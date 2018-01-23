@@ -1,0 +1,12 @@
+# usual .gitignore for R packages
+
+# C++
+*.o
+*.so
+*.dll
+# R
+*.Rhistory
+*.Rapp.history
+inst/doc
+# osx
+*.DS_Store
