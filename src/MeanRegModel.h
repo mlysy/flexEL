@@ -6,25 +6,31 @@
 
 // subclass: Mean regression
 class MeanRegModel {
+ private:
+  RowVectorXd yXb;
+  MatrixXd tG;
 protected:
   VectorXd y;
   MatrixXd X;
   int nObs, nEqs;
-  MatrixXd GGt;
 public:
-  MatrixXd G; // TODO: can make a set function instead of making it public 
-  MeanRegModel(VectorXd _y, MatrixXd _X, int nObs, int nEqs); // constructor non-censor
-  void evalG(VectorXd beta);
+  MatrixXd G; // TODO: can make a set function instead of making it public
+  MeanRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+	       void* params);
+  void evalG(const Ref<const VectorXd>& beta);
 };
 
 // constructor
-inline MeanRegModel::MeanRegModel(VectorXd _y, MatrixXd _X, int nObs, int nEqs) {
-  this->y = _y;
-  this->X = _X; 
-  this->nObs = nObs;
-  this->nEqs = nEqs;
-  this->G = MatrixXd::Zero(nEqs,nObs);
-  this->GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
+inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& _y,
+				  const Ref<const MatrixXd>& _X,
+				  void* params) {
+  y = _y;
+  X = _X;
+  nObs = y.size();
+  nEqs = X.rows(); // X gets passed as p x n matrix
+  G = MatrixXd::Zero(nEqs,nObs);
+  tG = MatrixXd::Zero(nObs, nEqs);
+  yXb = RowVectorXd::Zero(nObs);
 }
 
 // Chen-Van Keilegom (2009) way of constructing G, 
@@ -43,11 +49,17 @@ inline MeanRegModel::MeanRegModel(VectorXd _y, MatrixXd _X, int nObs, int nEqs) 
 // }
 
 // form the G matrix
-inline void MeanRegModel::evalG(VectorXd beta) {
-  for (int ii=0; ii<y.size(); ii++) {
-    this->G(0,ii) = y(ii)-X.col(ii).transpose()*beta;
-    this->G(1,ii) = pow((y(ii)-X.col(ii).transpose()*beta),2.0) - 1;
-  }
+inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
+  yXb.noalias() = y.transpose() - beta.transpose() * X;
+  tG = X.transpose();
+  tG.array().colwise() *= yXb.transpose().array();
+  G = tG.transpose();
+  // G.col(0) = y - Xb;
+  // G.col(1) = 
+  // for (int ii=0; ii<nObs; ii++) {
+  //   G(0,ii) = y(ii)-X.col(ii).transpose()*beta;
+  //   G(1,ii) = pow((y(ii)-X.col(ii).transpose()*beta),2.0) - 1;
+  // }
 }
 
 

@@ -12,10 +12,13 @@ using namespace Eigen;
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".lambdaNR")]]
-Rcpp::List lambdaNR(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd G, 
-                    Eigen::VectorXd lambda0, int nObs, int nEqs, 
+Rcpp::List lambdaNR(Eigen::MatrixXd G, 
                     int maxIter, double eps, bool verbose) {
-  InnerEL<MeanRegModel> IL(y, X, nObs, nEqs, lambda0); // instantiate
+  int nObs = G.cols();
+  int nEqs = G.rows();
+  VectorXd y = VectorXd::Zero(nObs);
+  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+  InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
   IL.G = G; // assign a given G
   // initialize variables for output here 
   int nIter;

@@ -4,24 +4,24 @@
 \alias{logEL_MeanReg}
 \title{log empirical likelihood for mean regression}
 \usage{
-logEL_MeanReg(y, X, nObs, nEqs, beta, lambda0, max_iter = 100, eps = 1e-07)
+logEL_MeanReg(y, X, beta, max_iter = 100, eps = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
 
 \item{X}{\code{nVars x nObs} matrix of constraints.}
 
-\item{nObs}{Number of observations.}
-
-\item{nEqs}{Number of estimating equations.}
-
 \item{beta}{Length-\code{nVars} vector of coefficients.}
-
-\item{lambda0}{Length-\code{nEqs} vector of initial value of lambda.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
 \item{eps}{Relative tolerance of Newton-Raphson convergence.}
+
+\item{nObs}{Number of observations.}
+
+\item{nEqs}{Number of estimating equations.}
+
+\item{lambda0}{Length-\code{nEqs} vector of initial value of lambda.}
 }
 \value{
 Log empirical likelihood of the input beta

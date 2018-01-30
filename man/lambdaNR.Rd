@@ -4,7 +4,7 @@
 \alias{lambdaNR}
 \title{Solve the inner loop optimization of an EL function.}
 \usage{
-lambdaNR(y, X, G, lambda0, nObs, nEqs, max_iter = 100, eps = 1e-07,
+lambdaNR(G, lambda0, nObs, nEqs, max_iter = 100, eps = 1e-07,
   verbose = FALSE)
 }
 \arguments{

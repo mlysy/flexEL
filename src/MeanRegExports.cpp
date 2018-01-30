@@ -9,15 +9,17 @@ using namespace Eigen;
 #include "MeanRegModel.h"
 
 
-// [[Rcpp::export(".logEL_MeanReg")]]
-double logEL_MeanReg(Eigen::VectorXd y, Eigen::MatrixXd X, int nObs, int nEqs, 
-                 Eigen::VectorXd beta, Eigen::VectorXd lambda0, 
-                 int maxIter = 100, double eps = 1e-7) {
-  InnerEL<MeanRegModel> MR(y, X, nObs, nEqs, lambda0); // instantiate
+// [[Rcpp::export(".MeanReg_loglik")]]
+double MeanReg_loglik(Eigen::VectorXd y, Eigen::MatrixXd X,
+		      int nObs, int nEqs, 
+		      Eigen::VectorXd beta, Eigen::VectorXd lambda0, 
+		      int maxIter = 100, double eps = 1e-7) {
+  InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
   double logELmean = MR.logEL(beta,maxIter,eps);
   return(logELmean);
 }
 
+/*
 // [[Rcpp::export(".PostSample_MeanReg")]]
 Eigen::MatrixXd PostSample_MeanReg(Eigen::VectorXd y, Eigen::MatrixXd X, 
                              int nObs, int nEqs, Eigen::VectorXd lambda0, 
@@ -27,3 +29,4 @@ Eigen::MatrixXd PostSample_MeanReg(Eigen::VectorXd y, Eigen::MatrixXd X,
   Eigen::MatrixXd beta_chain = MR.PostSample(nsamples, nburn, betaInit, sigs, maxIter, eps);
   return(beta_chain);
 }
+*/
