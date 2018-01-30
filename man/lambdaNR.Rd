@@ -4,7 +4,8 @@
 \alias{lambdaNR}
 \title{Solve the inner loop optimization of an EL function.}
 \usage{
-lambdaNR(G, lambda0, max_iter = 100, eps = 1e-07, verbose = FALSE)
+lambdaNR(y, X, G, lambda0, nObs, nEqs, max_iter = 100, eps = 1e-07,
+  verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}

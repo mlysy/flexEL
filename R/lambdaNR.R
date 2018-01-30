@@ -7,8 +7,8 @@
 #' @param verbose Display number of steps and tolerance criterion when algorithm terminates.
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
-#' @export
-lambdaNR <- function(G, lambda0,
+#' @export 
+lambdaNR <- function(y, X, G, lambda0, nObs, nEqs, 
                      max_iter = 100, eps = 1e-7, verbose = FALSE) {
   # input checks
   nEqs <- ncol(G)
@@ -16,7 +16,7 @@ lambdaNR <- function(G, lambda0,
   if(length(lambda0) != nEqs) {
     stop("G and lambda0 have incompatible dimensions.")
   }
-  ans <- .lambdaNR(G = t(G), lambda0 = lambda0,
+  ans <- .lambdaNR(y = y, X = X, G = t(G), nObs = nObs, nEqs = nEqs, lambda0 = lambda0,
                    maxIter = max_iter, eps = eps, verbose = verbose)
   if(ans$convergence) {
     ans <- ans$lambda

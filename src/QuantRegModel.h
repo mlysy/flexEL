@@ -1,37 +1,51 @@
+#ifndef QUANTREGMODEL_h
+#define QUANTREGMODEL_h
 
+#include <math.h>
+#include <Rmath.h>
 
+// subclass: Mean regression
 class QuantRegModel {
- private:
-  double alpha;
+protected:
   VectorXd y;
   MatrixXd X;
-  int nObs, nEq;
- public:
+  double alpha; 
+  int nObs, nEqs;
   MatrixXd G;
-  QuantRegModel(VectorXd _y, MatrixXd _X, void *par);
-  ~QuantRegModel;
-  void evalG(VectorXd theta);
+  MatrixXd GGt; 
+  double rho_alpha(double u, double alpha); // TODO: not needed?
+  double phi_alpha(double u, double alpha); 
+public:
+  QuantRegModel(VectorXd _y, MatrixXd _X, double alpha, int nObs, int nEqs); // constructor non-censor
+  void evalG(VectorXd beta);
 };
 
-inline QuantRegModel::QuantRegModel(VectorXd _y, MatrixXd _X, void *par) {
-  y = _y; // make sure it's a COPY, not just pointer allocation
-  X = _X;
-  nObs = y.length(); // or something
-  nEq = X.row();
-  G = MatrixXd::Zero(nObs, nEq); // or however you allocate Eigen memory
-  alpha = &((double*)par)
+// constructor
+inline QuantRegModel::QuantRegModel(VectorXd _y, MatrixXd _X, double alpha, int nObs, int nEqs) {
+  this->y = _y;
+  this->X = _X; 
+  this->alpha = alpha; 
+  this->nObs = nObs;
+  this->nEqs = nEqs;
+  this->G = MatrixXd::Zero(nEqs,nObs);
+  this->GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
 }
 
-// theta is beta.
-inline void QuantRegModel::evalG(VectorXd theta) {
+// revised L1 loss function for quantile regression
+inline double QuantRegModel::rho_alpha(double u, double alpha) {
+  return(u * (alpha - (u <= 0)));
 }
 
-inline QuantRegModel::~QuantRegModel {}
+// 1st derivative of rho_alpha
+inline double QuantRegModel::phi_alpha(double u, double alpha) {
+  return((u <= 0) - alpha);
+}
 
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------
+// form the G matrix
+inline void QuantRegModel::evalG(VectorXd beta) {
+  for(int ii=0; ii<y.size(); ii++) {
+    this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
+  }
+}
 
-template <class elMod>
-class InnerEL : elMod {
-  // make sure G and evalG are correctly inherited
-  
-};
+#endif

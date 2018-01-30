@@ -11,15 +11,15 @@
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export
-MeanReg_post <- function(nObs, nEqs, y, X, lambda0, nsamples, nburn, betaInit,
-                         Sigma, max_iter = 100, eps = 1e-7) {
-      # input checks
-      if(ncol(X) != length(y)) {
-            stop("X and y have inconsistent dimensions.")
-      }
-      if(nrow(X) != length(betaInit)) {
-            stop("X and beta have inconsistent dimensions.")
-      }
-      .MeanReg_post(nObs, nEqs, y, X, lambda0, nsamples, nburn, betaInit,
-                    Sigma, maxIter = 100L, eps = 1e-7)
+PostSample_QuantReg <- function(y, X, nObs, nEqs, alpha, lambda0, nsamples, nburn, betaInit,
+                          sigs, max_iter = 100, eps = 1e-7) {
+  # input checks
+  if(ncol(X) != length(y)) {
+    stop("X and y have inconsistent dimensions.")
+  }
+  if(nrow(X) != length(betaInit)) {
+    stop("X and beta have inconsistent dimensions.")
+  }
+  .PostSample_QuantReg(y, X, nObs, nEqs, alpha, lambda0, nsamples, nburn, betaInit,
+                 sigs, maxIter = 100L, eps = 1e-7)
 }

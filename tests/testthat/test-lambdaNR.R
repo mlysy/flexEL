@@ -1,5 +1,7 @@
-library(bayesEL) # always load the package (with library)
-source("el-utils.R")
+library(bayesELnew) # always load the package (with library)
+# source("el-utils.R")
+source("../bayesELnew/tests/testthat/el-utils.R")
+source("../bayesELnew/tests/donotrun/mle-check.R")
 
 # library(testthat) # not loaded automatically
 context("lambdaNR")

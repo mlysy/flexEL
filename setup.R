@@ -20,6 +20,8 @@ devtools::install()
 
 # after installing, quit + restart R
 
+# QUESTION: seems need to create the bayesELnew-package.R file by hand before document()
+
 # step 2: wrap C++ code in an R function and document it.
 # to automate documentation with roxygen2, need to delete NAMESPACE,
 # making sure package still loads C++ code properly, etc.
@@ -28,7 +30,8 @@ devtools::document() # create documentation
 # step 3: test code immediately
 
 # create a tests folder and do things informally.
-# we'll do it more formally later.
+# we'll do it more formally later. 
+
 
 #--- next steps: ---------------------------------------------------------------
 

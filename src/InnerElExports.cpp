@@ -5,20 +5,23 @@ using namespace Rcpp;
 //[[Rcpp::depends("RcppEigen")]]
 #include <RcppEigen.h>
 using namespace Eigen;
-#include "MeanReg.h"
+#include "InnerEL.h"
+#include "MeanRegModel.h"
 
+// Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".lambdaNR")]]
-Rcpp::List lambdaNR(Eigen::MatrixXd G, Eigen::VectorXd lambda0,
-		    int maxIter, double eps, bool verbose) {
+Rcpp::List lambdaNR(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd G, 
+                    Eigen::VectorXd lambda0, int nObs, int nEqs, 
+                    int maxIter, double eps, bool verbose) {
+  InnerEL<MeanRegModel> IL(y, X, nObs, nEqs, lambda0); // instantiate
+  IL.G = G; // assign a given G
+  // initialize variables for output here 
   int nIter;
   double maxErr;
-  VectorXd lambda(G.rows());
+  VectorXd lambda(nEqs);
   bool not_conv;
-  MeanReg IL(G.cols(), G.rows(), lambda0); // constructor
-  IL.G = G; // assignment
-  // IL.lambdaOld = lambda0; // NEW: removed since it's assigned by ctor
   IL.LambdaNR(nIter, maxErr, maxIter, eps);
   lambda = IL.lambdaNew; // output
   // check convergence
@@ -27,19 +30,5 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G, Eigen::VectorXd lambda0,
     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
   }
   return Rcpp::List::create(_["lambda"] = lambda,
-			    _["convergence"] = !not_conv);
+                            _["convergence"] = !not_conv);
 }
-
-// Not needed
-// // [[Rcpp::export(".PostSample")]]
-// Eigen::MatrixXd PostSample(Eigen::MatrixXd G,
-//                              int nObs, int nEqs, Eigen::VectorXd y, Eigen::MatrixXd X, 
-//                              Eigen::VectorXd lambda0, 
-//                              int nsamples, int nburn, Eigen::VectorXd betaInit,
-//                              Eigen::VectorXd sigs, int maxIter = 100, double eps = 1e-7)  {
-//   InnerEL IL(nObs, nEqs, lambda0);
-//   IL.G = G; // assignment
-//   Eigen::MatrixXd beta_chain = IL.PostSample(nsamples, nburn, y, X, betaInit,
-//                                                sigs, maxIter, eps);
-//   return(beta_chain);
-// }

@@ -1,4 +1,4 @@
 library(testthat)
-library(bayesEL)
+library(bayesELnew)
 
-test_check("bayesEL")
+test_check("bayesELnew")
