@@ -42,13 +42,13 @@ inline void MeanRegLSModel::evalG(const Ref<const VectorXd>& theta) {
     VectorXd gamma = theta.tail(nEqs/2);
     // location (mean) part
     yXb.noalias() = y.transpose() - beta.transpose() * X;
-    tG.block<nObs,nEqs/2>(0,0) = X.transpose();
-    tG.block<nObs,nEqs/2>(0,0).array().colwise() *= yXb.transpose().array();
-    G.block<nObs,nEqs/2>(0,0) = tG.block<nObs,nEqs/2>(0,0).transpose();
+    tG.block(0,0,nObs,nEqs/2) = X.transpose();
+    tG.block(0,0,nObs,nEqs/2).array().colwise() *= yXb.transpose().array();
+    G.block(0,0,nObs,nEqs/2) = tG.block(0,0,nObs,nEqs/2).transpose();
     // scale (variance) part
-    yXblg.noalias() = yXb.array().abs().log() - gamma.transpos() * X;
-    tG.block<nObs,nEqs/2>(0,nEqs) = X.transpose();
-    tG.block<nObs,nEqs/2>(0,nEqs).array().colwise() *= yXblg.transpose().array();
+    yXblg.noalias() = yXb.array().abs().log().matrix() - gamma.transpose() * X;
+    tG.block(0,nEqs,nObs,nEqs/2) = X.transpose();
+    tG.block(0,nEqs,nObs,nEqs/2).array().colwise() *= yXblg.transpose().array();
 }
 
 #endif
