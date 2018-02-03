@@ -12,7 +12,7 @@
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export
-logEL_QuantReg <- function(X, y, nObs, nEqs, beta, alpha, lambda0, max_iter = 100, eps = 1e-7) {
+qr.logel <- function(y, X, alpha, beta, max_iter = 100, eps = 1e-7) {
       # input checks
       if(ncol(X) != length(y)) {
             stop("X and y have inconsistent dimensions.")
@@ -23,5 +23,5 @@ logEL_QuantReg <- function(X, y, nObs, nEqs, beta, alpha, lambda0, max_iter = 10
       if(alpha <= 0 || alpha >= 1) {
             stop("alpha should be between 0 and 1.")
       }
-      .logEL_QuantReg(y, X, nObs, nEqs, beta, alpha, lambda0, maxIter = 100L, eps = 1e-7)
+      .QuantReg_logEL(y, X, alpha, beta, maxIter = 100L, eps = 1e-7)
 }
