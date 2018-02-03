@@ -21,27 +21,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // MeanReg_logEL
-double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, int nObs, int nEqs, Eigen::VectorXd beta, Eigen::VectorXd lambda0, int maxIter, double eps);
-RcppExport SEXP _bayesEL_MeanReg_logEL(SEXP ySEXP, SEXP XSEXP, SEXP nObsSEXP, SEXP nEqsSEXP, SEXP betaSEXP, SEXP lambda0SEXP, SEXP maxIterSEXP, SEXP epsSEXP) {
+double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta, int maxIter, double eps);
+RcppExport SEXP _bayesEL_MeanReg_logEL(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP, SEXP maxIterSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< int >::type nObs(nObsSEXP);
-    Rcpp::traits::input_parameter< int >::type nEqs(nEqsSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanReg_logEL(y, X, nObs, nEqs, beta, lambda0, maxIter, eps));
+    rcpp_result_gen = Rcpp::wrap(MeanReg_logEL(y, X, beta, maxIter, eps));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
-    {"_bayesEL_MeanReg_logEL", (DL_FUNC) &_bayesEL_MeanReg_logEL, 8},
+    {"_bayesEL_MeanReg_logEL", (DL_FUNC) &_bayesEL_MeanReg_logEL, 5},
     {NULL, NULL, 0}
 };
 

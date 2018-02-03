@@ -5,7 +5,7 @@
     .Call(`_bayesEL_lambdaNR`, G, maxIter, eps, verbose)
 }
 
-.MeanReg_logEL <- function(y, X, nObs, nEqs, beta, lambda0, maxIter = 100L, eps = 1e-7) {
-    .Call(`_bayesEL_MeanReg_logEL`, y, X, nObs, nEqs, beta, lambda0, maxIter, eps)
+.MeanReg_logEL <- function(y, X, beta, maxIter = 100L, eps = 1e-7) {
+    .Call(`_bayesEL_MeanReg_logEL`, y, X, beta, maxIter, eps)
 }
 

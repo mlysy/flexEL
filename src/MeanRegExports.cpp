@@ -10,9 +10,7 @@ using namespace Eigen;
 
 
 // [[Rcpp::export(".MeanReg_logEL")]]
-double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X,
-		      int nObs, int nEqs, 
-		      Eigen::VectorXd beta, Eigen::VectorXd lambda0, 
+double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,
 		      int maxIter = 100, double eps = 1e-7) {
     InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
     double logELmean = MR.logEL(beta,maxIter,eps);

@@ -65,8 +65,8 @@ mu.seq <- rbind(mu.seq.b1, mu.seq.b2)
 lambda0 <- rnorm(m)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
-  logel.seq[1,ii] <- mr.logel(y, X, n, m, c(mu.seq[1,ii], beta0[2]), lambda0)
-  logel.seq[2,ii] <- mr.logel(y, X, n, m, c(beta0[1], mu.seq[2,ii]), lambda0)
+  logel.seq[1,ii] <- mr.logel(y, X, c(mu.seq[1,ii], beta0[2]))
+  logel.seq[2,ii] <- mr.logel(y, X, c(beta0[1], mu.seq[2,ii]))
 }
 logelmode1 <- plotEL(mu.seq[1,], logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(mu.seq[2,], logel.seq[2,], beta0[2], NA, expression(beta[1]))
