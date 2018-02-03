@@ -12,50 +12,45 @@ using namespace Eigen;
 template <typename elModel>
 class InnerEL : public elModel { 
 private:
-  using elModel::nObs;
-  using elModel::nEqs;
-  // constants for logstar calculations
-  double trunc, aa, bb, cc; 
-  // temporary storage for Newton-Raphson
-  MatrixXd GGt;
-  VectorXd Q1;
-  MatrixXd Q2;
-  LDLT<MatrixXd> Q2ldlt;
-  VectorXd Glambda;
-  VectorXd rho;
-  VectorXd relErr;
-  ArrayXd Gl11;
-  // columnwise outer product (see below)
-  void BlockOuter(void);
-  // maximum relative error in lambda: same for cens / non-cens
-  double MaxRelErr(const Ref<const VectorXd>& lambdaNew,
+    using elModel::nObs;
+    using elModel::nEqs;
+    // constants for logstar calculations
+    double trunc, aa, bb, cc; 
+    // temporary storage for Newton-Raphson
+    MatrixXd GGt;
+    VectorXd Glambda;
+    ArrayXd Gl11;
+    VectorXd Q1;
+    MatrixXd Q2;
+    LDLT<MatrixXd> Q2ldlt;
+    VectorXd rho;
+    VectorXd relErr;
+    // columnwise outer product (see below)
+    void BlockOuter(void);
+    // maximum relative error in lambda: same for cens / non-cens
+    double MaxRelErr(const Ref<const VectorXd>& lambdaNew,
                    const Ref<const VectorXd>& lambdaOld);
 public:
-  using elModel::G;
-  // constructor for regression-like problems
-  InnerEL(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X,
-	  void* params);
-  // InnerEL(VectorXd, MatrixXd, double, int, int, VectorXd); // constructor for quantile regression 
-  // logstar and its derivatives
-  double logstar(double x);
-  double logstar1(double x);
-  double logstar2(double x);
-  // TODO: should create 'set' functions for them 
-  VectorXd lambdaOld;
-  VectorXd lambdaNew;
-  // MatrixXd G;
-  // // TODO: for accessibility, remove if not used 
-  // int getnObs() const;
-  // int getnEqs() const;
-  // Newton-Raphson algorithm
-  void LambdaNR(int& nIter, double& maxErr,
+    // constructor for regression-like problems
+    InnerEL(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
+          void* params);
+    // logstar and its derivatives
+    double logstar(double x);
+    double logstar1(double x);
+    double logstar2(double x);
+    // TODO: should create 'set' functions for them 
+    using elModel::G;
+    VectorXd lambdaOld;
+    VectorXd lambdaNew;
+    // Newton-Raphson algorithm
+    void LambdaNR(int& nIter, double& maxErr,
                 int maxIter, double tolEps);
-  // log empirical likelihood calculation 
-  double logEL(const Ref<const VectorXd>& theta, int maxIter, double eps); 
-  // // posterior sampler
-  // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
-  //                     const Ref<const VectorXd>& sigs,
-  // 		      int maxIter, double eps);
+    // log empirical likelihood calculation 
+    double logEL(const Ref<const VectorXd>& theta, int maxIter, double eps); 
+    // // posterior sampler
+    // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
+    //                     const Ref<const VectorXd>& sigs,
+    // 		      int maxIter, double eps);
 };
 
 // constructor for mean regression (without alpha)
@@ -63,136 +58,104 @@ template<typename elModel>
 inline InnerEL<elModel>::InnerEL(const Ref<const VectorXd>& y,
 				 const Ref<const MatrixXd>& X,
 				 void* params) : elModel(y, X, params) {
-  // logstar constants
-  trunc = 1.0/nObs;
-  aa = -.5 * nObs*nObs;
-  bb = 2.0 * nObs;
-  cc = -1.5 - log(nObs);
-  // Newton-Raphson initialization
-  // G = MatrixXd::Zero(nEqs,nObs);
-  GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-  lambdaOld = VectorXd::Zero(nEqs); 
-  // lambdaOld.noalias() = lambda0; // TODO: is this a copy or reference? 
-  lambdaNew = VectorXd::Zero(nEqs);
-  Q1 = VectorXd::Zero(nEqs);
-  Q2 = MatrixXd::Zero(nEqs,nEqs);
-  Glambda = VectorXd::Zero(nObs);
-  Gl11 = ArrayXd::Zero(nObs);
-  rho = VectorXd::Zero(nObs);
-  relErr = VectorXd::Zero(nEqs);
-  Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
+    // logstar constants
+    trunc = 1.0/nObs;
+    aa = -.5 * nObs*nObs;
+    bb = 2.0 * nObs;
+    cc = -1.5 - log(nObs);
+    // Newton-Raphson initialization
+    GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
+    lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
+    lambdaNew = VectorXd::Zero(nEqs);
+    Q1 = VectorXd::Zero(nEqs);
+    Q2 = MatrixXd::Zero(nEqs,nEqs);
+    Glambda = VectorXd::Zero(nObs);
+    Gl11 = ArrayXd::Zero(nObs);
+    rho = VectorXd::Zero(nObs);
+    relErr = VectorXd::Zero(nEqs);
+    Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
 }
-
-// // constructor for quantile regression (with alpha)
-// // TODO: too much copying???
-// template<typename elModel>
-// inline InnerEL<elModel>::InnerEL(VectorXd y, MatrixXd X, double alpha, 
-//                                  int nObs, int nEqs, VectorXd lambda0) : elModel(y, X, alpha, nObs,nEqs) {
-//   // logstar constants
-//   trunc = 1.0/nObs;
-//   aa = -.5 * nObs*nObs;
-//   bb = 2.0 * nObs;
-//   cc = -1.5 - log(nObs);
-//   // Newton-Raphson initialization
-//   // G = MatrixXd::Zero(nEqs,nObs);
-//   // GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-//   // lambdaOld = VectorXd::Zero(nEqs); 
-//   lambdaOld.noalias() = lambda0; // TODO: is this a copy or reference? 
-//   lambdaNew = VectorXd::Zero(nEqs);
-//   Q1 = VectorXd::Zero(nEqs);
-//   Q2 = MatrixXd::Zero(nEqs,nEqs);
-//   Glambda = VectorXd::Zero(nObs);
-//   rho = VectorXd::Zero(nObs);
-//   relErr = VectorXd::Zero(nEqs);
-//   Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
-// }
-
-// // for accessiblity
-// template<typename elModel>
-// inline int InnerEL<elModel>::getnObs() const {return nObs;}
-// template<typename elModel>
-// inline int InnerEL<elModel>::getnEqs() const {return nEqs;} 
 
 // logstar
 template<typename elModel>
 inline double InnerEL<elModel>::logstar(double x) {
-  if(x >= trunc) {
+    if(x >= trunc) {
     return(log(x));
-  } else {
+    } else {
     return((aa*x + bb)*x + cc);
-  }
+    }
 }
 
 // d logstar(x)/dx
 template<typename elModel>
 inline double InnerEL<elModel>::logstar1(double x) {
-  if(x >= trunc) {
+    if(x >= trunc) {
     return(1.0/x);
-  } else {
+    } else {
     // return(aa*x + bb);
     return(2.0*aa*x + bb); // TODO: should be (2*aa*x + bb) ?
-  }
+    }
 }
 
 // d^2 logstar(x)/dx^2
 template<typename elModel>
 inline double InnerEL<elModel>::logstar2(double x) {
-  if(x >= trunc) {
+    if(x >= trunc) {
     return(-1.0/(x*x));
-  } else {
+    } else {
     // return(aa);
     return(2.0*aa); // TODO: should be 2aa ?
-  }
+    }
 }
 
 // for an (m x N) matrix G = [g1 ... gN], returns the (m x mN) matrix
 // GGt = [g1 g1' ... gN gN']
 template<typename elModel>
 inline void InnerEL<elModel>::BlockOuter(void) {
-  // for each row of G, compute outer product and store as block
-  for(int ii=0; ii<nObs; ii++) {
+    // for each row of G, compute outer product and store as block
+    for(int ii=0; ii<nObs; ii++) {
     GGt.block(0,ii*nEqs,nEqs,nEqs).noalias() = G.col(ii) * G.col(ii).transpose();
-  }
-  return;
+    }
+    return;
 }
 
 // maximum relative error in lambda
 template<typename elModel>
 inline double InnerEL<elModel>::MaxRelErr(const Ref<const VectorXd>& lambdaNew,
                                  const Ref<const VectorXd>& lambdaOld) {
-  relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
-  return(relErr.maxCoeff());
+    relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
+    return(relErr.maxCoeff());
 }
 
 // Newton-Raphson algorithm
 template<typename elModel>
 inline void InnerEL<elModel>::LambdaNR(int& nIter, double& maxErr,
                               int maxIter, double tolEps) {
-  int ii, jj;
-  BlockOuter(); // initialize GGt
-  //lambdaOld = lambdaIn; // initialize lambda
-  // newton-raphson loop
-  for(ii=0; ii<maxIter; ii++) {
-    // Q1 and Q2
-    Glambda.noalias() = lambdaOld.transpose() * G;
-    Glambda = 1.0 - Glambda.array();
-    Q2.fill(0.0);
-    for(jj=0; jj<this->nObs; jj++) {
-      rho(jj) = logstar1(Glambda(jj));
-      Q2 += logstar2(Glambda(jj)) * GGt.block(0,jj*nEqs,nEqs,nEqs);
+    int ii, jj;
+    BlockOuter(); // initialize GGt
+    //lambdaOld = lambdaIn; // initialize lambda
+    // newton-raphson loop
+    for(ii=0; ii<maxIter; ii++) {
+        // Q1 and Q2
+        Glambda.noalias() = lambdaOld.transpose() * G;
+        Glambda = 1.0 - Glambda.array();
+        Q2.fill(0.0);
+        for(jj=0; jj<this->nObs; jj++) {
+            rho(jj) = logstar1(Glambda(jj));
+            Q2 += logstar2(Glambda(jj)) * GGt.block(0,jj*nEqs,nEqs,nEqs);
+        }
+        Q1 = -G * rho;
+        // update lambda
+        Q2ldlt.compute(Q2);
+        lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
+        maxErr = MaxRelErr(lambdaNew, lambdaOld); // maximum relative error
+        if (maxErr < tolEps) {
+            break;
+        }
+        lambdaOld = lambdaNew; // complete cycle
     }
-    Q1 = -G * rho;
-    // update lambda
-    Q2ldlt.compute(Q2);
-    lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
-    maxErr = MaxRelErr(lambdaNew, lambdaOld); // maximum relative error
-    if (maxErr < tolEps) {
-      break;
-    }
-    lambdaOld = lambdaNew; // complete cycle
-  }
-  nIter = ii; // output lambda and also nIter and maxErr
-  return;
+    nIter = ii; // output lambda and also nIter and maxErr
+    return;
 }
 
 // log empirical likelihood for linear regression Y = X'beta + eps
@@ -200,13 +163,13 @@ inline void InnerEL<elModel>::LambdaNR(int& nIter, double& maxErr,
 template<typename elModel>
 inline double InnerEL<elModel>::logEL(const Ref<const VectorXd>& theta,
 				      int maxIter, double eps) {
-  int nIter;
-  double maxErr;
-  elModel::evalG(theta);
-  LambdaNR(nIter, maxErr, maxIter, eps);
-  Glambda.noalias() = lambdaNew.transpose() * G;
-  Gl11 = 1.0/(1.0-Glambda.array());
-  return((log(Gl11) - log(Gl11.sum())).sum());
+    int nIter;
+    double maxErr;
+    elModel::evalG(theta);
+    LambdaNR(nIter, maxErr, maxIter, eps);
+    Glambda.noalias() = lambdaNew.transpose() * G;
+    Gl11 = 1.0/(1.0-Glambda.array());
+    return((log(Gl11) - log(Gl11.sum())).sum());
 }
 
 /*

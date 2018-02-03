@@ -2,10 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 .lambdaNR <- function(G, maxIter, eps, verbose) {
-    .Call(`_bayesELnew_lambdaNR`, G, maxIter, eps, verbose)
+    .Call(`_bayesEL_lambdaNR`, G, maxIter, eps, verbose)
 }
 
-.MeanReg_loglik <- function(y, X, nObs, nEqs, beta, lambda0, maxIter = 100L, eps = 1e-7) {
-    .Call(`_bayesELnew_MeanReg_loglik`, y, X, nObs, nEqs, beta, lambda0, maxIter, eps)
+.MeanReg_logEL <- function(y, X, nObs, nEqs, beta, lambda0, maxIter = 100L, eps = 1e-7) {
+    .Call(`_bayesEL_MeanReg_logEL`, y, X, nObs, nEqs, beta, lambda0, maxIter, eps)
 }
 

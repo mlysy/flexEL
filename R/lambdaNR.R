@@ -10,18 +10,18 @@
 #' @export
 lambdaNR <- function(G, lambda0, nObs, nEqs,
                      max_iter = 100, eps = 1e-7, verbose = FALSE) {
-  # input checks
-  nEqs <- ncol(G)
-  nObs <- nrow(G)
-  if(length(lambda0) != nEqs) {
+    # input checks
+    nEqs <- ncol(G)
+    nObs <- nrow(G)
+    if(length(lambda0) != nEqs) {
     stop("G and lambda0 have incompatible dimensions.")
-  }
-  ans <- .lambdaNR(G = t(G),
+    }
+    ans <- .lambdaNR(G = t(G),
                    maxIter = max_iter, eps = eps, verbose = verbose)
-  if(ans$convergence) {
+    if(ans$convergence) {
     ans <- ans$lambda
-  } else {
+    } else {
     ans <- rep(NA, nEqs)
-  }
-  ans
+    }
+    ans
 }

@@ -11,7 +11,7 @@
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export
-logEL_MeanReg <- function(y, X, beta, max_iter = 100, eps = 1e-7) {
+mr.logel <- function(y, X, beta, max_iter = 100, eps = 1e-7) {
   # input checks
   if(ncol(X) != length(y)) {
     stop("X and y have inconsistent dimensions.")
