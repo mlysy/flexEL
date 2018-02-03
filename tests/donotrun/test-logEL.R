@@ -118,7 +118,7 @@ lambda0 <- rnorm(m)
 alpha <- 0.5
 logel.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  logel.seq[ii] <- qr.logel(X, y, n, m, mu.seq[ii], alpha, lambda0)
+  logel.seq[ii] <- qr.logel(y, X, alpha, mu.seq[ii])
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
@@ -158,8 +158,8 @@ logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 lambda0 <- rnorm(m)
 alpha <- 0.5 # Seems extreme quantile e.g. 0.9 is much harder
 for (ii in 1:numpoints) {
-  logel.seq[1,ii] <- qr.logel(X, y, n, m, c(mu.seq[1,ii],beta0[2]), alpha, lambda0)
-  logel.seq[2,ii] <- qr.logel(X, y, n, m, c(beta0[1],mu.seq[2,ii]), alpha, lambda0)
+  logel.seq[1,ii] <- qr.logel(y, X, alpha, c(mu.seq[1,ii],beta0[2]))
+  logel.seq[2,ii] <- qr.logel(y, X, alpha, c(beta0[1],mu.seq[2,ii]))
 }
 logelmode1 <- plotEL(mu.seq[1,], logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(mu.seq[2,], logel.seq[2,], beta0[2], NA, expression(beta[1]))

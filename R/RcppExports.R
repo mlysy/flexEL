@@ -9,7 +9,7 @@
     .Call(`_bayesEL_MeanReg_logEL`, y, X, beta, maxIter, eps)
 }
 
-.QuantReg_logEL <- function(y, X, beta, alpha, maxIter = 100L, eps = 1e-7) {
-    .Call(`_bayesEL_QuantReg_logEL`, y, X, beta, alpha, maxIter, eps)
+.QuantReg_logEL <- function(y, X, alpha, beta, maxIter = 100L, eps = 1e-7) {
+    .Call(`_bayesEL_QuantReg_logEL`, y, X, alpha, beta, maxIter, eps)
 }
 
