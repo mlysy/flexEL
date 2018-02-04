@@ -1,8 +1,8 @@
 #--- check that lambdaNR.R is working properly ---------------------------------
 
-require(bayesELnew)
-source("../bayesELnew/tests/testthat/el-utils.R")
-source("../bayesELnew/tests/donotrun/mle-check.R")
+require(bayesEL)
+source("../bayesEL/tests/testthat/el-utils.R")
+source("../bayesEL/tests/donotrun/mle-check.R")
 
 # 1-d problem
 N <- 10 # number of observations
@@ -58,3 +58,4 @@ mle.check(loglik = Qf, theta.mle = lambdahat)
 
 # visual mode check (more reliable)
 mle.check(loglik = Qf, theta.mle = lambdahat_R)
+

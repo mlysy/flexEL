@@ -16,7 +16,7 @@ mrls.logel <- function(y, X, theta, max_iter = 100, eps = 1e-7) {
     if(ncol(X) != length(y)) {
         stop("X and y have inconsistent dimensions.")
     }
-    if(nrow(X) != length(theta)) {
+    if(nrow(X) * 2 != length(theta)) {
         stop("X and theta have inconsistent dimensions.")
     }
     .MeanRegLS_logEL(y, X, theta, maxIter = 100L, eps = 1e-7)

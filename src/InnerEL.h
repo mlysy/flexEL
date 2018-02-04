@@ -58,8 +58,10 @@ template<typename elModel>
 inline InnerEL<elModel>::InnerEL(const Ref<const VectorXd>& y,
 				 const Ref<const MatrixXd>& X,
 				 void* params) : elModel(y, X, params) {
+    // std::cout << nObs << std::endl;
+    // std::cout << nEqs << std::endl;
     // logstar constants
-    trunc = 1.0/nObs;
+    trunc = 1.0 / nObs;
     aa = -.5 * nObs*nObs;
     bb = 2.0 * nObs;
     cc = -1.5 - log(nObs);
@@ -167,9 +169,16 @@ inline double InnerEL<elModel>::logEL(const Ref<const VectorXd>& theta,
     double maxErr;
     elModel::evalG(theta);
     LambdaNR(nIter, maxErr, maxIter, eps);
-    Glambda.noalias() = lambdaNew.transpose() * G;
-    Gl11 = 1.0/(1.0-Glambda.array());
-    return((log(Gl11) - log(Gl11.sum())).sum());
+    if (nIter == maxIter && maxErr > eps) {
+        std::cout << "lambdaNR did not coverge" << std::endl;
+        return(-INFINITY);
+    }
+    else {
+        std::cout << "lambdaNR coverged" << std::endl;
+        Glambda.noalias() = lambdaNew.transpose() * G;
+        Gl11 = 1.0/(1.0-Glambda.array());
+        return((log(Gl11) - log(Gl11.sum())).sum());
+    }
 }
 
 /*
