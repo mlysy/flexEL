@@ -8,7 +8,7 @@
 class MeanRegModel {
 private:
     RowVectorXd yXb;
-    MatrixXd tG;
+    // MatrixXd tG;
 protected:
     VectorXd y;
     MatrixXd X;
@@ -29,16 +29,20 @@ inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& _y,
     nObs = y.size();
     nEqs = X.rows(); // X gets passed as p x nObs matrix
     G = MatrixXd::Zero(nEqs,nObs);
-    tG = MatrixXd::Zero(nObs, nEqs);
+    // tG = MatrixXd::Zero(nObs, nEqs);
     yXb = RowVectorXd::Zero(nObs);
 }
 
 // form the G matrix
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
+    // yXb.noalias() = y.transpose() - beta.transpose() * X;
+    // tG = X.transpose();
+    // tG.array().colwise() *= yXb.transpose().array();
+    // G = tG.transpose();
     yXb.noalias() = y.transpose() - beta.transpose() * X;
-    tG = X.transpose();
-    tG.array().colwise() *= yXb.transpose().array();
-    G = tG.transpose();
+    G = X;
+    G.array().rowwise() *= yXb.array();
+    // std::cout << "G = " << G << std::endl;
 }
 
 #endif
