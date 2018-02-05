@@ -6,6 +6,21 @@
 
 using namespace Rcpp;
 
+// lambdaNRC
+Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd qs, int maxIter, double eps, bool verbose);
+RcppExport SEXP _bayesEL_lambdaNRC(SEXP GSEXP, SEXP qsSEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type qs(qsSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(lambdaNRC(G, qs, maxIter, eps, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lambdaNR
 Rcpp::List lambdaNR(Eigen::MatrixXd G, int maxIter, double eps, bool verbose);
 RcppExport SEXP _bayesEL_lambdaNR(SEXP GSEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
@@ -68,6 +83,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
     {"_bayesEL_MeanReg_logEL", (DL_FUNC) &_bayesEL_MeanReg_logEL, 5},
     {"_bayesEL_MeanRegLS_logEL", (DL_FUNC) &_bayesEL_MeanRegLS_logEL, 5},
