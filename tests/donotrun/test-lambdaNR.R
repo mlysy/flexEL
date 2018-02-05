@@ -9,14 +9,14 @@ N <- 10 # number of observations
 m <- 1 # number of dimensions
 y <- rnorm(N*m)
 X <- matrix(rep(1,N))
-G <- matrix(y, m, N)
+G <- t(matrix(y, m, N))
 
 # optimization in C++
-lambda0 <- rnorm(m)
-lambdahat <- lambdaNR(G = t(G))
+# lambda0 <- rnorm(m)
+lambdahat <- lambdaNR(G = G)
 
 # by implementation in R
-lambdahat_Rout <- lambdaNR_R(G = t(G))
+lambdahat_Rout <- lambdaNR_R(G = G)
 lambdahat_R <- lambdahat_Rout$lambda
 
 # difference of the two implementation 
@@ -32,14 +32,14 @@ N <- 10 # number of observations
 m <- 3 # number of dimensions
 y <- rnorm(N*m)
 X <- matrix(rep(1,N))
-G <- matrix(rnorm(N*m), m, N)
+G <- t(matrix(rnorm(N*m), m, N))
 
 # optimization in C++
-lambda0 <- rnorm(m)
-lambdahat <- lambdaNR(G = t(G))
+# lambda0 <- rnorm(m)
+lambdahat <- lambdaNR(G = G)
 
 # by implementation in R
-lambdahat_Rout <- lambdaNR_R(G = t(G))
+lambdahat_Rout <- lambdaNR_R(G = G)
 lambdahat_R <- t(lambdahat_Rout$lambda) # output is a row vector
 
 # difference of the two implementation 

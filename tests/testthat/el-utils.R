@@ -91,7 +91,9 @@ log.star2 <- function(x, n) {
     return(ans)
 }
 
+# Note: input G is nObs x nEqs
 Qfun <- function(lambda, G) {
+    G <- t(G)
     N <- ncol(G) # nObs
     sum(apply(G, 2, function(gg) log.star(x = 1 - sum(lambda*gg), n = N)))
 }
@@ -170,6 +172,7 @@ log.sharp2 <- function(x, q) {
 
 # function to calculate qs from ws
 get_qs <- function(ws) {
+    n <- length(ws)
     wsps <- rep(NA,n) # ws partial sum
     for (ii in 1:n) wsps[ii] <- sum(ws[ii:n])
     # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
@@ -183,8 +186,8 @@ get_qs <- function(ws) {
 }
 
 # for mle.check
-# Note: requires G, qs to be in the environment, and G is xObs x nEqs
-QfunCens <- function(lambda) {
+# Note: requires qs to be in the environment, and G is xObs x nEqs
+QfunCens <- function(lambda, G) {
     G <- t(G)
     qs_sum <- sum(qs)
     G_list <- split(G, rep(1:ncol(G), each = nrow(G)))
@@ -195,18 +198,18 @@ QfunCens <- function(lambda) {
 
 # R implementation of lambdaNRC
 # Note: input G is nObs x nEqs here
-lambdaNRC_R <- function(G, lambda0, qs, maxIter = 100, eps = 1e-7, verbose = FALSE) {
+lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE) {
     G <- t(G)
     nObs <- ncol(G) 
-    nEqs <- length(lambda0) 
-    lambdaOld <- lambda0
+    nEqs <- nrow(G)
+    lambdaOld <- rep(0,nEqs)
     lambdaNew <- lambdaOld
     nIter <- 0
     # newton-raphson loop
     for (ii in 1:maxIter) {
         nIter <- ii
         # Q1 and Q2
-        Glambda <- lambdaOld %*% G
+        Glambda <- t(lambdaOld) %*% G
         Glambda <- sum(qs) + Glambda
         Q1 <- rep(0,nEqs)
         Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
@@ -228,7 +231,7 @@ lambdaNRC_R <- function(G, lambda0, qs, maxIter = 100, eps = 1e-7, verbose = FAL
             message("err = ", maxErr) 
         } 
     }
-    output<- list(lambda = lambdaNew, nIter = nIter, maxErr = maxErr)
+    output<- list(lambda = c(lambdaNew), nIter = nIter, maxErr = maxErr)
     return(output)
 }
 
