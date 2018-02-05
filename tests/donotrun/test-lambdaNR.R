@@ -13,10 +13,10 @@ G <- matrix(y, m, N)
 
 # optimization in C++
 lambda0 <- rnorm(m)
-lambdahat <- lambdaNR(y = y, X = X, G = t(G), nObs = N, nEqs = m, lambda0 = lambda0)
+lambdahat <- lambdaNR(G = t(G))
 
 # by implementation in R
-lambdahat_Rout <- lambdaNR_R(G = t(G), lambda0 = lambda0)
+lambdahat_Rout <- lambdaNR_R(G = t(G))
 lambdahat_R <- lambdahat_Rout$lambda
 
 # difference of the two implementation 
@@ -36,10 +36,10 @@ G <- matrix(rnorm(N*m), m, N)
 
 # optimization in C++
 lambda0 <- rnorm(m)
-lambdahat <- lambdaNR(y = y, X = X, G = t(G), lambda0 = lambda0)
+lambdahat <- lambdaNR(G = t(G))
 
 # by implementation in R
-lambdahat_Rout <- lambdaNR_R(G = t(G), lambda0 = lambda0)
+lambdahat_Rout <- lambdaNR_R(G = t(G))
 lambdahat_R <- t(lambdahat_Rout$lambda) # output is a row vector
 
 # difference of the two implementation 
