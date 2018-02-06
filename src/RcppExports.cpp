@@ -6,6 +6,22 @@
 
 using namespace Rcpp;
 
+// EMEL
+Rcpp::List EMEL(Eigen::MatrixXd G, Eigen::VectorXd delta, Eigen::VectorXd ws0, int maxIter, double eps, bool verbose);
+RcppExport SEXP _bayesEL_EMEL(SEXP GSEXP, SEXP deltaSEXP, SEXP ws0SEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type ws0(ws0SEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(EMEL(G, delta, ws0, maxIter, eps, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lambdaNRC
 Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd qs, int maxIter, double eps, bool verbose);
 RcppExport SEXP _bayesEL_lambdaNRC(SEXP GSEXP, SEXP qsSEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
@@ -83,6 +99,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_bayesEL_EMEL", (DL_FUNC) &_bayesEL_EMEL, 6},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
     {"_bayesEL_MeanReg_logEL", (DL_FUNC) &_bayesEL_MeanReg_logEL, 5},

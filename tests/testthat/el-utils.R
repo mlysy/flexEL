@@ -170,21 +170,6 @@ log.sharp2 <- function(x, q) {
     return(ans)
 }
 
-# function to calculate qs from ws
-get_qs <- function(ws) {
-    n <- length(ws)
-    wsps <- rep(NA,n) # ws partial sum
-    for (ii in 1:n) wsps[ii] <- sum(ws[ii:n])
-    # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
-    W <- matrix(rep(0,n*n),n,n) 
-    for (jj in 1:n) W[jj,(jj:n)] <- ws[jj:n]/wsps[jj]
-    qs <- rep(NA,n)
-    for (kk in 1:n) {
-        qs[kk] <- delta[kk] + (1-delta) %*% W[,kk]
-    } 
-    return(qs)
-}
-
 # for mle.check
 # Note: requires qs to be in the environment, and G is xObs x nEqs
 QfunCens <- function(lambda, G) {
@@ -198,11 +183,12 @@ QfunCens <- function(lambda, G) {
 
 # R implementation of lambdaNRC
 # Note: input G is nObs x nEqs here
-lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE) {
+lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE, 
+                        lambdaOld = NULL) {
     G <- t(G)
     nObs <- ncol(G) 
     nEqs <- nrow(G)
-    lambdaOld <- rep(0,nEqs)
+    if (is.null(lambdaOld)) lambdaOld <- rep(0,nEqs)
     lambdaNew <- lambdaOld
     nIter <- 0
     # newton-raphson loop
@@ -232,6 +218,49 @@ lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE) {
         } 
     }
     output<- list(lambda = c(lambdaNew), nIter = nIter, maxErr = maxErr)
+    return(output)
+}
+
+
+getqs_R <- function(ws, delta) {
+    n <- length(ws)
+    wsps <- rep(NA,n) # ws partial sum
+    for (ii in 1:n) wsps[ii] <- sum(ws[ii:n])
+    # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
+    W <- matrix(rep(0,n*n),n,n) 
+    for (jj in 1:n) W[jj,(jj:n)] <- ws[jj:n]/wsps[jj]
+    qs <- rep(NA,n)
+    for (kk in 1:n) {
+        qs[kk] <- delta[kk] + (1-delta) %*% W[,kk]
+    } 
+    return(qs)
+}
+
+EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
+    G <- t(G)
+    n <- ncol(G)
+    m <- nrow(G)
+    ws <- ws0
+    err <- Inf
+    lambdaOld <- rep(0,m)
+    for (ii in 1:max_iter) {
+        # E step: calculating qs
+        qs <- getqs_R(ws, delta)
+        # M step: 
+        lambdaNew <- lambdaNRC_R(t(G), qs, max_iter, eps, verbose, lambdaOld)$lambda
+        qs_sum <- sum(qs)
+        qlg <- qs_sum + lambdaNew %*% G
+        ws <- qs/qlg
+        ws <- ws/sum(ws)
+        err <- MaxRelErr(lambdaNew,lambdaOld)
+        if (verbose && iter %% 20 == 0) {
+            message("iter = ", iter)
+            message("err = ", err)
+        }
+        if (err < eps) break
+        lambdaOld <- lambdaNew
+    }
+    output <- list(ws = ws, lambda = lambdaNew)
     return(output)
 }
 

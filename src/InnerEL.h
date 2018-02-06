@@ -46,11 +46,11 @@ public:
     void LambdaNR(int& nIter, double& maxErr,
                 int maxIter, double tolEps);
     // log empirical likelihood calculation 
-    double logEL(const Ref<const VectorXd>& theta, int maxIter, double eps); 
+    double logEL(const Ref<const VectorXd>& theta, int maxIter, double tolEps); 
     // // posterior sampler
     // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
     //                     const Ref<const VectorXd>& sigs,
-    // 		      int maxIter, double eps);
+    // 		      int maxIter, double tolEps);
 };
 
 // constructor for mean regression (without alpha)
@@ -164,19 +164,22 @@ inline void InnerEL<elModel>::LambdaNR(int& nIter, double& maxErr,
 // beta is ncol(X) x 1 = p x 1 vector
 template<typename elModel>
 inline double InnerEL<elModel>::logEL(const Ref<const VectorXd>& theta,
-				      int maxIter, double eps) {
+				      int maxIter, double tolEps) {
     int nIter;
     double maxErr;
     elModel::evalG(theta);
-    LambdaNR(nIter, maxErr, maxIter, eps);
-    if (nIter == maxIter && maxErr > eps) {
-        std::cout << "lambdaNR did not coverge" << std::endl;
+    LambdaNR(nIter, maxErr, maxIter, tolEps);
+    if (nIter == maxIter && maxErr > tolEps) {
+        // std::cout << "lambdaNR did not coverge" << std::endl;
         return(-INFINITY);
     }
     else {
-        std::cout << "lambdaNR coverged" << std::endl;
+        // std::cout << "lambdaNR coverged" << std::endl;
         Glambda.noalias() = lambdaNew.transpose() * G;
         Gl11 = 1.0/(1.0-Glambda.array());
+        // Problem: NaN is because there is negtive entries in Gl11.
+        // but this happened for LSlogEL and the values are abnormal 
+        // std::cout << "Gl11 = " << Gl11 << std::endl;
         return((log(Gl11) - log(Gl11.sum())).sum());
     }
 }
@@ -187,13 +190,13 @@ template<typename elModel>
 inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
 					     VectorXd betaInit,
 					     VectorXd sigs,
-					     int maxIter, double eps) {
+					     int maxIter, double tolEps) {
   VectorXd betaOld = betaInit;
   VectorXd betaNew = betaOld;
   VectorXd betaProp = betaOld;
   int betalen = betaInit.size();
   MatrixXd beta_chain(betaInit.size(),nsamples);
-  double logELOld = logEL(betaOld, maxIter, eps); // NEW: chache old
+  double logELOld = logEL(betaOld, maxIter, tolEps); // NEW: chache old
   
   for (int ii=-nburn; ii<nsamples; ii++) {
     for (int jj=0; jj<betalen; jj++) {
@@ -205,7 +208,7 @@ inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
       double maxErr;
       // had a BUG here?! Didn't change G!!!
       elModel::evalG(betaProp); // NEW: change G with betaProp
-      LambdaNR(nIter, maxErr, maxIter, eps);
+      LambdaNR(nIter, maxErr, maxIter, tolEps);
       if (nIter < maxIter) satisfy = true;
       // if does not satisfy, keep the old beta
       if (satisfy == false) break;
@@ -217,8 +220,8 @@ inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
         log((1/(1-(lambdaNew.transpose()*elModel::G).array())).sum());
       double logELProp = logomegahat.sum();
       double ratio = exp(logELProp-logELOld);
-      // double ratio = exp(logEL(y, X, betaProp, maxIter, eps) -
-      //                    logEL(y, X, betaOld, maxIter, eps));
+      // double ratio = exp(logEL(y, X, betaProp, maxIter, tolEps) -
+      //                    logEL(y, X, betaOld, maxIter, tolEps));
       double a = std::min(1.0,ratio);
       if (u < a) { // accepted
         betaNew = betaProp;

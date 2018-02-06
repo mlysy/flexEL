@@ -1,9 +1,7 @@
-#--- check that lambdaNRC.R is working properly ---------------------------------
+#--------- check that lambdaNRC.R is working properly -----------------
 require(bayesEL)
 source("~/bayesEL/tests/testthat/el-utils.R")
 source("~/bayesEL/tests/donotrun/mle-check.R")
-
-#---- ## checking correctness of lambdaNRCens ## ----
 
 # 1-d problem 
 p <- 1

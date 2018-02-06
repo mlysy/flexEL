@@ -28,7 +28,7 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
   IL.LambdaNR(nIter, maxErr, maxIter, eps);
   lambda = IL.lambdaNew; // output
   // check convergence
-  not_conv = nIter >= maxIter && maxErr >= eps;
+  not_conv = (nIter == maxIter) && (maxErr > eps);
   if(verbose) {
     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
   }

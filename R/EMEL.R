@@ -7,13 +7,13 @@
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
 #' @export
-lambdaNR <- function(G, max_iter = 100, eps = 1e-7, verbose = FALSE) {
-    nEqs = ncol(G)
-    ans <- .lambdaNR(G = t(G), maxIter = max_iter, eps = eps, verbose = verbose)
+EMEL <- function(G, delta, ws, max_iter = 100, eps = 1e-7, verbose = FALSE) {
+    nObs = nrow(G)
+    ans <- .EMEL(G = t(G), delta, ws, maxIter = max_iter, eps = eps, verbose = verbose)
     if(ans$convergence) {
-        ans <- ans$lambda
+        ans <- ans$ws
     } else {
-        ans <- rep(NA, nEqs)
+        ans <- rep(NA, nObs)
     }
     ans
 }
