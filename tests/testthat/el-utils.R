@@ -249,8 +249,10 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
         nIter <- ii
         # E step: calculating qs
         qs <- getqs_R(ws, delta)
+        print(qs)
         # M step: 
         lambdaNew <- lambdaNRC_R(t(G), qs, max_iter, eps, verbose, lambdaOld)$lambda
+        print(lambdaNew)
         qs_sum <- sum(qs)
         qlg <- qs_sum + lambdaNew %*% G
         ws <- qs/qlg

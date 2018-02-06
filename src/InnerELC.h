@@ -203,17 +203,19 @@ inline void InnerELC<elModel>::EMEL(int& nIter, double& maxErr,
     for(ii=0; ii<maxIter; ii++) {
         // E-step:
         getqs();
-        // std::cout << "qs = " << qs << std::endl;
+        std::cout << "qs = " << qs << std::endl;
         // M-step:
         // std::cout << "lambdaOldEM = " << lambdaOldEM << std::endl;
         LambdaNR(nIter, maxErr, maxIter, tolEps);
-        // std::cout << "lambdaNew = " << lambdaNew << std::endl;
+        std::cout << "lambdaNew = " << lambdaNew << std::endl;
         // std::cout << "G = \n" << G << std::endl;
-        VectorXd lGq = ((lambdaNew * G).array() + qs.sum()).transpose();
+        VectorXd lGq = ((lambdaNew.transpose() * G).array() + qs.sum()).transpose();
+        std::cout << "lGq = \n" << lGq << std::endl;
         // TODO: no element-wise dividion???
         for (int jj=0; jj<nObs; jj++){
             ws(jj) = qs(jj)/lGq(jj);
         }
+        std::cout << "In EMEL before normalize: ws = \n" << ws << std::endl;
         ws = ws.array() / (ws.array().sum()); // normalize
         // std::cout << "In EMEL: ws = \n" << ws << std::endl; 
         maxErr = MaxRelErr(lambdaNew, lambdaOldEM); 

@@ -33,7 +33,6 @@ ws.R
 # difference of the two implementation 
 ws.cpp - ws.R
 
-
 ###### TODO: modify below ######
 
 #---- 5 variables case: check the result of em_el ----
@@ -70,11 +69,12 @@ obj  <- function(d,e) {
 # 2-dim problem 5 obvservations: 
 p <- 2
 N <- 5
-beta <- c(2,5)
+beta <- c(5,2)
 X <- rbind(rep(1,N),rnorm(N))
 z <- beta %*% X + rnorm(N)
-c <- rnorm(N, mean = 2*mean(z)) # censoring variable 
+c <- rnorm(N, mean = 1.5*mean(z)) # censoring variable
 delta <- z <= c
+delta
 sum(!delta)/N # censored percentage
 y <- z 
 y[!delta] <- c[!delta] # observed lifetime
@@ -83,41 +83,30 @@ ws0 <- rep(1/N,N)
 ord <- order(y)
 y <- y[ord]
 X <- matrix(X[,ord],p,N)
-G <- mr.evalG_R(y, X, beta)
+delta <- delta[ord]
 ws0 <- ws0[ord]
+G <- mr.evalG_R(y, X, beta)
+G
 
-wsnew <- EMEL(G, delta, ws0)
-wsnew_R <- EMEL_R(G, delta, ws0)$ws
+wsnew.cpp <- EMEL(G, delta, ws0)
+# TODO: why there are negative values??? why no censored data it produced NA???
+# ok problem: if some ws negative, lambda actually flies off
+wsnew.cpp
 
-# qs <- getqs_R(ws0,delta)
-
-# m <- 2 # for mean regression always 2
-# p <- 1
-# n <- 5
-# beta <- 1
-# z <- rnorm(n, mean = mu)
-# c <- rnorm(n, mean = 2*mu)
-# delta <- z <= c
-# sum(!delta)/n # censored percentage
-# y <- z
-# y[!delta] <- c[!delta]
-# X <- matrix(rep(1,5),1,5) # p x n matrix
-# G <- mr.evalG_R(y, X, mu)
-# lambda0 <- rnorm(m)
-# ws0 <- rep(1/5,5)
-# # order data here
-# ord <- order(y)
-# y <- y[ord]
-# X <- matrix(X[,ord],1,n)
-# ws0 <- ws0[ord]
+wsnew.R <- EMEL_R(G, delta, ws0)$ws
+wsnew.R
+wsnew.cpp - wsnew.R # differ more than 1-d
 
 d <- seq(0,1,length.out = 100)
 objval <- rep(NA, 100)
 objvalmode <- -Inf
 modeval <- NA
 modews <- rep(NA,5)
+# here -- choose which to plot 
+# wsnew_plot <- wsnew.cpp
+wsnew_plot <- wsnew.R
 for (ii in 1:100){
-    wsobjval <- obj(d[ii],wsnew_R[5])
+    wsobjval <- obj(d[ii],wsnew_plot[5])
     objval[ii] <- wsobjval$objval
     # if(!is.na(objval[ii])) print(objval)
     if (!is.na(objval[ii]) && (objval[ii] > objvalmode)) {
@@ -129,7 +118,7 @@ for (ii in 1:100){
 objval
 plot(d,objval,type = 'l')
 abline(v=modeval, col='red')
-abline(v=wsnew[4], col='blue')
+abline(v=wsnew_plot[4], col='blue')
 legend('topright',legend=c(expression('true mode'),
                            expression('emel result w[4]')),
        lty = c(1,1), col = c('red','blue'), cex = 0.4)
