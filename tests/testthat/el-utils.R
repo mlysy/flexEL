@@ -272,3 +272,19 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
     return(output)
 }
 
+#---- Location-scale model ----
+LSevalG <- function(y, X, theta) {
+    nObs <- ncol(X)
+    nEqs <- nrow(X)
+    G <- matrix(rep(NA,nEqs*2*nObs), nEqs*2, nObs) # nEq*2 x nobs
+    beta <- theta[1:nEqs]
+    gamma <- theta[(nEqs+1):2*nEqs]
+    yXb <- t(y) - beta %*% X
+    gXe <- exp(-2*gamma %*% X)
+    G[1:nEqs,] <- sweep(X, MARGIN = 2, yXb*gXe)
+    yXb2 <- yXb * yXb
+    G[(nEqs+1):2*nEqs,] <- sweep(X, MARGIN = 2, yXb2*gXe)
+    return(G)
+}
+
+
