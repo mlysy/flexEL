@@ -30,10 +30,13 @@ private:
     // maximum relative error in lambda: same for cens / non-cens
     double MaxRelErr(const Ref<const VectorXd>& lambdaNew,
                    const Ref<const VectorXd>& lambdaOld);
+    void initialize(); // common part of overloaded ctor's
 public:
     // constructor for regression-like problems
     InnerEL(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
           void* params);
+    InnerEL(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
+	    const Ref<const MatrixXd>& Z, void* params);
     // logstar and its derivatives
     double logstar(double x);
     double logstar1(double x);
@@ -61,21 +64,38 @@ inline InnerEL<elModel>::InnerEL(const Ref<const VectorXd>& y,
     // std::cout << nObs << std::endl;
     // std::cout << nEqs << std::endl;
     // logstar constants
-    trunc = 1.0 / nObs;
-    aa = -.5 * nObs*nObs;
-    bb = 2.0 * nObs;
-    cc = -1.5 - log(nObs);
-    // Newton-Raphson initialization
-    GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-    lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-    lambdaNew = VectorXd::Zero(nEqs);
-    Q1 = VectorXd::Zero(nEqs);
-    Q2 = MatrixXd::Zero(nEqs,nEqs);
-    Glambda = VectorXd::Zero(nObs);
-    Gl11 = ArrayXd::Zero(nObs);
-    rho = VectorXd::Zero(nObs);
-    relErr = VectorXd::Zero(nEqs);
-    Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
+  initialize();
+}
+
+// constructor for mean regression (without alpha)
+template<typename elModel>
+inline InnerEL<elModel>::InnerEL(const Ref<const VectorXd>& y,
+				 const Ref<const MatrixXd>& X,
+				 const Ref<const MatrixXd>& Z,
+				 void* params) : elModel(y, X, Z, params) {
+    // std::cout << nObs << std::endl;
+    // std::cout << nEqs << std::endl;
+    // logstar constants
+  initialize();
+}
+
+template<typename elModel>
+inline void InnerEL<elModel>::initialize() {
+  trunc = 1.0 / nObs;
+  aa = -.5 * nObs*nObs;
+  bb = 2.0 * nObs;
+  cc = -1.5 - log(nObs);
+  // Newton-Raphson initialization
+  GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
+  lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
+  lambdaNew = VectorXd::Zero(nEqs);
+  Q1 = VectorXd::Zero(nEqs);
+  Q2 = MatrixXd::Zero(nEqs,nEqs);
+  Glambda = VectorXd::Zero(nObs);
+  Gl11 = ArrayXd::Zero(nObs);
+  rho = VectorXd::Zero(nObs);
+  relErr = VectorXd::Zero(nEqs);
+  Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
 }
 
 // logstar

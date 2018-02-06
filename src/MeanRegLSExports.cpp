@@ -8,13 +8,27 @@ using namespace Eigen;
 #include "InnerEL.h"
 #include "MeanRegLSModel.h"
 
+// [[Rcpp::export(".MeanRegLS_G")]]
+Eigen::MatrixXd MeanRegLS_G(Eigen::VectorXd y,
+			    Eigen::MatrixXd X,
+			    Eigen::MatrixXd Z,
+			    Eigen::VectorXd theta) {
+  InnerEL<MeanRegLSModel> MR(y, X, Z, NULL); // instantiate
+  MR.evalG(theta);
+  MatrixXd G = MR.G;
+  return(G);
+}
+
 
 // [[Rcpp::export(".MeanRegLS_logEL")]]
-double MeanRegLS_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd theta,
-                     int maxIter = 100, double eps = 1e-7) {
-    InnerEL<MeanRegLSModel> MR(y, X, NULL); // instantiate
-    double logELmean = MR.logEL(theta,maxIter,eps);
-    return(logELmean);
+double MeanRegLS_logEL(Eigen::VectorXd y,
+		       Eigen::MatrixXd X,
+		       Eigen::MatrixXd Z,
+		       Eigen::VectorXd theta,
+		       int maxIter = 100, double eps = 1e-7) {
+  InnerEL<MeanRegLSModel> MR(y, X, Z, NULL); // instantiate
+  double logELmean = MR.logEL(theta,maxIter,eps);
+  return(logELmean);
 }
 
 /*

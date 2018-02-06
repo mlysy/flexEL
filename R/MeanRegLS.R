@@ -11,13 +11,19 @@
 #' @return Log empirical likelihood of the input theta
 #' @details ...
 #' @export
-mrls.logel <- function(y, X, theta, max_iter = 100, eps = 1e-7) {
+mrls.logel <- function(y, X, Z, beta, gamma, max_iter = 100, eps = 1e-7) {
     # input checks
-    if(ncol(X) != length(y)) {
-        stop("X and y have inconsistent dimensions.")
-    }
-    if(nrow(X) * 2 != length(theta)) {
-        stop("X and theta have inconsistent dimensions.")
-    }
-    .MeanRegLS_logEL(y, X, theta, maxIter = 100L, eps = 1e-7)
+    ## if(ncol(X) != length(y)) {
+    ##     stop("X and y have inconsistent dimensions.")
+    ## }
+    ## if(nrow(X) * 2 != length(theta)) {
+    ##     stop("X and theta have inconsistent dimensions.")
+    ## }
+    .MeanRegLS_logEL(y, X, Z, c(beta, gamma), maxIter = 100L, eps = 1e-7)
+}
+
+#' G function for mrLS model.
+#' @export
+mrls.G <- function(y, X, Z, beta, gamma) {
+  .MeanRegLS_G(y, X, Z, c(beta, gamma))
 }

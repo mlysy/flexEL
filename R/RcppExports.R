@@ -17,8 +17,12 @@
     .Call(`_bayesEL_MeanReg_logEL`, y, X, beta, maxIter, eps)
 }
 
-.MeanRegLS_logEL <- function(y, X, theta, maxIter = 100L, eps = 1e-7) {
-    .Call(`_bayesEL_MeanRegLS_logEL`, y, X, theta, maxIter, eps)
+.MeanRegLS_G <- function(y, X, Z, theta) {
+    .Call(`_bayesEL_MeanRegLS_G`, y, X, Z, theta)
+}
+
+.MeanRegLS_logEL <- function(y, X, Z, theta, maxIter = 100L, eps = 1e-7) {
+    .Call(`_bayesEL_MeanRegLS_logEL`, y, X, Z, theta, maxIter, eps)
 }
 
 .QuantReg_logEL <- function(y, X, alpha, beta, maxIter = 100L, eps = 1e-7) {

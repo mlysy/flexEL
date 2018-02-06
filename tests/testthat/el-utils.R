@@ -1,12 +1,18 @@
 
-#---- General helper functions ---- 
+#---- General helper functions ----
+
+# generate matrix of iid N(0,1)
+rMNorm <- function(n, p) {
+  if(missing(p)) p <- n
+  matrix(rnorm(n*p), n, p)
+}
 
 # Note: returns a nObs x nEqs matrix G
 # GfunCensMean <- function(y, X, beta) {
 #     n <- length(y)
 #     p <- length(beta)
 #     if (nrow(X) != p) stop("dimensions of X and beta don't match")
-#     
+#
 #     G <- matrix(rep(NA,2*n),2,n)
 #     for (ii in 1:n) {
 #         G[1,ii] <- y[ii] - t(X[,ii]) %*% beta # mean(eps) = 0
@@ -22,6 +28,28 @@ mr.evalG_R <- function(y, X, beta) {
     yXb <- y - beta %*% X
     G <- sweep(X, MARGIN = 2, yXb, `*`)
     return(t(G))
+}
+
+mrls.evalG_R <- function(y, X, Z, beta, gamma) {
+  nObs <- nrow(X)
+  nBeta <- length(beta)
+  nGamma <- length(gamma)
+  G <- matrix(NA, nObs, nBeta + nGamma + 1)
+  yXb <- y - X %*% beta
+  gZe <- exp(-2 * (Z %*% gamma))
+  WW <- c(yXb * gZe)
+  G[,1:nBeta] <- WW * X
+  WW <- c(yXb * WW)
+  G[,nBeta + 1:nGamma] <-  WW * Z
+  G[,nBeta + nGamma + 1] <- WW - 1
+  G
+}
+
+mrls.logel_R <- function(y, X, Z, beta, gamma,
+                         max_iter = 100, eps = 1e-07, verbose = FALSE) {
+  G <- mrls.evalG_R(y, X, Z, beta, gamma)
+  lambda <- lambdaNR(G = G, max_iter, eps, verbose)
+  sum(logomegahat(lambda, t(G)))
 }
 
 plotEL <- function(mu.seq, logel.seq, trueval, meanobs = NA, mu.name = "param") {
@@ -149,7 +177,7 @@ log.sharp <- function(x, q) {
     cond <- x >= q
     ans <- rep(NA,length(x))
     ans[cond] <- log(x[cond])
-    ans[!cond] <- -1/(2*q[!cond]^2)*x[!cond]^2 + 2/q[!cond]*x[!cond] 
+    ans[!cond] <- -1/(2*q[!cond]^2)*x[!cond]^2 + 2/q[!cond]*x[!cond]
     - 3/2 + log(q[!cond])
     return(ans)
 }
@@ -183,10 +211,10 @@ QfunCens <- function(lambda, G) {
 
 # R implementation of lambdaNRC
 # Note: input G is nObs x nEqs here
-lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE, 
+lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
     G <- t(G)
-    nObs <- ncol(G) 
+    nObs <- ncol(G)
     nEqs <- nrow(G)
     if (is.null(lambdaOld)) lambdaOld <- rep(0,nEqs)
     lambdaNew <- lambdaOld
@@ -213,9 +241,9 @@ lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE,
         }
         lambdaOld <- lambdaNew # complete cycle
         if (verbose && nIter %% 20 == 0){
-            message("nIter = ", nIter) 
-            message("err = ", maxErr) 
-        } 
+            message("nIter = ", nIter)
+            message("err = ", maxErr)
+        }
     }
     output<- list(lambda = c(lambdaNew), nIter = nIter, maxErr = maxErr)
     return(output)
@@ -227,13 +255,13 @@ getqs_R <- function(ws, delta) {
     wsps <- rep(NA,n) # ws partial sum
     for (ii in 1:n) wsps[ii] <- sum(ws[ii:n])
     # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
-    W <- matrix(rep(0,n*n),n,n) 
+    W <- matrix(rep(0,n*n),n,n)
     for (jj in 1:n) W[jj,(jj:n)] <- ws[jj:n]/wsps[jj]
     # print(W)
     qs <- rep(NA,n)
     for (kk in 1:n) {
         qs[kk] <- delta[kk] + (1-delta) %*% W[,kk]
-    } 
+    }
     return(qs)
 }
 
@@ -250,7 +278,7 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
         # E step: calculating qs
         qs <- getqs_R(ws, delta)
         print(qs)
-        # M step: 
+        # M step:
         lambdaNew <- lambdaNRC_R(t(G), qs, max_iter, eps, verbose, lambdaOld)$lambda
         print(lambdaNew)
         qs_sum <- sum(qs)
@@ -272,19 +300,19 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
     return(output)
 }
 
-#---- Location-scale model ----
-LSevalG <- function(y, X, theta) {
-    nObs <- ncol(X)
-    nEqs <- nrow(X)
-    G <- matrix(rep(NA,nEqs*2*nObs), nEqs*2, nObs) # nEq*2 x nobs
-    beta <- theta[1:nEqs]
-    gamma <- theta[(nEqs+1):2*nEqs]
-    yXb <- t(y) - beta %*% X
-    gXe <- exp(-2*gamma %*% X)
-    G[1:nEqs,] <- sweep(X, MARGIN = 2, yXb*gXe)
-    yXb2 <- yXb * yXb
-    G[(nEqs+1):2*nEqs,] <- sweep(X, MARGIN = 2, yXb2*gXe)
-    return(G)
-}
+## #---- Location-scale model ----
+## LSevalG <- function(y, X, theta) {
+##     nObs <- ncol(X)
+##     nEqs <- nrow(X)
+##     G <- matrix(rep(NA,nEqs*2*nObs), nEqs*2, nObs) # nEq*2 x nobs
+##     beta <- theta[1:nEqs]
+##     gamma <- theta[(nEqs+1):2*nEqs]
+##     yXb <- t(y) - beta %*% X
+##     gXe <- exp(-2*gamma %*% X)
+##     G[1:nEqs,] <- sweep(X, MARGIN = 2, yXb*gXe)
+##     yXb2 <- yXb * yXb
+##     G[(nEqs+1):2*nEqs,] <- sweep(X, MARGIN = 2, yXb2*gXe)
+##     return(G)
+## }
 
 

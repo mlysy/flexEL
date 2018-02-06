@@ -8,13 +8,25 @@
 class MeanRegLSModel {
 private:
     RowVectorXd yXb;   // y'-beta'X
-protected:
+    RowVectorXd gZe; // exp(-2 * gamma'Z)
+    VectorXd WW; // yXb * gZe
+    MatrixXd tG;
+    int nBeta;
+    int nGamma;
     VectorXd y;
+    MatrixXd tX;
     MatrixXd X;
+    MatrixXd tZ;
+    MatrixXd Z;
+    VectorXd beta;
+    VectorXd gamma;
+protected:
     int nObs, nEqs;
     MatrixXd G;
 public:
-    MeanRegLSModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+    MeanRegLSModel(const Ref<const VectorXd>& _y,
+		   const Ref<const MatrixXd>& _X,
+		   const Ref<const MatrixXd>& _Z,
                    void* params);
     void evalG(const Ref<const VectorXd>& theta);
 };
@@ -22,38 +34,54 @@ public:
 // constructor
 inline MeanRegLSModel::MeanRegLSModel(const Ref<const VectorXd>& _y,
                                       const Ref<const MatrixXd>& _X,
+				      const Ref<const MatrixXd>& _Z,
                                       void* params) {
     y = _y;
-    X = _X;
+    X = _X; // on regular scale
+    tX = X.transpose();
+    Z = _Z;
+    tZ = Z.transpose();
+    nBeta = tX.rows();
+    nGamma = tZ.rows();
     nObs = y.size();
-    nEqs = X.rows() * 2; // nObs x 2 for the mean and location function
+    nEqs = nBeta + nGamma + 1; // nObs x 2 for the mean and location function
     // G = MatrixXd::Zero(nEqs,nObs);
-    G = MatrixXd::Zero(nEqs+1,nObs);
+    G = MatrixXd::Zero(nEqs,nObs);
+    tG = G.transpose();
     yXb = RowVectorXd::Zero(nObs);
+    gZe = RowVectorXd::Zero(nObs);
+    WW = VectorXd::Zero(nObs);
+    beta = VectorXd::Zero(nBeta);
+    gamma = VectorXd::Zero(nGamma);
 }
 
 // form the G matrix
 inline void MeanRegLSModel::evalG(const Ref<const VectorXd>& theta) {
     // extract params for location and scale parts
-    VectorXd beta = theta.head(nEqs/2);
-    VectorXd gamma = theta.tail(nEqs/2);
+    beta = theta.head(nBeta);
+    gamma = theta.tail(nGamma);
     // std::cout << "beta = " << beta << std::endl;
     // std::cout << "gamma = " << gamma << std::endl;
-    // location 
-    yXb.noalias() = y.transpose() - beta.transpose() * X;
-    // std::cout << "yXb = \n" << yXb << std::endl; 
-    RowVectorXd gXe = (-2*gamma.transpose() * X).array().exp(); // 1 x nObs
+    // location
+    yXb.noalias() = - beta.transpose() * tX;
+    yXb.array() += y.transpose().array();
+    //yXb.noalias() = (y.array() - (beta.transpose() * tX).array()).transpose();
+    // std::cout << "yXb = \n" << yXb << std::endl;
+    gZe.noalias() = -2.0 * gamma.transpose() * tZ;
+    gZe = gZe.array().exp();
     // std::cout << "gXe = \n" << gXe << std::endl;
-    G.block(0,0,nEqs/2,nObs) = X;
-    G.block(0,0,nEqs/2,nObs).array().rowwise() *= yXb.array()*gXe.array();
+    tG.leftCols(nBeta) = X;
+    WW = yXb.array()*gZe.array();
+    tG.leftCols(nBeta).array().colwise() *= WW.array();
     // std::cout << "G = \n" << G << std::endl;
-    // scale 
-    RowVectorXd yXb2 = (yXb.array()*yXb.array()).matrix();
-    G.block(nEqs/2,0,nEqs/2,nObs) = X;
-    G.block(nEqs/2,0,nEqs/2,nObs).array().rowwise() *= yXb2.array()*gXe.array();
-    G.block(nEqs/2+1,0,nEqs/2,nObs).array() = yXb2.array()*gXe.array() - 1;
+    // scale
+    WW.array() *= yXb.array();
+    tG.block(0, nBeta, nObs, nGamma) = Z;
+    tG.block(0, nBeta, nObs, nGamma).array().colwise() *= WW.array();
+    tG.col(nEqs-1) = WW.array() - 1.0;
+    G = tG.transpose();
     // std::cout << "y = \n" << y << std::endl;
-    std::cout << "G = \n" << G << std::endl;
+    // std::cout << "G = \n" << G << std::endl;
 }
 
 // inline void MeanRegLSModel::evalG(const Ref<const VectorXd>& theta) {
