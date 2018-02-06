@@ -229,6 +229,7 @@ getqs_R <- function(ws, delta) {
     # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
     W <- matrix(rep(0,n*n),n,n) 
     for (jj in 1:n) W[jj,(jj:n)] <- ws[jj:n]/wsps[jj]
+    # print(W)
     qs <- rep(NA,n)
     for (kk in 1:n) {
         qs[kk] <- delta[kk] + (1-delta) %*% W[,kk]
@@ -243,7 +244,9 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
     ws <- ws0
     err <- Inf
     lambdaOld <- rep(0,m)
+    nIter <- 0
     for (ii in 1:max_iter) {
+        nIter <- ii
         # E step: calculating qs
         qs <- getqs_R(ws, delta)
         # M step: 
@@ -259,6 +262,9 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
         }
         if (err < eps) break
         lambdaOld <- lambdaNew
+    }
+    if (nIter == max_iter && err > eps) {
+        ws = rep(NA,n)
     }
     output <- list(ws = ws, lambda = lambdaNew)
     return(output)

@@ -21,7 +21,7 @@ y <- y[ord]
 X <- matrix(X[,ord],p,N)
 G <- mr.evalG_R(y, X, mu)
 ws0 <- ws0[ord]
-qs <- get_qs(ws0)
+qs <- getqs_R(ws0,delta)
 
 # optimization in C++
 lambdahat <- lambdaNRC(G,qs)
@@ -39,10 +39,11 @@ abline(v = lambdahat, col='red')
 abline(v = lambdahat_R, col='blue')
 
 # 2-dim problem : 
+p <- 2
 N <- 200
 beta <- c(1,2)
 X <- rbind(rep(1,N),rnorm(N))
-z <- beta %*% X
+z <- beta %*% X + rnorm(N)
 c <- rnorm(N, mean = 2*mean(z)) # censoring variable 
 delta <- z <= c
 sum(!delta)/N # censored percentage
@@ -55,7 +56,7 @@ y <- y[ord]
 X <- matrix(X[,ord],p,N)
 G <- mr.evalG_R(y, X, beta)
 ws0 <- ws0[ord]
-qs <- get_qs(ws0)
+qs <- getqs_R(ws0,delta)
 
 # optimization in C++
 lambdahat <- lambdaNRC(G,qs)

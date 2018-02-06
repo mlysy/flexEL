@@ -139,9 +139,10 @@ inline void InnerELC<elModel>::BlockOuter(void) {
 // maximum relative error in lambda
 template<typename elModel>
 inline double InnerELC<elModel>::MaxRelErr(const Ref<const VectorXd>& lambdaNew,
-                                  const Ref<const VectorXd>& lambdaOld) {
-  relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
-  return(relErr.maxCoeff());
+                                           const Ref<const VectorXd>& lambdaOld) {
+    // std::cout << "In MaxRelErr: lambdaNew = " << lambdaNew << ", lambdaOld = " << lambdaOld << std::endl;
+    relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
+    return(relErr.maxCoeff());
 }
 
 // Newton-Raphson algorithm
@@ -188,20 +189,23 @@ inline void InnerELC<elModel>::getqs() {
         // std::cout << "W.block(jj,0,1,nObs-jj) = \n" << W.block(jj,0,1,nObs-jj) << std::endl;
         W.block(jj,jj,1,nObs-jj) = (ws.block(jj,0,nObs-jj,1).array() / wsps(jj)).transpose(); 
     }
-    std::cout << "W = \n" << W << std::endl;
-    std::cout << "(1-delta.array()).matrix().transpose() * W = " << (1-delta.array()).matrix().transpose() * W << std::endl;
+    // std::cout << "W = \n" << W << std::endl;
+    // std::cout << "(1-delta.array()).matrix().transpose() * W = " << (1-delta.array()).matrix().transpose() * W << std::endl;
     qs = delta + (1-delta.array()).matrix().transpose() * W; 
 }
 
 template<typename elModel>
 inline void InnerELC<elModel>::EMEL(int& nIter, double& maxErr,
                                     int maxIter, double tolEps) {
+    // Problem: have to save this o.w. lambdaOld got modified
+    VectorXd lambdaOldEM = lambdaOld; 
     int ii; 
     for(ii=0; ii<maxIter; ii++) {
         // E-step:
         getqs();
         // std::cout << "qs = " << qs << std::endl;
         // M-step:
+        // std::cout << "lambdaOldEM = " << lambdaOldEM << std::endl;
         LambdaNR(nIter, maxErr, maxIter, tolEps);
         // std::cout << "lambdaNew = " << lambdaNew << std::endl;
         // std::cout << "G = \n" << G << std::endl;
@@ -212,8 +216,10 @@ inline void InnerELC<elModel>::EMEL(int& nIter, double& maxErr,
         }
         ws = ws.array() / (ws.array().sum()); // normalize
         // std::cout << "In EMEL: ws = \n" << ws << std::endl; 
-        maxErr = MaxRelErr(lambdaNew, lambdaOld); 
+        maxErr = MaxRelErr(lambdaNew, lambdaOldEM); 
+        // std::cout << "In EMEL: maxErr = " << maxErr << std::endl;
         if (maxErr < tolEps) break;
+        lambdaOldEM = lambdaNew;
     }
     nIter = ii; 
     return;

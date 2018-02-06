@@ -3,7 +3,7 @@ require(bayesEL)
 source("~/bayesEL/tests/testthat/el-utils.R")
 source("~/bayesEL/tests/donotrun/mle-check.R")
 
-# 1-d problem 
+# 1-d problem --- still sometimes not stable
 p <- 1
 N <- 5
 mu <- 1
@@ -24,21 +24,21 @@ G <- mr.evalG_R(y, X, mu)
 ws0 <- ws0[ord]
 
 # optimization in C++
-ws.cpp <- EMEL(G, delta, ws0, max_iter = 1)
-
+ws.cpp <- EMEL(G, delta, ws0)
+ws.cpp
 # optimization in R
-wsout <- EMEL_R(G,delta, ws0, max_iter = 1)
+wsout <- EMEL_R(G, delta, ws0)
 ws.R <- wsout$ws
-
+ws.R
 # difference of the two implementation 
 ws.cpp - ws.R
-
 
 
 ###### TODO: modify below ######
 
 #---- 5 variables case: check the result of em_el ----
 obj  <- function(d,e) {
+    G <- t(G)
     c2 <- G[1,1]-G[1,2]
     c3 <- G[1,1]-G[1,3]
     c4 <- G[1,4]-G[1,1]
@@ -67,25 +67,49 @@ obj  <- function(d,e) {
     return(output)
 }
 
-m <- 2 # for mean regression always 2
-p <- 1
-n <- 5
-mu <- 1
-z <- rnorm(n, mean = mu)
-c <- rnorm(n, mean = 2*mu)
+# 2-dim problem 5 obvservations: 
+p <- 2
+N <- 5
+beta <- c(2,5)
+X <- rbind(rep(1,N),rnorm(N))
+z <- beta %*% X + rnorm(N)
+c <- rnorm(N, mean = 2*mean(z)) # censoring variable 
 delta <- z <= c
-sum(!delta)/n # censored percentage
-y <- z
-y[!delta] <- c[!delta]
-X <- matrix(rep(1,5),1,5) # p x n matrix
-G <- mr.evalG_R(y, X, mu)
-lambda0 <- rnorm(m)
-ws0 <- rep(1/5,5)
+sum(!delta)/N # censored percentage
+y <- z 
+y[!delta] <- c[!delta] # observed lifetime
+ws0 <- rep(1/N,N)
 # order data here
 ord <- order(y)
 y <- y[ord]
-X <- matrix(X[,ord],1,n)
+X <- matrix(X[,ord],p,N)
+G <- mr.evalG_R(y, X, beta)
 ws0 <- ws0[ord]
+
+wsnew <- EMEL(G, delta, ws0)
+wsnew_R <- EMEL_R(G, delta, ws0)$ws
+
+# qs <- getqs_R(ws0,delta)
+
+# m <- 2 # for mean regression always 2
+# p <- 1
+# n <- 5
+# beta <- 1
+# z <- rnorm(n, mean = mu)
+# c <- rnorm(n, mean = 2*mu)
+# delta <- z <= c
+# sum(!delta)/n # censored percentage
+# y <- z
+# y[!delta] <- c[!delta]
+# X <- matrix(rep(1,5),1,5) # p x n matrix
+# G <- mr.evalG_R(y, X, mu)
+# lambda0 <- rnorm(m)
+# ws0 <- rep(1/5,5)
+# # order data here
+# ord <- order(y)
+# y <- y[ord]
+# X <- matrix(X[,ord],1,n)
+# ws0 <- ws0[ord]
 
 d <- seq(0,1,length.out = 100)
 objval <- rep(NA, 100)
@@ -93,7 +117,7 @@ objvalmode <- -Inf
 modeval <- NA
 modews <- rep(NA,5)
 for (ii in 1:100){
-    wsobjval <- obj(d[ii],wsnew[5])
+    wsobjval <- obj(d[ii],wsnew_R[5])
     objval[ii] <- wsobjval$objval
     # if(!is.na(objval[ii])) print(objval)
     if (!is.na(objval[ii]) && (objval[ii] > objvalmode)) {
