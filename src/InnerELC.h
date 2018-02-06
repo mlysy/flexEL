@@ -17,6 +17,7 @@ private:
     // constants for logsharp calculations
     // double trunc, aa, bb, cc; 
     // temporary storage for Newton-Raphson
+    VectorXd delta; // TODO: censoring indicator, move to model??
     MatrixXd GGt;
     VectorXd Glambda;
     ArrayXd Gl11;
@@ -30,9 +31,18 @@ private:
     // maximum relative error in lambda: same for cens / non-cens
     double MaxRelErr(const Ref<const VectorXd>& lambdaNew,
                      const Ref<const VectorXd>& lambdaOld);
+    void getqs(); // calculate qs from ws
 public:
+    // TODO: public for testing for now
+    VectorXd ws; // weights 
+    VectorXd wsps; // partial sum of ws 
+    // TODO: W for calculation in getqs, 
+    // it is only upper triangular, space!!!! what's better??
+    MatrixXd W; 
+    VectorXd qs;  
     // constructor for regression-like problems
     InnerELC(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
+             const Ref<const VectorXd>& delta,
              void* params);
     // logsharp and its derivatives
     double logsharp(double x, double q);
@@ -43,8 +53,9 @@ public:
     VectorXd lambdaOld;
     VectorXd lambdaNew;
     // Newton-Raphson algorithm
-    void LambdaNR(VectorXd qs, int& nIter, double& maxErr,
+    void LambdaNR(int& nIter, double& maxErr,
                   int maxIter, double tolEps);
+    void EMEL(int& nIter, double& maxErr,int maxIter, double tolEps);
     // log empirical likelihood calculation 
     // double logEL(const Ref<const VectorXd>& theta, int maxIter, double tolEps); 
     // // posterior sampler
@@ -58,6 +69,7 @@ public:
 template<typename elModel>
 inline InnerELC<elModel>::InnerELC(const Ref<const VectorXd>& y,
                                    const Ref<const MatrixXd>& X,
+                                   const Ref<const VectorXd>& delta,
                                    void* params) : elModel(y, X, params) {
     // std::cout << nObs << std::endl;
     // std::cout << nEqs << std::endl;
@@ -66,6 +78,11 @@ inline InnerELC<elModel>::InnerELC(const Ref<const VectorXd>& y,
     // bb = 2.0 * nObs;
     // cc = -1.5 - log(nObs);
     // Newton-Raphson initialization
+    this->delta = delta;
+    ws = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
+    wsps = VectorXd::Zero(nObs); 
+    W = MatrixXd::Zero(nObs,nObs);
+    qs = VectorXd::Zero(nObs); // Initialize with the current ws? 
     GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
     lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
     lambdaNew = VectorXd::Zero(nEqs);
@@ -129,9 +146,8 @@ inline double InnerELC<elModel>::MaxRelErr(const Ref<const VectorXd>& lambdaNew,
 
 // Newton-Raphson algorithm
 template<typename elModel>
-inline void InnerELC<elModel>::LambdaNR(VectorXd qs, 
-                               int& nIter, double& maxErr,
-                               int maxIter, double tolEps) {
+inline void InnerELC<elModel>::LambdaNR(int& nIter, double& maxErr,
+                                        int maxIter, double tolEps) {
     int ii, jj;
     BlockOuter(); // initialize GGt
     // newton-raphson loop
@@ -155,6 +171,51 @@ inline void InnerELC<elModel>::LambdaNR(VectorXd qs,
         lambdaOld = lambdaNew; // complete cycle
     }
     nIter = ii; // output lambda and also nIter and maxErr
+    return;
+}
+
+// TODO: this is not efficient
+template<typename elModel>
+inline void InnerELC<elModel>::getqs() {
+    for (int ii=0; ii<nObs; ii++) {
+        // ws is a col vector of lenght nObs
+        wsps(ii) = ws.block(ii,0,nObs-ii,1).sum();
+    }
+    // std::cout << "ws = \n" << ws << std::endl;
+    // std::cout << "wsps = \n" << wsps << std::endl;
+    for (int jj=0; jj<nObs; jj++) {
+        // std::cout << ws.block(jj,0,nObs-jj,1).array() / wsps(jj) << std::endl;
+        // std::cout << "W.block(jj,0,1,nObs-jj) = \n" << W.block(jj,0,1,nObs-jj) << std::endl;
+        W.block(jj,jj,1,nObs-jj) = (ws.block(jj,0,nObs-jj,1).array() / wsps(jj)).transpose(); 
+    }
+    std::cout << "W = \n" << W << std::endl;
+    std::cout << "(1-delta.array()).matrix().transpose() * W = " << (1-delta.array()).matrix().transpose() * W << std::endl;
+    qs = delta + (1-delta.array()).matrix().transpose() * W; 
+}
+
+template<typename elModel>
+inline void InnerELC<elModel>::EMEL(int& nIter, double& maxErr,
+                                    int maxIter, double tolEps) {
+    int ii; 
+    for(ii=0; ii<maxIter; ii++) {
+        // E-step:
+        getqs();
+        // std::cout << "qs = " << qs << std::endl;
+        // M-step:
+        LambdaNR(nIter, maxErr, maxIter, tolEps);
+        // std::cout << "lambdaNew = " << lambdaNew << std::endl;
+        // std::cout << "G = \n" << G << std::endl;
+        VectorXd lGq = ((lambdaNew * G).array() + qs.sum()).transpose();
+        // TODO: no element-wise dividion???
+        for (int jj=0; jj<nObs; jj++){
+            ws(jj) = qs(jj)/lGq(jj);
+        }
+        ws = ws.array() / (ws.array().sum()); // normalize
+        // std::cout << "In EMEL: ws = \n" << ws << std::endl; 
+        maxErr = MaxRelErr(lambdaNew, lambdaOld); 
+        if (maxErr < tolEps) break;
+    }
+    nIter = ii; 
     return;
 }
 

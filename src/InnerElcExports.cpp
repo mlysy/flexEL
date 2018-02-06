@@ -1,4 +1,4 @@
-// port some of InnerEL to R
+// port some of InnerELC to R
 
 #include <Rcpp.h>
 using namespace Rcpp;
@@ -18,14 +18,16 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd qs,
     int nEqs = G.rows();
     VectorXd y = VectorXd::Zero(nObs);
     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-    InnerELC<MeanRegModel> IL(y, X, NULL); // instantiate
+    VectorXd delta = VectorXd::Zero(nObs);
+    InnerELC<MeanRegModel> IL(y, X, delta, NULL); // instantiate
     IL.G = G; // assign a given G
+    IL.qs = qs; 
     // initialize variables for output here 
     int nIter;
     double maxErr;
     VectorXd lambda(nEqs);
     bool not_conv;
-    IL.LambdaNR(qs, nIter, maxErr, maxIter, eps);
+    IL.LambdaNR(nIter, maxErr, maxIter, eps);
     lambda = IL.lambdaNew; // output
     // check convergence
     not_conv = (nIter == maxIter) && (maxErr > eps);
