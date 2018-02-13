@@ -1,7 +1,7 @@
 library(bayesEL) # always load the package (with library)
-# source("el-utils.R")
-source("../bayesEL/tests/testthat/el-utils.R")
-source("../bayesEL/tests/donotrun/mle-check.R")
+source("el-utils.R")
+## source("../bayesEL/tests/testthat/el-utils.R")
+## source("../bayesEL/tests/donotrun/mle-check.R")
 
 # library(testthat) # not loaded automatically
 context("lambdaNR")
@@ -27,11 +27,11 @@ test_that("lambda.R == lambda.cpp", {
         max_iter <- sample(c(2, 10, 100), 1)
         eps <- runif(1, 1e-6, 1e-5)
         G <- Gmean(y, X, beta0)
-        lambda.cpp <- lambdaNR(G = G, 
+        lambda.cpp <- lambdaNR(G = G,
                                max_iter = max_iter, eps = eps, verbose = FALSE)
         # lambda.cpp
         # now in R
-        nrout <- lambdaNR_R(G = G, 
+        nrout <- lambdaNR_R(G = G,
                             max_iter = max_iter, eps = eps)
         lambda.R <- nrout$lambda
         expect_equal(lambda.R, lambda.cpp)
