@@ -98,10 +98,12 @@ inline InnerELC<elModel>::InnerELC(const Ref<const VectorXd>& y,
 // logsharp
 template<typename elModel>
 inline double InnerELC<elModel>::logsharp(double x, double q) {
+    double xq;
     if(x >= q) {
         return(log(x));
     } else {
-        return(-1.0/(2.0*q*q)*x*x + 2/q*x - 3.0/2.0 + log(q));
+        xq = x/q;
+        return(-0.5*xq*xq + 2.0*xq - 1.5 + log(q));
     }
 }
 
@@ -111,7 +113,7 @@ inline double InnerELC<elModel>::logsharp1(double x, double q) {
     if(x >= q) {
         return(1.0/x);
     } else {
-        return(-1.0/(q*q) + 2/q);
+        return(-1.0/(q*q) + 2.0/q);
     }
 }
 
@@ -121,7 +123,7 @@ inline double InnerELC<elModel>::logsharp2(double x, double q) {
     if(x >= q) {
         return(-1.0/(x*x));
     } else {
-        return(-1/(q*q));
+        return(-1.0/(q*q));
     }
 }
 
