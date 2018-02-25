@@ -213,7 +213,7 @@ QfunCens <- function(lambda, G) {
 
 # R implementation of lambdaNRC
 # Note: input G is nObs x nEqs here
-lambdaNRC_R <- function(G, qs, maxIter = 100, rel_tol = 1e-7, verbose = FALSE,
+lambdaNRC_R <- function(G, qs, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
     G <- t(G)
     nObs <- ncol(G)
@@ -222,7 +222,7 @@ lambdaNRC_R <- function(G, qs, maxIter = 100, rel_tol = 1e-7, verbose = FALSE,
     lambdaNew <- lambdaOld
     nIter <- 0
     # newton-raphson loop
-    for (ii in 1:maxIter) {
+    for (ii in 1:max_iter) {
         nIter <- ii
         # Q1 and Q2
         Glambda <- t(lambdaOld) %*% G
@@ -242,11 +242,12 @@ lambdaNRC_R <- function(G, qs, maxIter = 100, rel_tol = 1e-7, verbose = FALSE,
             break;
         }
         lambdaOld <- lambdaNew # complete cycle
-        if (verbose && nIter %% 20 == 0){
+        if (verbose && (nIter %% 5 == 0)){
             message("nIter = ", nIter)
             message("err = ", maxErr)
         }
     }
+    if(ii == max_iter && maxErr > rel_tol) lambdaNew <- rep(NA, nEqs)
     output<- list(lambda = c(lambdaNew), nIter = nIter, maxErr = maxErr)
     return(output)
 }

@@ -13,7 +13,7 @@ using namespace Eigen;
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".lambdaNR")]]
 Rcpp::List lambdaNR(Eigen::MatrixXd G, 
-                    int maxIter, double eps, bool verbose) {
+                    int maxIter, double relTol, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
   VectorXd y = VectorXd::Zero(nObs);
@@ -25,10 +25,10 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
   double maxErr;
   VectorXd lambda(nEqs);
   bool not_conv;
-  IL.LambdaNR(nIter, maxErr, maxIter, eps);
+  IL.LambdaNR(nIter, maxErr, maxIter, relTol);
   lambda = IL.lambdaNew; // output
   // check convergence
-  not_conv = (nIter == maxIter) && (maxErr > eps);
+  not_conv = (nIter == maxIter) && (maxErr > relTol);
   if(verbose) {
     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
   }

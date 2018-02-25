@@ -20,18 +20,12 @@ Eigen::VectorXd evalWeights(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(weights);
 }
 
-
-// Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".EMEL")]]
-Rcpp::List EMEL(Eigen::VectorXd beta, Eigen::MatrixXd G, 
-                Eigen::VectorXd deltas,Eigen::VectorXd omegas0, 
+Rcpp::List EMEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd deltas,
+                Eigen::VectorXd beta, Eigen::MatrixXd G, Eigen::VectorXd omegas0, 
                 int maxIter, double eps, bool verbose) {
-    int nObs = G.cols();
-    int nEqs = G.rows();
-    VectorXd y = VectorXd::Zero(nObs);
-    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
     InnerELC<MeanRegModel> IL(y, X, deltas, NULL); // instantiate
     IL.G = G; // assign a given G
     IL.omegas = omegas0; 
@@ -49,3 +43,33 @@ Rcpp::List EMEL(Eigen::VectorXd beta, Eigen::MatrixXd G,
     return Rcpp::List::create(_["omegas"] = omegasnew,
                               _["convergence"] = !not_conv);
 }
+
+
+// // Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
+// // G: m x N matrix
+// // lambda0: m-vector of starting values
+// // [[Rcpp::export(".EMEL")]]
+// Rcpp::List EMEL(Eigen::VectorXd beta, Eigen::MatrixXd G, 
+//                 Eigen::VectorXd deltas,Eigen::VectorXd omegas0, 
+//                 int maxIter, double eps, bool verbose) {
+//     int nObs = G.cols();
+//     int nEqs = G.rows();
+//     VectorXd y = VectorXd::Zero(nObs);
+//     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+//     InnerELC<MeanRegModel> IL(y, X, deltas, NULL); // instantiate
+//     IL.G = G; // assign a given G
+//     IL.omegas = omegas0; 
+//     // initialize variables for output here 
+//     int nIter;
+//     double maxErr;
+//     bool not_conv;
+//     IL.EMEL(nIter, maxErr, maxIter, eps);
+//     VectorXd omegasnew = IL.omegas; // output
+//     // check convergence
+//     not_conv = (nIter == maxIter) && (maxErr > eps);
+//     if(verbose) {
+//         Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+//     }
+//     return Rcpp::List::create(_["omegas"] = omegasnew,
+//                               _["convergence"] = !not_conv);
+// }

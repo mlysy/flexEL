@@ -5,12 +5,16 @@
     .Call(`_bayesEL_evalWeights`, y, X, deltas, omegas, beta)
 }
 
-.EMEL <- function(beta, G, deltas, omegas0, maxIter, eps, verbose) {
-    .Call(`_bayesEL_EMEL`, beta, G, deltas, omegas0, maxIter, eps, verbose)
+.EMEL <- function(y, X, deltas, beta, G, omegas0, maxIter, eps, verbose) {
+    .Call(`_bayesEL_EMEL`, y, X, deltas, beta, G, omegas0, maxIter, eps, verbose)
 }
 
-.lambdaNR <- function(G, maxIter, rel_tol, verbose) {
-    .Call(`_bayesEL_lambdaNR`, G, maxIter, rel_tol, verbose)
+.lambdaNRC <- function(G, weights, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_lambdaNRC`, G, weights, maxIter, relTol, verbose)
+}
+
+.lambdaNR <- function(G, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_lambdaNR`, G, maxIter, relTol, verbose)
 }
 
 .MeanReg_evalG <- function(y, X, beta) {

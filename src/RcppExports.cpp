@@ -6,48 +6,79 @@
 
 using namespace Rcpp;
 
-// EMEL
-Rcpp::List EMEL(Eigen::MatrixXd G, Eigen::VectorXd delta, Eigen::VectorXd ws0, int maxIter, double eps, bool verbose);
-RcppExport SEXP _bayesEL_EMEL(SEXP GSEXP, SEXP deltaSEXP, SEXP ws0SEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+// evalWeights
+Eigen::VectorXd evalWeights(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd beta);
+RcppExport SEXP _bayesEL_evalWeights(SEXP ySEXP, SEXP XSEXP, SEXP deltasSEXP, SEXP omegasSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(evalWeights(y, X, deltas, omegas, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// EMEL
+Rcpp::List EMEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd deltas, Eigen::VectorXd beta, Eigen::MatrixXd G, Eigen::VectorXd omegas0, int maxIter, double eps, bool verbose);
+RcppExport SEXP _bayesEL_EMEL(SEXP ySEXP, SEXP XSEXP, SEXP deltasSEXP, SEXP betaSEXP, SEXP GSEXP, SEXP omegas0SEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type ws0(ws0SEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas0(omegas0SEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(EMEL(G, delta, ws0, maxIter, eps, verbose));
+    rcpp_result_gen = Rcpp::wrap(EMEL(y, X, deltas, beta, G, omegas0, maxIter, eps, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // lambdaNRC
-Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd qs, int maxIter, double eps, bool verbose);
-RcppExport SEXP _bayesEL_lambdaNRC(SEXP GSEXP, SEXP qsSEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, int maxIter, double relTol, bool verbose);
+RcppExport SEXP _bayesEL_lambdaNRC(SEXP GSEXP, SEXP weightsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type qs(qsSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
-    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(lambdaNRC(G, qs, maxIter, eps, verbose));
+    rcpp_result_gen = Rcpp::wrap(lambdaNRC(G, weights, maxIter, relTol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // lambdaNR
-Rcpp::List lambdaNR(Eigen::MatrixXd G, int maxIter, double eps, bool verbose);
-RcppExport SEXP _bayesEL_lambdaNR(SEXP GSEXP, SEXP maxIterSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+Rcpp::List lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose);
+RcppExport SEXP _bayesEL_lambdaNR(SEXP GSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
-    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(lambdaNR(G, maxIter, eps, verbose));
+    rcpp_result_gen = Rcpp::wrap(lambdaNR(G, maxIter, relTol, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// MeanReg_evalG
+Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta);
+RcppExport SEXP _bayesEL_MeanReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(MeanReg_evalG(y, X, beta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -63,36 +94,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
     rcpp_result_gen = Rcpp::wrap(MeanReg_logEL(y, X, beta, maxIter, eps));
-    return rcpp_result_gen;
-END_RCPP
-}
-// MeanRegLS_G
-Eigen::MatrixXd MeanRegLS_G(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd theta);
-RcppExport SEXP _bayesEL_MeanRegLS_G(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP thetaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type theta(thetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanRegLS_G(y, X, Z, theta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// MeanRegLS_logEL
-double MeanRegLS_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd theta, int maxIter, double eps);
-RcppExport SEXP _bayesEL_MeanRegLS_logEL(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP thetaSEXP, SEXP maxIterSEXP, SEXP epsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
-    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanRegLS_logEL(y, X, Z, theta, maxIter, eps));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -114,12 +115,12 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_bayesEL_EMEL", (DL_FUNC) &_bayesEL_EMEL, 6},
+    {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 5},
+    {"_bayesEL_EMEL", (DL_FUNC) &_bayesEL_EMEL, 9},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
+    {"_bayesEL_MeanReg_evalG", (DL_FUNC) &_bayesEL_MeanReg_evalG, 3},
     {"_bayesEL_MeanReg_logEL", (DL_FUNC) &_bayesEL_MeanReg_logEL, 5},
-    {"_bayesEL_MeanRegLS_G", (DL_FUNC) &_bayesEL_MeanRegLS_G, 4},
-    {"_bayesEL_MeanRegLS_logEL", (DL_FUNC) &_bayesEL_MeanRegLS_logEL, 6},
     {"_bayesEL_QuantReg_logEL", (DL_FUNC) &_bayesEL_QuantReg_logEL, 6},
     {NULL, NULL, 0}
 };

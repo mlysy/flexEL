@@ -8,6 +8,14 @@ using namespace Eigen;
 #include "InnerEL.h"
 #include "MeanRegModel.h"
 
+// [[Rcpp::export(".MeanReg_evalG")]]
+Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta) {
+    InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+    MR.evalG(beta);
+    Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+    return(G); 
+}
+
 
 // [[Rcpp::export(".MeanReg_logEL")]]
 double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,

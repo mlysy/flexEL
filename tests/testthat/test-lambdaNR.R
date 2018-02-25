@@ -40,6 +40,14 @@ test_that("lambda.R == lambda.cpp", {
         expect_equal(lambda.R, lambda.cpp)
         
         # TODO: Location model + mean regression + censoring
+        weights <- abs(rnorm(n))
+        weights <- weights / sum(weights) * n # sum(weights) == n
+        lambda.cpp <- lambdaNR(G = G.cpp, weights, 
+                               max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+        nrout <- lambdaNRC_R(G = G.R, weights, 
+                             max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+        lambda.R <- nrout$lambda
+        expect_equal(lambda.R, lambda.cpp)
     }
 })
 

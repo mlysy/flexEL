@@ -4,10 +4,9 @@
 #include <math.h>
 #include <Rmath.h>
 
-// subclass: Mean regression
 class MeanRegModel {
 private:
-    RowVectorXd yXb;
+    RowVectorXd yXb; 
     // MatrixXd tG;
 protected:
     VectorXd y;
@@ -18,6 +17,7 @@ public:
     MeanRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
                  void* params);
     void evalG(const Ref<const VectorXd>& beta);
+    MatrixXd getG();
 };
 
 // constructor
@@ -43,6 +43,11 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
     G = X;
     G.array().rowwise() *= yXb.array();
     // std::cout << "G = " << G << std::endl;
+}
+
+// get function for G matrix
+inline MatrixXd MeanRegModel::getG() {
+    return(G);
 }
 
 #endif

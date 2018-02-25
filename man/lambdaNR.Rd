@@ -4,12 +4,12 @@
 \alias{lambdaNR}
 \title{Solve the inner loop optimization of an EL function.}
 \usage{
-lambdaNR(G, ws, max_iter = 100, rel_tol = 1e-07, verbose = FALSE)
+lambdaNR(G, weights, max_iter = 100, rel_tol = 1e-07, verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}
 
-\item{ws}{Optional length-\code{nObs} vector of weights for weighted Newton-Raphson algorithm.}
+\item{weights}{Optional length-\code{nObs} vector of weights for weighted Newton-Raphson algorithm.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 

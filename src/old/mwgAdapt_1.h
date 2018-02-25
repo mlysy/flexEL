@@ -40,7 +40,7 @@ for(int ii=0; ii<number_of_iterations; ii++) {
 // -----------------------------------------------------------------------------
 
 #ifndef mwgAdapt_h
-#define mwgAdapt_h 1
+#define mwgAdapt_h
 
 class mwgAdapt {
  private:
@@ -67,7 +67,7 @@ class mwgAdapt {
   // partial parameter updates, default adaptation parameters
   mwgAdapt(int nrv, bool *adapt);
   mwgAdapt(int nrv, int *adapt);
-  ~mwgAdapt;
+  ~mwgAdapt();
   void adapt(double *mwgSd, bool *accept); // adapts the standard deviations
   void reset(); // resets the iteration count to zero
   // TODO: implement copy/move constuctors.
@@ -117,7 +117,7 @@ inline void mwgAdapt::initialize(int nrv) {
 }
 
 // deallocate memory
-inline mwgAdapt::~mwgAdapt {
+inline mwgAdapt::~mwgAdapt() {
   delete [] adaptMax;
   delete [] adaptRate;
   delete [] doAdapt;
@@ -125,11 +125,11 @@ inline mwgAdapt::~mwgAdapt {
 
 // --- various constructors ----------------------------------------------------
 
-inline void mwgAdapt::mwgAdapt(int nrv) {
+inline mwgAdapt::mwgAdapt(int nrv) {
   initialize(nrv);
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate) {
+inline mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     adaptMax[ii] = amax[ii];
@@ -137,7 +137,7 @@ inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate) {
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
+inline mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
 			       bool *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
@@ -147,7 +147,7 @@ inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
+inline mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
 			       int *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
@@ -157,14 +157,14 @@ inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, bool *adapt) {
+inline mwgAdapt::mwgAdapt(int nrv, bool *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     doAdapt[ii] = adapt[ii];
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, int *adapt) {
+inline mwgAdapt::mwgAdapt(int nrv, int *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     doAdapt[ii] = (adapt[ii] != 0);
