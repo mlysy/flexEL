@@ -23,10 +23,12 @@ rMNorm <- function(n, p) {
 
 #  (location model)
 # mr.evalG is the same for non-censoring and censoring for mean regression
+# X: nObs x nEqs matrix
 # Note: returns a nObs x nEqs matrix G
 mr.evalG_R <- function(y, X, beta) {
-    yXb <- y - beta %*% X
-    G <- sweep(X, MARGIN = 2, yXb, `*`)
+    tX <- t(X)
+    yXb <- y - c(beta %*% tX)
+    G <- sweep(tX, MARGIN = 2, yXb, `*`)
     return(t(G))
 }
 
@@ -46,9 +48,9 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
 }
 
 mrls.logel_R <- function(y, X, Z, beta, gamma,
-                         max_iter = 100, eps = 1e-07, verbose = FALSE) {
+                         max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
   G <- mrls.evalG_R(y, X, Z, beta, gamma)
-  lambda <- lambdaNR(G = G, max_iter, eps, verbose)
+  lambda <- lambdaNR(G = G, max_iter, rel_tol, verbose)
   sum(logomegahat(lambda, t(G)))
 }
 
@@ -141,7 +143,7 @@ phi_alpha <- function(u, alpha) {
 
 # R implementation of lambdaNRC
 # Note: input G is nObs x nEqs here
-lambdaNR_R <- function(G, max_iter=100, eps=1e-7, verbose = FALSE) {
+lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE) {
     G <- t(G)
     nObs <- ncol(G)
     nEqs <- nrow(G)
@@ -161,10 +163,10 @@ lambdaNR_R <- function(G, max_iter=100, eps=1e-7, verbose = FALSE) {
         Q1 <- -G %*% rho
         lambdaNew <- lambdaOld - solve(Q2,Q1)
         maxErr <- MaxRelErr(lambdaNew, lambdaOld)
-        if (maxErr < eps) break;
+        if (maxErr < rel_tol) break;
         lambdaOld <- lambdaNew
     }
-    if(ii == max_iter && maxErr > eps) lambdaNew <- rep(NA, nEqs)
+    if(ii == max_iter && maxErr > rel_tol) lambdaNew <- rep(NA, nEqs)
     # c(lambdaNew) to make sure lambda is a vector
     output <- list(lambda=c(lambdaNew), maxErr=maxErr, nIter=nIter)
     return(output)
@@ -211,7 +213,7 @@ QfunCens <- function(lambda, G) {
 
 # R implementation of lambdaNRC
 # Note: input G is nObs x nEqs here
-lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE,
+lambdaNRC_R <- function(G, qs, maxIter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
     G <- t(G)
     nObs <- ncol(G)
@@ -236,7 +238,7 @@ lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE,
         # Problem lambdaOld flies off to +Inf, but because Q2 tends to 0
         lambdaNew <- lambdaOld - solve(Q2,Q1)
         maxErr <- MaxRelErr(lambdaNew, lambdaOld) # maximum relative error
-        if (maxErr < eps) {
+        if (maxErr < rel_tol) {
             break;
         }
         lambdaOld <- lambdaNew # complete cycle
@@ -250,22 +252,53 @@ lambdaNRC_R <- function(G, qs, maxIter = 100, eps = 1e-7, verbose = FALSE,
 }
 
 
-getqs_R <- function(ws, delta) {
-    n <- length(ws)
-    wsps <- rep(NA,n) # ws partial sum
-    for (ii in 1:n) wsps[ii] <- sum(ws[ii:n])
-    # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
-    W <- matrix(rep(0,n*n),n,n)
-    for (jj in 1:n) W[jj,(jj:n)] <- ws[jj:n]/wsps[jj]
-    # print(W)
-    qs <- rep(NA,n)
-    for (kk in 1:n) {
-        qs[kk] <- delta[kk] + (1-delta) %*% W[,kk]
+# getqs_R <- function(ws, delta) {
+#     n <- length(ws)
+#     wsps <- rep(NA,n) # ws partial sum
+#     for (ii in 1:n) wsps[ii] <- sum(ws[ii:n])
+#     # W is an upper triangular matrix corresponding to w.tilde in eq (2.10)
+#     W <- matrix(rep(0,n*n),n,n)
+#     for (jj in 1:n) W[jj,(jj:n)] <- ws[jj:n]/wsps[jj]
+#     # print(W)
+#     qs <- rep(NA,n)
+#     for (kk in 1:n) {
+#         qs[kk] <- delta[kk] + (1-delta) %*% W[,kk]
+#     }
+#     return(qs)
+# }
+
+
+evalPsos_R <- function(ii, epsOrd, omegas) {
+    nObs <- length(omegas)
+    psos <- 0
+    for (jj in 1:nObs) {
+        kk <- epsOrd[jj]
+        psos <- psos + omegas[kk] # sum over the omegas of eps <= than ii-th eps
+        if (kk == ii) break
     }
-    return(qs)
+    return(psos)
 }
 
-EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
+evalWeights_R <- function(y, X, deltas, omegas, beta) {
+    nObs <- length(y)
+    epsilons <- y - c(X %*% beta)
+    epsOrd <- order(epsilons, decreasing = TRUE)
+    psots <- rep(0,nObs)
+    for (ii in 1:nObs) {
+        for (jj in nObs:1) {
+            kk <- epsOrd[jj]
+            if (deltas[kk] == 0) {
+                psots[ii] <- psots[ii] + omegas[ii]/evalPsos_R(kk, epsOrd, omegas)
+            }
+            if (kk == ii) break
+        }
+    }
+    weights <- deltas + psots
+    return(weights)
+}
+
+# EMEL_R <- function(G, delta, ws0, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
+EMEL_R <- function(y, X, G, delta, ws0, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
     G <- t(G)
     n <- ncol(G)
     m <- nrow(G)
@@ -276,10 +309,11 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
     for (ii in 1:max_iter) {
         nIter <- ii
         # E step: calculating qs
-        qs <- getqs_R(ws, delta)
+        # qs <- getqs_R(ws, delta)
+        qs <- evalWeights_R(y, X, deltas, omegas, beta)
         print(qs)
         # M step:
-        lambdaNew <- lambdaNRC_R(t(G), qs, max_iter, eps, verbose, lambdaOld)$lambda
+        lambdaNew <- lambdaNRC_R(t(G), qs, max_iter, rel_tol, verbose, lambdaOld)$lambda
         print(lambdaNew)
         qs_sum <- sum(qs)
         qlg <- qs_sum + lambdaNew %*% G
@@ -290,10 +324,10 @@ EMEL_R <- function(G, delta, ws0, max_iter = 100, eps = 1e-7, verbose=FALSE) {
             message("iter = ", iter)
             message("err = ", err)
         }
-        if (err < eps) break
+        if (err < rel_tol) break
         lambdaOld <- lambdaNew
     }
-    if (nIter == max_iter && err > eps) {
+    if (nIter == max_iter && err > rel_tol) {
         ws = rep(NA,n)
     }
     output <- list(ws = ws, lambda = lambdaNew)
