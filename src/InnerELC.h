@@ -45,7 +45,6 @@ private:
     // constants for logsharp calculations
     // double trunc, aa, bb, cc; 
     // temporary storage for Newton-Raphson
-    VectorXd deltas; // TODO: censoring indicator, move to model??
     MatrixXd GGt;
     VectorXd Glambda;
     ArrayXd Gl11;
@@ -67,6 +66,7 @@ private:
     double evalPsos(const int ii); 
 public:
     // TODO: public for testing for now
+    VectorXd deltas; 
     VectorXd omegas; 
     VectorXd omegasps; // partial sum of omegas 
     // TODO: W for calculation in evalWeights, 
@@ -261,6 +261,7 @@ inline void InnerELC<elModel>::evalWeights(const Ref<const VectorXd>& beta) {
     weights.array() = deltas.array() + psots.array();
 }
 
+// exported as omega.hat.EM
 template<typename elModel>
 inline void InnerELC<elModel>::EMEL(VectorXd beta, int& nIter, double& maxErr,
                                     int maxIter, double relTol) {
@@ -279,9 +280,10 @@ inline void InnerELC<elModel>::EMEL(VectorXd beta, int& nIter, double& maxErr,
         VectorXd lGq = ((lambdaNew.transpose() * G).array() + weights.sum()).transpose();
         std::cout << "lGq = \n" << lGq << std::endl;
         // TODO: no element-wise dividion???
-        for (int jj=0; jj<nObs; jj++){
-            omegas(jj) = weights(jj)/lGq(jj);
-        }
+        // for (int jj=0; jj<nObs; jj++){
+        //     omegas(jj) = weights(jj)/lGq(jj);
+        // }
+        omegas.array() = weights.array() / lGq.array();
         std::cout << "In EMEL before normalize: omegas = \n" << omegas << std::endl;
         omegas = omegas.array() / (omegas.array().sum()); // normalize
         // std::cout << "In EMEL: omegas = \n" << omegas << std::endl; 

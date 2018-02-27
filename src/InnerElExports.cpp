@@ -35,3 +35,18 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
   return Rcpp::List::create(_["lambda"] = lambda,
                             _["convergence"] = !not_conv);
 }
+
+// Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
+// as in the censored case 
+// [[Rcpp::export(".omega.hat")]]
+Eigen::VectorXd getOmegas(Eigen::MatrixXd G, 
+                          int maxIter, double relTol, bool verbose) {
+    int nObs = G.cols();
+    int nEqs = G.rows();
+    VectorXd y = VectorXd::Zero(nObs);
+    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+    InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
+    IL.G = G; 
+    VectorXd omegas = IL.getOmegas(maxIter, relTol);
+    return(omegas);
+}

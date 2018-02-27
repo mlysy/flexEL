@@ -1,7 +1,7 @@
 #--------- check that EMEL.R is working properly -----------------
 require(bayesEL)
 source("~/bayesEL/tests/testthat/el-utils.R")
-source("~/bayesEL/tests/donotrun/mle-check.R")
+source("~/bayesEL/tests/testthat/mle-check.R")
 
 # 1-d problem --- still sometimes not stable
 p <- 1

@@ -1,4 +1,4 @@
-#' Solve the inner loop optimization of an EL function.
+#' Returns the omegas, i.e., the empirical probabilities.
 #'
 #' @param G \code{nObs x nEqns} matrix of constraints.
 #' @param max_iter Maximum number of Newton-Raphson steps.
@@ -7,13 +7,12 @@
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
 #' @export
-EMEL <- function(G, delta, ws, max_iter = 100, eps = 1e-7, verbose = FALSE) {
-    nObs = nrow(G)
-    ans <- .EMEL(G = t(G), delta, ws, maxIter = max_iter, eps = eps, verbose = verbose)
-    if(ans$convergence) {
-        ans <- ans$ws
-    } else {
-        ans <- rep(NA, nObs)
+omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
+    if (missing(deltas) && missing(epsilons)) {
+        omega.hat <- .omega.hat(t(G), max_iter, rel_tol, verbose)
     }
-    ans
+    else {
+        omega.hat <- .omega.hat.EM(...)
+    }
+    omega.hat
 }

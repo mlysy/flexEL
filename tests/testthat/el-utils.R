@@ -47,13 +47,6 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
   G
 }
 
-mrls.logel_R <- function(y, X, Z, beta, gamma,
-                         max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
-  G <- mrls.evalG_R(y, X, Z, beta, gamma)
-  lambda <- lambdaNR(G = G, max_iter, rel_tol, verbose)
-  sum(logomegahat(lambda, t(G)))
-}
-
 plotEL <- function(mu.seq, logel.seq, trueval, meanobs = NA, mu.name = "param") {
     plot(mu.seq, exp(logel.seq-max(logel.seq)),
          cex=0.2, xlab = mu.name, ylab = 'log EL', type = 'l')
@@ -128,17 +121,37 @@ Qfun <- function(lambda, G) {
     sum(apply(G, 2, function(gg) log.star(x = 1 - sum(lambda*gg), n = N)))
 }
 
-logomegahat <- function(lambdahat, G) {
-    # returns a vector of log omegahat
-    log(1/(1-t(lambdahat) %*% G) / sum(1/(1-t(lambdahat) %*% G)))
-}
-
 rho_alpha <- function(u, alpha) {
     u * (alpha - (u <= 0))
 }
 
 phi_alpha <- function(u, alpha) {
     (u <= 0) - alpha
+}
+
+# G is nObs x nEqs matrix
+omega.hat_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
+    lambdaout <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
+    lambdahat <- lambdaout$lambda
+    nIter <- lambdaout$nIter
+    maxErr <- lambdaout$maxErr
+    if (nIter == max_iter && maxErr > rel_tol) {
+        nObs <- nrow(G)
+        omegahat <- rep(1.0/nObs,nObs)
+    }
+    else {
+        omegahat <- c(1/(1-t(lambdahat) %*% t(G)) / sum(1/(1-t(lambdahat) %*% t(G))))
+    }
+    # returns a vector of omegahat
+    return(omegahat)
+}
+
+mrls.logel_R <- function(y, X, Z, beta, gamma) {
+    # max_iter = 100, rel_tol = 1e-07, verbose = FALSE
+    G <- mrls.evalG_R(y, X, Z, beta, gamma)
+    # lambda <- lambdaNR(G = G, max_iter, rel_tol, verbose)
+    omegahat <- omega.hat_R(G = G, max_iter, rel_tol, verbose)
+    sum(log(omegahat))
 }
 
 # R implementation of lambdaNRC
