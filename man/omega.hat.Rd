@@ -2,7 +2,7 @@
 % Please edit documentation in R/omega.hat.R
 \name{omega.hat}
 \alias{omega.hat}
-\title{Returns the omegas, i.e., the empirical probabilities.}
+\title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.}
 \usage{
 omega.hat(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
   verbose = FALSE)
@@ -10,17 +10,21 @@ omega.hat(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}
 
+\item{epsilons}{Length-\code{nObs} vector of residuals, omit if no censoring.}
+
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
+
+\item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
 
 \item{verbose}{Display number of steps and tolerance criterion when algorithm terminates.}
 
-\item{eps}{Relative tolerance of Newton-Raphson convergence.}
+\item{delta}{Length-\code{nObs} vector of censor indicators, omit if no censoring.}
 }
 \value{
-Length-\code{nEq} vector corresponding to the solution of the optimization problem.
+Length-\code{nEq} vector for the resulting empirical distribution, omegas.
 }
 \description{
-Returns the omegas, i.e., the empirical probabilities.
+Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
 }
 \details{
 The inner-loop optimization of EL is ...

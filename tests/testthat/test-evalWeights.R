@@ -12,7 +12,7 @@ test_that("lambda.R == lambda.cpp", {
         nEqs <- sample(2:5,1)
         X <- matrix(rnorm(nObs*nEqs),nObs,nEqs)
         beta <- rnorm(nEqs)
-        y <- X %*% beta
+        y <- X %*% beta + rnorm(nObs)
         numcens <- sample(1:floor(nObs/2),1)
         censinds <- sample(1:nObs,numcens)
         deltas <- rep(1,nObs)

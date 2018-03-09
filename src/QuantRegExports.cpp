@@ -12,9 +12,9 @@ using namespace Eigen;
 // [[Rcpp::export(".QuantReg_logEL")]]
 double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
                  double alpha, Eigen::VectorXd beta, 
-                 int maxIter = 100, double eps = 1e-7) {
+                 int maxIter = 100, double relTol = 1e-7) {
       InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
-      double logELquant = QR.logEL(beta,maxIter,eps);
+      double logELquant = QR.logEL(maxIter,relTol);
       return(logELquant);
 }
 

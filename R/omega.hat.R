@@ -1,10 +1,12 @@
-#' Returns the omegas, i.e., the empirical probabilities.
+#' Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
 #'
 #' @param G \code{nObs x nEqns} matrix of constraints.
+#' @param delta Length-\code{nObs} vector of censor indicators, omit if no censoring.
+#' @param epsilons Length-\code{nObs} vector of residuals, omit if no censoring.
 #' @param max_iter Maximum number of Newton-Raphson steps.
-#' @param eps Relative tolerance of Newton-Raphson convergence.
+#' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @param verbose Display number of steps and tolerance criterion when algorithm terminates.
-#' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
+#' @return Length-\code{nEq} vector for the resulting empirical distribution, omegas.
 #' @details The inner-loop optimization of EL is ...
 #' @export
 omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {

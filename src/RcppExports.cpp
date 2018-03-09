@@ -94,8 +94,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // MeanReg_logEL
-double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta, int maxIter, double eps);
-RcppExport SEXP _bayesEL_MeanReg_logEL(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP, SEXP maxIterSEXP, SEXP epsSEXP) {
+double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_MeanReg_logEL(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -103,14 +103,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
-    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanReg_logEL(y, X, beta, maxIter, eps));
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    rcpp_result_gen = Rcpp::wrap(MeanReg_logEL(y, X, beta, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
 // QuantReg_logEL
-double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, Eigen::VectorXd beta, int maxIter, double eps);
-RcppExport SEXP _bayesEL_QuantReg_logEL(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP maxIterSEXP, SEXP epsSEXP) {
+double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, Eigen::VectorXd beta, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantReg_logEL(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -119,8 +119,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
-    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_logEL(y, X, alpha, beta, maxIter, eps));
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantReg_logEL(y, X, alpha, beta, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }

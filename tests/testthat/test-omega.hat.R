@@ -4,7 +4,7 @@ library(bayesEL) # always load the package (with library)
 source("~/bayesEL/tests/testthat/el-utils.R")
 source("~/bayesEL/tests/testthat/mle-check.R")
 
-library(testthat) # not loaded automatically
+# library(testthat) # not loaded automatically
 context("omega.hat")
 
 ntest <- 50

@@ -3,35 +3,14 @@
 
 // class for computing inner optimization of EL likelihood with censoring
 
-#include <vector> // for the sorting to work 
-using namespace std;
+// #include <vector> // for the sorting to work 
+// using namespace std;
+#include "SortOrder.h"
 #include <Rcpp.h>
 using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
 // [[Rcpp::depends(RcppEigen)]]
-
-// helper function for sorting indices according to values in a C vector
-template <typename T>
-class compare_acc_vec {
-    const T& vec;
-public:
-    compare_acc_vec(const T& vec): vec(vec) { }
-    bool operator () (size_t lind, size_t rind) const {
-        return vec[lind] > vec[rind]; // < to sort ascendingly; > to sort descendingly
-    }
-};
-
-// return indices after sorting ascendingly
-// Note: have to change return type to vector<int> if want to convert to
-//       Eigen Vector types, i.e., VectorXi
-template <typename T>
-vector<size_t> sort_inds(const vector<T> &vec) {
-    vector<size_t> inds(vec.size());
-    iota(inds.begin(), inds.end(), 0);
-    sort(inds.begin(), inds.end(), compare_acc_vec <decltype(vec)> (vec));
-    return inds;
-}
 
 
 // main class begins here
@@ -54,7 +33,8 @@ private:
     VectorXd rho;
     VectorXd relErr;
     VectorXd epsilons; // error term used to order omegas in evalWeights
-    vector<size_t> epsOrd; // order of epsilons
+    // vector<size_t> epsOrd; // C vector of indicies of ordered epsilons
+    VectorXi epsOrd; // vector of indicies of ordered epsilons
     VectorXd psots; // partial sum of omegatildas
     // columnwise outer product (see below)
     void BlockOuter(void);
@@ -109,7 +89,8 @@ inline InnerELC<elModel>::InnerELC(const Ref<const VectorXd>& _y,
     // std::cout << nEqs << std::endl;
     epsilons = VectorXd::Zero(nObs);
     psots = VectorXd::Zero(nObs); 
-    epsOrd = vector<size_t>(nObs); // Note: epsOrd is a C vector not Eigen VectorXd
+    // epsOrd = vector<size_t>(nObs); // Note: epsOrd is a C vector not Eigen VectorXd
+    epsOrd = VectorXi::Zero(nObs);
     // Newton-Raphson initialization
     deltas = _deltas;
     omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
@@ -234,7 +215,8 @@ inline double InnerELC<elModel>::evalPsos(const int ii) {
     double psos = 0;
     int kk;
     for (int jj=0; jj <nObs; jj++) {
-        kk = epsOrd.at(jj); // index of jj-th epsilon (ordered decreasingly)
+        // kk = epsOrd.at(jj); // index of jj-th epsilon (ordered decreasingly)
+        kk = epsOrd(jj);
         psos += omegas(kk);
         if (kk == ii) break;
     }
@@ -245,13 +227,15 @@ template<typename elModel>
 inline void InnerELC<elModel>::evalWeights(const Ref<const VectorXd>& beta) {
     // find the indices for decreasing order of epsilons 
     epsilons.noalias() = y.transpose() - beta.transpose() * X;
-    // need to work with vector version 
-    vector<double> epsVec(epsilons.data(), epsilons.data()+epsilons.size());
-    epsOrd = sort_inds(epsVec);
+    // // work with vector version 
+    // vector<double> epsVec(epsilons.data(), epsilons.data()+epsilons.size());
+    // epsOrd = sort_inds(epsVec);
+    epsOrd = sort_inds(epsilons); 
     int kk;
     for (int ii=0; ii<nObs; ii++) {
         for (int jj=nObs-1; jj>=0; jj--) { // here is backwards (smaller ones)
-            kk = epsOrd.at(jj);
+            // kk = epsOrd.at(jj);
+            kk = epsOrd(jj);
             if (deltas(kk) == 0) {
                 psots(ii) += omegas(ii)/evalPsos(kk);
             }

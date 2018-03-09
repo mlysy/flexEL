@@ -307,6 +307,7 @@ evalWeights_R <- function(y, X, deltas, omegas, beta) {
             if (kk == ii) break
         }
     }
+    # the weights have the order as the original sample 
     weights <- deltas + psots
     return(weights)
 }
