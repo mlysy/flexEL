@@ -7,7 +7,7 @@
 #' @return Length-\code{nObs} vector of weights for the weighted NR algorithm.
 #' @details ... 
 #' @export
-evalWeights <- function(y, X, deltas, omegas, beta) {
+getWeights <- function(y, X, deltas, omegas, beta) {
     # TODO: do some checking here
-    .evalWeights(y, t(X), deltas, omegas, beta)
+    .getWeights(y, t(X), deltas, omegas, beta)
 }

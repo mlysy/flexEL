@@ -135,7 +135,8 @@ omega.hat_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
     lambdahat <- lambdaout$lambda
     nIter <- lambdaout$nIter
     maxErr <- lambdaout$maxErr
-    if (nIter == max_iter && maxErr > rel_tol) {
+    conv <- nIter == max_iter && maxErr > rel_tol # 1 if not converged
+    if (conv) {
         nObs <- nrow(G)
         omegahat <- rep(1.0/nObs,nObs)
     }
@@ -143,7 +144,7 @@ omega.hat_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
         omegahat <- c(1/(1-t(lambdahat) %*% t(G)) / sum(1/(1-t(lambdahat) %*% t(G))))
     }
     # returns a vector of omegahat
-    return(omegahat)
+    return(list(omegas=omegahat, convergence=!conv))
 }
 
 mrls.logel_R <- function(y, X, Z, beta, gamma) {
@@ -293,7 +294,8 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
     return(psos)
 }
 
-evalWeights_R <- function(y, X, deltas, omegas, beta) {
+
+getWeights_R <- function(y, X, deltas, omegas, beta) {
     nObs <- length(y)
     epsilons <- y - c(X %*% beta)
     epsOrd <- order(epsilons, decreasing = TRUE)
@@ -312,8 +314,9 @@ evalWeights_R <- function(y, X, deltas, omegas, beta) {
     return(weights)
 }
 
+# TODO: modify this into omega.hat.EM_R and then wrap the two (cens and non-cens) together 
 # EMEL_R <- function(G, delta, ws0, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
-EMEL_R <- function(y, X, G, delta, ws0, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
+omega.hat.EM_R <- function(y, X, G, delta, ws0, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
     G <- t(G)
     n <- ncol(G)
     m <- nrow(G)
@@ -325,7 +328,7 @@ EMEL_R <- function(y, X, G, delta, ws0, max_iter = 100, rel_tol = 1e-7, verbose=
         nIter <- ii
         # E step: calculating qs
         # qs <- getqs_R(ws, delta)
-        qs <- evalWeights_R(y, X, deltas, omegas, beta)
+        qs <- getWeights_R(y, X, deltas, omegas, beta)
         print(qs)
         # M step:
         lambdaNew <- lambdaNRC_R(t(G), qs, max_iter, rel_tol, verbose, lambdaOld)$lambda

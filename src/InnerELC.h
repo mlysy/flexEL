@@ -54,8 +54,8 @@ public:
     MatrixXd W; 
     VectorXd weights;  
     // constructor for regression-like problems
-    InnerELC(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
-             const Ref<const VectorXd>& deltas,
+    InnerELC(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X, 
+             const Ref<const VectorXd>& _deltas,
              void* params);
     // logsharp and its derivatives
     double logsharp(double x, double q);
@@ -68,8 +68,10 @@ public:
     // Newton-Raphson algorithm
     void LambdaNR(int& nIter, double& maxErr,
                   int maxIter, double relTol);
-    void evalWeights(const Ref<const VectorXd>& beta); // calculate weights
-    void EMEL(VectorXd beta, int& nIter, double& maxErr,int maxIter, double relTol);
+    void setEpsilons(const Ref<const VectorXd>& _epsilons); // setter for epsilons 
+    void evalWeights(); // calculate weights according to epsilons 
+    void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
+    VectorXd getOmegas(); 
     // log empirical likelihood calculation 
     // double logEL(const Ref<const VectorXd>& theta, int maxIter, double relTol); 
     // // posterior sampler
@@ -166,7 +168,7 @@ template<typename elModel>
 inline void InnerELC<elModel>::LambdaNR(int& nIter, double& maxErr,
                                         int maxIter, double relTol) {
     int ii, jj;
-    BlockOuter(); // initialize GGt
+    BlockOuter(); // initialize GGt according to epsilons order (epsOrd)
     // newton-raphson loop
     for(ii=0; ii<maxIter; ii++) {
         // Q1 and Q2
@@ -223,10 +225,17 @@ inline double InnerELC<elModel>::evalPsos(const int ii) {
     return psos;
 }
 
+
 template<typename elModel>
-inline void InnerELC<elModel>::evalWeights(const Ref<const VectorXd>& beta) {
+inline void InnerELC<elModel>::setEpsilons(const Ref<const VectorXd>& _epsilons) {
+    epsilons = _epsilons;
+}
+
+
+// Note: epsilons must have been assigned
+template<typename elModel>
+inline void InnerELC<elModel>::evalWeights() {
     // find the indices for decreasing order of epsilons 
-    epsilons.noalias() = y.transpose() - beta.transpose() * X;
     // // work with vector version 
     // vector<double> epsVec(epsilons.data(), epsilons.data()+epsilons.size());
     // epsOrd = sort_inds(epsVec);
@@ -242,42 +251,50 @@ inline void InnerELC<elModel>::evalWeights(const Ref<const VectorXd>& beta) {
             if (kk == ii) break;
         }
     }
+    // assigned weights are still in the order of original data
     weights.array() = deltas.array() + psots.array();
 }
 
-// exported as omega.hat.EM
+// exported as `omega.hat.EM`
+// Note: epsilons must have been assigned
 template<typename elModel>
-inline void InnerELC<elModel>::EMEL(VectorXd beta, int& nIter, double& maxErr,
-                                    int maxIter, double relTol) {
+inline void InnerELC<elModel>::evalOmegas(int& nIter, double& maxErr,
+                                          int maxIter, double relTol) {
     // Problem: have to save this o.w. lambdaOld got modified
     VectorXd lambdaOldEM = lambdaOld; 
     int ii; 
     for(ii=0; ii<maxIter; ii++) {
         // E-step:
-        evalWeights(beta);
-        std::cout << "weights = " << weights << std::endl;
+        evalWeights(); // assigns weights according to epsilons
+        // std::cout << "weights = " << weights << std::endl;
         // M-step:
         // std::cout << "lambdaOldEM = " << lambdaOldEM << std::endl;
         LambdaNR(nIter, maxErr, maxIter, relTol);
-        std::cout << "lambdaNew = " << lambdaNew << std::endl;
+        // std::cout << "lambdaNew = " << lambdaNew << std::endl;
         // std::cout << "G = \n" << G << std::endl;
         VectorXd lGq = ((lambdaNew.transpose() * G).array() + weights.sum()).transpose();
-        std::cout << "lGq = \n" << lGq << std::endl;
-        // TODO: no element-wise dividion???
+        // std::cout << "lGq = \n" << lGq << std::endl;
+        // can do element-wise division, no need of a for loop
         // for (int jj=0; jj<nObs; jj++){
         //     omegas(jj) = weights(jj)/lGq(jj);
         // }
         omegas.array() = weights.array() / lGq.array();
-        std::cout << "In EMEL before normalize: omegas = \n" << omegas << std::endl;
+        // std::cout << "In evalOmegas before normalize: omegas = \n" << omegas << std::endl;
         omegas = omegas.array() / (omegas.array().sum()); // normalize
-        // std::cout << "In EMEL: omegas = \n" << omegas << std::endl; 
+        // std::cout << "In evalOmegas: omegas = \n" << omegas << std::endl; 
         maxErr = MaxRelErr(lambdaNew, lambdaOldEM); 
-        // std::cout << "In EMEL: maxErr = " << maxErr << std::endl;
+        // std::cout << "In evalOmegas: maxErr = " << maxErr << std::endl;
         if (maxErr < relTol) break;
         lambdaOldEM = lambdaNew;
     }
     nIter = ii; 
     return;
+}
+
+
+template<typename elModel>
+inline VectorXd InnerELC<elModel>::getOmegas() {
+    return(omegas);
 }
 
 // // posterior sampler

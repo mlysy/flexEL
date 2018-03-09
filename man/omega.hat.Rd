@@ -21,7 +21,7 @@ omega.hat(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
 \item{delta}{Length-\code{nObs} vector of censor indicators, omit if no censoring.}
 }
 \value{
-Length-\code{nEq} vector for the resulting empirical distribution, omegas.
+Length-\code{nEq} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/nObs if did not converge.
 }
 \description{
 Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.

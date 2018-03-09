@@ -39,14 +39,24 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
 // as in the censored case 
 // [[Rcpp::export(".omega.hat")]]
-Eigen::VectorXd getOmegas(Eigen::MatrixXd G, 
+Rcpp::List getOmegas(Eigen::MatrixXd G, 
                           int maxIter, double relTol, bool verbose) {
     int nObs = G.cols();
     int nEqs = G.rows();
     VectorXd y = VectorXd::Zero(nObs);
     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
     InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-    IL.G = G; 
-    VectorXd omegas = IL.getOmegas(maxIter, relTol);
-    return(omegas);
+    IL.G = G; // assign G before optmization 
+    int nIter;
+    double maxErr;
+    bool not_conv;
+    IL.evalOmegas(nIter, maxErr, maxIter, relTol); // calculate omegas
+    VectorXd omegasnew = IL.getOmegas(); // get omegas
+    // check convergence
+    not_conv = (nIter == maxIter) && (maxErr > relTol);
+    if(verbose) {
+        Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+    }
+    return Rcpp::List::create(_["omegas"] = omegasnew,
+                              _["convergence"] = !not_conv);
 }

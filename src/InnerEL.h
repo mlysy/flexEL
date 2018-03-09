@@ -16,6 +16,7 @@ private:
     using elModel::nEqs;
     // constants for logstar calculations
     double trunc, aa, bb, cc; 
+    VectorXd omegas; // store the empirical distribution 
     // temporary storage for Newton-Raphson
     MatrixXd GGt;
     VectorXd Glambda;
@@ -47,7 +48,8 @@ public:
                 int maxIter, double relTol);
     // log empirical likelihood calculation 
     double logEL(int maxIter, double relTol); 
-    VectorXd getOmegas(int maxIter, double relTol); // returns omegas
+    void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol); 
+    VectorXd getOmegas(); // returns omegas
     // // posterior sampler
     // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
     //                     const Ref<const VectorXd>& sigs,
@@ -62,6 +64,7 @@ inline InnerEL<elModel>::InnerEL(const Ref<const VectorXd>& y,
     // std::cout << nObs << std::endl;
     // std::cout << nEqs << std::endl;
     // logstar constants
+    omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
     trunc = 1.0 / nObs;
     aa = -.5 * nObs*nObs;
     bb = 2.0 * nObs;
@@ -161,50 +164,52 @@ inline void InnerEL<elModel>::LambdaNR(int& nIter, double& maxErr,
     return;
 }
 
-// TODO: obtain omegas: G must have been assigned
+// TODO: now G must have been assigned before calling this function 
 // const Ref<const VectorXd>& theta
 template<typename elModel>
-inline VectorXd InnerEL<elModel>::getOmegas(int maxIter, double relTol) {
-    int nIter;
-    double maxErr;
-    // elModel::evalG(theta); // REMOVED here, evalG or assign G in export 
+inline void InnerEL<elModel>::evalOmegas(int& nIter, double& maxErr, 
+                                         int maxIter, double relTol) {
+    // G must have been assigned
     LambdaNR(nIter, maxErr, maxIter, relTol);
-    VectorXd omegas = VectorXd::Zero(nObs);
-    if (nIter == maxIter && maxErr > relTol) {
-        // std::cout << "lambdaNR did not coverge" << std::endl;
-        omegas.array() += 1.0/nObs; // TODO: Not converged return 1/n ?
-    }
-    else {
-        // std::cout << "lambdaNR coverged" << std::endl;
-        Glambda.noalias() = lambdaNew.transpose() * G;
-        Gl11 = 1.0/(1.0-Glambda.array());
-        // std::cout << "Gl11 = " << Gl11 << std::endl;
-        omegas.array() = Gl11.array() / Gl11.sum();
-    }
+    Glambda.noalias() = lambdaNew.transpose() * G;
+    Gl11 = 1.0/(1.0-Glambda.array());
+    // std::cout << "Gl11 = " << Gl11 << std::endl;
+    omegas.array() = Gl11.array() / Gl11.sum();
+}
+
+template<typename elModel>
+inline VectorXd InnerEL<elModel>::getOmegas() {
     return(omegas);
 }
 
+template<typename elModel>
+inline double InnerEL<elModel>::logEL(int maxIter, double relTol) {
+    evalOmegas(maxIter, relTol); // evaluate weights and assign them 
+    return(omegas.array().log().sum()); 
+}
+
+// Old code: 
 // log empirical likelihood for linear regression Y = X'beta + eps
 // beta is ncol(X) x 1 = p x 1 vector
 // REMOVED: const Ref<const VectorXd>& theta
-template<typename elModel>
-inline double InnerEL<elModel>::logEL(int maxIter, double relTol) {
-    int nIter;
-    double maxErr;
-    // elModel::evalG(theta); // REMOVED here, evalG or assign G in export 
-    LambdaNR(nIter, maxErr, maxIter, relTol);
-    if (nIter == maxIter && maxErr > relTol) {
-        // std::cout << "lambdaNR did not coverge" << std::endl;
-        return(-INFINITY);
-    }
-    else {
-        // std::cout << "lambdaNR coverged" << std::endl;
-        Glambda.noalias() = lambdaNew.transpose() * G;
-        Gl11 = 1.0/(1.0-Glambda.array());
-        // std::cout << "Gl11 = " << Gl11 << std::endl;
-        return((log(Gl11) - log(Gl11.sum())).sum());
-    }
-}
+// template<typename elModel>
+// inline double InnerEL<elModel>::logEL(int maxIter, double relTol) {
+//     int nIter;
+//     double maxErr;
+//     // elModel::evalG(theta); // REMOVED here, evalG or assign G in export 
+//     LambdaNR(nIter, maxErr, maxIter, relTol);
+//     if (nIter == maxIter && maxErr > relTol) {
+//         // std::cout << "lambdaNR did not coverge" << std::endl;
+//         return(-INFINITY);
+//     }
+//     else {
+//         // std::cout << "lambdaNR coverged" << std::endl;
+//         Glambda.noalias() = lambdaNew.transpose() * G;
+//         Gl11 = 1.0/(1.0-Glambda.array());
+//         // std::cout << "Gl11 = " << Gl11 << std::endl;
+//         return((log(Gl11) - log(Gl11.sum())).sum());
+//     }
+// }
 
 
 /*

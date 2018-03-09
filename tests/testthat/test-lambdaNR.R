@@ -23,7 +23,6 @@ test_that("lambda.R == lambda.cpp", {
         X <- replicate(p, rnorm(n))
         beta0 <- rnorm(p)
         y <- c(X %*% beta0) + rnorm(n) # with N(0,1) error term
-        lambda0 <- rnorm(p) # m == p in location mean reg model
         max_iter <- sample(c(2, 10, 100), 1)
         rel_tol <- runif(1, 1e-6, 1e-5)
         # checking G matrix from cpp and R
@@ -47,6 +46,8 @@ test_that("lambda.R == lambda.cpp", {
         nrout <- lambdaNRC_R(G = G.R, weights, 
                              max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
         lambda.R <- nrout$lambda
+        lambda.R
+        lambda.cpp
         expect_equal(lambda.R, lambda.cpp)
     }
 })
