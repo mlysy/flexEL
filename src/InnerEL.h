@@ -47,7 +47,7 @@ public:
     void LambdaNR(int& nIter, double& maxErr,
                 int maxIter, double relTol);
     // log empirical likelihood calculation 
-    double logEL(int maxIter, double relTol); 
+    double logEL(int& nIter, double& maxErr, int maxIter, double relTol); 
     void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol); 
     VectorXd getOmegas(); // returns omegas
     // // posterior sampler
@@ -183,8 +183,9 @@ inline VectorXd InnerEL<elModel>::getOmegas() {
 }
 
 template<typename elModel>
-inline double InnerEL<elModel>::logEL(int maxIter, double relTol) {
-    evalOmegas(maxIter, relTol); // evaluate weights and assign them 
+inline double InnerEL<elModel>::logEL(int& nIter, double& maxErr,
+                                      int maxIter, double relTol) {
+    evalOmegas(nIter, maxErr, maxIter, relTol); // evaluate weights and assign them 
     return(omegas.array().log().sum()); 
 }
 

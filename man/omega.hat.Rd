@@ -10,6 +10,8 @@ omega.hat(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}
 
+\item{deltas}{Length-\code{nObs} vector of censor indicators, omit if no censoring.}
+
 \item{epsilons}{Length-\code{nObs} vector of residuals, omit if no censoring.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
@@ -17,8 +19,6 @@ omega.hat(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
 \item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
 
 \item{verbose}{Display number of steps and tolerance criterion when algorithm terminates.}
-
-\item{delta}{Length-\code{nObs} vector of censor indicators, omit if no censoring.}
 }
 \value{
 Length-\code{nEq} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/nObs if did not converge.

@@ -13,9 +13,12 @@ using namespace Eigen;
 double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
                  double alpha, Eigen::VectorXd beta, 
                  int maxIter = 100, double relTol = 1e-7) {
-      InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
-      double logELquant = QR.logEL(maxIter,relTol);
-      return(logELquant);
+    InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+    int nIter;
+    double maxErr;
+    double logELquant = QR.logEL(nIter, maxErr, maxIter,relTol);
+    // TODO: check convergence 
+    return(logELquant);
 }
 
 // // [[Rcpp::export(".PostSample_QuantReg")]]

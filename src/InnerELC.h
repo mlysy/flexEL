@@ -5,6 +5,8 @@
 
 // #include <vector> // for the sorting to work 
 // using namespace std;
+#include <math.h>
+#include <Rmath.h> // for random number 
 #include "SortOrder.h"
 #include <Rcpp.h>
 using namespace Rcpp;
@@ -43,7 +45,7 @@ private:
                      const Ref<const VectorXd>& lambdaOld);
     // helper function for evalWeights: calculate partial sum of omegas
     // partial sum of omegas_jj s.t. eps_jj >= eps_ii
-    double evalPsos(const int ii); 
+    double evalPsos(const int ii);
 public:
     // TODO: public for testing for now
     VectorXd deltas; 
@@ -269,7 +271,17 @@ inline void InnerELC<elModel>::evalOmegas(int& nIter, double& maxErr,
         // std::cout << "weights = " << weights << std::endl;
         // M-step:
         // std::cout << "lambdaOldEM = " << lambdaOldEM << std::endl;
-        LambdaNR(nIter, maxErr, maxIter, relTol);
+        LambdaNR(nIter, maxErr, maxIter, relTol); 
+        // Check convergence of NR here
+        if (nIter == maxIter & maxErr > relTol) {
+            // if the above NR did not converge, randomly modify the omegas and continue
+            for (int kk=0; kk<nObs; kk++) {
+                omegas(kk) += R::rnorm(0,1);
+            }
+            omegas.array() = omegas.array().abs();
+            omegas /= omegas.sum();
+            continue;
+        }
         // std::cout << "lambdaNew = " << lambdaNew << std::endl;
         // std::cout << "G = \n" << G << std::endl;
         VectorXd lGq = ((lambdaNew.transpose() * G).array() + weights.sum()).transpose();
@@ -280,11 +292,11 @@ inline void InnerELC<elModel>::evalOmegas(int& nIter, double& maxErr,
         // }
         omegas.array() = weights.array() / lGq.array();
         // std::cout << "In evalOmegas before normalize: omegas = \n" << omegas << std::endl;
-        omegas = omegas.array() / (omegas.array().sum()); // normalize
+        omegas.array() = omegas.array() / (omegas.array().sum()); // normalize
         // std::cout << "In evalOmegas: omegas = \n" << omegas << std::endl; 
         maxErr = MaxRelErr(lambdaNew, lambdaOldEM); 
         // std::cout << "In evalOmegas: maxErr = " << maxErr << std::endl;
-        if (maxErr < relTol) break;
+        if (maxErr <= relTol) break;
         lambdaOldEM = lambdaNew;
     }
     nIter = ii; 

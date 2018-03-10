@@ -1,7 +1,7 @@
 #' Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
 #'
 #' @param G \code{nObs x nEqns} matrix of constraints.
-#' @param delta Length-\code{nObs} vector of censor indicators, omit if no censoring.
+#' @param deltas Length-\code{nObs} vector of censor indicators, omit if no censoring.
 #' @param epsilons Length-\code{nObs} vector of residuals, omit if no censoring.
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.

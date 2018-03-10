@@ -2,7 +2,7 @@
 % Please edit documentation in R/mr.evalG.R
 \name{mr.evalG}
 \alias{mr.evalG}
-\title{Solve the inner loop optimization of an EL function.}
+\title{Evaluate the G matrix for mean regression (location model)}
 \usage{
 mr.evalG(y, X, beta)
 }
@@ -13,11 +13,8 @@ mr.evalG(y, X, beta)
 
 \item{beta}{Length-\code{nEqs} vector of coefficients in location model.}
 }
-\value{
-G \code{nObs x nEqns} matrix of constraints.
-}
 \description{
-Solve the inner loop optimization of an EL function.
+Evaluate the G matrix for mean regression (location model)
 }
 \details{
 Returns the G matrix for location mean regression model.

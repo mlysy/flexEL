@@ -39,7 +39,7 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
 // as in the censored case 
 // [[Rcpp::export(".omega.hat")]]
-Rcpp::List getOmegas(Eigen::MatrixXd G, 
+Rcpp::List evalOmegas(Eigen::MatrixXd G, 
                           int maxIter, double relTol, bool verbose) {
     int nObs = G.cols();
     int nEqs = G.rows();

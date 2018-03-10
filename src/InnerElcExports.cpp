@@ -12,8 +12,8 @@ using namespace Eigen;
 // TODO: getWeights does not need y X, only depends on deltas, epsilons and omegas, 
 //       remove y X and use pesudo input to init
 // returns weights for the weighted NR algorithm 
-// [[Rcpp::export(".getWeights")]]
-Eigen::VectorXd getWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
+// [[Rcpp::export(".evalWeights")]]
+Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
                            Eigen::VectorXd epsilons) {
     // pseudo input since they are not used in calculation of lambda
     int nObs = omegas.size();
@@ -26,7 +26,7 @@ Eigen::VectorXd getWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
     Eigen::VectorXd weights = ILC.weights; 
     return(weights);
 }
-// Eigen::VectorXd getWeights(Eigen::VectorXd y, Eigen::MatrixXd X, 
+// Eigen::VectorXd evalWeights(Eigen::VectorXd y, Eigen::MatrixXd X, 
 //                            Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
 //                            Eigen::VectorXd epsilons) {
 //     InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
@@ -71,7 +71,7 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".omega.hat.EM")]]
-Rcpp::List getOmegasEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
+Rcpp::List evalOmegasEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
                 Eigen::VectorXd epsilons, 
                 int maxIter, double relTol, bool verbose) {
     // pseudo input since they are not used in calculation of lambda

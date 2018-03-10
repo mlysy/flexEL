@@ -21,7 +21,10 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::Vecto
 double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,
                      int maxIter = 100, double relTol = 1e-7) {
     InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
-    double logELmean = MR.logEL(maxIter,relTol);
+    int nIter;
+    double maxErr; 
+    double logELmean = MR.logEL(nIter, maxErr, maxIter,relTol); 
+    // TODO: check convergence here
     return(logELmean);
 }
 

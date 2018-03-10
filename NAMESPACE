@@ -3,7 +3,7 @@
 S3method(qr,logel)
 export(PostSample_MeanReg)
 export(PostSample_QuantReg)
-export(getWeights)
+export(evalWeights)
 export(lambdaNR)
 export(mr.evalG)
 export(mr.logel)

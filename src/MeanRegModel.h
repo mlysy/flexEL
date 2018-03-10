@@ -1,8 +1,8 @@
 #ifndef MEANREGMODEL_h
 #define MEANREGMODEL_h
 
-#include <math.h>
-#include <Rmath.h>
+// #include <math.h>
+// #include <Rmath.h>
 
 class MeanRegModel {
 private:
