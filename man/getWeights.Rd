@@ -4,13 +4,9 @@
 \alias{getWeights}
 \title{Solve the inner loop optimization of an EL function.}
 \usage{
-getWeights(y, X, deltas, omegas, beta)
+getWeights(deltas, omegas, epsilons)
 }
 \arguments{
-\item{y}{Lenght-\code{nObs} vector of responses.}
-
-\item{X}{\code{nObs x n Eqs} matrix of covariate matrix.}
-
 \item{deltas}{Lenght-\code{nObs} vector of censoring indicators.}
 
 \item{omegas}{Lenght-\code{nObs} vector, empirical distribution (probability vector).}

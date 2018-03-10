@@ -295,9 +295,9 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
 }
 
 
-getWeights_R <- function(y, X, deltas, omegas, beta) {
-    nObs <- length(y)
-    epsilons <- y - c(X %*% beta)
+getWeights_R <- function(deltas, omegas, epsilons) {
+    # epsilons <- y - c(X %*% beta)
+    nObs <- length(omegas)
     epsOrd <- order(epsilons, decreasing = TRUE)
     psots <- rep(0,nObs)
     for (ii in 1:nObs) {

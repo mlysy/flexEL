@@ -7,17 +7,15 @@
 using namespace Rcpp;
 
 // getWeights
-Eigen::VectorXd getWeights(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons);
-RcppExport SEXP _bayesEL_getWeights(SEXP ySEXP, SEXP XSEXP, SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP) {
+Eigen::VectorXd getWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons);
+RcppExport SEXP _bayesEL_getWeights(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
-    rcpp_result_gen = Rcpp::wrap(getWeights(y, X, deltas, omegas, epsilons));
+    rcpp_result_gen = Rcpp::wrap(getWeights(deltas, omegas, epsilons));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -126,7 +124,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_bayesEL_getWeights", (DL_FUNC) &_bayesEL_getWeights, 5},
+    {"_bayesEL_getWeights", (DL_FUNC) &_bayesEL_getWeights, 3},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_getOmegasEM", (DL_FUNC) &_bayesEL_getOmegasEM, 6},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},

@@ -13,9 +13,12 @@ using namespace Eigen;
 //       remove y X and use pesudo input to init
 // returns weights for the weighted NR algorithm 
 // [[Rcpp::export(".getWeights")]]
-Eigen::VectorXd getWeights(Eigen::VectorXd y, Eigen::MatrixXd X, 
-                            Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
-                            Eigen::VectorXd epsilons) {
+Eigen::VectorXd getWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
+                           Eigen::VectorXd epsilons) {
+    // pseudo input since they are not used in calculation of lambda
+    int nObs = omegas.size();
+    VectorXd y = VectorXd::Zero(nObs);
+    MatrixXd X = MatrixXd::Zero(1,nObs);
     InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
     ILC.omegas = omegas;
     ILC.setEpsilons(epsilons); 
@@ -23,6 +26,16 @@ Eigen::VectorXd getWeights(Eigen::VectorXd y, Eigen::MatrixXd X,
     Eigen::VectorXd weights = ILC.weights; 
     return(weights);
 }
+// Eigen::VectorXd getWeights(Eigen::VectorXd y, Eigen::MatrixXd X, 
+//                            Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
+//                            Eigen::VectorXd epsilons) {
+//     InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
+//     ILC.omegas = omegas;
+//     ILC.setEpsilons(epsilons); 
+//     ILC.evalWeights(); 
+//     Eigen::VectorXd weights = ILC.weights; 
+//     return(weights);
+// }
 
 // Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
 // G: m x N matrix
