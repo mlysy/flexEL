@@ -12,16 +12,16 @@
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export
-qr.logel <- function(y, X, alpha, beta, max_iter = 100, eps = 1e-7) {
+qr.logel <- function(y, X, alpha, beta, max_iter = 100, rel_tol = 1e-7) {
       # input checks
-      if(ncol(X) != length(y)) {
+      if(nrow(X) != length(y)) {
             stop("X and y have inconsistent dimensions.")
       }
-      if(nrow(X) != length(beta)) {
+      if(ncol(X) != length(beta)) {
             stop("X and beta have inconsistent dimensions.")
       }
       if(alpha <= 0 || alpha >= 1) {
             stop("alpha should be between 0 and 1.")
       }
-      .QuantReg_logEL(y, X, alpha, beta, maxIter = 100L, eps = 1e-7)
+      .QuantReg_logEL(y, t(X), alpha, beta, maxIter = max_iter, relTol = rel_tol)
 }

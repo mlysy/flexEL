@@ -34,63 +34,6 @@ MaxRelErr <- function(lambdaNew, lambdaOld) {
     return(max(relErr))
 }
 
-#---- mean regression models ----
-
-# Note: returns a nObs x nEqs matrix G
-# GfunCensMean <- function(y, X, beta) {
-#     n <- length(y)
-#     p <- length(beta)
-#     if (nrow(X) != p) stop("dimensions of X and beta don't match")
-#
-#     G <- matrix(rep(NA,2*n),2,n)
-#     for (ii in 1:n) {
-#         G[1,ii] <- y[ii] - t(X[,ii]) %*% beta # mean(eps) = 0
-#         G[2,ii] <- G[1,ii]^2-1 # var(eps) = 1
-#     }
-#     return(t(G))
-# }
-
-#  (location model)
-# mr.evalG is the same for non-censoring and censoring for mean regression
-# X: nObs x nEqs matrix
-# Note: returns a nObs x nEqs matrix G
-mr.evalG_R <- function(y, X, beta) {
-    tX <- t(X)
-    yXb <- y - c(beta %*% tX)
-    G <- sweep(tX, MARGIN = 2, yXb, `*`)
-    return(t(G))
-}
-
-mrls.evalG_R <- function(y, X, Z, beta, gamma) {
-  nObs <- nrow(X)
-  nBeta <- length(beta)
-  nGamma <- length(gamma)
-  G <- matrix(NA, nObs, nBeta + nGamma + 1)
-  yXb <- y - X %*% beta
-  gZe <- exp(-2 * (Z %*% gamma))
-  WW <- c(yXb * gZe)
-  G[,1:nBeta] <- WW * X
-  WW <- c(yXb * WW)
-  G[,nBeta + 1:nGamma] <-  WW * Z
-  G[,nBeta + nGamma + 1] <- WW - 1
-  G
-}
-
-
-# Is Q2 pd?
-# solveV <- function(V, x, ldV = FALSE) {
-#   C <- chol(V) # cholesky decomposition
-#   if(missing(x)) x <- diag(nrow(V))
-#   # solve is O(ncol(C) * ncol(x)) with triangular matrices
-#   # using backward subsitution
-#   ans <- backsolve(r = C, x = backsolve(r = C, x = x, transpose = TRUE))
-#   if(ldV) {
-#     ldV <- 2 * sum(log(diag(C)))
-#     ans <- list(y = ans, ldV = ldV)
-#   }
-#   ans
-# }
-
 #---- non-censoring EL ----
 
 log.star <- function(x, n) {
@@ -124,21 +67,14 @@ Qfun <- function(lambda, G) {
     sum(apply(G, 2, function(gg) log.star(x = 1 - sum(lambda*gg), n = N)))
 }
 
-rho_alpha <- function(u, alpha) {
-    u * (alpha - (u <= 0))
-}
-
-phi_alpha <- function(u, alpha) {
-    (u <= 0) - alpha
-}
-
-# R implementation of lambdaNRC
+# R implementation of lambdaNR
 # G is nObs x nEqs matrix
-lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE) {
+lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE, 
+                       lambdaOld = NULL) {
     G <- t(G)
     nObs <- ncol(G)
     nEqs <- nrow(G)
-    lambdaOld <- rep(0,nEqs)
+    if (is.null(lambdaOld)) lambdaOld <- rep(0,nEqs)
     lambdaNew <- lambdaOld
     nIter <- 0
     for (ii in 1:max_iter) {
@@ -157,21 +93,23 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE) {
         if (maxErr < rel_tol) break;
         lambdaOld <- lambdaNew
     }
-    if(ii == max_iter && maxErr > rel_tol) lambdaNew <- rep(NA, nEqs)
+    notconv <- ii == max_iter && maxErr > rel_tol
+    if(notconv) lambdaNew <- rep(NA, nEqs)
     # c(lambdaNew) to make sure lambda is a vector
-    output <- list(lambda=c(lambdaNew), maxErr=maxErr, nIter=nIter)
+    output <- list(lambda=c(lambdaNew), convergence=!notconv)
     return(output)
 }
 
 # 
 # G is nObs x nEqs matrix
 omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
-    lambdaout <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
-    lambdahat <- lambdaout$lambda
-    nIter <- lambdaout$nIter
-    maxErr <- lambdaout$maxErr
-    conv <- nIter == max_iter && maxErr > rel_tol # 1 if not converged
-    if (conv) {
+    lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
+    lambdahat <- lambdaOut$lambda
+    # nIter <- lambdaout$nIter
+    # maxErr <- lambdaout$maxErr
+    # notconv <- nIter == max_iter && maxErr > rel_tol # 1 if not converged
+    conv <- lambdaOut$convergence # 1 if converged
+    if (!conv) {
         nObs <- nrow(G)
         omegahat <- rep(1.0/nObs,nObs)
     }
@@ -179,14 +117,15 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
         omegahat <- c(1/(1-t(lambdahat) %*% t(G)) / sum(1/(1-t(lambdahat) %*% t(G))))
     }
     # returns a vector of omegahat
-    return(list(omegas=omegahat, convergence=!conv))
+    return(list(omegas=omegahat, convergence=conv))
 }
 
+# TODO: changed
 mrls.logel_R <- function(y, X, Z, beta, gamma) {
     # max_iter = 100, rel_tol = 1e-07, verbose = FALSE
     G <- mrls.evalG_R(y, X, Z, beta, gamma)
     # lambda <- lambdaNR(G = G, max_iter, rel_tol, verbose)
-    omegahat <- omega.hat_R(G = G)
+    omegahat <- omega.hat.NC_R(G = G)
     sum(log(omegahat))
 }
 
@@ -354,7 +293,7 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
     }
     else {
         omegaOut <- omega.hat.EM_R(G, deltas, epsilons,
-                                  max_iter, rel_tol, verbose)
+                                   max_iter, rel_tol, verbose)
     }
     if (omegaOut$convergence) {
         return(c(omegaOut$omegas))
@@ -366,8 +305,134 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
     }
 }
 
+#---- mean regression ----
+
+# Note: returns a nObs x nEqs matrix G
+# GfunCensMean <- function(y, X, beta) {
+#     n <- length(y)
+#     p <- length(beta)
+#     if (nrow(X) != p) stop("dimensions of X and beta don't match")
+#
+#     G <- matrix(rep(NA,2*n),2,n)
+#     for (ii in 1:n) {
+#         G[1,ii] <- y[ii] - t(X[,ii]) %*% beta # mean(eps) = 0
+#         G[2,ii] <- G[1,ii]^2-1 # var(eps) = 1
+#     }
+#     return(t(G))
+# }
+
+#  (location model)
+# mr.evalG is the same for non-censoring and censoring for mean regression
+# X: nObs x nEqs matrix
+# return: a nObs x nEqs matrix G
+mr.evalG_R <- function(y, X, beta) {
+    tX <- t(X)
+    yXb <- y - c(beta %*% tX)
+    G <- sweep(tX, MARGIN = 2, yXb, `*`)
+    return(t(G))
+}
+
+#---- quantile regression ----
+
+rho_alpha <- function(u, alpha) {
+    u * (alpha - (u <= 0))
+}
+
+phi_alpha <- function(u, alpha) {
+    (u <= 0) - alpha
+}
+
+#  (location model)
+# qr.evalG is the same for non-censoring and censoring for mean regression
+# X: nObs x nEqs matrix
+# return: a nObs x nEqs matrix G
+qr.evalG_R <- function(y, X, alpha, beta) {
+    tX <- t(X) # tX is nEqs x nObs
+    yXb <- y - c(beta %*% tX)
+    pyXb <- phi_alpha(yXb,alpha)
+    G <- sweep(tX, MARGIN = 2, pyXb, `*`)
+    return(t(G))
+}
+
+qr.logel_R <- function(y, X, alpha, beta, max_iter = 100, rel_tol = 1e-7) {
+    G <- qr.evalG(y, X, alpha, beta)
+    omegahat <- omega.hat_R(G)
+    return(sum(log(omegahat)))
+}
+
+qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
+    betaOld <- betaInit
+    betaNew <- betaOld
+    # betaProp <- betaNew
+    betalen <- length(betaInit)
+    beta_chain <- matrix(NA,betalen,nsamples)
+    logELOld <- qr.logel_R(y, X, alpha, betaOld)
+    lambdaOld <- rep(0,ncol(X))
+    for (ii in (-nburn+1):nsamples) {
+        for (jj in 1:betalen) {
+            # satisfy <- FALSE
+            betaProp <- betaOld
+            # betaProp[jj] <- betaOld[jj] + sigs[jj]*rnorm(1)
+            betaProp[jj] <- betaOld[jj]
+            G <- qr.evalG_R(y, X, alpha, betaProp)
+            lambdaOut <- lambdaNR_R(G, lambdaOld = lambdaOld)
+            if (!lambdaOut$convergence) break
+            # satisfy <- TRUE
+            lambdaNew <- lambdaOut$lambda
+            lambdaOld <- lambdaNew
+            Glambda <- G %*% lambdaNew
+            logomegahat <- log(1/(1-Glambda)) - log(sum(1/(1-Glambda)))
+            logELProp <- sum(logomegahat)
+            ratio <- exp(logELProp-logELOld)
+            # message(ratio)
+            u <- runif(1)
+            a <- min(1,ratio)
+            if (u < a) {
+                betaNew <- betaProp
+                betaOld <- betaNew
+                logELOld <- logELProp
+            }
+        }
+        if (ii > 0) {
+            beta_chain[,ii] <- betaNew
+        }
+    }
+    return(beta_chain)
+}
+
+# Is Q2 pd?
+# solveV <- function(V, x, ldV = FALSE) {
+#   C <- chol(V) # cholesky decomposition
+#   if(missing(x)) x <- diag(nrow(V))
+#   # solve is O(ncol(C) * ncol(x)) with triangular matrices
+#   # using backward subsitution
+#   ans <- backsolve(r = C, x = backsolve(r = C, x = x, transpose = TRUE))
+#   if(ldV) {
+#     ldV <- 2 * sum(log(diag(C)))
+#     ans <- list(y = ans, ldV = ldV)
+#   }
+#   ans
+# }
+
+
 
 ## #---- Location-scale model ----
+
+mrls.evalG_R <- function(y, X, Z, beta, gamma) {
+    nObs <- nrow(X)
+    nBeta <- length(beta)
+    nGamma <- length(gamma)
+    G <- matrix(NA, nObs, nBeta + nGamma + 1)
+    yXb <- y - X %*% beta
+    gZe <- exp(-2 * (Z %*% gamma))
+    WW <- c(yXb * gZe)
+    G[,1:nBeta] <- WW * X
+    WW <- c(yXb * WW)
+    G[,nBeta + 1:nGamma] <-  WW * Z
+    G[,nBeta + nGamma + 1] <- WW - 1
+    G
+}
+
 ## LSevalG <- function(y, X, theta) {
 ##     nObs <- ncol(X)
 ##     nEqs <- nrow(X)

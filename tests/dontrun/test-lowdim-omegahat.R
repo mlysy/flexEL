@@ -62,7 +62,7 @@ obj  <- function(d,e) {
     return(output)
 }
 
-# 2-dim problem 5 obvservations: 
+# simulate data
 p <- 2
 N <- 5
 beta0 <- c(5,2)
@@ -93,10 +93,9 @@ objvalmode <- -Inf
 modeval <- NA
 modews <- rep(NA,5)
 ## choose which to plot here 
-omegas_plot <- omegas.cpp
-# omegas_plot <- omegas.R
+omegas_plot <- omegas.R
 for (ii in 1:100){
-    wsobjval <- obj(d[ii],omegas_plot[5])
+    wsobjval <- obj(d[ii], 0.05) # omegas_plot[5]
     objval[ii] <- wsobjval$objval
     # if(!is.na(objval[ii])) print(objval)
     if (!is.na(objval[ii]) && (objval[ii] > objvalmode)) {

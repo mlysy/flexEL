@@ -50,10 +50,10 @@ public:
     double logEL(int& nIter, double& maxErr, int maxIter, double relTol); 
     void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol); 
     VectorXd getOmegas(); // returns omegas
-    // // posterior sampler
-    // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
-    //                     const Ref<const VectorXd>& sigs,
-    // 		      int maxIter, double relTol);
+    // posterior sampler
+    MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
+                        const Ref<const VectorXd>& sigs,
+                        int maxIter, double relTol);
 };
 
 // constructor for mean regression (without alpha)
@@ -212,29 +212,34 @@ inline double InnerEL<elModel>::logEL(int& nIter, double& maxErr,
 //     }
 // }
 
-
-/*
 // posterior sampler
 template<typename elModel>
 inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
-					     VectorXd betaInit,
-					     VectorXd sigs,
+					     VectorXd betaInit, const Ref<const VectorXd>& sigs,
 					     int maxIter, double relTol) {
   VectorXd betaOld = betaInit;
   VectorXd betaNew = betaOld;
   VectorXd betaProp = betaOld;
   int betalen = betaInit.size();
   MatrixXd beta_chain(betaInit.size(),nsamples);
-  double logELOld = logEL(betaOld, maxIter, relTol); // NEW: chache old
-  
+  int nIter;
+  double maxErr;
+  double logELOld = logEL(nIter, maxErr, maxIter, relTol); // NEW: chache old
+  double logELProp;
+  bool satisfy;
+  double u;
+  double a;
+  double ratio;
+
   for (int ii=-nburn; ii<nsamples; ii++) {
     for (int jj=0; jj<betalen; jj++) {
       betaProp = betaOld;
-      betaProp(jj) = betaOld(jj) + sigs(jj)*R::norm_rand();
+      // betaProp(jj) = betaOld(jj) + sigs(jj)*R::norm_rand();
+      betaProp(jj) += sigs(jj)*R::norm_rand();
       // check if proposed beta satisfies the constraint
-      bool satisfy = false;
-      int nIter = 0;
-      double maxErr;
+      satisfy = false;
+      // int nIter = 0;
+      // double maxErr;
       // had a BUG here?! Didn't change G!!!
       elModel::evalG(betaProp); // NEW: change G with betaProp
       LambdaNR(nIter, maxErr, maxIter, relTol);
@@ -242,16 +247,18 @@ inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
       // if does not satisfy, keep the old beta
       if (satisfy == false) break;
       // if does satisfy, flip a coin
-      double u = R::unif_rand();
+      u = R::unif_rand();
       // use the lambda calculate just now to get the logEL for Prop
       // to avoid an extra call of lambdaNR
-      VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*elModel::G).array())) - 
+      // VectorXd rlg = 1/(1-(lambdaNew.transpose()*elModel::G).array());
+      VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*elModel::G).array())) -
         log((1/(1-(lambdaNew.transpose()*elModel::G).array())).sum());
-      double logELProp = logomegahat.sum();
-      double ratio = exp(logELProp-logELOld);
+      logELProp = logomegahat.sum();
+      ratio = exp(logELProp-logELOld);
+      // std::cout << "ratio = " << ratio << std::endl;
       // double ratio = exp(logEL(y, X, betaProp, maxIter, relTol) -
       //                    logEL(y, X, betaOld, maxIter, relTol));
-      double a = std::min(1.0,ratio);
+      a = std::min(1.0,ratio);
       if (u < a) { // accepted
         betaNew = betaProp;
         betaOld = betaNew;
@@ -264,6 +271,5 @@ inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
   }
   return(beta_chain);
 }
-*/
 
 #endif

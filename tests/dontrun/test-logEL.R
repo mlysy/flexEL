@@ -6,7 +6,7 @@ source("../bayesEL/tests/testthat/el-utils.R")
 # Plot the EL likelihood EL(mu) for the single constraint E[Y - mu] = 0
 
 # dimensions
-n <- 100 # number of observations
+n <- 500 # number of observations
 numpoints <- 100
 
 #---- mean reg: p = 1 (only intercept) ----
@@ -107,28 +107,29 @@ legend('topright',legend=c(expression('grid plot & mode'),
 m <- 1 # for quant reg m = p
 mu0 <- rnorm(m) # true parameter value
 mu0
-
+alpha <- 0.75
 # gird plot
-mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints) # TODO: grid points range matters ?
+mu.seq <- seq(-.5+mu0+qnorm(alpha),.5+mu0+qnorm(alpha),length.out = numpoints) # TODO: grid points range matters ?
 logel.seq <- rep(NA,numpoints)
-X <- matrix(rep(1,m*n),m,n) # each col of X is one observation
-y <- X * mu0 + rnorm(n) # with N(0,1) error term
+X <- matrix(rep(1,m*n),n,m) # each col of X is one observation
+y <- c(X * mu0 + rnorm(n)) # with N(0,1) error term
 mean(y)
-lambda0 <- rnorm(m)
-alpha <- 0.5
 logel.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   logel.seq[ii] <- qr.logel(y, X, alpha, mu.seq[ii])
 }
-logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
+logelmode <- plotEL(mu.seq, logel.seq, mu0+qnorm(alpha), mu.name = expression(mu))
 
-# sample from posteriro
-nsamples <- 10000
-nburn <- 2000
+# sample from posterior
+nsamples <- 1000
+nburn <- 500
 sigs <- rep(0.1,m)
 betaInit <- rnorm(m)
 system.time(
-  beta_chain <- qr.post(y, X, n, m, alpha, lambda0, nsamples, nburn, betaInit, sigs)
+    beta_chain <- qr.post_R(y, X, alpha, nsamples, nburn, mu0, sigs)
+)
+system.time(
+    beta_chain <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
 )
 plot(beta_chain[1,], xlab = expression(mu), ylab = 'logEL', type='l')
 

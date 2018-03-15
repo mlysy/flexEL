@@ -29,7 +29,15 @@
     .Call(`_bayesEL_MeanReg_logEL`, y, X, beta, maxIter, relTol)
 }
 
+.QuantReg_evalG <- function(y, X, alpha, beta) {
+    .Call(`_bayesEL_QuantReg_evalG`, y, X, alpha, beta)
+}
+
 .QuantReg_logEL <- function(y, X, alpha, beta, maxIter = 100L, relTol = 1e-7) {
     .Call(`_bayesEL_QuantReg_logEL`, y, X, alpha, beta, maxIter, relTol)
+}
+
+.QuantReg_post <- function(y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_QuantReg_post`, y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter, relTol)
 }
 

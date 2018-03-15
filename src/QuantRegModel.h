@@ -19,6 +19,7 @@ public:
     QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
                   void* params); // constructor non-censor
     void evalG(const Ref<const VectorXd>& beta);
+    MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
 };
 
 // constructor
@@ -48,6 +49,11 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
     for(int ii=0; ii<y.size(); ii++) {
         this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
     }
+}
+
+// get function for G matrix
+inline MatrixXd QuantRegModel::getG() {
+    return(G);
 }
 
 #endif

@@ -38,7 +38,8 @@ test_that("lambda.R == lambda.cpp", {
         lambda.R <- nrout$lambda
         expect_equal(lambda.R, lambda.cpp)
         
-        # TODO: Location model + mean regression + censoring
+        # Location model + mean regression + censoring
+        # TODO: sometimes only one converges :(
         weights <- abs(rnorm(n))
         weights <- weights / sum(weights) * n # sum(weights) == n
         lambda.cpp <- lambdaNR(G = G.cpp, weights, 
@@ -51,6 +52,12 @@ test_that("lambda.R == lambda.cpp", {
         expect_equal(lambda.R, lambda.cpp)
     }
 })
+
+lambdahat <- lambda.R
+G <- G.R
+par(mfrow=c(1,1))
+curve(sapply(x, QfunCens, G = G), from = lambdahat-1, to = lambdahat+1)
+abline(v = lambdahat, col='red')
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 

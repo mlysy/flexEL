@@ -4,7 +4,7 @@
 \alias{qr.logel}
 \title{log empirical likelihood for quantile regression}
 \usage{
-\method{qr}{logel}(y, X, alpha, beta, max_iter = 100, eps = 1e-07)
+\method{qr}{logel}(y, X, alpha, beta, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
@@ -17,13 +17,13 @@
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
-\item{eps}{Relative tolerance of Newton-Raphson convergence.}
-
 \item{nObs}{Number of observations.}
 
 \item{nEqs}{Number of estimating equations.}
 
 \item{lambda0}{Length-\code{nEqs} vector of initial value of lambda.}
+
+\item{eps}{Relative tolerance of Newton-Raphson convergence.}
 }
 \value{
 Log empirical likelihood of the input beta

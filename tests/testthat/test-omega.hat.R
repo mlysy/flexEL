@@ -9,12 +9,11 @@ context("omega.hat")
 
 ntest <- 50
 
-test_that("lambda.R == lambda.cpp", {
+test_that("omegahat.R == omegahat.cpp", {
     for(ii in 1:ntest) {
         # n <- sample(10:20,1)
         # p <- sample(1:(n-2), 1)
         # G <- matrix(rnorm(n*p),n,p) # random G seems not easy to work 
-        system.time({
         # n <- sample(10:20,1)
         # p <- sample(1:(n-2), 1)
         n <- 15
@@ -51,7 +50,6 @@ test_that("lambda.R == lambda.cpp", {
         G.cpp <- mr.evalG(y, X, beta0)
         omegahat.cpp <- omega.hat(G.cpp, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
         omegahat.R <- omega.hat_R(G.R, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-        })
         omegahat.cpp
         omegahat.R
         omegahat.cpp - omegahat.R
