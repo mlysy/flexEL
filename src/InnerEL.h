@@ -14,6 +14,7 @@ class InnerEL : public elModel {
 private:
     using elModel::nObs;
     using elModel::nEqs;
+    using elModel::G;
     // constants for logstar calculations
     double trunc, aa, bb, cc; 
     VectorXd omegas; // store the empirical distribution 
@@ -39,8 +40,8 @@ public:
     double logstar(double x);
     double logstar1(double x);
     double logstar2(double x);
-    // TODO: should create 'set' functions for them 
-    using elModel::G;
+    // TODO: should create 'set' and 'get' functions for them 
+    // using elModel::G;
     VectorXd lambdaOld;
     VectorXd lambdaNew;
     // Newton-Raphson algorithm
@@ -50,10 +51,10 @@ public:
     double logEL(int& nIter, double& maxErr, int maxIter, double relTol); 
     void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol); 
     VectorXd getOmegas(); // returns omegas
-    // posterior sampler
-    MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
-                        const Ref<const VectorXd>& sigs,
-                        int maxIter, double relTol);
+    // posterior sampler: removed for now
+    // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
+    //                     const Ref<const VectorXd>& sigs,
+    //                     int maxIter, double relTol);
 };
 
 // constructor for mean regression (without alpha)
@@ -212,7 +213,8 @@ inline double InnerEL<elModel>::logEL(int& nIter, double& maxErr,
 //     }
 // }
 
-// posterior sampler
+// posterior sampler: removed for now
+/*
 template<typename elModel>
 inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
 					     VectorXd betaInit, const Ref<const VectorXd>& sigs,
@@ -271,5 +273,6 @@ inline MatrixXd InnerEL<elModel>::PostSample(int nsamples, int nburn,
   }
   return(beta_chain);
 }
+*/
 
 #endif

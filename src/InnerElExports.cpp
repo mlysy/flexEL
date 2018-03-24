@@ -9,8 +9,7 @@ using namespace Eigen;
 #include "MeanRegModel.h"
 
 // Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
-// G: m x N matrix
-// lambda0: m-vector of starting values
+// G: nEqs x nObs matrix
 // [[Rcpp::export(".lambdaNR")]]
 Rcpp::List lambdaNR(Eigen::MatrixXd G, 
                     int maxIter, double relTol, bool verbose) {
@@ -18,8 +17,9 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
   int nEqs = G.rows();
   VectorXd y = VectorXd::Zero(nObs);
   MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+  // Here init with an MeanRegModel, but it is the same using QuantRegModel
   InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-  IL.G = G; // assign a given G
+  IL.setG(G); // assign the given G
   // initialize variables for output here 
   int nIter;
   double maxErr;
@@ -45,8 +45,10 @@ Rcpp::List evalOmegas(Eigen::MatrixXd G,
     int nEqs = G.rows();
     VectorXd y = VectorXd::Zero(nObs);
     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+    // Here init with an MeanRegModel, but it is the same using QuantRegModel
     InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-    IL.G = G; // assign G before optmization 
+    IL.setG(G); // assign the given G
+    // initialize variables for output here 
     int nIter;
     double maxErr;
     bool not_conv;

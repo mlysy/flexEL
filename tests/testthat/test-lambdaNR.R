@@ -1,5 +1,6 @@
 #---- testing evalG and lambdaNR (location + mean regression + censoring) ----
 library(bayesEL) # always load the package (with library)
+library(optimCheck)
 # source("el-utils.R")
 source("~/bayesEL/tests/testthat/el-utils.R")
 source("~/bayesEL/tests/testthat/mle-check.R")
@@ -37,6 +38,7 @@ test_that("lambda.R == lambda.cpp", {
                             max_iter = max_iter, rel_tol = rel_tol)
         lambda.R <- nrout$lambda
         expect_equal(lambda.R, lambda.cpp)
+        
         
         # Location model + mean regression + censoring
         # TODO: sometimes only one converges :(

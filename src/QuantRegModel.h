@@ -1,10 +1,9 @@
 #ifndef QUANTREGMODEL_h
 #define QUANTREGMODEL_h
 
-#include <math.h>
-#include <Rmath.h>
+// #include <math.h>
+// #include <Rmath.h>
 
-// subclass: Mean regression
 class QuantRegModel {
 private:
     double rho_alpha(double u, double alpha); // TODO: not needed?
@@ -19,6 +18,7 @@ public:
     QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
                   void* params); // constructor non-censor
     void evalG(const Ref<const VectorXd>& beta);
+    void setG(const Ref<const MatrixXd>& _G); 
     MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
 };
 
@@ -49,6 +49,11 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
     for(int ii=0; ii<y.size(); ii++) {
         this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
     }
+}
+
+// set function for G matrix
+inline void QuantRegModel::setG(const Ref<const MatrixXd>& _G) {
+    G = _G; 
 }
 
 // get function for G matrix

@@ -121,8 +121,8 @@ for (ii in 1:numpoints) {
 logelmode <- plotEL(mu.seq, logel.seq, mu0+qnorm(alpha), mu.name = expression(mu))
 
 # sample from posterior
-nsamples <- 1000
-nburn <- 500
+nsamples <- 10000
+nburn <- 3000
 sigs <- rep(0.1,m)
 betaInit <- rnorm(m)
 system.time(

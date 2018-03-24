@@ -2,7 +2,6 @@
 
 S3method(qr,evalG)
 S3method(qr,logel)
-S3method(qr,post)
 export(PostSample_MeanReg)
 export(evalWeights)
 export(lambdaNR)

@@ -17,8 +17,6 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(G); 
 }
 
-
-
 // [[Rcpp::export(".QuantReg_logEL")]]
 double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
                  double alpha, Eigen::VectorXd beta, 
@@ -32,6 +30,7 @@ double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(logELquant);
 }
 
+/*
 // [[Rcpp::export(".QuantReg_post")]]
 Eigen::MatrixXd QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                              double alpha, int nsamples, int nburn, 
@@ -41,3 +40,4 @@ Eigen::MatrixXd QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
       Eigen::MatrixXd beta_chain = QR.PostSample(nsamples, nburn, betaInit, sigs, maxIter, relTol);
       return(beta_chain);
 }
+*/
