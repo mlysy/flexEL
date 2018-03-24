@@ -11,7 +11,9 @@ using namespace Eigen;
 // [[Rcpp::export(".MeanReg_evalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
-    InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+    // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+    InnerEL<MeanRegModel> MR;
+    MR.setData(y,X,NULL); 
     MR.evalG(beta);
     Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
     return(G); 
@@ -20,7 +22,9 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 // [[Rcpp::export(".MeanReg_logEL")]]
 double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,
                      int maxIter = 100, double relTol = 1e-7) {
-    InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+    // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+    InnerEL<MeanRegModel> MR;
+    MR.setData(y,X,NULL); 
     MR.evalG(beta);
     int nIter;
     double maxErr; 

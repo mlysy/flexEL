@@ -15,15 +15,17 @@ using namespace Eigen;
 // [[Rcpp::export(".evalWeights")]]
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
                            Eigen::VectorXd epsilons) {
-    // pseudo input since they are not used in calculation of lambda
+    // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = omegas.size();
     VectorXd y = VectorXd::Zero(nObs);
     MatrixXd X = MatrixXd::Zero(1,nObs);
-    InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
-    ILC.omegas = omegas;
+    // InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
+    InnerELC<MeanRegModel> ILC; 
+    ILC.setData(y,X,deltas,NULL); 
+    ILC.setOmegas(omegas);
     ILC.setEpsilons(epsilons); 
     ILC.evalWeights(); 
-    Eigen::VectorXd weights = ILC.weights; 
+    Eigen::VectorXd weights = ILC.getWeights(); 
     return(weights);
 }
 // Eigen::VectorXd evalWeights(Eigen::VectorXd y, Eigen::MatrixXd X, 
@@ -43,22 +45,24 @@ Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
 // [[Rcpp::export(".lambdaNRC")]]
 Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
                      int maxIter, double relTol, bool verbose) {
-    // pseudo input since they are not used in calculation of lambda
+    // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
     int nEqs = G.rows();
     VectorXd y = VectorXd::Zero(nObs);
     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-    VectorXd delta = VectorXd::Zero(nObs);
-    InnerELC<MeanRegModel> ILC(y, X, delta, NULL); // instantiate
-    ILC.G = G; // assign a given G
-    ILC.weights = weights; 
+    VectorXd deltas = VectorXd::Zero(nObs);
+    // InnerELC<MeanRegModel> ILC(y, X, delta, NULL); // instantiate
+    InnerELC<MeanRegModel> ILC; 
+    ILC.setData(y,X,deltas,NULL); 
+    ILC.setG(G); // assign a given G
+    ILC.setWeights(weights); 
     // initialize variables for output here 
     int nIter;
     double maxErr;
-    VectorXd lambda(nEqs);
+    VectorXd lambda;
     bool not_conv;
-    ILC.LambdaNR(nIter, maxErr, maxIter, relTol);
-    lambda = ILC.lambdaNew; // output
+    ILC.lambdaNR(nIter, maxErr, maxIter, relTol);
+    lambda = ILC.getLambda(); // output
     // check convergence
     not_conv = (nIter == maxIter) && (maxErr > relTol);
     if(verbose) {
@@ -74,14 +78,16 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
 Rcpp::List evalOmegasEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
                 Eigen::VectorXd epsilons, 
                 int maxIter, double relTol, bool verbose) {
-    // pseudo input since they are not used in calculation of lambda
+    // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
     int nEqs = G.rows();
     VectorXd y = VectorXd::Zero(nObs);
     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-    InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
-    ILC.G = G; // assign a given G
-    ILC.deltas = deltas; 
+    // InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
+    InnerELC<MeanRegModel> ILC; 
+    ILC.setData(y,X,deltas,NULL); 
+    ILC.setG(G); // assign a given G
+    ILC.setDeltas(deltas); 
     ILC.setEpsilons(epsilons); 
     // initialize variables for output here 
     int nIter;

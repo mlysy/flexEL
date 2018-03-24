@@ -39,7 +39,6 @@ test_that("lambda.R == lambda.cpp", {
         lambda.R <- nrout$lambda
         expect_equal(lambda.R, lambda.cpp)
         
-        
         # Location model + mean regression + censoring
         # TODO: sometimes only one converges :(
         weights <- abs(rnorm(n))

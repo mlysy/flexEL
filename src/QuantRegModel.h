@@ -15,20 +15,34 @@ protected:
     int nObs, nEqs;
     MatrixXd G;
 public:
-    QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
-                  void* params); // constructor non-censor
+    // QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+    //               void* params); // constructor non-censor
+    void setData(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+                 void* params); // set data with default ctor
     void evalG(const Ref<const VectorXd>& beta);
     void setG(const Ref<const MatrixXd>& _G); 
     MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
 };
 
-// constructor
-inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y, 
-                                    const Ref<const MatrixXd>& _X,
-                                    void* params) {
+// constructor: old 
+// inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y, 
+//                                     const Ref<const MatrixXd>& _X,
+//                                     void* params) {
+//     y = _y;
+//     X = _X; 
+//     alpha = *(double*)(params); 
+//     nObs = y.size();
+//     nEqs = X.rows(); // X gets passed as p x nObs matrix
+//     G = MatrixXd::Zero(nEqs,nObs);
+// }
+
+// setData (with default ctor)
+inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
+                                  const Ref<const MatrixXd>& _X,
+                                  void* params) {
     y = _y;
-    X = _X; 
-    alpha = *(double*)(params); 
+    X = _X;
+    alpha = *(double*)(params);
     nObs = y.size();
     nEqs = X.rows(); // X gets passed as p x nObs matrix
     G = MatrixXd::Zero(nEqs,nObs);

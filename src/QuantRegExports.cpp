@@ -11,7 +11,9 @@ using namespace Eigen;
 // [[Rcpp::export(".QuantReg_evalG")]]
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
                               double alpha, Eigen::VectorXd beta) {
-    InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+    // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+    InnerEL<QuantRegModel> QR;
+    QR.setData(y,X,&alpha); 
     QR.evalG(beta);
     Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
     return(G); 
@@ -21,7 +23,9 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
                  double alpha, Eigen::VectorXd beta, 
                  int maxIter = 100, double relTol = 1e-7) {
-    InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+    // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+    InnerEL<QuantRegModel> QR;
+    QR.setData(y,X,&alpha); 
     QR.evalG(beta); 
     int nIter;
     double maxErr;
