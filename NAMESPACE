@@ -2,9 +2,9 @@
 
 S3method(qr,evalG)
 S3method(qr,logel)
-export(PostSample_MeanReg)
 export(evalWeights)
 export(lambdaNR)
+export(logEL)
 export(mr.evalG)
 export(mr.logel)
 export(omega.hat)

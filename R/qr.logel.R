@@ -1,14 +1,11 @@
 #' log empirical likelihood for quantile regression
 #'
-#' @param nObs Number of observations.
-#' @param nEqs Number of estimating equations.  
 #' @param X \code{nVars x nObs} matrix of constraints.
 #' @param y Length-\code{nObs} vector of response values.
 #' @param beta Length-\code{nVars} vector of coefficients. 
 #' @param alpha Quantile level, a calar between 0 and 1. 
-#' @param lambda0 Length-\code{nEqs} vector of initial value of lambda.
 #' @param max_iter Maximum number of Newton-Raphson steps.
-#' @param eps Relative tolerance of Newton-Raphson convergence.
+#' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export

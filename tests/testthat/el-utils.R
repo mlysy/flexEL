@@ -7,6 +7,12 @@ rMNorm <- function(n, p) {
   matrix(rnorm(n*p), n, p)
 }
 
+# max of min of abs and rel error
+max.xdiff <- function(x) {
+    xdiff <- abs(diff(x))
+    max(pmin(xdiff[,1], xdiff[,2]))
+}
+
 plotEL <- function(mu.seq, logel.seq, trueval, meanobs = NA, mu.name = "param") {
     plot(mu.seq, exp(logel.seq-max(logel.seq)),
          cex=0.2, xlab = mu.name, ylab = 'log EL', type = 'l')
@@ -60,8 +66,9 @@ log.star2 <- function(x, n) {
     return(ans)
 }
 
-# Note: input G is nObs x nEqs
-Qfun <- function(lambda, G) {
+# Note: G is nObs x nEqs
+# TODO: right now G must exist in the environment 
+Qfun <- function(lambda) {
     G <- t(G)
     N <- ncol(G) # nObs
     sum(apply(G, 2, function(gg) log.star(x = 1 - sum(lambda*gg), n = N)))
@@ -301,7 +308,7 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
     else {
         # TODO: verbose?
         n <- nrow(G)
-        return(rep(1/n,n))
+        return(rep(0,n))
     }
 }
 

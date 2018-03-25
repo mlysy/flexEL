@@ -21,6 +21,10 @@
     .Call(`_bayesEL_evalOmegas`, G, maxIter, relTol, verbose)
 }
 
+.logEL <- function(G, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_logEL`, G, maxIter, relTol, verbose)
+}
+
 .MeanReg_evalG <- function(y, X, beta) {
     .Call(`_bayesEL_MeanReg_evalG`, y, X, beta)
 }

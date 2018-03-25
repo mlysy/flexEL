@@ -65,7 +65,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // evalOmegas
-Rcpp::List evalOmegas(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose);
+Eigen::VectorXd evalOmegas(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose);
 RcppExport SEXP _bayesEL_evalOmegas(SEXP GSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -75,6 +75,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(evalOmegas(G, maxIter, relTol, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logEL
+double logEL(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose);
+RcppExport SEXP _bayesEL_logEL(SEXP GSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(logEL(G, maxIter, relTol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -143,6 +157,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_evalOmegasEM", (DL_FUNC) &_bayesEL_evalOmegasEM, 6},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
     {"_bayesEL_evalOmegas", (DL_FUNC) &_bayesEL_evalOmegas, 4},
+    {"_bayesEL_logEL", (DL_FUNC) &_bayesEL_logEL, 4},
     {"_bayesEL_MeanReg_evalG", (DL_FUNC) &_bayesEL_MeanReg_evalG, 3},
     {"_bayesEL_MeanReg_logEL", (DL_FUNC) &_bayesEL_MeanReg_logEL, 5},
     {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},

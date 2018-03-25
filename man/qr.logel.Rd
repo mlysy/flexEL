@@ -17,13 +17,7 @@
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
-\item{nObs}{Number of observations.}
-
-\item{nEqs}{Number of estimating equations.}
-
-\item{lambda0}{Length-\code{nEqs} vector of initial value of lambda.}
-
-\item{eps}{Relative tolerance of Newton-Raphson convergence.}
+\item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
 }
 \value{
 Log empirical likelihood of the input beta

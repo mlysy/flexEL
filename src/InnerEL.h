@@ -2,7 +2,6 @@
 #define INNEREL_h
 
 // class for computing inner optimization of EL likelihood
-
 #include <Rcpp.h>
 using namespace Rcpp;
 #include <RcppEigen.h>
@@ -50,8 +49,8 @@ public:
                   int maxIter, double relTol);
     VectorXd getLambda(); // get function for lambdaNew
     // log empirical likelihood calculation 
-    double logEL(int& nIter, double& maxErr, int maxIter, double relTol); 
-    void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol); 
+    double logEL(int maxIter, double relTol); 
+    void evalOmegas(int maxIter, double relTol); 
     VectorXd getOmegas(); // returns omegas
     // posterior sampler: removed for now
     // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
@@ -205,15 +204,24 @@ inline VectorXd InnerEL<ELModel>::getLambda() {
 
 // TODO: now G must have been assigned before calling this function 
 // const Ref<const VectorXd>& theta
+// template<typename ELModel>
+// inline void InnerEL<ELModel>::evalOmegas(int& nIter, double& maxErr, 
+//                                          int maxIter, double relTol) {
 template<typename ELModel>
-inline void InnerEL<ELModel>::evalOmegas(int& nIter, double& maxErr, 
-                                         int maxIter, double relTol) {
+inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
     // G must have been assigned
+    int nIter;
+    double maxErr; 
     lambdaNR(nIter, maxErr, maxIter, relTol);
-    Glambda.noalias() = lambdaNew.transpose() * G;
-    Gl11 = 1.0/(1.0-Glambda.array());
-    // std::cout << "Gl11 = " << Gl11 << std::endl;
-    omegas.array() = Gl11.array() / Gl11.sum();
+    // check convergence 
+    if (nIter == maxIter && maxErr > relTol) {
+        omegas = VectorXd::Zero(nObs);
+    }
+    else {
+        Glambda.noalias() = lambdaNew.transpose() * G;
+        Gl11 = 1.0/(1.0-Glambda.array());
+        omegas.array() = Gl11.array() / Gl11.sum();
+    }
 }
 
 template<typename ELModel>
@@ -222,10 +230,12 @@ inline VectorXd InnerEL<ELModel>::getOmegas() {
 }
 
 template<typename ELModel>
-inline double InnerEL<ELModel>::logEL(int& nIter, double& maxErr,
-                                      int maxIter, double relTol) {
-    evalOmegas(nIter, maxErr, maxIter, relTol); // evaluate weights and assign them 
-    return(omegas.array().log().sum()); 
+inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
+    evalOmegas(maxIter, relTol); // evaluate weights and assign them 
+    // Maybe add a flag for lambdaNR's convergence..?
+    // if lambdaNR did not converge, return -Inf
+    if (omegas.sum() == 0) return -INFINITY;
+    else return(omegas.array().log().sum()); 
 }
 
 // Old code: 

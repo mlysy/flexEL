@@ -17,12 +17,12 @@ omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbo
         omegaOut <- .omega.hat.EM(t(G), deltas, epsilons, 
                                   max_iter, rel_tol, verbose)
     }
-    if (omegaOut$convergence) {
-        return(omegaOut$omegas)
-    }
-    else { 
-        # TODO: should give warning here, verbose???
-        n <- nrow(G)
-        return(rep(1/n,n))
-    }
+    # if (omegaOut$convergence) {
+    #     return(omegaOut$omegas)
+    # }
+    # else { 
+    #     # TODO: should give warning here, verbose???
+    #     n <- nrow(G)
+    #     return(rep(1/n,n))
+    # }
 }

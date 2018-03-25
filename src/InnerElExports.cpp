@@ -42,7 +42,7 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
 // as in the censored case 
 // [[Rcpp::export(".omega.hat")]]
-Rcpp::List evalOmegas(Eigen::MatrixXd G, 
+Eigen::VectorXd evalOmegas(Eigen::MatrixXd G, 
                           int maxIter, double relTol, bool verbose) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
@@ -55,16 +55,48 @@ Rcpp::List evalOmegas(Eigen::MatrixXd G,
     IL.setData(y,X,NULL);
     IL.setG(G); // assign the given G
     // initialize variables for output here 
-    int nIter;
-    double maxErr;
-    bool not_conv;
-    IL.evalOmegas(nIter, maxErr, maxIter, relTol); // calculate omegas
+    // int nIter;
+    // double maxErr;
+    // bool not_conv;
+    // IL.evalOmegas(nIter, maxErr, maxIter, relTol); // calculate omegas
+    IL.evalOmegas(maxIter, relTol); // calculate omegas
     VectorXd omegasnew = IL.getOmegas(); // get omegas
     // check convergence
-    not_conv = (nIter == maxIter) && (maxErr > relTol);
-    if(verbose) {
-        Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
-    }
-    return Rcpp::List::create(_["omegas"] = omegasnew,
-                              _["convergence"] = !not_conv);
+    // not_conv = (nIter == maxIter) && (maxErr > relTol);
+    // not_conv = (omegasnew.sum() == 0); 
+    // if(verbose) {
+    //     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+    // }
+    return omegasnew;
+    // return Rcpp::List::create(_["omegas"] = omegasnew,
+    //                           _["convergence"] = !not_conv);
+}
+
+// [[Rcpp::export(".logEL")]]
+double logEL(Eigen::MatrixXd G, 
+                 int maxIter, double relTol, bool verbose) {
+    // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
+    int nObs = G.cols();
+    int nEqs = G.rows();
+    VectorXd y = VectorXd::Zero(nObs);
+    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+    // Here init with an MeanRegModel, but it is the same using QuantRegModel
+    // InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
+    InnerEL<MeanRegModel> IL;
+    IL.setData(y,X,NULL);
+    IL.setG(G); // assign the given G
+    // initialize variables for output here 
+    // int nIter;
+    // double maxErr;
+    // bool not_conv;
+    // double logel = IL.logEL(nIter, maxErr, maxIter, relTol);
+    double logel = IL.logEL(maxIter, relTol);
+    // check convergence
+    // not_conv = (nIter == maxIter) && (maxErr > relTol);
+    // if(verbose) {
+    //     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+    // }
+    return logel; 
+    // return Rcpp::List::create(_["logel"] = logel,
+    //                           _["convergence"] = !not_conv);
 }
