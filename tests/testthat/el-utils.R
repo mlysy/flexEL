@@ -127,6 +127,15 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
     return(list(omegas=omegahat, convergence=conv))
 }
 
+# G is nObs x nEqs matrix
+logEL_R <- function(omegas, G, max_iter = 100, rel_tol = 1e-07) {
+    rhs <- t(G) %*% omegas
+    if (sum(rhs) > 0.01) return(-Inf)
+    else {
+        return(sum(log(omegas)))
+    }
+}
+
 # TODO: changed
 mrls.logel_R <- function(y, X, Z, beta, gamma) {
     # max_iter = 100, rel_tol = 1e-07, verbose = FALSE

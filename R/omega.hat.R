@@ -11,12 +11,13 @@
 #' @export
 omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
     if (missing(deltas) && missing(epsilons)) {
-        omegaOut <- .omega.hat(t(G), max_iter, rel_tol, verbose)
+        omegahat <- .omega.hat(t(G), max_iter, rel_tol, verbose)
     }
     else {
-        omegaOut <- .omega.hat.EM(t(G), deltas, epsilons, 
+        omegahat <- .omega.hat.EM(t(G), deltas, epsilons, 
                                   max_iter, rel_tol, verbose)
     }
+    return(omegahat)
     # if (omegaOut$convergence) {
     #     return(omegaOut$omegas)
     # }

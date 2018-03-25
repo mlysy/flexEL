@@ -26,6 +26,7 @@ test_that("omegahat.R == omegahat.cpp", {
         # expect_equal(G.R, G.cpp)
         omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
         omegahat.R <- omega.hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+        omegahat.cpp
         expect_equal(omegahat.cpp, omegahat.R)
     }
 })

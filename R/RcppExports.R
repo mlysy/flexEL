@@ -18,26 +18,18 @@
 }
 
 .omega.hat <- function(G, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_evalOmegas`, G, maxIter, relTol, verbose)
+    .Call(`_bayesEL_omegaHat`, G, maxIter, relTol, verbose)
 }
 
-.logEL <- function(G, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_logEL`, G, maxIter, relTol, verbose)
+.logEL <- function(omegas, G, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_logEL`, omegas, G, maxIter, relTol, verbose)
 }
 
 .MeanReg_evalG <- function(y, X, beta) {
     .Call(`_bayesEL_MeanReg_evalG`, y, X, beta)
 }
 
-.MeanReg_logEL <- function(y, X, beta, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanReg_logEL`, y, X, beta, maxIter, relTol)
-}
-
 .QuantReg_evalG <- function(y, X, alpha, beta) {
     .Call(`_bayesEL_QuantReg_evalG`, y, X, alpha, beta)
-}
-
-.QuantReg_logEL <- function(y, X, alpha, beta, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_QuantReg_logEL`, y, X, alpha, beta, maxIter, relTol)
 }
 

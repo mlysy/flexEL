@@ -38,8 +38,8 @@ public:
     // InnerEL(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
     //       void* params);
     InnerEL(); // default ctor
-    void setData(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
-                 void* params);
+    void setData(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X, 
+                 void* _params);
     // logstar and its derivatives
     double logstar(double x);
     double logstar1(double x);
@@ -48,9 +48,12 @@ public:
     void lambdaNR(int& nIter, double& maxErr,
                   int maxIter, double relTol);
     VectorXd getLambda(); // get function for lambdaNew
-    // log empirical likelihood calculation 
-    double logEL(int maxIter, double relTol); 
+    // log empirical likelihood calculation with given omega and G
+    double logEL(); 
+    // find the best omegas given G 
     void evalOmegas(int maxIter, double relTol); 
+    // set and get functions 
+    void setOmegas(const Ref<const VectorXd>& _omegas); 
     VectorXd getOmegas(); // returns omegas
     // posterior sampler: removed for now
     // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
@@ -90,12 +93,12 @@ inline InnerEL<ELModel>::InnerEL(){}
 
 // set data with default ctor
 template<typename ELModel>
-inline void InnerEL<ELModel>::setData(const Ref<const VectorXd>& y,
-                                      const Ref<const MatrixXd>& X,
-                                      void* params) {
+inline void InnerEL<ELModel>::setData(const Ref<const VectorXd>& _y,
+                                      const Ref<const MatrixXd>& _X,
+                                      void* _params) {
     // std::cout << nObs << std::endl;
     // std::cout << nEqs << std::endl;
-    ELModel::setData(y,X,params); // set base class data 
+    ELModel::setData(_y,_X,_params); // set base class data 
     // logstar constants
     omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
     trunc = 1.0 / nObs;
@@ -212,7 +215,9 @@ inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
     // G must have been assigned
     int nIter;
     double maxErr; 
+    // std::cout << "evalOmegas: before lambdaNew = " << lambdaNew << std::endl;
     lambdaNR(nIter, maxErr, maxIter, relTol);
+    // std::cout << "evalOmegas: after lambdaNew = " << lambdaNew << std::endl;
     // check convergence 
     if (nIter == maxIter && maxErr > relTol) {
         omegas = VectorXd::Zero(nObs);
@@ -225,18 +230,35 @@ inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
 }
 
 template<typename ELModel>
+inline void InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& _omegas) {
+    omegas = _omegas; 
+}
+
+template<typename ELModel>
 inline VectorXd InnerEL<ELModel>::getOmegas() {
     return(omegas);
 }
 
 template<typename ELModel>
-inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
-    evalOmegas(maxIter, relTol); // evaluate weights and assign them 
-    // Maybe add a flag for lambdaNR's convergence..?
-    // if lambdaNR did not converge, return -Inf
-    if (omegas.sum() == 0) return -INFINITY;
-    else return(omegas.array().log().sum()); 
+inline double InnerEL<ELModel>::logEL() {
+    // check if omega is not a feasible solution with G return -Inf
+    VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
+    std::cout << "rhs = " << rhs.transpose() << std::endl; 
+    // TODO: what tolarance?  
+    if (rhs.array().sum() > 0.01) return -INFINITY;
+    else return(omegas.array().log().sum());
 }
+
+// This version finds the maximized loglikelihood, 
+//      or -Inf if no feasible omegas satisfies G.
+// template<typename ELModel>
+// inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
+//     evalOmegas(maxIter, relTol); // evaluate weights and assign them
+//     // Maybe add a flag for lambdaNR's convergence..?
+//     // if lambdaNR did not converge, return -Inf
+//     if (omegas.sum() == 0) return -INFINITY;
+//     else return(omegas.array().log().sum());
+// }
 
 // Old code: 
 // log empirical likelihood for linear regression Y = X'beta + eps

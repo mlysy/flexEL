@@ -42,7 +42,7 @@ Rcpp::List lambdaNR(Eigen::MatrixXd G,
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
 // as in the censored case 
 // [[Rcpp::export(".omega.hat")]]
-Eigen::VectorXd evalOmegas(Eigen::MatrixXd G, 
+Eigen::VectorXd omegaHat(Eigen::MatrixXd G, 
                           int maxIter, double relTol, bool verbose) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
@@ -72,6 +72,26 @@ Eigen::VectorXd evalOmegas(Eigen::MatrixXd G,
     //                           _["convergence"] = !not_conv);
 }
 
+// This version gives the loglikelihood, 
+//      or -Inf if omegas does not satisfy constraints.
+// [[Rcpp::export(".logEL")]]
+double logEL(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
+             int maxIter, double relTol, bool verbose) {
+    int nObs = G.cols();
+    int nEqs = G.rows();
+    VectorXd y = VectorXd::Zero(nObs);
+    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+    InnerEL<MeanRegModel> IL;
+    IL.setData(y,X,NULL);
+    IL.setG(G); // set the given G
+    IL.setOmegas(omegas); // set the given omegas
+    double logel = IL.logEL();
+    return logel; 
+}
+
+// This version finds the maximized loglikelihood, 
+//      or -Inf if no feasible omegas satisfies constraints.
+/* 
 // [[Rcpp::export(".logEL")]]
 double logEL(Eigen::MatrixXd G, 
                  int maxIter, double relTol, bool verbose) {
@@ -100,3 +120,4 @@ double logEL(Eigen::MatrixXd G,
     // return Rcpp::List::create(_["logel"] = logel,
     //                           _["convergence"] = !not_conv);
 }
+*/

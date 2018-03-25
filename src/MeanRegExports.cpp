@@ -19,19 +19,20 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(G); 
 }
 
-// [[Rcpp::export(".MeanReg_logEL")]]
-double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,
-                     int maxIter = 100, double relTol = 1e-7) {
-    // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
-    InnerEL<MeanRegModel> MR;
-    MR.setData(y,X,NULL); 
-    MR.evalG(beta);
-    int nIter;
-    double maxErr; 
-    double logELmean = MR.logEL(nIter, maxErr, maxIter,relTol); 
-    // TODO: check convergence here
-    return(logELmean);
-}
+// Old code:
+// // [[Rcpp::export(".MeanReg_logEL")]]
+// double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,
+//                      int maxIter = 100, double relTol = 1e-7) {
+//     // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+//     InnerEL<MeanRegModel> MR;
+//     MR.setData(y,X,NULL); 
+//     MR.evalG(beta);
+//     // int nIter;
+//     // double maxErr; 
+//     double logELmean = MR.logEL(); 
+//     // TODO: check convergence here
+//     return(logELmean);
+// }
 
 /*
 // [[Rcpp::export(".MeanReg_PostSample")]]

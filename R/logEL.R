@@ -8,11 +8,17 @@
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export
-logEL <- function(G, deltas, epsilons, 
+logEL <- function(omegas, G, deltas, epsilons, 
                   max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
     # non-censoing case
     if (missing(deltas) && missing(epsilons)) {
-        .logEL(G = G, maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+        if (!is.vector(omegas)) {
+            stop("omegas must be a vector")
+        }
+        if(nrow(G) != length(omegas)) {
+            stop("G and deltas have inconsistent dimensions.")
+        }
+        .logEL(omegas, G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
     }
     # censoring case
     else {

@@ -19,20 +19,21 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(G); 
 }
 
-// [[Rcpp::export(".QuantReg_logEL")]]
-double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
-                 double alpha, Eigen::VectorXd beta, 
-                 int maxIter = 100, double relTol = 1e-7) {
-    // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
-    InnerEL<QuantRegModel> QR;
-    QR.setData(y,X,&alpha); 
-    QR.evalG(beta); 
-    int nIter;
-    double maxErr;
-    double logELquant = QR.logEL(nIter, maxErr, maxIter, relTol);
-    // TODO: check convergence 
-    return(logELquant);
-}
+// Old code:
+// // [[Rcpp::export(".QuantReg_logEL")]]
+// double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
+//                  double alpha, Eigen::VectorXd beta, 
+//                  int maxIter = 100, double relTol = 1e-7) {
+//     // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+//     InnerEL<QuantRegModel> QR;
+//     QR.setData(y,X,&alpha); 
+//     QR.evalG(beta); 
+//     // int nIter;
+//     // double maxErr;
+//     double logELquant = QR.logEL();
+//     // TODO: check convergence 
+//     return(logELquant);
+// }
 
 /*
 // [[Rcpp::export(".QuantReg_post")]]

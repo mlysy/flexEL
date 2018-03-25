@@ -4,7 +4,7 @@
 \alias{logEL}
 \title{log empirical likelihood}
 \usage{
-logEL(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
+logEL(omegas, G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
   verbose = FALSE)
 }
 \arguments{
