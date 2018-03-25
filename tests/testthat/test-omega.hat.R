@@ -16,7 +16,7 @@ test_that("omegahat.R == omegahat.cpp", {
         p <- sample(1:(n-2), 1)
         max_iter <- sample(c(2, 10, 100), 1)
         rel_tol <- runif(1, 1e-6, 1e-5)
-        G <- matrix(rnorm(n*p),n,p) # random G seems not easy to work
+        G <- matrix(rnorm(n*p),n,p) # random G here
         # X <- replicate(p, rnorm(n))
         # X[1,] <- rep(1,p)
         # beta0 <- rnorm(p)
@@ -26,7 +26,7 @@ test_that("omegahat.R == omegahat.cpp", {
         # expect_equal(G.R, G.cpp)
         omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
         omegahat.R <- omega.hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-        omegahat.cpp
+        # omegahat.cpp
         expect_equal(omegahat.cpp, omegahat.R)
     }
 })
