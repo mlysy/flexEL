@@ -67,8 +67,8 @@ log.star2 <- function(x, n) {
 }
 
 # Note: G is nObs x nEqs
-# TODO: right now G must exist in the environment 
-Qfun <- function(lambda) {
+# TODO: right now G must exist in the environment
+Qfun <- function(lambda, G) {
     G <- t(G)
     N <- ncol(G) # nObs
     sum(apply(G, 2, function(gg) log.star(x = 1 - sum(lambda*gg), n = N)))
@@ -76,7 +76,7 @@ Qfun <- function(lambda) {
 
 # R implementation of lambdaNR
 # G is nObs x nEqs matrix
-lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE, 
+lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
                        lambdaOld = NULL) {
     G <- t(G)
     nObs <- ncol(G)
@@ -107,7 +107,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
     return(output)
 }
 
-# 
+#
 # G is nObs x nEqs matrix
 omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
     lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
@@ -175,7 +175,7 @@ log.sharp2 <- function(x, q) {
 
 # for mle.check
 # Note: requires weights to be in the environment, and G is nObs x nEqs
-QfunCens <- function(lambda) {
+QfunCens <- function(lambda, G) {
     G <- t(G)
     weights_sum <- sum(weights)
     G_list <- split(G, rep(1:ncol(G), each = nrow(G)))
@@ -185,7 +185,7 @@ QfunCens <- function(lambda) {
 }
 
 # R implementation of lambdaNRC
-# G is nObs x nEqs matrix 
+# G is nObs x nEqs matrix
 # lambdaOld passed in is for the EM algorithm `omega.hat.EM_R` to work properly
 lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
@@ -239,7 +239,7 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
     return(psos)
 }
 
-# calculate the weights for the weighted (censored) EL problem 
+# calculate the weights for the weighted (censored) EL problem
 evalWeights_R <- function(deltas, omegas, epsilons) {
     nObs <- length(omegas)
     epsOrd <- order(epsilons, decreasing = TRUE)
@@ -253,12 +253,12 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
             if (kk == ii) break
         }
     }
-    # the weights have the order as the original sample 
+    # the weights have the order as the original sample
     weights <- deltas + psots
     return(weights)
 }
 
-# G is nObs x nEqs matrix 
+# G is nObs x nEqs matrix
 omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
     n <- nrow(G)
     m <- ncol(G)
@@ -274,7 +274,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
         # print(weights)
         # M step:
         lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
-        # TODO: what if not converged ?? use a random weights and continue ? 
+        # TODO: what if not converged ?? use a random weights and continue ?
         if (!lambdaOut$convergence) {
             omegas <- abs(omegas + rnorm(n))
             omegas <- omegas/sum(omegas)
@@ -294,7 +294,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
         if (err < rel_tol) break
         lambdaOld <- lambdaNew
     }
-    notconv <- nIter == max_iter && err > rel_tol # TRUE if not converged 
+    notconv <- nIter == max_iter && err > rel_tol # TRUE if not converged
     if (notconv) {
         omegas = rep(1/n,n)
     }
