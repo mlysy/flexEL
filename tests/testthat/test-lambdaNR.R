@@ -3,7 +3,7 @@ library(bayesEL) # always load the package (with library)
 library(optimCheck)
 # source("el-utils.R")
 source("~/bayesEL/tests/testthat/el-utils.R")
-source("~/bayesEL/tests/testthat/mle-check.R")
+# source("~/bayesEL/tests/testthat/mle-check.R")
 
 # library(testthat) # not loaded automatically
 context("lambdaNR")
@@ -55,25 +55,31 @@ test_that("lambda.R == lambda.cpp", {
 
 # Censored case: 
 # TODO: with censoring sometimes only one converges :(
-# test_that("lambdaC.R == lambdaC.cpp", {
-#     for(ii in 1:ntest) {
-#         n <- sample(10:20,1)
-#         p <- sample(1:(n-2), 1)
-#         G <- matrix(rnorm(n*p),n,p) # randomly generated G
-#         max_iter <- sample(c(2, 10, 100), 1)
-#         rel_tol <- runif(1, 1e-6, 1e-5)
-#         weights <- abs(rnorm(n))
-#         weights <- weights / sum(weights) * n # sum(weights) == n
-#         lambda.cpp <- lambdaNR(G = G.cpp, weights,
-#                                max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-#         nrout <- lambdaNRC_R(G = G.R, weights,
-#                              max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-#         lambda.R <- nrout$lambda
-#         lambda.R
-#         lambda.cpp
-#         expect_equal(lambda.R, lambda.cpp)
-#     }
-# })
+test_that("lambdaC.R == lambdaC.cpp", {
+    for(ii in 1:ntest) {
+        n <- sample(10:20,1)
+        p <- sample(1:(n-2), 1)
+        G <- matrix(rnorm(n*p),n,p) # randomly generated G
+        max_iter <- sample(c(2, 10, 100), 1)
+        rel_tol <- runif(1, 1e-6, 1e-5)
+        weights <- abs(rnorm(n))
+        weights <- weights / sum(weights) * n # sum(weights) == n
+        lambda.cpp <- lambdaNR(G = G, weights,
+                               max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+        # lambda.cpp
+        # ocheck.cpp <- optim_refit(lambda.cpp, QfunCens)
+        # expect_lt(max.xdiff(ocheck.cpp),0.01)
+        
+        nrout <- lambdaNRC_R(G = G, weights,
+                             max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+        lambda.R <- nrout$lambda
+        # lambda.R 
+        # ocheck.R <- optim_proj(lambda.R, QfunCens)
+        # expect_lt(max.xdiff(ocheck.R),0.01)
+        expect_equal(lambda.cpp, lambda.R)
+        expect_lt(max.xdiff(ocheck.cpp), 0.01)
+    }
+})
 
 # lambdahat <- lambda.R
 # G <- G.R

@@ -243,7 +243,7 @@ template<typename ELModel>
 inline double InnerEL<ELModel>::logEL() {
     // check if omega is not a feasible solution with G return -Inf
     VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
-    std::cout << "rhs = " << rhs.transpose() << std::endl; 
+    // std::cout << "rhs = " << rhs.transpose() << std::endl; 
     // TODO: what tolarance?  
     if (rhs.array().sum() > 0.01) return -INFINITY;
     else return(omegas.array().log().sum());

@@ -45,6 +45,7 @@ test_that("logel.R == logel.cpp", {
             # this should be 0s still 
             expect_equal(c(omegas_twk %*% G), rep(0,p))
             logtwk.cpp <- logEL(omegas_twk, G)
+            # logopt should be greater than logtwk 
             expect_gt(logopt - logtwk, 0)
         }
  

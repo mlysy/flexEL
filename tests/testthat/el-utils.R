@@ -153,7 +153,7 @@ log.sharp <- function(x, q) {
     ans <- rep(NA,length(x))
     ans[cond] <- log(x[cond])
     ans[!cond] <- -1/(2*q[!cond]^2)*x[!cond]^2 + 2/q[!cond]*x[!cond]
-    - 3/2 + log(q[!cond])
+                                                - 3/2 + log(q[!cond])
     return(ans)
 }
 
@@ -174,8 +174,8 @@ log.sharp2 <- function(x, q) {
 }
 
 # for mle.check
-# Note: requires weights to be in the environment, and G is xObs x nEqs
-QfunCens <- function(lambda, G) {
+# Note: requires weights to be in the environment, and G is nObs x nEqs
+QfunCens <- function(lambda) {
     G <- t(G)
     weights_sum <- sum(weights)
     G_list <- split(G, rep(1:ncol(G), each = nrow(G)))
@@ -212,6 +212,7 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
         # Problem lambdaOld flies off to +Inf, but because Q2 tends to 0
         lambdaNew <- lambdaOld - solve(Q2,Q1)
         maxErr <- MaxRelErr(lambdaNew, lambdaOld) # maximum relative error
+        # message("maxErr = ", maxErr)
         if (maxErr < rel_tol) {
             break;
         }

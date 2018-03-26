@@ -171,7 +171,7 @@ inline double InnerELC<ELModel>::logsharp1(double x, double q) {
     if(x >= q) {
         return(1.0/x);
     } else {
-        return(-1.0/(q*q) + 2.0/q);
+        return(-1.0/(q*q)*x + 2.0/q);
     }
 }
 
@@ -224,8 +224,10 @@ inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr,
         Q1 = G * (rho.array()*weights.array()).matrix();
         // update lambda
         Q2ldlt.compute(Q2);
+        // std::cout << "Q2invQ1 = " << Q2ldlt.solve(Q1) << std::endl;
         lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
         maxErr = maxRelErr(lambdaNew, lambdaOld); // maximum relative error
+        // std::cout << "maxErr = " << maxErr << std::endl;
         if (maxErr < relTol) {
             break;
         }
