@@ -47,16 +47,16 @@ test_that("lambda.R == lambda.cpp", {
             else {
                 ocheck <- optim_refit(xsol = lambda.cpp, Qfun)
             }
-            if (max.xdiff(ocheck) > 0.01) print(orefit)
+            if (max.xdiff(ocheck) > 0.01) print(ocheck)
             expect_lt(max.xdiff(ocheck),0.01)
         }
     }
 })
 
 # Censored case: 
-# TODO: with censoring sometimes only one converges :(
 test_that("lambdaC.R == lambdaC.cpp", {
     for(ii in 1:ntest) {
+        message(ii)
         n <- sample(10:20,1)
         p <- sample(1:(n-2), 1)
         G <- matrix(rnorm(n*p),n,p) # randomly generated G
@@ -76,8 +76,28 @@ test_that("lambdaC.R == lambdaC.cpp", {
         # lambda.R 
         # ocheck.R <- optim_proj(lambda.R, QfunCens)
         # expect_lt(max.xdiff(ocheck.R),0.01)
+        
+        # check R and C++ are equal
         expect_equal(lambda.cpp, lambda.R)
-        expect_lt(max.xdiff(ocheck.cpp), 0.01)
+        
+        # Check optimality by optimCheck if converged 
+        if (nrout$convergence) {
+            # TODO: it seems to be very unstable with p == 1, use optim_proj much better 
+            if (p == 1) {
+                # xfit <- optim(par = lambda.cpp, fn = Qfun,
+                #               # lower = abs(lambda.cpp)*(-1.5), upper = abs(lambda.cpp)*1.5, # with "Brent"
+                #               method = "BFGS")
+                # ocheck <- optim_refit(xsol = lambda.cpp, Qfun, xopt = xfit$par)
+                ocheck <- optim_proj(xsol = lambda.cpp, fun = QfunCens, plot = FALSE)
+            }
+            else {
+                ocheck <- optim_refit(xsol = lambda.cpp, QfunCens)
+            }
+            if (max.xdiff(ocheck) > 0.01) print(ocheck)
+            expect_lt(max.xdiff(ocheck),0.01)
+        }
+        # ocheck.cpp <- optim_refit(lambda.cpp, QfunCens)
+        # expect_lt(max.xdiff(ocheck.cpp), 0.01)
     }
 })
 
