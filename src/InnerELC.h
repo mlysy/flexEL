@@ -70,9 +70,12 @@ public:
                   int maxIter, double relTol);
     // eval functions 
     void evalWeights(); // calculate weights according to epsilons 
-    void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
+    // void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
+    void evalOmegas(int maxIter, double relTol);
+    // log empirical likelihood calculation with given omega and G
+    double logEL(); 
     // set and get functions 
-    void setDeltas(const Ref<const VectorXd>& _deltas); 
+    // void setDeltas(const Ref<const VectorXd>& _deltas); 
     void setWeights(const Ref<const VectorXd>& _weights); 
     void setOmegas(const Ref<const VectorXd>& _omegas);
     void setEpsilons(const Ref<const VectorXd>& _epsilons);
@@ -261,15 +264,18 @@ inline VectorXd InnerELC<ELModel>::getLambda() {
 //     weights = deltas + (1-deltas.array()).matrix().transpose() * ; 
 // }
 
+// returns partial sum of omegas according to the epsilons(jj) that are larger  
+//   than epsilons(ii)
+// Note: epsOrd must have been assigned, i.e. have called sort_inds(epsilons); 
 template<typename ELModel>
 inline double InnerELC<ELModel>::evalPsos(const int ii) {
     double psos = 0;
     int kk;
-    for (int jj=0; jj <nObs; jj++) {
-        // kk = epsOrd.at(jj); // index of jj-th epsilon (ordered decreasingly)
-        kk = epsOrd(jj);
+    for (int jj=nObs-1; jj>=0; jj--) {
+        // epsOrd corresponds to epsilons acesndingly 
+        kk = epsOrd(jj); // kk is the index of the jj-th largest epsilon
         psos += omegas(kk);
-        if (kk == ii) break;
+        if (kk == ii) break; // until (backwardsly) reaching ii-th largest epsilon 
     }
     return psos;
 }
@@ -291,8 +297,7 @@ inline void InnerELC<ELModel>::evalWeights() {
     epsOrd = sort_inds(epsilons); 
     int kk;
     for (int ii=0; ii<nObs; ii++) {
-        for (int jj=nObs-1; jj>=0; jj--) { // here is backwards (smaller ones)
-            // kk = epsOrd.at(jj);
+        for (int jj=0; jj<nObs; jj++) { // here is backwards (smaller ones)
             kk = epsOrd(jj);
             if (deltas(kk) == 0) {
                 psots(ii) += omegas(ii)/evalPsos(kk);
@@ -307,11 +312,12 @@ inline void InnerELC<ELModel>::evalWeights() {
 // exported as `omega.hat.EM`
 // Note: epsilons must have been assigned
 template<typename ELModel>
-inline void InnerELC<ELModel>::evalOmegas(int& nIter, double& maxErr,
-                                          int maxIter, double relTol) {
+inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
     // Problem: have to save this o.w. lambdaOld got modified
     VectorXd lambdaOldEM = lambdaOld; 
     int ii; 
+    int nIter; 
+    double maxErr;
     for(ii=0; ii<maxIter; ii++) {
         // E-step:
         evalWeights(); // assigns weights according to epsilons
@@ -343,17 +349,17 @@ inline void InnerELC<ELModel>::evalOmegas(int& nIter, double& maxErr,
         // std::cout << "In evalOmegas: omegas = \n" << omegas << std::endl; 
         maxErr = maxRelErr(lambdaNew, lambdaOldEM); 
         // std::cout << "In evalOmegas: maxErr = " << maxErr << std::endl;
-        if (maxErr <= relTol) break;
+        if (maxErr < relTol) break;
         lambdaOldEM = lambdaNew;
     }
     nIter = ii; 
     return;
 }
 
-template<typename ELModel>
-inline void InnerELC<ELModel>::setDeltas(const Ref<const VectorXd>& _deltas) {
-    deltas = _deltas;
-}
+// template<typename ELModel>
+// inline void InnerELC<ELModel>::setDeltas(const Ref<const VectorXd>& _deltas) {
+//     deltas = _deltas;
+// }
 
 template<typename ELModel>
 inline void InnerELC<ELModel>::setWeights(const Ref<const VectorXd>& _weights) {
@@ -373,6 +379,29 @@ inline VectorXd InnerELC<ELModel>::getWeights() {
 template<typename ELModel>
 inline VectorXd InnerELC<ELModel>::getOmegas() {
     return(omegas);
+}
+
+template<typename ELModel>
+inline double InnerELC<ELModel>::logEL() {
+    // TODO: (sort it here?) 
+    // sort epsilons decendingly and record its order 
+    epsOrd = sort_inds(epsilons); 
+    // std::cout << "epsOrd = " << epsOrd.transpose() << std::endl; 
+    // check if omega is not a feasible solution with G return -Inf
+    VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
+    // std::cout << "rhs = " << rhs.transpose() << std::endl; 
+    // TODO: what tolarance?  
+    if (rhs.array().sum() > 0.01) return -INFINITY;
+    else {
+        VectorXd psos(nObs); 
+        for (int ii=0; ii<nObs; ii++) {
+            psos(ii) = evalPsos(ii); 
+        }
+        // std::cout << "psos = " << psos.transpose() << std::endl; 
+        return((deltas.array()*omegas.array().log()
+               + (1-deltas.array())*psos.array().log()).sum());
+        // R: return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+    }
 }
 
 // // posterior sampler

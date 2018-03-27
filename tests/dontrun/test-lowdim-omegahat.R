@@ -1,7 +1,8 @@
 ## check that omega.hat is working properly in low dimension cases 
 require(bayesEL)
+require(optimCheck)
 source("~/bayesEL/tests/testthat/el-utils.R")
-source("~/bayesEL/tests/testthat/mle-check.R")
+# source("~/bayesEL/tests/testthat/mle-check.R")
 
 #---- 1-d problem -- still sometimes not stable ----
 p <- 1
@@ -30,6 +31,24 @@ omegas.cpp
 omegas.cpp - omegas.R
 
 # So .. if they both converged then they are the same but often only one converged
+# but, how to check optimality .. 
+
+# ok choose which to check here
+omegas <- omegas.cpp
+# quick check by using Null space vectors
+NG <- Null(G) # any col c of NG satisfies c %*% G = 0
+# we know that omegas > 0, just take any c of NG, add omegas until > 0
+# then normalize it
+ind <- sample(N-p,1) # dim of NG is n x (n-p)
+mult <- sample(20:100,1) # randomly scale up the omegas by mult
+omegas_twk <- NG[,ind] + mult*omegas
+# make sure omegas_twk is nonnegative: 
+while (sum(omegas_twk < 0) > 0) omegas_twk <- omegas_twk + 50*omegas
+omegas_twk <- omegas_twk / sum(omegas_twk) # normalize it
+logel <- logEL_R(omegas, G, deltas, epsilons)
+logel_twk <- logEL_R(omegas_twk, G, deltas, epsilons)
+logel - logel_twk
+# expect_gt(logel.cpp, logel.cpp_twk)
 
 #---- 2-d priblem -- 5 variables case ----
 # Note: epsilons should be in the enviornment 
@@ -93,7 +112,7 @@ objvalmode <- -Inf
 modeval <- NA
 modews <- rep(NA,5)
 ## choose which to plot here 
-omegas_plot <- omegas.R
+omegas_plot <- omegas.cpp
 for (ii in 1:100){
     wsobjval <- obj(d[ii], 0.05) # omegas_plot[5]
     objval[ii] <- wsobjval$objval

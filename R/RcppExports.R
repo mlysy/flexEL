@@ -10,7 +10,11 @@
 }
 
 .omega.hat.EM <- function(G, deltas, epsilons, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_evalOmegasEM`, G, deltas, epsilons, maxIter, relTol, verbose)
+    .Call(`_bayesEL_omegaHatEM`, G, deltas, epsilons, maxIter, relTol, verbose)
+}
+
+.logELC <- function(omegas, G, deltas, epsilons, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_logELC`, omegas, G, deltas, epsilons, maxIter, relTol, verbose)
 }
 
 .lambdaNR <- function(G, maxIter, relTol, verbose) {

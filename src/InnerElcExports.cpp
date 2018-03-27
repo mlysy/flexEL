@@ -75,7 +75,7 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".omega.hat.EM")]]
-Rcpp::List evalOmegasEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
+Eigen::VectorXd omegaHatEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
                 Eigen::VectorXd epsilons, 
                 int maxIter, double relTol, bool verbose) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
@@ -87,19 +87,38 @@ Rcpp::List evalOmegasEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
     InnerELC<MeanRegModel> ILC; 
     ILC.setData(y,X,deltas,NULL); 
     ILC.setG(G); // assign a given G
-    ILC.setDeltas(deltas); 
     ILC.setEpsilons(epsilons); 
     // initialize variables for output here 
-    int nIter;
-    double maxErr;
-    bool not_conv;
-    ILC.evalOmegas(nIter, maxErr, maxIter, relTol);
+    // int nIter;
+    // double maxErr;
+    // bool not_conv;
+    ILC.evalOmegas(maxIter, relTol);
     VectorXd omegasnew = ILC.getOmegas(); // output
+    return omegasnew; 
     // check convergence
-    not_conv = (nIter == maxIter) && (maxErr > relTol);
-    if(verbose) {
-        Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
-    }
-    return Rcpp::List::create(_["omegas"] = omegasnew,
-                              _["convergence"] = !not_conv);
+    // not_conv = (nIter == maxIter) && (maxErr > relTol);
+    // if(verbose) {
+    //     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+    // }
+    // return Rcpp::List::create(_["omegas"] = omegasnew,
+    //                           _["convergence"] = !not_conv);
+}
+
+// This version gives the loglikelihood, 
+//      or -Inf if omegas does not satisfy constraints.
+// [[Rcpp::export(".logELC")]]
+double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
+              Eigen::VectorXd deltas, Eigen::VectorXd epsilons, 
+             int maxIter, double relTol, bool verbose) {
+    int nObs = G.cols();
+    int nEqs = G.rows();
+    VectorXd y = VectorXd::Zero(nObs);
+    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+    InnerELC<MeanRegModel> ILC;
+    ILC.setData(y,X,deltas,NULL);
+    ILC.setG(G); // set the given G
+    ILC.setOmegas(omegas); // set the given omegas
+    ILC.setEpsilons(epsilons); 
+    double logel = ILC.logEL();
+    return logel; 
 }

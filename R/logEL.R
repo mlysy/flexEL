@@ -1,5 +1,6 @@
 #' log empirical likelihood
 #'
+#' @param omegas \code{nObs} probability vector. 
 #' @param G \code{nObs x nEqs} matrix of constraints.
 #' @param deltas \code{nObs} vector of censoring indicators. 
 #' @param epsilons \code{nObs} vector of residuals. 
@@ -32,6 +33,7 @@ logEL <- function(omegas, G, deltas, epsilons,
         if(length(deltas) != length(epsilons)) {
             stop("deltas and epsilons have inconsistent lengths.")
         }
-        ...
+        .logELC(omegas, G = t(G), deltas = deltas, epsilons = epsilons, 
+               maxIter = max_iter, relTol = rel_tol, verbose = verbose)
     }
 }

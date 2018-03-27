@@ -14,7 +14,7 @@ class compare_acc_vec {
 public:
     compare_acc_vec(const T& vec): vec(vec) { }
     bool operator () (size_t lind, size_t rind) const {
-        return vec[lind] > vec[rind]; // < to sort ascendingly; > to sort descendingly
+        return vec[lind] < vec[rind]; // < to sort ascendingly; > to sort descendingly
     }
 };
 

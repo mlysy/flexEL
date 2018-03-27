@@ -68,14 +68,14 @@ log.star2 <- function(x, n) {
 
 # Note: G is nObs x nEqs
 # TODO: right now G must exist in the environment 
-Qfun <- function(lambda) {
+Qfun <- function(lambda, G) {
     G <- t(G)
     N <- ncol(G) # nObs
     sum(apply(G, 2, function(gg) log.star(x = 1 - sum(lambda*gg), n = N)))
 }
 
 # R implementation of lambdaNR
-# G is nObs x nEqs matrix
+# Input: G is nObs x nEqs matrix
 lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE, 
                        lambdaOld = NULL) {
     G <- t(G)
@@ -100,7 +100,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
         if (maxErr < rel_tol) break;
         lambdaOld <- lambdaNew
     }
-    notconv <- ii == max_iter && maxErr > rel_tol
+    notconv <- (ii == max_iter && maxErr > rel_tol)
     if(notconv) lambdaNew <- rep(NA, nEqs)
     # c(lambdaNew) to make sure lambda is a vector
     output <- list(lambda=c(lambdaNew), convergence=!notconv)
@@ -111,28 +111,55 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
 # G is nObs x nEqs matrix
 omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
     lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
-    lambdahat <- lambdaOut$lambda
     # nIter <- lambdaout$nIter
     # maxErr <- lambdaout$maxErr
     # notconv <- nIter == max_iter && maxErr > rel_tol # 1 if not converged
     conv <- lambdaOut$convergence # 1 if converged
     if (!conv) {
         nObs <- nrow(G)
-        omegahat <- rep(1.0/nObs,nObs)
+        omegahat <- rep(0,nObs)
     }
     else {
+        lambdahat <- lambdaOut$lambda
         omegahat <- c(1/(1-t(lambdahat) %*% t(G)) / sum(1/(1-t(lambdahat) %*% t(G))))
     }
     # returns a vector of omegahat
-    return(list(omegas=omegahat, convergence=conv))
+    return(omegahat)
+    # return(list(omegas=omegahat, convergence=conv))
 }
 
 # G is nObs x nEqs matrix
-logEL_R <- function(omegas, G, max_iter = 100, rel_tol = 1e-07) {
+logEL_R <- function(omegas, G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
+    if (nrow(G) != length(omegas)) {
+        stop("omegas and G have inconsistent dimensions.")
+    }
+    # If not feasible, return -Inf 
     rhs <- t(G) %*% omegas
-    if (sum(rhs) > 0.01) return(-Inf)
-    else {
+    if (sum(rhs) > 0.01) return(-Inf) # TODO: what tolerance to use here
+    # non-censored case:
+    if (missing(deltas) && missing(epsilons)) {
         return(sum(log(omegas)))
+    }
+    # censored case:
+    else {
+        if (length(omegas) != length(deltas)) {
+            stop("omegas and deltas have inconsistent dimensions.")
+        }
+        if (length(omegas) != length(epsilons)) {
+            stop("omegas and epsilons have inconsistent dimensions.")
+        }
+        if (length(deltas) != length(epsilons)) {
+            stop("deltas and epsilons have inconsistent dimensions.")
+        }
+        n <- length(omegas)
+        epsOrd <- order(epsilons) # ascending order of epsilons
+        # print(epsOrd)
+        psos <- rep(0,n)
+        for (ii in 1:n) {
+            psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+        }
+        # print(psos)
+        return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
     }
 }
 
@@ -175,13 +202,14 @@ log.sharp2 <- function(x, q) {
 
 # for mle.check
 # Note: requires weights to be in the environment, and G is nObs x nEqs
-QfunCens <- function(lambda) {
+QfunCens <- function(lambda, G) {
     G <- t(G)
     weights_sum <- sum(weights)
     G_list <- split(G, rep(1:ncol(G), each = nrow(G)))
     ls <- mapply(function(gg,qq) log.sharp(x = weights_sum + sum(lambda*gg), qq),
                  G_list, weights)
-    return(weights %*% ls)
+    # as.numeric otherwise it's a 1-1 matrix
+    return(as.numeric(weights %*% ls))
 }
 
 # R implementation of lambdaNRC
@@ -231,7 +259,7 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
 evalPsos_R <- function(ii, epsOrd, omegas) {
     nObs <- length(omegas)
     psos <- 0
-    for (jj in 1:nObs) {
+    for (jj in nObs:1) {
         kk <- epsOrd[jj]
         psos <- psos + omegas[kk] # sum over the omegas of eps <= than ii-th eps
         if (kk == ii) break
@@ -245,7 +273,7 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     epsOrd <- order(epsilons, decreasing = TRUE)
     psots <- rep(0,nObs)
     for (ii in 1:nObs) {
-        for (jj in nObs:1) {
+        for (jj in 1:nObs) {
             kk <- epsOrd[jj]
             if (deltas[kk] == 0) {
                 psots[ii] <- psots[ii] + omegas[ii]/evalPsos_R(kk, epsOrd, omegas)
@@ -291,35 +319,37 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
             message("iter = ", iter)
             message("err = ", err)
         }
-        if (err < rel_tol) break
+        if (err <= rel_tol) break
         lambdaOld <- lambdaNew
     }
-    notconv <- nIter == max_iter && err > rel_tol # TRUE if not converged 
+    notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
     if (notconv) {
-        omegas = rep(1/n,n)
+        omegas = rep(0,n)
     }
-    output <- list(omegas = omegas, convergence=!notconv)
-    # output <- list(omegas = omegas, lambda=lambdaNew)
-    return(output)
+    return(omegas)
+    # output <- list(omegas = omegas, convergence=!notconv)
+    # # output <- list(omegas = omegas, lambda=lambdaNew)
+    # return(output)
 }
 
 # wrapper function for censor and non-censor omega.hat
 omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
     if (missing(deltas) && missing(epsilons)) {
-        omegaOut <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
+        omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
     }
     else {
-        omegaOut <- omega.hat.EM_R(G, deltas, epsilons,
+        omegas <- omega.hat.EM_R(G, deltas, epsilons,
                                    max_iter, rel_tol, verbose)
     }
-    if (omegaOut$convergence) {
-        return(c(omegaOut$omegas))
-    }
-    else {
-        # TODO: verbose?
-        n <- nrow(G)
-        return(rep(0,n))
-    }
+    return(c(omegas))
+    # if (omegaOut$convergence) {
+    #     return(c(omegas))
+    # }
+    # else {
+    #     # TODO: verbose?
+    #     n <- nrow(G)
+    #     return(rep(0,n))
+    # }
 }
 
 #---- mean regression ----

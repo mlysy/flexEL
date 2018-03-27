@@ -3,10 +3,10 @@ library(bayesEL) # always load the package (with library)
 source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically
-context("getWeights")
+context("evalWeights")
 
 ntest <- 50
-test_that("lambda.R == lambda.cpp", {
+test_that("weights.R == weights.cpp", {
     for(ii in 1:ntest) {
         nObs <- sample(10:50,1) 
         nEqs <- sample(2:5,1)
@@ -20,9 +20,9 @@ test_that("lambda.R == lambda.cpp", {
         omegas <- abs(rnorm(nObs)) 
         omegas <- omegas / sum(omegas) # prob vector
         epsilons <- rnorm(nObs)
-        weights.cpp <- getWeights(deltas, omegas, epsilons)
+        weights.cpp <- evalWeights(deltas, omegas, epsilons)
         expect_equal(sum(weights.cpp),nObs)
-        weights.R <- getWeights_R(deltas, omegas, epsilons)
+        weights.R <- evalWeights_R(deltas, omegas, epsilons)
         expect_equal(sum(weights.R),nObs)
     }
 })
