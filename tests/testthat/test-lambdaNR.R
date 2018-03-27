@@ -42,7 +42,9 @@ test_that("lambda.R == lambda.cpp", {
                 #               # lower = abs(lambda.cpp)*(-1.5), upper = abs(lambda.cpp)*1.5, # with "Brent"
                 #               method = "BFGS")
                 # ocheck <- optim_refit(xsol = lambda.cpp, Qfun, xopt = xfit$par)
-                ocheck <- optim_proj(xsol = lambda.cpp, fun = Qfun, plot = FALSE)
+                ocheck <- optim_proj(xsol = lambda.cpp, 
+                                     fun = function(lambda) QfunCens(lambda, G),
+                                     plot = FALSE)
             }
             else {
                 ocheck <- optim_refit(xsol = lambda.cpp, Qfun)
@@ -85,7 +87,9 @@ test_that("lambdaC.R == lambdaC.cpp", {
         # Check optimality by optimCheck if converged 
         if (nrout$convergence) {
             # check by optim_proj
-            ocheck <- optim_proj(xsol = lambda.cpp, fun = QfunCens, plot = FALSE)
+            ocheck <- optim_proj(xsol = lambda.cpp, 
+                                 fun = function(lambda) QfunCens(lambda, G), 
+                                 plot = FALSE)
             if (max.xdiff(ocheck) > 0.1) print(ocheck)
             expect_lt(max.xdiff(ocheck),0.1)
             # # TODO: it seems to be very unstable with p == 1, use optim_proj much better 

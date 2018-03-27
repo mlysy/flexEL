@@ -24,5 +24,6 @@ test_that("weights.R == weights.cpp", {
         expect_equal(sum(weights.cpp),nObs)
         weights.R <- evalWeights_R(deltas, omegas, epsilons)
         expect_equal(sum(weights.R),nObs)
+        expect_equal(weights.cpp, weights.R)
     }
 })

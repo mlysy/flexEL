@@ -128,6 +128,8 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
     # return(list(omegas=omegahat, convergence=conv))
 }
 
+
+
 # G is nObs x nEqs matrix
 logEL_R <- function(omegas, G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
     if (nrow(G) != length(omegas)) {
@@ -270,7 +272,7 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
 # calculate the weights for the weighted (censored) EL problem 
 evalWeights_R <- function(deltas, omegas, epsilons) {
     nObs <- length(omegas)
-    epsOrd <- order(epsilons, decreasing = TRUE)
+    epsOrd <- order(epsilons)
     psots <- rep(0,nObs)
     for (ii in 1:nObs) {
         for (jj in 1:nObs) {
