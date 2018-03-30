@@ -128,8 +128,6 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
     # return(list(omegas=omegahat, convergence=conv))
 }
 
-
-
 # G is nObs x nEqs matrix
 logEL_R <- function(omegas, G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
     if (nrow(G) != length(omegas)) {
@@ -206,7 +204,7 @@ log.sharp2 <- function(x, q) {
 # Note: requires weights to be in the environment, and G is nObs x nEqs
 QfunCens <- function(lambda, G) {
     G <- t(G)
-    weights_sum <- sum(weights)
+    weights_sum <- sum(weights) # this should be nObs tho..
     G_list <- split(G, rep(1:ncol(G), each = nrow(G)))
     ls <- mapply(function(gg,qq) log.sharp(x = weights_sum + sum(lambda*gg), qq),
                  G_list, weights)
@@ -288,6 +286,31 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     return(weights)
 }
 
+# find a solution in the null space of G s.t. >= 0 and sum to 1. 
+# G is nObs x nEqs 
+# library(MASS)
+# Warning: this does not guarantee to find a solution
+searchSol <- function(G) {
+    n <- nrow(G)
+    p <- ncol(G)
+    con.mat1 <- cbind(G,-G)
+    con.mat <- rbind(con.mat1, colSums(con.mat1))
+    con.dir <- c(rep(">=",n),"==")
+    con.rhs <- c(rep(0,n),1)
+    sol <- matrix(nrow=150, ncol=n) 
+    for (i in 1:n) { 
+        obj.in <- rnorm(p)
+        obj.in <- cbind(obj.in, -obj.in)
+        out <- lp (objective.in = obj.in, 
+                   const.mat = con.mat, 
+                   const.dir = con.dir, 
+                   const.rhs = con.rhs)
+        sol[i,] <- con.mat1 %*% out$solution 
+    } 
+    sol <- unique(round(sol, digits=10)) 
+    omegas <- t(sol[1,])
+}
+
 # G is nObs x nEqs matrix 
 omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
     n <- nrow(G)
@@ -296,6 +319,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     lambdaOld <- rep(0,m)
     nIter <- 0
     omegas <- rep(1/n,n)
+    # pick a vector in the null space that is positive and sum to 1: 
+    # omegas <- searchSol(G)
     for (ii in 1:max_iter) {
         nIter <- ii
         # E step: calculating weights
@@ -306,6 +331,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
         lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
         # TODO: what if not converged ?? use a random weights and continue ? 
         if (!lambdaOut$convergence) {
+            message("randomly modify omegas..")
             omegas <- abs(omegas + rnorm(n))
             omegas <- omegas/sum(omegas)
             lambdaNew <- lambdaOld
@@ -352,6 +378,29 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
     #     n <- nrow(G)
     #     return(rep(0,n))
     # }
+}
+
+library(MASS) # for use of Null
+# wrapper of omega.hat_R for optimCheck
+omega.check <- function(x, omegas, G, deltas, epsilons) {
+  NG <- Null(G)
+  xNG <- c(NG %*% x) - rowSums(NG) + omegas # x == 1s, xNG == omegas 
+  if (any(xNG < 0)) return(-Inf)
+  xNG <- xNG / sum(xNG) # normalize it
+  if (missing(deltas) && missing(epsilons)) {
+    return(sum(log(xNG)))
+  }
+  else {
+    n <- length(omegas)
+    epsOrd <- order(epsilons) # ascending order of epsilons
+    # print(epsOrd)
+    psos <- rep(0,n)
+    for (ii in 1:n) {
+      psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+    }
+    # print(psos)
+    return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+  }
 }
 
 #---- mean regression ----
