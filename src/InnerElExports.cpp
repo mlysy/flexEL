@@ -72,26 +72,8 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G,
     //                           _["convergence"] = !not_conv);
 }
 
-// This version gives the loglikelihood, 
-//      or -Inf if omegas does not satisfy constraints.
-// [[Rcpp::export(".logEL")]]
-double logEL(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
-             int maxIter, double relTol, bool verbose) {
-    int nObs = G.cols();
-    int nEqs = G.rows();
-    VectorXd y = VectorXd::Zero(nObs);
-    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-    InnerEL<MeanRegModel> IL;
-    IL.setData(y,X,NULL);
-    IL.setG(G); // set the given G
-    IL.setOmegas(omegas); // set the given omegas
-    double logel = IL.logEL();
-    return logel; 
-}
-
 // This version finds the maximized loglikelihood, 
 //      or -Inf if no feasible omegas satisfies constraints.
-/* 
 // [[Rcpp::export(".logEL")]]
 double logEL(Eigen::MatrixXd G, 
                  int maxIter, double relTol, bool verbose) {
@@ -105,19 +87,23 @@ double logEL(Eigen::MatrixXd G,
     InnerEL<MeanRegModel> IL;
     IL.setData(y,X,NULL);
     IL.setG(G); // assign the given G
-    // initialize variables for output here 
-    // int nIter;
-    // double maxErr;
-    // bool not_conv;
-    // double logel = IL.logEL(nIter, maxErr, maxIter, relTol);
     double logel = IL.logEL(maxIter, relTol);
-    // check convergence
-    // not_conv = (nIter == maxIter) && (maxErr > relTol);
-    // if(verbose) {
-    //     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
-    // }
     return logel; 
-    // return Rcpp::List::create(_["logel"] = logel,
-    //                           _["convergence"] = !not_conv);
 }
-*/
+
+// // This version gives the loglikelihood, 
+// //      or -Inf if omegas does not satisfy constraints.
+// // [[Rcpp::export(".logEL")]]
+// double logEL(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
+//              int maxIter, double relTol, bool verbose) {
+//     int nObs = G.cols();
+//     int nEqs = G.rows();
+//     VectorXd y = VectorXd::Zero(nObs);
+//     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+//     InnerEL<MeanRegModel> IL;
+//     IL.setData(y,X,NULL);
+//     IL.setG(G); // set the given G
+//     IL.setOmegas(omegas); // set the given omegas
+//     double logel = IL.logEL();
+//     return logel; 
+// }

@@ -49,7 +49,7 @@ public:
                   int maxIter, double relTol);
     VectorXd getLambda(); // get function for lambdaNew
     // log empirical likelihood calculation with given omega and G
-    double logEL(); 
+    double logEL(int maxIter, double relTol); 
     // find the best omegas given G 
     void evalOmegas(int maxIter, double relTol); 
     // set and get functions 
@@ -239,26 +239,28 @@ inline VectorXd InnerEL<ELModel>::getOmegas() {
     return(omegas);
 }
 
-template<typename ELModel>
-inline double InnerEL<ELModel>::logEL() {
-    // check if omega is not a feasible solution with G return -Inf
-    VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
-    // std::cout << "rhs = " << rhs.transpose() << std::endl; 
-    // TODO: what tolarance?  
-    if (rhs.array().sum() > 0.01) return -INFINITY;
-    else return(omegas.array().log().sum());
-}
-
-// This version finds the maximized loglikelihood, 
-//      or -Inf if no feasible omegas satisfies G.
+// finds the loglikelihood given an omega, G, 
+//   returns -Inf if omegas is not feasible
 // template<typename ELModel>
-// inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
-//     evalOmegas(maxIter, relTol); // evaluate weights and assign them
-//     // Maybe add a flag for lambdaNR's convergence..?
-//     // if lambdaNR did not converge, return -Inf
-//     if (omegas.sum() == 0) return -INFINITY;
+// inline double InnerEL<ELModel>::logEL() {
+//     // check if omega is not a feasible solution with G return -Inf
+//     VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
+//     // std::cout << "rhs = " << rhs.transpose() << std::endl; 
+//     // TODO: what tolarance?  sum to 1 ; relative to the norm of omegas and G
+//     if (rhs.array().sum() > 0.01) return -INFINITY;
 //     else return(omegas.array().log().sum());
 // }
+
+// finds the maximized loglikelihood, 
+//      or returns -Inf if no feasible omegas satisfies G.
+template<typename ELModel>
+inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
+    evalOmegas(maxIter, relTol); // evaluate weights and assign them
+    // Maybe add a flag for lambdaNR's convergence..?
+    // if lambdaNR did not converge, return -Inf
+    if (omegas.sum() == 0) return -INFINITY;
+    else return(omegas.array().log().sum());
+}
 
 // Old code: 
 // log empirical likelihood for linear regression Y = X'beta + eps

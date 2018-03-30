@@ -81,7 +81,10 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
     G <- t(G)
     nObs <- ncol(G)
     nEqs <- nrow(G)
-    if (is.null(lambdaOld)) lambdaOld <- rep(0,nEqs)
+    if (is.null(lambdaOld)) {
+      # lambdaOld <- rnorm(nEqs) # TODO: initialize to random value? 
+      lambdaOld <- rep(0,nEqs)
+    }
     lambdaNew <- lambdaOld
     nIter <- 0
     for (ii in 1:max_iter) {
@@ -95,8 +98,12 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
             Q2 <- Q2 + log.star2(Glambda[jj],nObs) * (G[,jj] %*% t(G[,jj]))
         }
         Q1 <- -G %*% rho
-        lambdaNew <- lambdaOld - solve(Q2,Q1)
+        lambdaNew <- lambdaOld - solve(Q2,Q1) # TODO: step size?
         maxErr <- MaxRelErr(lambdaNew, lambdaOld)
+        if (verbose && (nIter %% 5 == 0)){
+          message("nIter = ", nIter)
+          message("err = ", maxErr)
+        }
         if (maxErr < rel_tol) break;
         lambdaOld <- lambdaNew
     }
@@ -175,12 +182,12 @@ mrls.logel_R <- function(y, X, Z, beta, gamma) {
 #---- censoring EL ----
 
 # log.sharp and related are unique to censoring
+# Note: x and q must be of the same length
 log.sharp <- function(x, q) {
     cond <- x >= q
     ans <- rep(NA,length(x))
     ans[cond] <- log(x[cond])
-    ans[!cond] <- -1/(2*q[!cond]^2)*x[!cond]^2 + 2/q[!cond]*x[!cond]
-                                                - 3/2 + log(q[!cond])
+    ans[!cond] <- -1/(2*q[!cond]^2)*x[!cond]^2 + 2/q[!cond]*x[!cond] - 3/2 + log(q[!cond])
     return(ans)
 }
 
@@ -202,7 +209,7 @@ log.sharp2 <- function(x, q) {
 
 # for mle.check
 # Note: requires weights to be in the environment, and G is nObs x nEqs
-QfunCens <- function(lambda, G) {
+QfunCens <- function(lambda, G, weights) {
     G <- t(G)
     weights_sum <- sum(weights) # this should be nObs tho..
     G_list <- split(G, rep(1:ncol(G), each = nrow(G)))
@@ -217,43 +224,42 @@ QfunCens <- function(lambda, G) {
 # lambdaOld passed in is for the EM algorithm `omega.hat.EM_R` to work properly
 lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
-    G <- t(G)
-    nObs <- ncol(G)
-    nEqs <- nrow(G)
-    if (is.null(lambdaOld)) lambdaOld <- rep(0,nEqs)
-    lambdaNew <- lambdaOld
-    nIter <- 0
-    # newton-raphson loop
-    for (ii in 1:max_iter) {
-        nIter <- ii
-        # Q1 and Q2
-        Glambda <- t(lambdaOld) %*% G
-        Glambda <- sum(weights) + Glambda
-        Q1 <- rep(0,nEqs)
-        Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
-        for (jj in 1:nObs) {
-            Q1 <- Q1 + weights[jj]*log.sharp1(Glambda[jj],weights[jj])*G[,jj]
-            Q2 <- Q2 + weights[jj]*log.sharp2(Glambda[jj],weights[jj])*(G[,jj] %*% t(G[,jj]))
-        }
-        # update lambda
-        # tryCatch(solve(Q2,Q1), finally = print(lambdaOld))
-        # Problem lambdaOld flies off to +Inf, but because Q2 tends to 0
-        lambdaNew <- lambdaOld - solve(Q2,Q1)
-        maxErr <- MaxRelErr(lambdaNew, lambdaOld) # maximum relative error
-        # message("maxErr = ", maxErr)
-        if (maxErr < rel_tol) {
-            break;
-        }
-        lambdaOld <- lambdaNew # complete cycle
-        if (verbose && (nIter %% 5 == 0)){
-            message("nIter = ", nIter)
-            message("err = ", maxErr)
-        }
+  G <- t(G)
+  nObs <- ncol(G)
+  nEqs <- nrow(G)
+  if (is.null(lambdaOld)) lambdaOld <- rep(0,nEqs)
+  lambdaNew <- lambdaOld
+  nIter <- 0
+  # newton-raphson loop
+  for (ii in 1:max_iter) {
+    nIter <- ii
+    # Q1 and Q2
+    Glambda <- t(lambdaOld) %*% G
+    Glambda <- sum(weights) + Glambda
+    # Q1 <- rep(0,nEqs)
+    rho <- rep(NA,nObs)
+    Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
+    for (jj in 1:nObs) {
+      rho[jj] <- log.sharp1(Glambda[jj], weights[jj]);
+      Q2 <- Q2 + weights[jj]*log.sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
     }
-    notconv <- ii == max_iter && maxErr > rel_tol
-    if (notconv) lambdaNew <- rep(NA, nEqs)
-    output<- list(lambda = c(lambdaNew), convergence=!notconv)
-    return(output)
+    Q1 <- G %*% (rho * weights)
+    lambdaNew <- lambdaOld - solve(Q2,Q1)
+    maxErr <- MaxRelErr(lambdaNew, lambdaOld) # maximum relative error
+    # message("maxErr = ", maxErr)
+    if (maxErr < rel_tol) {
+        break;
+    }
+    lambdaOld <- lambdaNew # complete cycle
+    if (verbose && (nIter %% 10 == 0)){
+        message("nIter = ", nIter)
+        message("err = ", maxErr)
+    }
+  }
+  notconv <- (ii == max_iter && maxErr > rel_tol)
+  if (notconv) lambdaNew <- rep(NA, nEqs)
+  output<- list(lambda = c(lambdaNew), convergence=!notconv)
+  return(output)
 }
 
 evalPsos_R <- function(ii, epsOrd, omegas) {
@@ -382,6 +388,7 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
 
 library(MASS) # for use of Null
 # wrapper of omega.hat_R for optimCheck
+# if omegas is optimal, then x == rep(1,n-p) should be optimal
 omega.check <- function(x, omegas, G, deltas, epsilons) {
   NG <- Null(G)
   xNG <- c(NG %*% x) - rowSums(NG) + omegas # x == 1s, xNG == omegas 

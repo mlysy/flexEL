@@ -104,10 +104,10 @@ Eigen::VectorXd omegaHatEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
     //                           _["convergence"] = !not_conv);
 }
 
-// This version gives the loglikelihood, 
-//      or -Inf if omegas does not satisfy constraints.
+// Returns the maximized log empirical likelihood given G, 
+//      or -Inf if no omegas satisfies G.
 // [[Rcpp::export(".logELC")]]
-double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
+double logELC(Eigen::MatrixXd G, 
               Eigen::VectorXd deltas, Eigen::VectorXd epsilons, 
              int maxIter, double relTol, bool verbose) {
     int nObs = G.cols();
@@ -117,8 +117,7 @@ double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G,
     InnerELC<MeanRegModel> ILC;
     ILC.setData(y,X,deltas,NULL);
     ILC.setG(G); // set the given G
-    ILC.setOmegas(omegas); // set the given omegas
     ILC.setEpsilons(epsilons); 
-    double logel = ILC.logEL();
+    double logel = ILC.logEL(maxIter, relTol);
     return logel; 
 }

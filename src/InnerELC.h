@@ -73,7 +73,7 @@ public:
     // void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
     void evalOmegas(int maxIter, double relTol);
     // log empirical likelihood calculation with given omega and G
-    double logEL(); 
+    double logEL(int maxIter, double relTol); 
     // set and get functions 
     // void setDeltas(const Ref<const VectorXd>& _deltas); 
     void setWeights(const Ref<const VectorXd>& _weights); 
@@ -290,14 +290,11 @@ inline void InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& _epsilons)
 // Note: epsilons must have been assigned
 template<typename ELModel>
 inline void InnerELC<ELModel>::evalWeights() {
-    // find the indices for decreasing order of epsilons 
-    // // work with vector version 
-    // vector<double> epsVec(epsilons.data(), epsilons.data()+epsilons.size());
-    // epsOrd = sort_inds(epsVec);
+    // find the indices for increasing order of epsilons 
     epsOrd = sort_inds(epsilons); 
     int kk;
     for (int ii=0; ii<nObs; ii++) {
-        for (int jj=0; jj<nObs; jj++) { // here is backwards (smaller ones)
+        for (int jj=0; jj<nObs; jj++) {
             kk = epsOrd(jj);
             if (deltas(kk) == 0) {
                 psots(ii) += omegas(ii)/evalPsos(kk);
@@ -381,28 +378,43 @@ inline VectorXd InnerELC<ELModel>::getOmegas() {
     return(omegas);
 }
 
+// finds the maximized loglikelihood, 
+//      or returns -Inf if no feasible omegas satisfies G.
 template<typename ELModel>
-inline double InnerELC<ELModel>::logEL() {
-    // TODO: (sort it here?) 
-    // sort epsilons decendingly and record its order 
-    epsOrd = sort_inds(epsilons); 
-    // std::cout << "epsOrd = " << epsOrd.transpose() << std::endl; 
-    // check if omega is not a feasible solution with G return -Inf
-    VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
-    // std::cout << "rhs = " << rhs.transpose() << std::endl; 
-    // TODO: what tolarance?  
-    if (rhs.array().sum() > 0.01) return -INFINITY;
-    else {
-        VectorXd psos(nObs); 
-        for (int ii=0; ii<nObs; ii++) {
-            psos(ii) = evalPsos(ii); 
-        }
-        // std::cout << "psos = " << psos.transpose() << std::endl; 
-        return((deltas.array()*omegas.array().log()
-               + (1-deltas.array())*psos.array().log()).sum());
-        // R: return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+inline double InnerELC<ELModel>::logEL(int maxIter, double relTol) {
+  evalOmegas(maxIter,relTol);
+  if (omegas.sum() == 0) return -INFINITY;
+  else {
+    VectorXd psos(nObs); 
+    for (int ii=0; ii<nObs; ii++) {
+      psos(ii) = evalPsos(ii);
     }
+    return((deltas.array()*omegas.array().log()
+              + (1-deltas.array())*psos.array().log()).sum());
+  }
 }
+
+// template<typename ELModel>
+// inline double InnerELC<ELModel>::logEL() {
+//     // TODO: (sort it here?) 
+//     // sort epsilons decendingly and record its order 
+//     epsOrd = sort_inds(epsilons); 
+//     // std::cout << "epsOrd = " << epsOrd.transpose() << std::endl; 
+//     // check if omega is not a feasible solution with G return -Inf
+//     VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
+//     // std::cout << "rhs = " << rhs.transpose() << std::endl; 
+//     // TODO: what tolarance?  
+//     if (rhs.array().sum() > 0.01) return -INFINITY;
+//     else {
+//         VectorXd psos(nObs); 
+//         for (int ii=0; ii<nObs; ii++) {
+//             psos(ii) = evalPsos(ii); 
+//         }
+//         // std::cout << "psos = " << psos.transpose() << std::endl; 
+//         return((deltas.array()*omegas.array().log()
+//                + (1-deltas.array())*psos.array().log()).sum());
+//     }
+// }
 
 // // posterior sampler
 // inline MatrixXd InnerELC::PostSample(int nsamples, int nburn,

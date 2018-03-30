@@ -13,8 +13,8 @@
     .Call(`_bayesEL_omegaHatEM`, G, deltas, epsilons, maxIter, relTol, verbose)
 }
 
-.logELC <- function(omegas, G, deltas, epsilons, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_logELC`, omegas, G, deltas, epsilons, maxIter, relTol, verbose)
+.logELC <- function(G, deltas, epsilons, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_logELC`, G, deltas, epsilons, maxIter, relTol, verbose)
 }
 
 .lambdaNR <- function(G, maxIter, relTol, verbose) {
@@ -25,8 +25,8 @@
     .Call(`_bayesEL_omegaHat`, G, maxIter, relTol, verbose)
 }
 
-.logEL <- function(omegas, G, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_logEL`, omegas, G, maxIter, relTol, verbose)
+.logEL <- function(G, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_logEL`, G, maxIter, relTol, verbose)
 }
 
 .MeanReg_evalG <- function(y, X, beta) {
