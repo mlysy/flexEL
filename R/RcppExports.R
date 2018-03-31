@@ -9,8 +9,8 @@
     .Call(`_bayesEL_lambdaNRC`, G, weights, maxIter, relTol, verbose)
 }
 
-.omega.hat.EM <- function(G, deltas, epsilons, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_omegaHatEM`, G, deltas, epsilons, maxIter, relTol, verbose)
+.omega.hat.EM <- function(omegas, G, deltas, epsilons, maxIter, relTol, verbose) {
+    .Call(`_bayesEL_omegaHatEM`, omegas, G, deltas, epsilons, maxIter, relTol, verbose)
 }
 
 .logELC <- function(G, deltas, epsilons, maxIter, relTol, verbose) {

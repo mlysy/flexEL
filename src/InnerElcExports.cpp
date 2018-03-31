@@ -75,9 +75,10 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".omega.hat.EM")]]
-Eigen::VectorXd omegaHatEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
-                Eigen::VectorXd epsilons, 
-                int maxIter, double relTol, bool verbose) {
+Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegas, 
+                           Eigen::MatrixXd G, Eigen::VectorXd deltas,
+                           Eigen::VectorXd epsilons, 
+                           int maxIter, double relTol, bool verbose) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
     int nEqs = G.rows();
@@ -88,20 +89,11 @@ Eigen::VectorXd omegaHatEM(Eigen::MatrixXd G, Eigen::VectorXd deltas,
     ILC.setData(y,X,deltas,NULL); 
     ILC.setG(G); // assign a given G
     ILC.setEpsilons(epsilons); 
-    // initialize variables for output here 
-    // int nIter;
-    // double maxErr;
-    // bool not_conv;
+    // TODO: right now, set initial omegas (by uncensored omega.hat) manually 
+    ILC.setOmegas(omegas);
     ILC.evalOmegas(maxIter, relTol);
     VectorXd omegasnew = ILC.getOmegas(); // output
     return omegasnew; 
-    // check convergence
-    // not_conv = (nIter == maxIter) && (maxErr > relTol);
-    // if(verbose) {
-    //     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
-    // }
-    // return Rcpp::List::create(_["omegas"] = omegasnew,
-    //                           _["convergence"] = !not_conv);
 }
 
 // Returns the maximized log empirical likelihood given G, 

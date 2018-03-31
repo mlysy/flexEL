@@ -5,37 +5,44 @@ source("~/bayesEL/tests/testthat/el-utils.R")
 # source("~/bayesEL/tests/testthat/mle-check.R")
 
 #---- 1-d problem -- still sometimes not stable ----
-p <- 1
-N <- 5
-mu0 <- 1
-z <- rnorm(N, mean = mu0) # true lifetime variable
-c <- rnorm(N, mean = 2*mu0) # censoring variable 
-deltas <- z <= c
-sum(!deltas)/N # censored percentage
-y <- z 
-y[!deltas] <- c[!deltas] # observed lifetime
-X <- matrix(rep(p,N),N,p) # p x n matrix
-mu <- mu0+rnorm(1)
-epsilons <- y - mu
-G <- mr.evalG_R(y, X, mu)
+p <- 2
+n <- 10
+G <- matrix(rnorm(n*p), n, p)
+deltas <- rep(1,n)
+numcens <- sample(round(n/2),1)
+censinds <- sample(n,numcens)
+deltas[censinds] <- 0
+epsilons <- rnorm(n)
+# mu0 <- 1
+# z <- rnorm(N, mean = mu0) # true lifetime variable
+# c <- rnorm(N, mean = 2*mu0) # censoring variable 
+# deltas <- z <= c
+# sum(!deltas)/N # censored percentage
+# y <- z 
+# y[!deltas] <- c[!deltas] # observed lifetime
+# X <- matrix(rep(p,N),N,p) # p x n matrix
+# mu <- mu0+rnorm(1)
+# epsilons <- y - mu
+# G <- mr.evalG_R(y, X, mu)
 
 # optimization in R
-omegas.R <- omega.hat_R(G, deltas, epsilons)
+omegas.R <- omega.hat_R(G, deltas, epsilons, max_iter = 200)
 omegas.R
 
 # optimization in C++
-omegas.cpp <- omega.hat(G, deltas, epsilons)
+omegas.cpp <- omega.hat(G, deltas, epsilons, max_iter = 200)
 omegas.cpp
 
 # difference of the two implementation 
 omegas.cpp - omegas.R
 
 # So .. if they both converged then they are the same but often only one converged
-# but, how to check optimality .. 
-ocheck <- optim_proj(xsol = rep(1,N-p), 
-                     xrng = 0.04, 
-                     fun = function(x) {omega.check(x, omegas.R, G, deltas, epsilons)},
-                     plot = TRUE) 
+# if both converged and equal, optimal 
+ocheck <- optim_proj(xsol = rep(1,n-p), 
+                     xrng = 0.05, 
+                     fun = function(x){omega.check(x, omegas.R, G, deltas, epsilons)},
+                     plot = T) 
+ocheck
 
 # ok choose which to check here
 omegas <- omegas.cpp

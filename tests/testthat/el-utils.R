@@ -208,7 +208,7 @@ log.sharp2 <- function(x, q) {
 }
 
 # for mle.check
-# Note: requires weights to be in the environment, and G is nObs x nEqs
+# Input: G is nObs x nEqs
 QfunCens <- function(lambda, G, weights) {
     G <- t(G)
     weights_sum <- sum(weights) # this should be nObs tho..
@@ -244,6 +244,8 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
       Q2 <- Q2 + weights[jj]*log.sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
     }
     Q1 <- G %*% (rho * weights)
+    # print("Q2invQ1 = ")
+    # print(t(solve(Q2,Q1)))
     lambdaNew <- lambdaOld - solve(Q2,Q1)
     maxErr <- MaxRelErr(lambdaNew, lambdaOld) # maximum relative error
     # message("maxErr = ", maxErr)
@@ -289,6 +291,12 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     }
     # the weights have the order as the original sample 
     weights <- deltas + psots
+    # print("evalWeights: deltas = ")
+    # print(deltas)
+    # print("evalWeights: epsilons = ")
+    # print(epsilons)
+    # print("evalWeights: psots = ")
+    # print(psots)
     return(weights)
 }
 
@@ -324,36 +332,49 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     err <- Inf
     lambdaOld <- rep(0,m)
     nIter <- 0
-    omegas <- rep(1/n,n)
-    # pick a vector in the null space that is positive and sum to 1: 
-    # omegas <- searchSol(G)
+    omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
+    if (sum(omegas) == 0) return(rep(0,n))
     for (ii in 1:max_iter) {
         nIter <- ii
         # E step: calculating weights
         # weights <- getweights_R(omegas, delta)
         weights <- evalWeights_R(deltas, omegas, epsilons)
+        # print("weights = ")
         # print(weights)
         # M step:
         lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
         # TODO: what if not converged ?? use a random weights and continue ? 
         if (!lambdaOut$convergence) {
-            message("randomly modify omegas..")
-            omegas <- abs(omegas + rnorm(n))
-            omegas <- omegas/sum(omegas)
-            lambdaNew <- lambdaOld
-            next
+          message("lambdaNRC did not converge in EM")
+          return(rep(0,n))
         }
+        # if (!lambdaOut$convergence) {
+        #     message("randomly modify omegas..")
+        #     omegas <- abs(omegas + rnorm(n))
+        #     omegas <- omegas/sum(omegas)
+        #     lambdaNew <- lambdaOld
+        #     next
+        # }
         lambdaNew <- lambdaOut$lambda
+        qlg <- c(sum(weights) + lambdaNew %*% t(G))
+        # print(qlg)
+        # print("lambdaNew = ")
         # print(lambdaNew)
-        qlg <- sum(weights) + lambdaNew %*% t(G)
+        # print("lambdaOld = ")
+        # print(lambdaOld)
+        # if (ii == 2) break
         omegas <- weights/qlg
+        # print("omegas = ")
+        # print(omegas)
         omegas <- omegas/sum(omegas)
+        # print("omegas = ")
+        # print(omegas)
         err <- MaxRelErr(lambdaNew,lambdaOld)
         if (verbose && iter %% 20 == 0) {
             message("iter = ", iter)
             message("err = ", err)
         }
-        if (err <= rel_tol) break
+        if (err < rel_tol) break
         lambdaOld <- lambdaNew
     }
     notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
@@ -361,9 +382,6 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
         omegas = rep(0,n)
     }
     return(omegas)
-    # output <- list(omegas = omegas, convergence=!notconv)
-    # # output <- list(omegas = omegas, lambda=lambdaNew)
-    # return(output)
 }
 
 # wrapper function for censor and non-censor omega.hat
@@ -376,14 +394,6 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
                                    max_iter, rel_tol, verbose)
     }
     return(c(omegas))
-    # if (omegaOut$convergence) {
-    #     return(c(omegas))
-    # }
-    # else {
-    #     # TODO: verbose?
-    #     n <- nrow(G)
-    #     return(rep(0,n))
-    # }
 }
 
 library(MASS) # for use of Null
@@ -403,10 +413,10 @@ omega.check <- function(x, omegas, G, deltas, epsilons) {
     # print(epsOrd)
     psos <- rep(0,n)
     for (ii in 1:n) {
-      psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+      psos[ii] <- evalPsos_R(ii, epsOrd, xNG) 
     }
     # print(psos)
-    return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+    return(sum(deltas*log(xNG)+(1-deltas)*log(psos)))
   }
 }
 

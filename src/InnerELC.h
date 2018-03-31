@@ -227,7 +227,7 @@ inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr,
         Q1 = G * (rho.array()*weights.array()).matrix();
         // update lambda
         Q2ldlt.compute(Q2);
-        // std::cout << "Q2invQ1 = " << Q2ldlt.solve(Q1) << std::endl;
+        // std::cout << "Q2invQ1 = " << Q2ldlt.solve(Q1).transpose() << std::endl;
         lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
         maxErr = maxRelErr(lambdaNew, lambdaOld); // maximum relative error
         // std::cout << "maxErr = " << maxErr << std::endl;
@@ -292,6 +292,7 @@ template<typename ELModel>
 inline void InnerELC<ELModel>::evalWeights() {
     // find the indices for increasing order of epsilons 
     epsOrd = sort_inds(epsilons); 
+    psots.noalias() = VectorXd::Zero(nObs); // clear previous values
     int kk;
     for (int ii=0; ii<nObs; ii++) {
         for (int jj=0; jj<nObs; jj++) {
@@ -304,6 +305,9 @@ inline void InnerELC<ELModel>::evalWeights() {
     }
     // assigned weights are still in the order of original data
     weights.array() = deltas.array() + psots.array();
+    // std::cout << "evalWeights: deltas = " << deltas.transpose() << std::endl;
+    // std::cout << "evalWeights: epsilons = " << epsilons.transpose() << std::endl;
+    // std::cout << "evalWeights: psots = " << psots.transpose() << std::endl;
 }
 
 // exported as `omega.hat.EM`
@@ -318,38 +322,43 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
     for(ii=0; ii<maxIter; ii++) {
         // E-step:
         evalWeights(); // assigns weights according to epsilons
-        // std::cout << "weights = " << weights << std::endl;
+        // std::cout << "weights = " << weights.transpose() << std::endl;
         // M-step:
         // std::cout << "lambdaOldEM = " << lambdaOldEM << std::endl;
         lambdaNR(nIter, maxErr, maxIter, relTol); 
         // Check convergence of NR here
         if (nIter == maxIter & maxErr > relTol) {
-            // if the above NR did not converge, randomly modify the omegas and continue
-            for (int kk=0; kk<nObs; kk++) {
-                omegas(kk) += R::rnorm(0,1);
-            }
-            omegas.array() = omegas.array().abs();
-            omegas /= omegas.sum();
-            continue;
+          std::cout << "lambdaNRC did not converge in EM" << std::endl;
         }
-        // std::cout << "lambdaNew = " << lambdaNew << std::endl;
+        // if (nIter == maxIter & maxErr > relTol) {
+        //     // if the above NR did not converge, randomly modify the omegas and continue
+        //     for (int kk=0; kk<nObs; kk++) {
+        //         omegas(kk) += R::rnorm(0,1);
+        //     }
+        //     omegas.array() = omegas.array().abs();
+        //     omegas /= omegas.sum();
+        //     continue;
+        // }
         // std::cout << "G = \n" << G << std::endl;
         VectorXd lGq = ((lambdaNew.transpose() * G).array() + weights.sum()).transpose();
-        // std::cout << "lGq = \n" << lGq << std::endl;
-        // can do element-wise division, no need of a for loop
-        // for (int jj=0; jj<nObs; jj++){
-        //     omegas(jj) = weights(jj)/lGq(jj);
-        // }
+        // std::cout << "lGq = \n" << lGq.transpose() << std::endl;
+        // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
+        // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
+        // std::cout << "lambdaOldEM = " << lambdaOldEM.transpose() << std::endl;
+        // if (ii == 1) break;
         omegas.array() = weights.array() / lGq.array();
-        // std::cout << "In evalOmegas before normalize: omegas = \n" << omegas << std::endl;
+        // std::cout << "In evalOmegas before normalize: omegas = \n" << omegas.transpose() << std::endl;
         omegas.array() = omegas.array() / (omegas.array().sum()); // normalize
-        // std::cout << "In evalOmegas: omegas = \n" << omegas << std::endl; 
+        // std::cout << "In evalOmegas: omegas = \n" << omegas.transpose() << std::endl;
         maxErr = maxRelErr(lambdaNew, lambdaOldEM); 
         // std::cout << "In evalOmegas: maxErr = " << maxErr << std::endl;
         if (maxErr < relTol) break;
         lambdaOldEM = lambdaNew;
     }
     nIter = ii; 
+    if (nIter == maxIter & maxErr > relTol) {
+      omegas = VectorXd::Zero(nObs); 
+    }
     return;
 }
 

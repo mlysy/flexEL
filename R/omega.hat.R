@@ -10,20 +10,15 @@
 #' @details The inner-loop optimization of EL is ...
 #' @export
 omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
-    if (missing(deltas) && missing(epsilons)) {
-        omegahat <- .omega.hat(t(G), max_iter, rel_tol, verbose)
-    }
-    else {
-        omegahat <- .omega.hat.EM(t(G), deltas, epsilons, 
-                                  max_iter, rel_tol, verbose)
-    }
-    return(omegahat)
-    # if (omegaOut$convergence) {
-    #     return(omegaOut$omegas)
-    # }
-    # else { 
-    #     # TODO: should give warning here, verbose???
-    #     n <- nrow(G)
-    #     return(rep(1/n,n))
-    # }
+  if (missing(deltas) && missing(epsilons)) {
+    omegahat <- .omega.hat(t(G), max_iter, rel_tol, verbose)
+  }
+  else {
+    # TODO: set the inital omegas manually atm.. 
+    omegas <- .omega.hat(t(G), max_iter, rel_tol, verbose)
+    if (sum(omegas) == 0) return(rep(0,length(deltas)))
+    omegahat <- .omega.hat.EM(omegas, t(G), deltas, epsilons, 
+                              max_iter, rel_tol, verbose)
+  }
+  return(omegahat)
 }
