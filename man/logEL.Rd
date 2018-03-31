@@ -17,8 +17,6 @@ logEL(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
 \item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
-
-\item{omegas}{\code{nObs} probability vector.}
 }
 \value{
 Log empirical likelihood of the input beta

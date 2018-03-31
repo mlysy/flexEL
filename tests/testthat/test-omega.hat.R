@@ -1,4 +1,4 @@
-#---- testing omega.hat  ----
+# ---- testing R and C++ implementations of omega.hat are equal and optimality ----
 library(bayesEL) # always load the package (with library)
 library(optimCheck)
 # source("el-utils.R")
@@ -10,7 +10,6 @@ context("omega.hat")
 ntest <- 50
 
 # Non-censored case: 
-# checking R and C++ implementations are equal and optimality of omega.hat
 test_that("omegahat.R == omegahat.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)

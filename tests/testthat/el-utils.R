@@ -135,39 +135,50 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
     # return(list(omegas=omegahat, convergence=conv))
 }
 
+# template<typename ELModel>
+#   inline double InnerELC<ELModel>::logEL(int maxIter, double relTol) {
+#     evalOmegas(maxIter,relTol);
+#     if (omegas.sum() == 0) return -INFINITY;
+#     else {
+#       VectorXd psos(nObs); 
+#       for (int ii=0; ii<nObs; ii++) {
+#         psos(ii) = evalPsos(ii);
+#       }
+#       return((deltas.array()*omegas.array().log()
+#               + (1-deltas.array())*psos.array().log()).sum());
+#     }
+#   }
+
 # G is nObs x nEqs matrix
-logEL_R <- function(omegas, G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
-    if (nrow(G) != length(omegas)) {
-        stop("omegas and G have inconsistent dimensions.")
+logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
+  # non-censored case:
+  if (missing(deltas) && missing(epsilons)) {
+    omegas <- omega.hat.NC_R(G, max_iter, rel_tol)
+    if (sum(omegas)== 0) return(-Inf)
+    else return(sum(log(omegas)))
+  }
+  # censored case:
+  else {
+    if (length(deltas) != length(epsilons)) {
+        stop("deltas and epsilons have inconsistent dimensions.")
     }
-    # If not feasible, return -Inf 
-    rhs <- t(G) %*% omegas
-    if (sum(rhs) > 0.01) return(-Inf) # TODO: what tolerance to use here
-    # non-censored case:
-    if (missing(deltas) && missing(epsilons)) {
-        return(sum(log(omegas)))
+    if (nrow(G) != length(deltas)) {
+      stop("deltas and G have inconsistent dimensions.")
     }
-    # censored case:
+    omegas <- omega.hat.EM_R(G, deltas, epsilons, max_iter, rel_tol)
+    if (sum(omegas)== 0) return(-Inf)
     else {
-        if (length(omegas) != length(deltas)) {
-            stop("omegas and deltas have inconsistent dimensions.")
-        }
-        if (length(omegas) != length(epsilons)) {
-            stop("omegas and epsilons have inconsistent dimensions.")
-        }
-        if (length(deltas) != length(epsilons)) {
-            stop("deltas and epsilons have inconsistent dimensions.")
-        }
-        n <- length(omegas)
-        epsOrd <- order(epsilons) # ascending order of epsilons
-        # print(epsOrd)
-        psos <- rep(0,n)
-        for (ii in 1:n) {
-            psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
-        }
-        # print(psos)
-        return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+      epsOrd <- order(epsilons) # ascending order of epsilons
+      # print(epsOrd)
+      n <- length(omegas)
+      psos <- rep(0,n)
+      for (ii in 1:n) {
+        psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+      }
+      # print(psos)
+      return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
     }
+  }
 }
 
 # TODO: changed
@@ -304,26 +315,26 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
 # G is nObs x nEqs 
 # library(MASS)
 # Warning: this does not guarantee to find a solution
-searchSol <- function(G) {
-    n <- nrow(G)
-    p <- ncol(G)
-    con.mat1 <- cbind(G,-G)
-    con.mat <- rbind(con.mat1, colSums(con.mat1))
-    con.dir <- c(rep(">=",n),"==")
-    con.rhs <- c(rep(0,n),1)
-    sol <- matrix(nrow=150, ncol=n) 
-    for (i in 1:n) { 
-        obj.in <- rnorm(p)
-        obj.in <- cbind(obj.in, -obj.in)
-        out <- lp (objective.in = obj.in, 
-                   const.mat = con.mat, 
-                   const.dir = con.dir, 
-                   const.rhs = con.rhs)
-        sol[i,] <- con.mat1 %*% out$solution 
-    } 
-    sol <- unique(round(sol, digits=10)) 
-    omegas <- t(sol[1,])
-}
+# searchSol <- function(G) {
+#     n <- nrow(G)
+#     p <- ncol(G)
+#     con.mat1 <- cbind(G,-G)
+#     con.mat <- rbind(con.mat1, colSums(con.mat1))
+#     con.dir <- c(rep(">=",n),"==")
+#     con.rhs <- c(rep(0,n),1)
+#     sol <- matrix(nrow=150, ncol=n) 
+#     for (i in 1:n) { 
+#         obj.in <- rnorm(p)
+#         obj.in <- cbind(obj.in, -obj.in)
+#         out <- lp (objective.in = obj.in, 
+#                    const.mat = con.mat, 
+#                    const.dir = con.dir, 
+#                    const.rhs = con.rhs)
+#         sol[i,] <- con.mat1 %*% out$solution 
+#     } 
+#     sol <- unique(round(sol, digits=10)) 
+#     omegas <- t(sol[1,])
+# }
 
 # G is nObs x nEqs matrix 
 omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
@@ -332,6 +343,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     err <- Inf
     lambdaOld <- rep(0,m)
     nIter <- 0
+    # initialize omegas with uncensored solution 
     omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
     if (sum(omegas) == 0) return(rep(0,n))
     for (ii in 1:max_iter) {

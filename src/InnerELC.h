@@ -330,16 +330,6 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
         if (nIter == maxIter & maxErr > relTol) {
           std::cout << "lambdaNRC did not converge in EM" << std::endl;
         }
-        // if (nIter == maxIter & maxErr > relTol) {
-        //     // if the above NR did not converge, randomly modify the omegas and continue
-        //     for (int kk=0; kk<nObs; kk++) {
-        //         omegas(kk) += R::rnorm(0,1);
-        //     }
-        //     omegas.array() = omegas.array().abs();
-        //     omegas /= omegas.sum();
-        //     continue;
-        // }
-        // std::cout << "G = \n" << G << std::endl;
         VectorXd lGq = ((lambdaNew.transpose() * G).array() + weights.sum()).transpose();
         // std::cout << "lGq = \n" << lGq.transpose() << std::endl;
         // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
@@ -398,6 +388,7 @@ inline double InnerELC<ELModel>::logEL(int maxIter, double relTol) {
     for (int ii=0; ii<nObs; ii++) {
       psos(ii) = evalPsos(ii);
     }
+    // std::cout << omegas.transpose() << std::endl; 
     return((deltas.array()*omegas.array().log()
               + (1-deltas.array())*psos.array().log()).sum());
   }

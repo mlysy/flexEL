@@ -99,7 +99,7 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegas,
 // Returns the maximized log empirical likelihood given G, 
 //      or -Inf if no omegas satisfies G.
 // [[Rcpp::export(".logELC")]]
-double logELC(Eigen::MatrixXd G, 
+double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
               Eigen::VectorXd deltas, Eigen::VectorXd epsilons, 
              int maxIter, double relTol, bool verbose) {
     int nObs = G.cols();
@@ -110,6 +110,8 @@ double logELC(Eigen::MatrixXd G,
     ILC.setData(y,X,deltas,NULL);
     ILC.setG(G); // set the given G
     ILC.setEpsilons(epsilons); 
+    // TODO: right now, set initial omegas (by uncensored omega.hat) manually 
+    ILC.setOmegas(omegas);
     double logel = ILC.logEL(maxIter, relTol);
     return logel; 
 }
