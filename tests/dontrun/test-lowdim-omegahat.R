@@ -39,9 +39,9 @@ omegas.cpp - omegas.R
 # So .. if they both converged then they are the same but often only one converged
 # if both converged and equal, optimal 
 ocheck <- optim_proj(xsol = rep(1,n-p), 
-                     xrng = 0.05, 
+                     xrng = 0.01, 
                      fun = function(x){omega.check(x, omegas.R, G, deltas, epsilons)},
-                     plot = T) 
+                     plot = FALSE) 
 ocheck
 
 # ok choose which to check here

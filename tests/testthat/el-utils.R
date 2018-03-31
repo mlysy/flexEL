@@ -402,7 +402,9 @@ library(MASS) # for use of Null
 omega.check <- function(x, omegas, G, deltas, epsilons) {
   NG <- Null(G)
   xNG <- c(NG %*% x) - rowSums(NG) + omegas # x == 1s, xNG == omegas 
-  if (any(xNG < 0)) return(-Inf)
+  # might have to use a small negative value to aviod rounding errors
+  if (any(xNG < -1e-10)) return(-Inf)
+  xNG <- abs(xNG) # try replace the extreme small value to positive
   xNG <- xNG / sum(xNG) # normalize it
   if (missing(deltas) && missing(epsilons)) {
     return(sum(log(xNG)))

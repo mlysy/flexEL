@@ -34,35 +34,38 @@ test_that("omegahat.R == omegahat.cpp", {
 })
 
 # Censored case: 
-# TODO: check the correctness of the R version by the old 5 variables way (?)
-# and then check the c++ version against it 
-# test_that("omegahatC.R == omegahatC.cpp", {
-#     for(ii in 1:ntest) {
-#         # TODO: may should choose a random percentage of censored observations
-#         # c <- abs(rnorm(n, mean=y, sd=1)) # independent random censoring values
-#         # deltas <- y <= c # delta == 1 if observed 0 if censored
-#         # y[!deltas] <- c[!deltas] # observed lifetime after censoring
-#         # 1-sum(deltas)/n
-#         # debug:
-#         n <- 15
-#         p <- 2
-#         X <- replicate(p, rnorm(n))
-#         X[1,] <- rep(1,p)
-#         beta0 <- rnorm(p)
-#         y <- c(X %*% beta0) + rnorm(n) # with N(0,1) error term
-#         max_iter <- 100
-#         rel_tol <- 1e-5
-#         epsilons <- c(y - X %*% beta0)
-#         deltas <- rep(1,n)
-#         # censind <- sample(n,2)
-#         censind <- order(epsilons)[c(4,7)]
-#         deltas[censind] <- 0
-#         y[censind] <- rnorm(1,mean=y[censind]) # makes only 1 censored
-#         G.cpp <- mr.evalG(y, X, beta0)
-#         omegahat.cpp <- omega.hat(G.cpp, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-#         omegahat.R <- omega.hat_R(G.R, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-#         omegahat.cpp
-#         omegahat.R
-#         omegahat.cpp - omegahat.R
-#     }
-# })
+test_that("omegahatC.R == omegahatC.cpp", {
+  for(ii in 1:ntest) {
+    # message(ii)
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(2, 10, 100), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    G <- matrix(rnorm(n*p), n, p)
+    deltas <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    deltas[censinds] <- 0
+    # deltas
+    epsilons <- rnorm(n)
+    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    # omegahat.cpp
+    omegahat.R <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    # omegahat.R
+    if (sum(omegahat.cpp)!=0 && sum(omegahat.R)==0) {
+      message("R version did not converge but C++ does, still checks optimality!")
+    }
+    else {
+      expect_equal(omegahat.cpp, omegahat.R)
+    }
+    if (sum(omegahat.cpp)!=0) {
+      ocheck <- optim_proj(xsol = rep(1,n-p), 
+                           xrng = 0.05,
+                           npts = 101, # 101 would have x exactly 1, o.w. sometimes does not work
+                           fun = function(x) {omega.check(x, omegahat.cpp, G, deltas, epsilons)},
+                           plot = FALSE) 
+      # print(ocheck)
+      expect_lt(max.xdiff(ocheck), 0.01)
+    }
+  }
+})
