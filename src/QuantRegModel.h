@@ -24,17 +24,19 @@ public:
     MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
 };
 
+/*
 // constructor: old 
-// inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y, 
-//                                     const Ref<const MatrixXd>& _X,
-//                                     void* params) {
-//     y = _y;
-//     X = _X; 
-//     alpha = *(double*)(params); 
-//     nObs = y.size();
-//     nEqs = X.rows(); // X gets passed as p x nObs matrix
-//     G = MatrixXd::Zero(nEqs,nObs);
-// }
+inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y,
+                                    const Ref<const MatrixXd>& _X,
+                                    void* params) {
+    y = _y;
+    X = _X;
+    alpha = *(double*)(params);
+    nObs = y.size();
+    nEqs = X.rows(); // X gets passed as p x nObs matrix
+    G = MatrixXd::Zero(nEqs,nObs);
+}
+*/
 
 // setData (with default ctor)
 inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,

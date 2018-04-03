@@ -54,22 +54,9 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G,
     InnerEL<MeanRegModel> IL;
     IL.setData(y,X,NULL);
     IL.setG(G); // assign the given G
-    // initialize variables for output here 
-    // int nIter;
-    // double maxErr;
-    // bool not_conv;
-    // IL.evalOmegas(nIter, maxErr, maxIter, relTol); // calculate omegas
     IL.evalOmegas(maxIter, relTol); // calculate omegas
     VectorXd omegasnew = IL.getOmegas(); // get omegas
-    // check convergence
-    // not_conv = (nIter == maxIter) && (maxErr > relTol);
-    // not_conv = (omegasnew.sum() == 0); 
-    // if(verbose) {
-    //     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
-    // }
     return omegasnew;
-    // return Rcpp::List::create(_["omegas"] = omegasnew,
-    //                           _["convergence"] = !not_conv);
 }
 
 // This version finds the maximized loglikelihood, 

@@ -3,7 +3,6 @@
 
 // class for computing inner optimization of EL likelihood with censoring
 
-// #include <vector> // for the sorting to work 
 // using namespace std;
 #include <math.h>
 #include <Rmath.h> // for random number 
@@ -90,36 +89,37 @@ public:
     // 		      int maxIter, double relTol);
 };
 
-// constructor
+/*
 // constructor for mean regression (without alpha)
-// template<typename ELModel>
-// inline InnerELC<ELModel>::InnerELC(const Ref<const VectorXd>& _y,
-//                                    const Ref<const MatrixXd>& _X,
-//                                    const Ref<const VectorXd>& _deltas,
-//                                    void* params) : ELModel(_y, _X, params) {
-//     // std::cout << nObs << std::endl;
-//     // std::cout << nEqs << std::endl;
-//     epsilons = VectorXd::Zero(nObs);
-//     psots = VectorXd::Zero(nObs); 
-//     // epsOrd = vector<size_t>(nObs); // Note: epsOrd is a C vector not Eigen VectorXd
-//     epsOrd = VectorXi::Zero(nObs);
-//     // Newton-Raphson initialization
-//     deltas = _deltas;
-//     omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
-//     omegasps = VectorXd::Zero(nObs); 
-//     W = MatrixXd::Zero(nObs,nObs);
-//     weights = VectorXd::Zero(nObs); // Initialize with the current omegas? 
-//     GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-//     lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-//     lambdaNew = VectorXd::Zero(nEqs);
-//     Q1 = VectorXd::Zero(nEqs);
-//     Q2 = MatrixXd::Zero(nEqs,nEqs);
-//     Glambda = VectorXd::Zero(nObs);
-//     Gl11 = ArrayXd::Zero(nObs);
-//     rho = VectorXd::Zero(nObs);
-//     relErr = VectorXd::Zero(nEqs);
-//     Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
-// }
+template<typename ELModel>
+inline InnerELC<ELModel>::InnerELC(const Ref<const VectorXd>& _y,
+                                   const Ref<const MatrixXd>& _X,
+                                   const Ref<const VectorXd>& _deltas,
+                                   void* params) : ELModel(_y, _X, params) {
+    // std::cout << nObs << std::endl;
+    // std::cout << nEqs << std::endl;
+    epsilons = VectorXd::Zero(nObs);
+    psots = VectorXd::Zero(nObs);
+    // epsOrd = vector<size_t>(nObs); // Note: epsOrd is a C vector not Eigen VectorXd
+    epsOrd = VectorXi::Zero(nObs);
+    // Newton-Raphson initialization
+    deltas = _deltas;
+    omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
+    omegasps = VectorXd::Zero(nObs);
+    W = MatrixXd::Zero(nObs,nObs);
+    weights = VectorXd::Zero(nObs); // Initialize with the current omegas?
+    GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
+    lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
+    lambdaNew = VectorXd::Zero(nEqs);
+    Q1 = VectorXd::Zero(nEqs);
+    Q2 = MatrixXd::Zero(nEqs,nEqs);
+    Glambda = VectorXd::Zero(nObs);
+    Gl11 = ArrayXd::Zero(nObs);
+    rho = VectorXd::Zero(nObs);
+    relErr = VectorXd::Zero(nEqs);
+    Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
+}
+ */
 
 // default ctor
 template<typename ELModel>
@@ -132,8 +132,6 @@ inline void InnerELC<ELModel>::setData(const Ref<const VectorXd>& _y,
                                        const Ref<const VectorXd>& _deltas,
                                        void* params) {
     ELModel::setData(_y,_X,params); 
-    // std::cout << nObs << std::endl;
-    // std::cout << nEqs << std::endl;
     epsilons = VectorXd::Zero(nObs);
     psots = VectorXd::Zero(nObs);
     // epsOrd = vector<size_t>(nObs); // Note: epsOrd is a C vector not Eigen VectorXd
@@ -245,25 +243,6 @@ inline VectorXd InnerELC<ELModel>::getLambda() {
     return(lambdaNew);
 }
 
-// wrong way not ordering by epsilons
-// template<typename ELModel>
-// inline void InnerELC<ELModel>::evalWeights() {
-//     for (int ii=0; ii<nObs; ii++) {
-//         // omegas is a col vector of length nObs
-//         omegasps(ii) = omegas.block(ii,0,nObs-ii,1).sum();
-//     }
-//     // std::cout << "omegas = \n" << omegas << std::endl;
-//     // std::cout << "omegasps = \n" << omegasps << std::endl;
-//     for (int jj=0; jj<nObs; jj++) {
-//         // std::cout << omegas.block(jj,0,nObs-jj,1).array() / omegasps(jj) << std::endl;
-//         // std::cout << ".block(jj,0,1,nObs-jj) = \n" << .block(jj,0,1,nObs-jj) << std::endl;
-//         W.block(jj,jj,1,nObs-jj) = (omegas.block(jj,0,nObs-jj,1).array() / omegasps(jj)).transpose(); 
-//     }
-//     // std::cout << " = \n" <<  << std::endl;
-//     // std::cout << "(1-deltas.array()).matrix().transpose() *  = " << (1-deltas.array()).matrix().transpose() *  << std::endl;
-//     weights = deltas + (1-deltas.array()).matrix().transpose() * ; 
-// }
-
 // returns partial sum of omegas according to the epsilons(jj) that are larger  
 //   than epsilons(ii)
 // Note: epsOrd must have been assigned, i.e. have called sort_inds(epsilons); 
@@ -285,7 +264,6 @@ template<typename ELModel>
 inline void InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& _epsilons) {
     epsilons = _epsilons;
 }
-
 
 // Note: epsilons must have been assigned
 template<typename ELModel>
@@ -351,11 +329,6 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
     }
     return;
 }
-
-// template<typename ELModel>
-// inline void InnerELC<ELModel>::setDeltas(const Ref<const VectorXd>& _deltas) {
-//     deltas = _deltas;
-// }
 
 template<typename ELModel>
 inline void InnerELC<ELModel>::setWeights(const Ref<const VectorXd>& _weights) {

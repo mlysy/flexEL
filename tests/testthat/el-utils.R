@@ -67,7 +67,6 @@ log.star2 <- function(x, n) {
 }
 
 # Note: G is nObs x nEqs
-# TODO: right now G must exist in the environment 
 Qfun <- function(lambda, G) {
     G <- t(G)
     N <- ncol(G) # nObs
@@ -134,20 +133,6 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
     return(omegahat)
     # return(list(omegas=omegahat, convergence=conv))
 }
-
-# template<typename ELModel>
-#   inline double InnerELC<ELModel>::logEL(int maxIter, double relTol) {
-#     evalOmegas(maxIter,relTol);
-#     if (omegas.sum() == 0) return -INFINITY;
-#     else {
-#       VectorXd psos(nObs); 
-#       for (int ii=0; ii<nObs; ii++) {
-#         psos(ii) = evalPsos(ii);
-#       }
-#       return((deltas.array()*omegas.array().log()
-#               + (1-deltas.array())*psos.array().log()).sum());
-#     }
-#   }
 
 # G is nObs x nEqs matrix
 logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
@@ -302,12 +287,6 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     }
     # the weights have the order as the original sample 
     weights <- deltas + psots
-    # print("evalWeights: deltas = ")
-    # print(deltas)
-    # print("evalWeights: epsilons = ")
-    # print(epsilons)
-    # print("evalWeights: psots = ")
-    # print(psots)
     return(weights)
 }
 
@@ -528,21 +507,6 @@ qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
     }
     return(beta_chain)
 }
-
-# Is Q2 pd?
-# solveV <- function(V, x, ldV = FALSE) {
-#   C <- chol(V) # cholesky decomposition
-#   if(missing(x)) x <- diag(nrow(V))
-#   # solve is O(ncol(C) * ncol(x)) with triangular matrices
-#   # using backward subsitution
-#   ans <- backsolve(r = C, x = backsolve(r = C, x = x, transpose = TRUE))
-#   if(ldV) {
-#     ldV <- 2 * sum(log(diag(C)))
-#     ans <- list(y = ans, ldV = ldV)
-#   }
-#   ans
-# }
-
 
 
 ## #---- Location-scale model ----

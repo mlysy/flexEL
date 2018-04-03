@@ -61,31 +61,33 @@ public:
     //                     int maxIter, double relTol);
 };
 
-// // constructor for mean regression: old 
-// template<typename ELModel>
-// inline InnerEL<ELModel>::InnerEL(const Ref<const VectorXd>& y,
-// 				 const Ref<const MatrixXd>& X,
-// 				 void* params) : ELModel(y, X, params) {
-//     // std::cout << nObs << std::endl;
-//     // std::cout << nEqs << std::endl;
-//     // logstar constants
-//     omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
-//     trunc = 1.0 / nObs;
-//     aa = -.5 * nObs*nObs;
-//     bb = 2.0 * nObs;
-//     cc = -1.5 - log(nObs);
-//     // Newton-Raphson initialization
-//     GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-//     lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-//     lambdaNew = VectorXd::Zero(nEqs);
-//     Q1 = VectorXd::Zero(nEqs);
-//     Q2 = MatrixXd::Zero(nEqs,nEqs);
-//     Glambda = VectorXd::Zero(nObs);
-//     Gl11 = ArrayXd::Zero(nObs);
-//     rho = VectorXd::Zero(nObs);
-//     relErr = VectorXd::Zero(nEqs);
-//     Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
-// }
+/*
+// constructor for mean regression: old
+template<typename ELModel>
+inline InnerEL<ELModel>::InnerEL(const Ref<const VectorXd>& y,
+				 const Ref<const MatrixXd>& X,
+				 void* params) : ELModel(y, X, params) {
+    // std::cout << nObs << std::endl;
+    // std::cout << nEqs << std::endl;
+    // logstar constants
+    omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
+    trunc = 1.0 / nObs;
+    aa = -.5 * nObs*nObs;
+    bb = 2.0 * nObs;
+    cc = -1.5 - log(nObs);
+    // Newton-Raphson initialization
+    GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
+    lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
+    lambdaNew = VectorXd::Zero(nEqs);
+    Q1 = VectorXd::Zero(nEqs);
+    Q2 = MatrixXd::Zero(nEqs,nEqs);
+    Glambda = VectorXd::Zero(nObs);
+    Gl11 = ArrayXd::Zero(nObs);
+    rho = VectorXd::Zero(nObs);
+    relErr = VectorXd::Zero(nEqs);
+    Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
+}
+ */
 
 // default ctor 
 template<typename ELModel>
@@ -96,8 +98,6 @@ template<typename ELModel>
 inline void InnerEL<ELModel>::setData(const Ref<const VectorXd>& _y,
                                       const Ref<const MatrixXd>& _X,
                                       void* _params) {
-    // std::cout << nObs << std::endl;
-    // std::cout << nEqs << std::endl;
     ELModel::setData(_y,_X,_params); // set base class data 
     // logstar constants
     omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
