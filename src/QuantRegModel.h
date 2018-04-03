@@ -1,37 +1,80 @@
+#ifndef QUANTREGMODEL_h
+#define QUANTREGMODEL_h
 
+// #include <math.h>
+// #include <Rmath.h>
 
 class QuantRegModel {
- private:
-  double alpha;
-  VectorXd y;
-  MatrixXd X;
-  int nObs, nEq;
- public:
-  MatrixXd G;
-  QuantRegModel(VectorXd _y, MatrixXd _X, void *par);
-  ~QuantRegModel;
-  void evalG(VectorXd theta);
+private:
+    double rho_alpha(double u, double alpha); // TODO: not needed?
+    double phi_alpha(double u, double alpha); 
+protected:
+    VectorXd y;
+    MatrixXd X;
+    double alpha; 
+    int nObs, nEqs;
+    MatrixXd G;
+public:
+    // QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+    //               void* params); // constructor non-censor
+    void setData(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+                 void* params); // set data with default ctor
+    void evalG(const Ref<const VectorXd>& beta);
+    void setG(const Ref<const MatrixXd>& _G); 
+    MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
 };
 
-inline QuantRegModel::QuantRegModel(VectorXd _y, MatrixXd _X, void *par) {
-  y = _y; // make sure it's a COPY, not just pointer allocation
-  X = _X;
-  nObs = y.length(); // or something
-  nEq = X.row();
-  G = MatrixXd::Zero(nObs, nEq); // or however you allocate Eigen memory
-  alpha = &((double*)par)
+/*
+// constructor: old 
+inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y,
+                                    const Ref<const MatrixXd>& _X,
+                                    void* params) {
+    y = _y;
+    X = _X;
+    alpha = *(double*)(params);
+    nObs = y.size();
+    nEqs = X.rows(); // X gets passed as p x nObs matrix
+    G = MatrixXd::Zero(nEqs,nObs);
+}
+*/
+
+// setData (with default ctor)
+inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
+                                  const Ref<const MatrixXd>& _X,
+                                  void* params) {
+    y = _y;
+    X = _X;
+    alpha = *(double*)(params);
+    nObs = y.size();
+    nEqs = X.rows(); // X gets passed as p x nObs matrix
+    G = MatrixXd::Zero(nEqs,nObs);
 }
 
-// theta is beta.
-inline void QuantRegModel::evalG(VectorXd theta) {
+// revised L1 loss function for quantile regression
+inline double QuantRegModel::rho_alpha(double u, double alpha) {
+    return(u * (alpha - (u <= 0)));
 }
 
-inline QuantRegModel::~QuantRegModel {}
+// 1st derivative of rho_alpha
+inline double QuantRegModel::phi_alpha(double u, double alpha) {
+    return((u <= 0) - alpha);
+}
 
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------
+// form the G matrix
+inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
+    for(int ii=0; ii<y.size(); ii++) {
+        this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
+    }
+}
 
-template <class elMod>
-class InnerEL : elMod {
-  // make sure G and evalG are correctly inherited
-  
-};
+// set function for G matrix
+inline void QuantRegModel::setG(const Ref<const MatrixXd>& _G) {
+    G = _G; 
+}
+
+// get function for G matrix
+inline MatrixXd QuantRegModel::getG() {
+    return(G);
+}
+
+#endif

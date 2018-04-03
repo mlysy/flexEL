@@ -1,12 +1,12 @@
-#--- check that logELmean.R is working properly ---------------------------------
-
+#--- check that logEL_MeanReg.R is working properly ---------------------------------
+# setwd("~/bayesEL/")
 require(bayesEL)
-source("../bayesEL/tests/el-utils.R")
+source("../bayesEL/tests/testthat/el-utils.R")
 
 # Plot the EL likelihood EL(mu) for the single constraint E[Y - mu] = 0
 
 # dimensions
-n <- 100 # number of observations
+n <- 500 # number of observations
 numpoints <- 100
 
 #---- mean reg: p = 1 (only intercept) ----
@@ -28,8 +28,7 @@ y <- X * mu0 + rnorm(n) # with N(0,1) error term
 mean(y)
 lambda0 <- rnorm(m)
 for (ii in 1:numpoints) {
-      logel.seq[ii] <- logELmean(n, m, y, X, mu.seq[ii],
-                                 lambda0, max_iter = 100, eps = 1e-7)
+    logel.seq[ii] <- mr.logel(y, X, mu.seq[ii], max_iter = 100, eps = 1e-7)
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
@@ -39,7 +38,7 @@ nburn <- 2000
 beta0 <- rnorm(p) # current prior of beta N(0,1)
 sigs <- rep(0.1,m)
 system.time(
-  mu_chain <- MeanReg_post(n, m, y, X, lambda0, nsamples, nburn, beta0, sigs)
+  mu_chain <- mr.post(y, X, n, m, lambda0, nsamples, nburn, beta0, sigs)
 )
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
 
@@ -66,8 +65,8 @@ mu.seq <- rbind(mu.seq.b1, mu.seq.b2)
 lambda0 <- rnorm(m)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
-      logel.seq[1,ii] <- logELmean(n, m, y, X, c(mu.seq[1,ii], beta0[2]), lambda0)
-      logel.seq[2,ii] <- logELmean(n, m, y, X, c(beta0[1], mu.seq[2,ii]), lambda0)
+  logel.seq[1,ii] <- mr.logel(y, X, c(mu.seq[1,ii], beta0[2]))
+  logel.seq[2,ii] <- mr.logel(y, X, c(beta0[1], mu.seq[2,ii]))
 }
 logelmode1 <- plotEL(mu.seq[1,], logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(mu.seq[2,], logel.seq[2,], beta0[2], NA, expression(beta[1]))
@@ -78,7 +77,7 @@ nburn <- 2000
 sigs <- rep(0.1,m)
 betaInit <- rnorm(p)
 system.time(
-  beta_chain <- MeanReg_post(n, m, y, X, lambda0, nsamples, nburn, betaInit, sigs)
+  beta_chain <- mr.post(y, X, n, m, lambda0, nsamples, nburn, betaInit, sigs)
 )
 plot(beta_chain[1,], xlab = 'beta1', ylab = 'EL', type='l')
 plot(beta_chain[2,], xlab = 'beta2', ylab = 'EL', type='l')
@@ -108,28 +107,29 @@ legend('topright',legend=c(expression('grid plot & mode'),
 m <- 1 # for quant reg m = p
 mu0 <- rnorm(m) # true parameter value
 mu0
-
+alpha <- 0.75
 # gird plot
-mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints) # TODO: grid points range matters ?
+mu.seq <- seq(-.5+mu0+qnorm(alpha),.5+mu0+qnorm(alpha),length.out = numpoints) # TODO: grid points range matters ?
 logel.seq <- rep(NA,numpoints)
-X <- matrix(rep(1,m*n),m,n) # each col of X is one observation
-y <- X * mu0 + rnorm(n) # with N(0,1) error term
+X <- matrix(rep(1,m*n),n,m) # each col of X is one observation
+y <- c(X * mu0 + rnorm(n)) # with N(0,1) error term
 mean(y)
-lambda0 <- rnorm(m)
-alpha <- 0.5
 logel.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  logel.seq[ii] <- logELquant(n, m, X, y, mu.seq[ii], alpha, lambda0)
+  logel.seq[ii] <- qr.logel(y, X, alpha, mu.seq[ii])
 }
-logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
+logelmode <- plotEL(mu.seq, logel.seq, mu0+qnorm(alpha), mu.name = expression(mu))
 
-# sample from posteriro
+# sample from posterior
 nsamples <- 10000
-nburn <- 2000
+nburn <- 3000
 sigs <- rep(0.1,m)
 betaInit <- rnorm(m)
 system.time(
-  beta_chain <- QuantReg_post(n, m, y, X, alpha, lambda0, nsamples, nburn, betaInit, sigs)
+    beta_chain <- qr.post_R(y, X, alpha, nsamples, nburn, mu0, sigs)
+)
+system.time(
+    beta_chain <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
 )
 plot(beta_chain[1,], xlab = expression(mu), ylab = 'logEL', type='l')
 
@@ -159,8 +159,8 @@ logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 lambda0 <- rnorm(m)
 alpha <- 0.5 # Seems extreme quantile e.g. 0.9 is much harder
 for (ii in 1:numpoints) {
-      logel.seq[1,ii] <- logELquant(n, m, X, y, c(mu.seq[1,ii],beta0[2]), alpha, lambda0)
-      logel.seq[2,ii] <- logELquant(n, m, X, y, c(beta0[1],mu.seq[2,ii]), alpha, lambda0)
+  logel.seq[1,ii] <- qr.logel(y, X, alpha, c(mu.seq[1,ii],beta0[2]))
+  logel.seq[2,ii] <- qr.logel(y, X, alpha, c(beta0[1],mu.seq[2,ii]))
 }
 logelmode1 <- plotEL(mu.seq[1,], logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(mu.seq[2,], logel.seq[2,], beta0[2], NA, expression(beta[1]))
@@ -171,7 +171,7 @@ nburn <- 2000
 sigs <- rep(0.1,m)
 betaInit <- rnorm(m)
 system.time(
-  beta_chain <- QuantReg_post(n, m, y, X, alpha, lambda0, nsamples, nburn, betaInit, sigs)
+  beta_chain <- qr.post(y, X, n, m, alpha, lambda0, nsamples, nburn, betaInit, sigs)
 )
 plot(beta_chain[1,], xlab = 'beta1', ylab = 'EL', type='l')
 plot(beta_chain[2,], xlab = 'beta2', ylab = 'EL', type='l')

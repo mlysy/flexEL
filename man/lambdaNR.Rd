@@ -4,16 +4,16 @@
 \alias{lambdaNR}
 \title{Solve the inner loop optimization of an EL function.}
 \usage{
-lambdaNR(G, lambda0, max_iter = 100, eps = 1e-07, verbose = FALSE)
+lambdaNR(G, weights, max_iter = 100, rel_tol = 1e-07, verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}
 
-\item{lambda0}{Length-\code{nEq} vector of starting values.}
+\item{weights}{Optional length-\code{nObs} vector of weights for weighted Newton-Raphson algorithm.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
-\item{eps}{Relative tolerance of Newton-Raphson convergence.}
+\item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
 
 \item{verbose}{Display number of steps and tolerance criterion when algorithm terminates.}
 }
