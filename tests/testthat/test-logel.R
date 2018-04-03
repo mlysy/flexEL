@@ -1,15 +1,15 @@
 # ---- testing logel implementation in R and C++ are equal ----
-library(bayesEL) # always load the package (with library)
+## library(bayesEL) # always load the package (with library)
 # library(optimCheck)
-# source("el-utils.R")
-source("~/bayesEL/tests/testthat/el-utils.R")
+source("el-utils.R")
+## source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically
 context("logEL")
 
 ntest <- 50
 
-# Non-censored case: 
+# Non-censored case:
 test_that("logel.R == logel.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -23,7 +23,7 @@ test_that("logel.R == logel.cpp", {
   }
 })
 
-# Censored case: 
+# Censored case:
 test_that("logelC.R == logelC.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -46,7 +46,7 @@ test_that("logelC.R == logelC.cpp", {
     else {
       expect_equal(logopt.cpp,logopt.R)
     }
-    # location model data generation 
+    # location model data generation
     # X <- matrix(rnorm(n*p),n,p)
     # beta <- 2+ rnorm(p)
     # y <- c(X %*% beta + rnorm(n))

@@ -1,6 +1,7 @@
-#' Numerical check for MLE
+#' Numerical check for MLE.
 #'
 #' Given a log-likelihood function and a potential MLE, checks whether each one-dimensional version of the log-likelihood which varies one parameter at a time with all others at the MLE is indeed maximized at the MLE value.
+#'
 #' @param loglik loglikelihood function.  Takes a single vector argument.
 #' @param theta.mle The potential MLE.
 #' @param itheta indices of one dimensional functions to evaluate and plot.  Defaults to all parameters.
@@ -8,10 +9,14 @@
 #' @param theta.rng Optional two-row matrix giving the plotting limits for each parameter.  Defaults to theta.mle +/- .5 * abs(theta.mle)
 #' @param refit If \code{TRUE}, recalculates the range so that drop is more or less the same on either side of \code{theta.mle}.
 #' @param layout Optional vector giving the number of rows and columns in the plot.  For \code{p} parameters, defaults to \code{c(nr, nc)}, where \code{nr = floor(p)} and \code{nc = ceiling(p/nr)}.
-#' @return Invisibly returns \code{NULL}.  The purpose of this function is to plot the one-dimensional log-likelihoods.
+#' @param plot Logical, whether or not to plot the conditional likelihoods.  See Value for details.
+#' @return A logical vector of length \code{p}, indicating whether or not the MLE was the maximum of the plotted points along each coordinate.  This is for numerically checking what the plots otherwise do visually.
 mle.check <- function(loglik, theta.mle, itheta, theta.names, theta.rng,
-                      refit = TRUE, layout, debug = FALSE) {
+                      refit = TRUE, layout, plot = TRUE) {
   ntheta <- length(theta.mle) # number of parameters
+  npts <- 200 # number of points to plot
+  is.mle <- rep(NA, ntheta) # check whether MLE maximizes 1d loglikelihoods
+  ll.max <- loglik(theta.mle) # maximum value
   if(missing(itheta)) itheta <- 1:ntheta
   if(is.logical(itheta)) itheta <- which(itheta) # convert T/F's to indices
   if(missing(theta.names)) {
@@ -27,19 +32,22 @@ mle.check <- function(loglik, theta.mle, itheta, theta.names, theta.rng,
   ntheta2 <- length(itheta)
   if(length(theta.names) > ntheta2) theta.names <- theta.names[itheta]
   if(ncol(theta.rng) > ntheta2) theta.rng <- theta.rng[,itheta,drop=FALSE]
-  # set up plot
-  opar <- par(no.readonly = TRUE) # save specs of current plot
-  # plot size
-  if(missing(layout)) {
-    layout <- floor(sqrt(ntheta2))
-    layout <- c(layout, ceiling(ntheta2/layout))
+  if(plot) {
+    # set up plot
+    opar <- par(no.readonly = TRUE) # save specs of current plot
+    # plot size
+    if(missing(layout)) {
+      layout <- floor(sqrt(ntheta2))
+      layout <- c(layout, ceiling(ntheta2/layout))
+    }
+    par(mfrow = layout, mar = c(2,2.5,2.5,0), oma = c(3, 3, .5, .5))
+    on.exit(par(opar)) # restore plot parameters when exiting function
   }
   # for loop for plotting
-  par(mfrow = layout, mar = c(2,2.5,2.5,0), oma = c(3, 3, .5, .5))
   for(ii in 1:ntheta2) {
     ith <- itheta[ii]
     theta.seq <- seq(from = theta.rng[1,ii],
-                     to = theta.rng[2,ii], len = 200)
+                     to = theta.rng[2,ii], len = npts)
     for(jj in 1:2) {
       # evaluate likelihood fixing all components except one
       theta.ll <- sapply(theta.seq, function(thetai) {
@@ -48,7 +56,6 @@ mle.check <- function(loglik, theta.mle, itheta, theta.names, theta.rng,
         loglik(theta)
       })
       if(jj == 1 && refit) {
-        if(debug) browser()
         vth <- !is.na(theta.ll) & theta.ll > -Inf # valid values
         lth <- theta.seq < theta.mle[ith] # on the left of mle
         rth <- theta.seq > theta.mle[ith] # on the right
@@ -60,16 +67,24 @@ mle.check <- function(loglik, theta.mle, itheta, theta.names, theta.rng,
         theta.seq <- seq(theta.seq[ibd[1]], theta.seq[ibd[2]], len = 200)
       } else break
     }
-    # plot loglikelihood and add estimated value
-    plot(theta.seq, theta.ll, type = "l",
-         xlab = "", ylab = "")
-    title(main = theta.names[ii], cex.main = 2)
-    abline(v = theta.mle[ith], col = "red")
+    # numerical check
+    is.mle[ii] <- ll.max >= max(theta.ll)
+    if(plot) {
+      # plot loglikelihood and add estimated value
+      graphics::plot(theta.seq, theta.ll, type = "l",
+                     xlab = "", ylab = "")
+      title(main = theta.names[ii], cex.main = 2)
+      abline(v = theta.mle[ith], col = "red")
+    }
   }
-  # labels in margin
-  mtext(side = 2, text = "Log-Likelihood",
-        line = 1, outer = TRUE)
-  mtext(side = 1, text = "Parameter",
-        line = 1, outer = TRUE)
-  par(opar) # restore plot parameters
+  if(plot) {
+    # labels in margin
+    mtext(side = 2, text = "Log-Likelihood",
+          line = 1, outer = TRUE)
+    mtext(side = 1, text = "Parameter",
+          line = 1, outer = TRUE)
+    return(invisible(is.mle))
+  } else {
+    return(is.mle)
+  }
 }
