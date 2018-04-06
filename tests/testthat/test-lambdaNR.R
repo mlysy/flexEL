@@ -1,8 +1,8 @@
 # ---- testing lambdaNR ----
-## library(bayesEL) # always load the package (with library)
+# library(bayesEL) # always load the package (with library)
 library(optimCheck)
 source("el-utils.R")
-## source("~/bayesEL/tests/testthat/el-utils.R")
+# source("~/bayesEL/tests/testthat/el-utils.R")
 # source("~/bayesEL/tests/testthat/mle-check.R")
 
 # library(testthat) # not loaded automatically
@@ -10,17 +10,10 @@ context("lambdaNR")
 
 ntest <- 50
 
-# # G function for location mean regression (old)
-# Gmean <- function(y, X, beta) {
-#     z <- c(y - X %*% beta)
-#     cbind(z, z^2 - 1)
-# }
-
 # Non-censored case:
-# checking R and C++ implementations are equal, and optimality of the solution
-test_that("lambda.R == lambda.cpp", {
+# checking R and C++ implementations are equal
+test_that("no censoring: lambda.R == lambda.cpp", {
   for(ii in 1:ntest) {
-    # Location model + mean regression
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
     G <- matrix(rnorm(n*p),n,p) # randomly generated G
@@ -32,79 +25,72 @@ test_that("lambda.R == lambda.cpp", {
                         max_iter = max_iter, rel_tol = rel_tol)
     lambda.R <- nrout$lambda
     expect_equal(lambda.R, lambda.cpp)
-    # Check optimality by optimCheck if converged
-    if (nrout$convergence) {
-      # check by optim_proj
+  }
+})
+
+# checking optimality of the solution from C++
+test_that("no censoring: lambda.cpp is optimal", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p) # randomly generated G
+    max_iter <- sample(c(5, 10, 100), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    lambda.cpp <- lambdaNR(G = G,
+                           max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    # check optimality by optim_proj if converged
+    if (!any(is.na(lambda.cpp))) {
       ocheck <- optim_proj(xsol = lambda.cpp,
                            fun = function(lambda) Qfun(lambda, G),
                            plot = FALSE)
-      # if (max.xdiff(ocheck) > 0.01) print(ocheck)
       expect_lt(max.xdiff(ocheck),0.01)
-      # TODO: it seems to be very unstable with p == 1, use optim_proj
-      # if (p == 1) {
-      #     # xfit <- optim(par = lambda.cpp, fn = Qfun,
-      #     #               # lower = abs(lambda.cpp)*(-1.5), upper = abs(lambda.cpp)*1.5, # with "Brent"
-      #     #               method = "BFGS")
-      #     # ocheck <- optim_refit(xsol = lambda.cpp, Qfun, xopt = xfit$par)
-      #     ocheck <- optim_proj(xsol = lambda.cpp,
-      #                          fun = function(lambda) Qfun(lambda, G),
-      #                          plot = FALSE)
-      # }
-      # else {
-      #     ocheck <- optim_refit(xsol = lambda.cpp,
-      #                           fun = function(lambda) Qfun(lambda, G))
-      # }
-      # if (max.xdiff(ocheck) > 0.01) print(ocheck)
-      # expect_lt(max.xdiff(ocheck),0.01)
     }
   }
 })
 
 # Censored case:
-# checking R and C++ implementations are equal, and optimality of the solution
-test_that("lambdaC.R == lambdaC.cpp", {
-    for(ii in 1:ntest) {
-        # message(ii)
-        n <- sample(10:20,1)
-        p <- sample(1:(n-2), 1)
-        G <- matrix(rnorm(n*p),n,p) # randomly generated G
-        max_iter <- sample(c(2, 10, 100), 1)
-        rel_tol <- runif(1, 1e-6, 1e-5)
-        weights <- abs(rnorm(n))
-        weights <- weights / sum(weights) * n # sum(weights) == n
-        lambda.cpp <- lambdaNR(G = G, weights,
-                               max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-        nrout <- lambdaNRC_R(G = G, weights,
-                             max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-        lambda.R <- nrout$lambda
-        # check R and C++ are equal
-        expect_equal(lambda.cpp, lambda.R)
-        # Check optimality by optimCheck if converged
-        if (nrout$convergence) {
-            # check by optim_proj
-            ocheck <- optim_proj(xsol = lambda.cpp,
-                                 fun = function(lambda) QfunCens(lambda, G, weights),
-                                 plot = FALSE)
-            # if (max.xdiff(ocheck) > 0.01) print(ocheck)
-            expect_lt(max.xdiff(ocheck),0.01)
-            # # TODO: it seems to be very unstable with p == 1, use optim_proj much better
-            # if (p == 1) {
-            #     # xfit <- optim(par = lambda.cpp, fn = Qfun,
-            #     #               # lower = abs(lambda.cpp)*(-1.5), upper = abs(lambda.cpp)*1.5, # with "Brent"
-            #     #               method = "BFGS")
-            #     # ocheck <- optim_refit(xsol = lambda.cpp, Qfun, xopt = xfit$par)
-            #     ocheck <- optim_proj(xsol = lambda.cpp, fun = QfunCens, plot = FALSE)
-            # }
-            # else {
-            #     ocheck <- optim_refit(xsol = lambda.cpp, QfunCens)
-            # }
-            # if (max.xdiff(ocheck) > 0.01) print(ocheck)
-            # expect_lt(max.xdiff(ocheck),0.01)
-        }
-        # ocheck.cpp <- optim_refit(lambda.cpp, QfunCens)
-        # expect_lt(max.xdiff(ocheck.cpp), 0.01)
-    }
+# checking R and C++ implementations are equal
+test_that("under censoring: lambda.R == lambda.cpp", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p) # randomly generated G
+    max_iter <- sample(c(2, 10, 100), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    weights <- abs(rnorm(n))
+    weights <- weights / sum(weights) * n # sum(weights) == n
+    lambda.cpp <- lambdaNR(G = G, weights,
+                           max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    nrout <- lambdaNRC_R(G = G, weights,
+                         max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    lambda.R <- nrout$lambda
+    # check R and C++ are equal
+    expect_equal(lambda.cpp, lambda.R)
+  }
 })
+
+# checking optimality of the solution from C++
+test_that("under censoring: lambda.cpp is optimal", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p) # randomly generated G
+    max_iter <- sample(c(5, 10, 100), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    weights <- abs(rnorm(n))
+    weights <- weights / sum(weights) * n # sum(weights) == n
+    lambda.cpp <- lambdaNR(G = G, weights,
+                           max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    # check optimality by optim_proj if converged
+    if (!any(is.na(lambda.cpp))) {
+      ocheck <- optim_proj(xsol = lambda.cpp,
+                           fun = function(lambda) QfunCens(lambda, G, weights),
+                           plot = FALSE)
+      expect_lt(max.xdiff(ocheck),0.01)
+    }
+  }
+})
+
 
 # lambdahat <- lambda.R
 # G <- G.R
