@@ -71,10 +71,11 @@ public:
     void evalWeights(); // calculate weights according to epsilons 
     // void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
     void evalOmegas(int maxIter, double relTol);
-    // log empirical likelihood calculation with given omega and G
-    double logEL(int maxIter, double relTol); 
+    // log empirical likelihood calculation with given omegas and G
+    double logEL();
+    // double logEL(int maxIter, double relTol); 
     // set and get functions 
-    // void setDeltas(const Ref<const VectorXd>& _deltas); 
+    void setLambda(const Ref<const VectorXd>& _lambda); // assigned to lambdaNew
     void setWeights(const Ref<const VectorXd>& _weights); 
     void setOmegas(const Ref<const VectorXd>& _omegas);
     void setEpsilons(const Ref<const VectorXd>& _epsilons);
@@ -240,7 +241,7 @@ inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr,
 
 template<typename ELModel>
 inline VectorXd InnerELC<ELModel>::getLambda() {
-    return(lambdaNew);
+  return(lambdaNew);
 }
 
 // returns partial sum of omegas according to the epsilons(jj) that are larger  
@@ -262,14 +263,16 @@ inline double InnerELC<ELModel>::evalPsos(const int ii) {
 
 template<typename ELModel>
 inline void InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& _epsilons) {
-    epsilons = _epsilons;
+  epsilons = _epsilons;
+  epsOrd = sort_inds(epsilons); 
+  
 }
 
 // Note: epsilons must have been assigned
 template<typename ELModel>
 inline void InnerELC<ELModel>::evalWeights() {
     // find the indices for increasing order of epsilons 
-    epsOrd = sort_inds(epsilons); 
+    epsOrd = sort_inds(epsilons);  // TODO: might remove it from here
     psots.noalias() = VectorXd::Zero(nObs); // clear previous values
     int kk;
     for (int ii=0; ii<nObs; ii++) {
@@ -292,8 +295,8 @@ inline void InnerELC<ELModel>::evalWeights() {
 // Note: epsilons must have been assigned
 template<typename ELModel>
 inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
-    // Problem: have to save this o.w. lambdaOld got modified
-    VectorXd lambdaOldEM = lambdaOld; 
+  // Problem: have to save this o.w. lambdaOld got modified
+  VectorXd lambdaOldEM = lambdaOld; 
     int ii; 
     int nIter; 
     double maxErr;
@@ -302,7 +305,7 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
         evalWeights(); // assigns weights according to epsilons
         // std::cout << "weights = " << weights.transpose() << std::endl;
         // M-step:
-        // std::cout << "lambdaOldEM = " << lambdaOldEM << std::endl;
+        // std::cout << "lambdaOldEM = " << lambdaOldEM.transpose() << std::endl;
         lambdaNR(nIter, maxErr, maxIter, relTol); 
         // Check convergence of NR here
         if (nIter == maxIter & maxErr > relTol) {
@@ -334,6 +337,11 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
 }
 
 template<typename ELModel>
+inline void InnerELC<ELModel>::setLambda(const Ref<const VectorXd>& _lambda) {
+  lambdaNew = _lambda;
+}
+
+template<typename ELModel>
 inline void InnerELC<ELModel>::setWeights(const Ref<const VectorXd>& _weights) {
     weights = _weights; 
 }
@@ -353,19 +361,19 @@ inline VectorXd InnerELC<ELModel>::getOmegas() {
     return(omegas);
 }
 
-// finds the maximized loglikelihood, 
-//      or returns -Inf if no feasible omegas satisfies G.
+// Note: omegas must have been assigned before calling 
+// i.e., in InnerElcExports.cpp, assign omegas first 
 template<typename ELModel>
-inline double InnerELC<ELModel>::logEL(int maxIter, double relTol) {
-  evalOmegas(maxIter,relTol);
-  // if (omegas.sum() == 0) return -INFINITY;
+inline double InnerELC<ELModel>::logEL() {
+  // evalOmegas(maxIter,relTol); 
   if (omegas != omegas) return -INFINITY; // (NaN is not equal to themselves)
   else {
     VectorXd psos(nObs); 
     for (int ii=0; ii<nObs; ii++) {
       psos(ii) = evalPsos(ii);
     }
-    // std::cout << omegas.transpose() << std::endl; 
+    // std::cout << "epsOrd = " << epsOrd.transpose() << std::endl;
+    // std::cout << "psos = " << psos.transpose() << std::endl;
     return((deltas.array()*omegas.array().log()
               + (1-deltas.array())*psos.array().log()).sum());
   }

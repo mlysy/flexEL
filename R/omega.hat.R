@@ -11,14 +11,25 @@
 #' @export
 omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
-    omegahat <- .omega.hat(t(G), max_iter, rel_tol, verbose)
+    lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    omegahat <- .omega.hat(t(G), lambda = lambda)
   }
   else {
-    # TODO: set the inital omegas manually atm.. 
-    omegas <- .omega.hat(t(G), max_iter, rel_tol, verbose)
-    if (any(is.nan(omegas))) return(rep(NaN,length(deltas)))
-    omegahat <- .omega.hat.EM(omegas, t(G), deltas, epsilons, 
+    # Note: inital omegas obtained from non-censored optimization
+    lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    omegasInit <- .omega.hat(t(G), lambda)
+    # if (any(is.nan(omegasInit))) return(rep(NaN,length(deltas)))
+    omegahat <- .omega.hat.EM(omegasInit, t(G), deltas, epsilons,
                               max_iter, rel_tol, verbose)
   }
   return(omegahat)
 }
+
+# omega.hat <- function(G, lambda, deltas, epsilons) {
+#   if (missing(deltas) && missing(epsilons)) {
+#     omegahat <- .omega.hat(t(G), lambda)
+#   }
+#   else {
+#     ...
+#   }
+# }

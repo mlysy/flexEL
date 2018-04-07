@@ -12,7 +12,10 @@ logEL <- function(G, deltas, epsilons,
                   max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   # non-censoing case
   if (missing(deltas) && missing(epsilons)) {
-    .logEL(G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    omegas <- .omega.hat(t(G), lambda = lambda)
+    logel <- .logEL(omegas)
+    # .logEL(G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
   }
   # censoring case
   else {
@@ -26,9 +29,12 @@ logEL <- function(G, deltas, epsilons,
     if(length(deltas) != length(epsilons)) {
       stop("deltas and epsilons have inconsistent lengths.")
     }
-    omegas <- .omega.hat(t(G), max_iter, rel_tol, verbose)
-    if (any(is.nan(omegas))) return(-Inf)
-    .logELC(omegas = omegas, G = t(G), deltas = deltas, epsilons = epsilons, 
-            maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    # Note: inital omegas obtained from non-censored optimization
+    lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    omegasInit <- .omega.hat(t(G), lambda)
+    omegas <- .omega.hat.EM(omegasInit, t(G), deltas, epsilons, max_iter, rel_tol, verbose)
+    # if (any(is.nan(omegas))) return(-Inf)
+    logel <-.logELC(omegas = omegas, G = t(G), deltas = deltas, epsilons = epsilons)
   }
+  return(logel)
 }

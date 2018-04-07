@@ -1,8 +1,8 @@
 # ---- testing logel implementation in R and C++ are equal ----
-## library(bayesEL) # always load the package (with library)
+# library(bayesEL) # always load the package (with library)
 # library(optimCheck)
 source("el-utils.R")
-## source("~/bayesEL/tests/testthat/el-utils.R")
+# source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically
 context("logEL")
@@ -36,10 +36,12 @@ test_that("logelC.R == logelC.cpp", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    logopt.cpp <- logEL(G,deltas,epsilons,max_iter=max_iter,rel_tol=rel_tol)
-    # logopt.cpp
-    logopt.R <- logEL_R(G,deltas,epsilons,max_iter=max_iter,rel_tol=rel_tol)
-    # logopt.R
+    logopt.cpp <- logEL(G = G, deltas = deltas, epsilons = epsilons,
+                        max_iter=max_iter,rel_tol=rel_tol)
+    logopt.cpp
+    logopt.R <- logEL_R(G = G, deltas = deltas, epsilons = epsilons,
+                        max_iter=max_iter,rel_tol=rel_tol)
+    logopt.R
     if ((logopt.R == -Inf) && (logopt.cpp != -Inf)) {
       message("R version did not converge but C++ did.")
     }

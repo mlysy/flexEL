@@ -154,13 +154,11 @@ logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
     if (any(is.nan(omegas))) return(-Inf)
     else {
       epsOrd <- order(epsilons) # ascending order of epsilons
-      # print(epsOrd)
       n <- length(omegas)
       psos <- rep(0,n)
       for (ii in 1:n) {
         psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
       }
-      # print(psos)
       return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
     }
   }

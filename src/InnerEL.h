@@ -47,16 +47,21 @@ public:
     // Newton-Raphson algorithm
     void lambdaNR(int& nIter, double& maxErr,
                   int maxIter, double relTol);
-    VectorXd getLambda(); // get function for lambdaNew
+    // calculate omegas given G and lambda (New)
+    void evalOmegas();
+    // find the best omegas given G (Old)
+    // void evalOmegas(int maxIter, double relTol);
+    // calculate logEL given omegas
+    double logEL();
     // log empirical likelihood calculation with given omega and G
-    double logEL(int maxIter, double relTol); 
-    // find the best omegas given G 
-    void evalOmegas(int maxIter, double relTol); 
+    // double logEL(int maxIter, double relTol); 
     // set and get functions 
+    void setLambda(const Ref<const VectorXd>& _lambda); // assigned to lambdaNew
     void setOmegas(const Ref<const VectorXd>& _omegas); 
+    VectorXd getLambda(); // get function for lambdaNew
     VectorXd getOmegas(); // returns omegas
     // posterior sampler: removed for now
-    // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
+    // MatrixXd PostSample(int nsamples, int nburn, VectorXd thetaInit,
     //                     const Ref<const VectorXd>& sigs,
     //                     int maxIter, double relTol);
 };
@@ -201,15 +206,17 @@ inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr,
 }
 
 template<typename ELModel>
+inline void InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& _lambda) {
+  lambdaNew = _lambda;
+}
+
+template<typename ELModel>
 inline VectorXd InnerEL<ELModel>::getLambda() {
     return(lambdaNew);
 }
 
-// TODO: now G must have been assigned before calling this function 
-// const Ref<const VectorXd>& theta
-// template<typename ELModel>
-// inline void InnerEL<ELModel>::evalOmegas(int& nIter, double& maxErr, 
-//                                          int maxIter, double relTol) {
+// Note: G must have been assigned before calling this function 
+/* Old code
 template<typename ELModel>
 inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
     // G must have been assigned
@@ -218,7 +225,6 @@ inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
     lambdaNR(nIter, maxErr, maxIter, relTol);
     // check convergence 
     if (nIter == maxIter && maxErr > relTol) {
-        // omegas = VectorXd::Zero(nObs);
         // omegas = NumericVector::create(NA_REAL); // does not work
         for (int ii=0; ii<nObs; ii++) {
           omegas(ii) = std::numeric_limits<double>::quiet_NaN();
@@ -229,6 +235,24 @@ inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
         Gl11 = 1.0/(1.0-Glambda.array());
         omegas.array() = Gl11.array() / Gl11.sum();
     }
+}
+*/ 
+
+// Note: G and lambdaNew must have been assigned before calling
+// i.e., in InnerElExports.cpp, assign lambdaNew first 
+template<typename ELModel>
+inline void InnerEL<ELModel>::evalOmegas() {
+  // G and lambdaNew must have been assigned
+  if (lambdaNew != lambdaNew) { // if lambdaNew is NaN 
+    for (int ii=0; ii<nObs; ii++) {
+      omegas(ii) = std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+  else {
+    Glambda.noalias() = lambdaNew.transpose() * G;
+    Gl11 = 1.0/(1.0-Glambda.array());
+    omegas.array() = Gl11.array() / Gl11.sum();
+  }
 }
 
 template<typename ELModel>
@@ -243,26 +267,37 @@ inline VectorXd InnerEL<ELModel>::getOmegas() {
 
 // finds the loglikelihood given an omega, G, 
 //   returns -Inf if omegas is not feasible
-// template<typename ELModel>
-// inline double InnerEL<ELModel>::logEL() {
-//     // check if omega is not a feasible solution with G return -Inf
-//     VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
-//     // std::cout << "rhs = " << rhs.transpose() << std::endl; 
-//     // TODO: what tolarance?  sum to 1 ; relative to the norm of omegas and G
-//     if (rhs.array().sum() > 0.01) return -INFINITY;
-//     else return(omegas.array().log().sum());
-// }
+/*
+template<typename ELModel>
+inline double InnerEL<ELModel>::logEL() {
+    // check if omega is not a feasible solution with G return -Inf
+    VectorXd rhs = G * omegas; // if feasible, should be approx a vector of 0s
+    // std::cout << "rhs = " << rhs.transpose() << std::endl;
+    // TODO: what tolarance?  sum to 1 ; relative to the norm of omegas and G
+    if (rhs.array().sum() > 0.01) return -INFINITY;
+    else return(omegas.array().log().sum());
+}
+*/
 
 // finds the maximized loglikelihood, 
 //      or returns -Inf if no feasible omegas satisfies G.
+/* Old code
 template<typename ELModel>
 inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
-    evalOmegas(maxIter, relTol); // evaluate weights and assign them
-    // Maybe add a flag for lambdaNR's convergence..?
-    // if lambdaNR did not converge, return -Inf
-    // if (omegas.sum() == 0) return -INFINITY;
-    if (omegas != omegas) return -INFINITY; // (NaN is not equal to themselves)
-    else return(omegas.array().log().sum());
+  evalOmegas(maxIter, relTol); // evaluate weights and assign them
+  // if lambdaNR did not converge, return -Inf
+  if (omegas != omegas) return -INFINITY; // (NaN is not equal to themselves)
+  else return(omegas.array().log().sum());
+}
+*/
+
+// Note: omegas must have been assigned before calling 
+// i.e., in InnerElExports.cpp, evaluate & assign omegas first 
+template<typename ELModel>
+inline double InnerEL<ELModel>::logEL() {
+  // if omegas are NaN, return -Inf
+  if (omegas != omegas) return -INFINITY;
+  else return(omegas.array().log().sum());
 }
 
 // Old code: 
@@ -288,17 +323,17 @@ inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
 //     }
 // }
 
-// posterior sampler: removed for now
+// posterior sampler: depend on evalG
 /*
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
-					     VectorXd betaInit, const Ref<const VectorXd>& sigs,
+					     VectorXd thetaInit, const Ref<const VectorXd>& sigs,
 					     int maxIter, double relTol) {
-  VectorXd betaOld = betaInit;
-  VectorXd betaNew = betaOld;
-  VectorXd betaProp = betaOld;
-  int betalen = betaInit.size();
-  MatrixXd beta_chain(betaInit.size(),nsamples);
+  VectorXd thetaOld = thetaInit;
+  VectorXd thetaNew = thetaOld;
+  VectorXd thetaProp = thetaOld;
+  int thetalen = thetaInit.size();
+  MatrixXd theta_chain(thetalen,nsamples);
   int nIter;
   double maxErr;
   double logELOld = logEL(nIter, maxErr, maxIter, relTol); // NEW: chache old
@@ -309,19 +344,17 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
   double ratio;
 
   for (int ii=-nburn; ii<nsamples; ii++) {
-    for (int jj=0; jj<betalen; jj++) {
-      betaProp = betaOld;
-      // betaProp(jj) = betaOld(jj) + sigs(jj)*R::norm_rand();
-      betaProp(jj) += sigs(jj)*R::norm_rand();
-      // check if proposed beta satisfies the constraint
+    for (int jj=0; jj<thetalen; jj++) {
+      thetaProp = thetaOld;
+      thetaProp(jj) += sigs(jj)*R::norm_rand();
+      // check if proposed theta satisfies the constraint
       satisfy = false;
       // int nIter = 0;
       // double maxErr;
-      // had a BUG here?! Didn't change G!!!
-      ELModel::evalG(betaProp); // NEW: change G with betaProp
+      ELModel::evalG(thetaProp); // NEW: change G with thetaProp
       lambdaNR(nIter, maxErr, maxIter, relTol);
       if (nIter < maxIter) satisfy = true;
-      // if does not satisfy, keep the old beta
+      // if does not satisfy, keep the old theta
       if (satisfy == false) break;
       // if does satisfy, flip a coin
       u = R::unif_rand();
@@ -333,21 +366,23 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
       logELProp = logomegahat.sum();
       ratio = exp(logELProp-logELOld);
       // std::cout << "ratio = " << ratio << std::endl;
-      // double ratio = exp(logEL(y, X, betaProp, maxIter, relTol) -
-      //                    logEL(y, X, betaOld, maxIter, relTol));
+      // double ratio = exp(logEL(y, X, thetaProp, maxIter, relTol) -
+      //                    logEL(y, X, thetaOld, maxIter, relTol));
       a = std::min(1.0,ratio);
       if (u < a) { // accepted
-        betaNew = betaProp;
-        betaOld = betaNew;
+        thetaNew = thetaProp;
+        thetaOld = thetaNew;
         logELOld = logELProp; // NEW: store the new one
       }
     }
     if (ii >= 0) {
-      beta_chain.col(ii) = betaNew;
+      theta_chain.col(ii) = thetaNew;
     }
   }
-  return(beta_chain);
+  return(theta_chain);
 }
 */
+
+// ----- Old code -----
 
 #endif

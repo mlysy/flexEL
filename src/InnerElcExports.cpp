@@ -43,6 +43,41 @@ Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".lambdaNRC")]]
+Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
+                     int maxIter, double relTol, bool verbose) {
+  // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
+  int nObs = G.cols();
+  int nEqs = G.rows();
+  VectorXd y = VectorXd::Zero(nObs);
+  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+  VectorXd deltas = VectorXd::Zero(nObs);
+  // InnerELC<MeanRegModel> ILC(y, X, delta, NULL); // instantiate
+  InnerELC<MeanRegModel> ILC; 
+  ILC.setData(y,X,deltas,NULL); 
+  ILC.setG(G); // assign a given G
+  ILC.setWeights(weights); 
+  // initialize variables for output here 
+  int nIter;
+  double maxErr;
+  VectorXd lambda;
+  bool not_conv;
+  ILC.lambdaNR(nIter, maxErr, maxIter, relTol);
+  lambda = ILC.getLambda(); // output
+  // check convergence
+  not_conv = (nIter == maxIter) && (maxErr > relTol);
+  if(verbose) {
+    Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+  }
+  // fill in NaN if not converged
+  if (not_conv) {
+    for (int ii=0; ii<lambda.size(); ii++) {
+      lambda(ii) = std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+  return lambda;
+}
+
+/* return a list -- value & convergence status
 Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
                      int maxIter, double relTol, bool verbose) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
@@ -71,11 +106,12 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
     return Rcpp::List::create(_["lambda"] = lambda,
                               _["convergence"] = !not_conv);
 }
+*/
 
 // G: m x N matrix
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".omega.hat.EM")]]
-Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegas, 
+Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit, 
                            Eigen::MatrixXd G, Eigen::VectorXd deltas,
                            Eigen::VectorXd epsilons, 
                            int maxIter, double relTol, bool verbose) {
@@ -89,8 +125,8 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegas,
     ILC.setData(y,X,deltas,NULL); 
     ILC.setG(G); // assign a given G
     ILC.setEpsilons(epsilons); 
-    // TODO: right now, set initial omegas (by uncensored omega.hat) manually 
-    ILC.setOmegas(omegas);
+    // Note: set initial omegas from uncensored omega.hat
+    ILC.setOmegas(omegasInit);
     ILC.evalOmegas(maxIter, relTol);
     VectorXd omegasnew = ILC.getOmegas(); // output
     return omegasnew; 
@@ -98,10 +134,10 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegas,
 
 // Returns the maximized log empirical likelihood given G, 
 //      or -Inf if no omegas satisfies G.
+// Note: omegas should be the returned value from censored omega.hat
 // [[Rcpp::export(".logELC")]]
 double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
-              Eigen::VectorXd deltas, Eigen::VectorXd epsilons, 
-             int maxIter, double relTol, bool verbose) {
+              Eigen::VectorXd deltas, Eigen::VectorXd epsilons) {
     int nObs = G.cols();
     int nEqs = G.rows();
     VectorXd y = VectorXd::Zero(nObs);
@@ -110,8 +146,8 @@ double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G,
     ILC.setData(y,X,deltas,NULL);
     ILC.setG(G); // set the given G
     ILC.setEpsilons(epsilons); 
-    // TODO: right now, set initial omegas (by uncensored omega.hat) manually 
+    // set omegas which is obtained from EM algorithm 
     ILC.setOmegas(omegas);
-    double logel = ILC.logEL(maxIter, relTol);
+    double logel = ILC.logEL();
     return logel; 
 }
