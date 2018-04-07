@@ -44,7 +44,7 @@ MaxRelErr <- function(lambdaNew, lambdaOld) {
 
 log.star <- function(x, n) {
     cond <- x >= 1/n
-    ans <- rep(NA, length(x))
+    ans <- rep(NaN, length(x))
     ans[cond] <- log(x[cond])
     ans[!cond] <- -1/2 * n^2 * x[!cond]^2 + 2*n*x[!cond] - 3/2 - log(n)
     ans
@@ -52,7 +52,7 @@ log.star <- function(x, n) {
 
 log.star1 <- function(x, n) {
     cond <- x >= 1/n
-    ans <- rep(NA,length(x))
+    ans <- rep(NaN,length(x))
     ans[cond] <- 1/(x[cond])
     ans[!cond] <- -n^2*x[!cond] + 2*n
     return(ans)
@@ -60,7 +60,7 @@ log.star1 <- function(x, n) {
 
 log.star2 <- function(x, n) {
     cond <- x >= 1/n
-    ans <- rep(NA,length(x))
+    ans <- rep(NaN,length(x))
     ans[cond] <- -1/(x[cond]^2)
     ans[!cond] <- -n^2
     return(ans)
@@ -91,7 +91,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
         Glambda <- t(lambdaOld) %*% G
         Glambda <- 1 - Glambda
         Q2 <- matrix(0, nrow=nEqs, ncol=nEqs)
-        rho <- rep(NA, nObs)
+        rho <- rep(NaN, nObs)
         for(jj in 1:nObs) {
             rho[jj] <- log.star1(Glambda[jj],nObs)
             Q2 <- Q2 + log.star2(Glambda[jj],nObs) * (G[,jj] %*% t(G[,jj]))
@@ -107,7 +107,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
         lambdaOld <- lambdaNew
     }
     notconv <- (ii == max_iter && maxErr > rel_tol)
-    if(notconv) lambdaNew <- rep(NA, nEqs)
+    if(notconv) lambdaNew <- rep(NaN, nEqs)
     # c(lambdaNew) to make sure lambda is a vector
     output <- list(lambda=c(lambdaNew), convergence=!notconv)
     return(output)
@@ -123,7 +123,7 @@ omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) 
     conv <- lambdaOut$convergence # 1 if converged
     if (!conv) {
         nObs <- nrow(G)
-        omegahat <- rep(0,nObs)
+        omegahat <- rep(NaN,nObs)
     }
     else {
         lambdahat <- lambdaOut$lambda
@@ -139,7 +139,7 @@ logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
   # non-censored case:
   if (missing(deltas) && missing(epsilons)) {
     omegas <- omega.hat.NC_R(G, max_iter, rel_tol)
-    if (sum(omegas)== 0) return(-Inf)
+    if (any(is.nan(omegas))) return(-Inf)
     else return(sum(log(omegas)))
   }
   # censored case:
@@ -151,7 +151,7 @@ logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
       stop("deltas and G have inconsistent dimensions.")
     }
     omegas <- omega.hat.EM_R(G, deltas, epsilons, max_iter, rel_tol)
-    if (sum(omegas)== 0) return(-Inf)
+    if (any(is.nan(omegas))) return(-Inf)
     else {
       epsOrd <- order(epsilons) # ascending order of epsilons
       # print(epsOrd)
@@ -181,7 +181,7 @@ mrls.logel_R <- function(y, X, Z, beta, gamma) {
 # Note: x and q must be of the same length
 log.sharp <- function(x, q) {
     cond <- x >= q
-    ans <- rep(NA,length(x))
+    ans <- rep(NaN,length(x))
     ans[cond] <- log(x[cond])
     ans[!cond] <- -1/(2*q[!cond]^2)*x[!cond]^2 + 2/q[!cond]*x[!cond] - 3/2 + log(q[!cond])
     return(ans)
@@ -189,7 +189,7 @@ log.sharp <- function(x, q) {
 
 log.sharp1 <- function(x, q) {
     cond <- x >= q
-    ans <- rep(NA,length(x))
+    ans <- rep(NaN,length(x))
     ans[cond] <- 1/(x[cond])
     ans[!cond] <- -1/(q[!cond]^2)*x[!cond] + 2/q[!cond]
     return(ans)
@@ -197,7 +197,7 @@ log.sharp1 <- function(x, q) {
 
 log.sharp2 <- function(x, q) {
     cond <- x >= q
-    ans <- rep(NA,length(x))
+    ans <- rep(NaN,length(x))
     ans[cond] <- -1/(x[cond]^2)
     ans[!cond] <- -1/q[!cond]^2
     return(ans)
@@ -233,7 +233,7 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     Glambda <- t(lambdaOld) %*% G
     Glambda <- sum(weights) + Glambda
     # Q1 <- rep(0,nEqs)
-    rho <- rep(NA,nObs)
+    rho <- rep(NaN,nObs)
     Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
     for (jj in 1:nObs) {
       rho[jj] <- log.sharp1(Glambda[jj], weights[jj]);
@@ -255,7 +255,7 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     }
   }
   notconv <- (ii == max_iter && maxErr > rel_tol)
-  if (notconv) lambdaNew <- rep(NA, nEqs)
+  if (notconv) lambdaNew <- rep(NaN, nEqs)
   output<- list(lambda = c(lambdaNew), convergence=!notconv)
   return(output)
 }
@@ -324,7 +324,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     nIter <- 0
     # initialize omegas with uncensored solution 
     omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
-    if (sum(omegas) == 0) return(rep(0,n))
+    if (any(is.nan(omegas))) return(rep(NaN,n))
     for (ii in 1:max_iter) {
         nIter <- ii
         # E step: calculating weights
@@ -337,15 +337,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
         # TODO: what if not converged ?? use a random weights and continue ? 
         if (!lambdaOut$convergence) {
           message("lambdaNRC did not converge in EM")
-          return(rep(0,n))
+          return(rep(NaN,n))
         }
-        # if (!lambdaOut$convergence) {
-        #     message("randomly modify omegas..")
-        #     omegas <- abs(omegas + rnorm(n))
-        #     omegas <- omegas/sum(omegas)
-        #     lambdaNew <- lambdaOld
-        #     next
-        # }
         lambdaNew <- lambdaOut$lambda
         qlg <- c(sum(weights) + lambdaNew %*% t(G))
         # print(qlg)
@@ -370,7 +363,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     }
     notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
     if (notconv) {
-        omegas = rep(0,n)
+        omegas = rep(NaN,n)
     }
     return(omegas)
 }
@@ -473,7 +466,7 @@ qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
     betaNew <- betaOld
     # betaProp <- betaNew
     betalen <- length(betaInit)
-    beta_chain <- matrix(NA,betalen,nsamples)
+    beta_chain <- matrix(NaN,betalen,nsamples)
     logELOld <- qr.logel_R(y, X, alpha, betaOld)
     lambdaOld <- rep(0,ncol(X))
     for (ii in (-nburn+1):nsamples) {
@@ -515,7 +508,7 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
     nObs <- nrow(X)
     nBeta <- length(beta)
     nGamma <- length(gamma)
-    G <- matrix(NA, nObs, nBeta + nGamma + 1)
+    G <- matrix(NaN, nObs, nBeta + nGamma + 1)
     yXb <- y - X %*% beta
     gZe <- exp(-2 * (Z %*% gamma))
     WW <- c(yXb * gZe)

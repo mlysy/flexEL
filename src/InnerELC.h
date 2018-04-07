@@ -325,7 +325,10 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
     }
     nIter = ii; 
     if (nIter == maxIter & maxErr > relTol) {
-      omegas = VectorXd::Zero(nObs); 
+      // omegas = VectorXd::Zero(nObs); 
+      for (int ii=0; ii<nObs; ii++) {
+        omegas(ii) = std::numeric_limits<double>::quiet_NaN();
+      }
     }
     return;
 }
@@ -355,7 +358,8 @@ inline VectorXd InnerELC<ELModel>::getOmegas() {
 template<typename ELModel>
 inline double InnerELC<ELModel>::logEL(int maxIter, double relTol) {
   evalOmegas(maxIter,relTol);
-  if (omegas.sum() == 0) return -INFINITY;
+  // if (omegas.sum() == 0) return -INFINITY;
+  if (omegas != omegas) return -INFINITY; // (NaN is not equal to themselves)
   else {
     VectorXd psos(nObs); 
     for (int ii=0; ii<nObs; ii++) {

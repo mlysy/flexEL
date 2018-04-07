@@ -21,7 +21,7 @@ lambdaNR <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE
         ans <- ans$lambda
     } 
     else {
-        ans <- rep(NA, ncol(G)) # ncol(G) == nEqs
+        ans <- rep(NaN, ncol(G)) # ncol(G) == nEqs
     }
     ans
 }

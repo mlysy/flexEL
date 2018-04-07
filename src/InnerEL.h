@@ -215,12 +215,14 @@ inline void InnerEL<ELModel>::evalOmegas(int maxIter, double relTol) {
     // G must have been assigned
     int nIter;
     double maxErr; 
-    // std::cout << "evalOmegas: before lambdaNew = " << lambdaNew << std::endl;
     lambdaNR(nIter, maxErr, maxIter, relTol);
-    // std::cout << "evalOmegas: after lambdaNew = " << lambdaNew << std::endl;
     // check convergence 
     if (nIter == maxIter && maxErr > relTol) {
-        omegas = VectorXd::Zero(nObs);
+        // omegas = VectorXd::Zero(nObs);
+        // omegas = NumericVector::create(NA_REAL); // does not work
+        for (int ii=0; ii<nObs; ii++) {
+          omegas(ii) = std::numeric_limits<double>::quiet_NaN();
+        }
     }
     else {
         Glambda.noalias() = lambdaNew.transpose() * G;
@@ -258,7 +260,8 @@ inline double InnerEL<ELModel>::logEL(int maxIter, double relTol) {
     evalOmegas(maxIter, relTol); // evaluate weights and assign them
     // Maybe add a flag for lambdaNR's convergence..?
     // if lambdaNR did not converge, return -Inf
-    if (omegas.sum() == 0) return -INFINITY;
+    // if (omegas.sum() == 0) return -INFINITY;
+    if (omegas != omegas) return -INFINITY; // (NaN is not equal to themselves)
     else return(omegas.array().log().sum());
 }
 

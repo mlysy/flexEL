@@ -16,7 +16,7 @@ omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbo
   else {
     # TODO: set the inital omegas manually atm.. 
     omegas <- .omega.hat(t(G), max_iter, rel_tol, verbose)
-    if (sum(omegas) == 0) return(rep(0,length(deltas)))
+    if (any(is.nan(omegas))) return(rep(NaN,length(deltas)))
     omegahat <- .omega.hat.EM(omegas, t(G), deltas, epsilons, 
                               max_iter, rel_tol, verbose)
   }

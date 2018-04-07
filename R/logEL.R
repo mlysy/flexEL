@@ -27,7 +27,7 @@ logEL <- function(G, deltas, epsilons,
       stop("deltas and epsilons have inconsistent lengths.")
     }
     omegas <- .omega.hat(t(G), max_iter, rel_tol, verbose)
-    if (sum(omegas) == 0) return(-Inf)
+    if (any(is.nan(omegas))) return(-Inf)
     .logELC(omegas = omegas, G = t(G), deltas = deltas, epsilons = epsilons, 
             maxIter = max_iter, relTol = rel_tol, verbose = verbose)
   }
