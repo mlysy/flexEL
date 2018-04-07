@@ -61,9 +61,9 @@ public:
     VectorXd getLambda(); // get function for lambdaNew
     VectorXd getOmegas(); // returns omegas
     // posterior sampler: removed for now
-    // MatrixXd PostSample(int nsamples, int nburn, VectorXd thetaInit,
-    //                     const Ref<const VectorXd>& sigs,
-    //                     int maxIter, double relTol);
+    MatrixXd PostSample(int nsamples, int nburn, VectorXd thetaInit,
+                        const Ref<const VectorXd>& sigs,
+                        int maxIter, double relTol);
 };
 
 /*
@@ -324,7 +324,6 @@ inline double InnerEL<ELModel>::logEL() {
 // }
 
 // posterior sampler: depend on evalG
-/*
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
 					     VectorXd thetaInit, const Ref<const VectorXd>& sigs,
@@ -334,9 +333,13 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
   VectorXd thetaProp = thetaOld;
   int thetalen = thetaInit.size();
   MatrixXd theta_chain(thetalen,nsamples);
+  ELModel::evalG(thetaOld);
   int nIter;
   double maxErr;
-  double logELOld = logEL(nIter, maxErr, maxIter, relTol); // NEW: chache old
+  lambdaNR(nIter, maxErr, maxIter, relTol); 
+  // TODO: what if not converged
+  evalOmegas();
+  double logELOld = logEL(); 
   double logELProp;
   bool satisfy;
   double u;
@@ -349,8 +352,6 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
       thetaProp(jj) += sigs(jj)*R::norm_rand();
       // check if proposed theta satisfies the constraint
       satisfy = false;
-      // int nIter = 0;
-      // double maxErr;
       ELModel::evalG(thetaProp); // NEW: change G with thetaProp
       lambdaNR(nIter, maxErr, maxIter, relTol);
       if (nIter < maxIter) satisfy = true;
@@ -365,9 +366,6 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
         log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
       logELProp = logomegahat.sum();
       ratio = exp(logELProp-logELOld);
-      // std::cout << "ratio = " << ratio << std::endl;
-      // double ratio = exp(logEL(y, X, thetaProp, maxIter, relTol) -
-      //                    logEL(y, X, thetaOld, maxIter, relTol));
       a = std::min(1.0,ratio);
       if (u < a) { // accepted
         thetaNew = thetaProp;
@@ -381,7 +379,7 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
   }
   return(theta_chain);
 }
-*/
+
 
 // ----- Old code -----
 

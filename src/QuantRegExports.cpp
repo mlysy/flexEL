@@ -10,11 +10,11 @@ using namespace Eigen;
 
 // [[Rcpp::export(".QuantReg_evalG")]]
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
-                              double alpha, Eigen::VectorXd beta) {
+                              double alpha, Eigen::VectorXd theta) {
     // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
     InnerEL<QuantRegModel> QR;
     QR.setData(y,X,&alpha); 
-    QR.evalG(beta);
+    QR.evalG(theta);
     Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
     return(G); 
 }
@@ -35,14 +35,14 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 //     return(logELquant);
 // }
 
-/*
 // [[Rcpp::export(".QuantReg_post")]]
 Eigen::MatrixXd QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                              double alpha, int nsamples, int nburn, 
-                             Eigen::VectorXd betaInit, Eigen::VectorXd sigs, 
+                             Eigen::VectorXd thetaInit, Eigen::VectorXd sigs, 
                              int maxIter = 100, double relTol = 1e-7) {
-      InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
-      Eigen::MatrixXd beta_chain = QR.PostSample(nsamples, nburn, betaInit, sigs, maxIter, relTol);
-      return(beta_chain);
+  InnerEL<QuantRegModel> QR;
+  QR.setData(y,X,&alpha); 
+  // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
+  Eigen::MatrixXd theta_chain = QR.PostSample(nsamples, nburn, thetaInit, sigs, maxIter, relTol);
+  return(theta_chain);
 }
-*/
