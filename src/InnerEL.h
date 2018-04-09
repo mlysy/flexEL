@@ -61,8 +61,8 @@ public:
     VectorXd getLambda(); // get function for lambdaNew
     VectorXd getOmegas(); // returns omegas
     // posterior sampler: removed for now
-    MatrixXd PostSample(int nsamples, int nburn, VectorXd thetaInit,
-                        const Ref<const VectorXd>& sigs,
+    MatrixXd postSample(int nsamples, int nburn, VectorXd thetaInit,
+                        const Ref<const VectorXd>& sigs, VectorXd &paccept, 
                         int maxIter, double relTol);
 };
 
@@ -324,10 +324,11 @@ inline double InnerEL<ELModel>::logEL() {
 // }
 
 // posterior sampler: depend on evalG
+// paccept should be a vector of length(thetaInit)
 template<typename ELModel>
-inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
+inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
 					     VectorXd thetaInit, const Ref<const VectorXd>& sigs,
-					     int maxIter, double relTol) {
+					     VectorXd &paccept, int maxIter, double relTol) {
   VectorXd thetaOld = thetaInit;
   VectorXd thetaNew = thetaOld;
   VectorXd thetaProp = thetaOld;
@@ -337,7 +338,7 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
   int nIter;
   double maxErr;
   lambdaNR(nIter, maxErr, maxIter, relTol); 
-  // TODO: what if not converged
+  // TODO: what if not converged ?
   evalOmegas();
   double logELOld = logEL(); 
   double logELProp;
@@ -345,6 +346,7 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
   double u;
   double a;
   double ratio;
+  paccept = VectorXd::Zero(thetaInit.size()); // TODO: need to initialize to 0 ?
 
   for (int ii=-nburn; ii<nsamples; ii++) {
     for (int jj=0; jj<thetalen; jj++) {
@@ -368,6 +370,7 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
       ratio = exp(logELProp-logELOld);
       a = std::min(1.0,ratio);
       if (u < a) { // accepted
+        paccept(jj) += 1; 
         thetaNew = thetaProp;
         thetaOld = thetaNew;
         logELOld = logELProp; // NEW: store the new one
@@ -377,6 +380,7 @@ inline MatrixXd InnerEL<ELModel>::PostSample(int nsamples, int nburn,
       theta_chain.col(ii) = thetaNew;
     }
   }
+  paccept /= (nsamples+nburn); 
   return(theta_chain);
 }
 

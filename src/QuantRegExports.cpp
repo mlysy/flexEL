@@ -36,13 +36,18 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 // }
 
 // [[Rcpp::export(".QuantReg_post")]]
-Eigen::MatrixXd QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
+Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                              double alpha, int nsamples, int nburn, 
                              Eigen::VectorXd thetaInit, Eigen::VectorXd sigs, 
                              int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   QR.setData(y,X,&alpha); 
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
-  Eigen::MatrixXd theta_chain = QR.PostSample(nsamples, nburn, thetaInit, sigs, maxIter, relTol);
-  return(theta_chain);
+  Eigen::VectorXd paccept; 
+  Eigen::MatrixXd theta_chain = QR.postSample(nsamples, nburn, thetaInit, sigs, paccept, maxIter, relTol);
+  // return(theta_chain);
+  Rcpp::List retlst; 
+  retlst["theta_chain"] = theta_chain;
+  retlst["paccept"] = paccept; 
+  return(retlst); 
 }

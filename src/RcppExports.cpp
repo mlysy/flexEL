@@ -130,7 +130,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantReg_post
-Eigen::MatrixXd QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, int nsamples, int nburn, Eigen::VectorXd thetaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
+Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, int nsamples, int nburn, Eigen::VectorXd thetaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
 RcppExport SEXP _bayesEL_QuantReg_post(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP thetaInitSEXP, SEXP sigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
