@@ -10,13 +10,26 @@ using namespace Eigen;
 
 // [[Rcpp::export(".QuantReg_evalG")]]
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
-                              double alpha, Eigen::VectorXd theta) {
+                              double alpha, Eigen::VectorXd beta) {
     // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
     InnerEL<QuantRegModel> QR;
     QR.setData(y,X,&alpha); 
-    QR.evalG(theta);
+    QR.evalG(beta);
     Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
     return(G); 
+}
+
+// [[Rcpp::export(".QuantRegLS_evalG")]]
+Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, 
+                                 Eigen::MatrixXd X, Eigen::MatrixXd Z, 
+                                 double alpha, 
+                                 Eigen::VectorXd beta, Eigen::VectorXd gamma) {
+  // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+  InnerEL<QuantRegModel> QR;
+  QR.setData(y,X,Z,&alpha); 
+  QR.evalG(beta,gamma);
+  Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
+  return(G); 
 }
 
 // Old code:
@@ -38,16 +51,16 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 // [[Rcpp::export(".QuantReg_post")]]
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                              double alpha, int nsamples, int nburn, 
-                             Eigen::VectorXd thetaInit, Eigen::VectorXd sigs, 
+                             Eigen::VectorXd betaInit, Eigen::VectorXd sigs, 
                              int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   QR.setData(y,X,&alpha); 
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
   Eigen::VectorXd paccept; 
-  Eigen::MatrixXd theta_chain = QR.postSample(nsamples, nburn, thetaInit, sigs, paccept, maxIter, relTol);
-  // return(theta_chain);
+  Eigen::MatrixXd beta_chain = QR.postSample(nsamples, nburn, betaInit, sigs, paccept, maxIter, relTol);
+  // return(beta_chain);
   Rcpp::List retlst; 
-  retlst["theta_chain"] = theta_chain;
+  retlst["beta_chain"] = beta_chain;
   retlst["paccept"] = paccept; 
   return(retlst); 
 }

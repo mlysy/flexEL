@@ -517,7 +517,7 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
   return(G)
 }
 
-qrls.evalG_R <- function(y, X, Z, beta, gamma, alpha) {
+qrls.evalG_R <- function(y, X, Z, alpha, beta, gamma) {
   nObs <- nrow(X)
   nBeta <- length(beta)
   nGamma <- length(gamma)
@@ -526,7 +526,7 @@ qrls.evalG_R <- function(y, X, Z, beta, gamma, alpha) {
   yXbeZg <- c((y - X %*% beta)*eZg)
   pyXbeZg <- phi_alpha(yXbeZg, alpha)
   G[,1:nBeta] <- pyXbeZg * eZg * X # times each col of X
-  G[,nBeta+1:nGamma] <- pyXbeZg * yXbeZg * eZg * Z # times each col of Z
+  G[,nBeta+1:nGamma] <- pyXbeZg * yXbeZg * Z # times each col of Z
   G[,nBeta+nGamma+1] <- yXbeZg^2 - 1
   return(G)
 }

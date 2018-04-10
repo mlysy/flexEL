@@ -6,13 +6,17 @@
 
 class QuantRegModel {
 private:
+  RowVectorXd yXb;
+  RowVectorXd eZg;
+  RowVectorXd yXbeZg;
   double rho_alpha(double u, double alpha); // TODO: not needed?
   double phi_alpha(double u, double alpha); 
 protected:
   VectorXd y;
   MatrixXd X;
+  MatrixXd Z;
   double alpha; 
-  int nObs, nEqs;
+  int nObs, nEqs, nBet, nGam;
   MatrixXd G;
 public:
   // QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
@@ -47,14 +51,31 @@ inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y,
 
 // setData (with default ctor)
 inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
-                                  const Ref<const MatrixXd>& _X,
-                                  void* params) {
-    y = _y;
-    X = _X;
-    alpha = *(double*)(params);
-    nObs = y.size();
-    nEqs = X.rows(); // X gets passed as p x nObs matrix
-    G = MatrixXd::Zero(nEqs,nObs);
+                                   const Ref<const MatrixXd>& _X,
+                                   void* params) {
+  y = _y;
+  X = _X;
+  alpha = *(double*)(params);
+  nObs = y.size();
+  nBet = X.rows(); // X gets passed as nBet x nObs matrix
+  nEqs = nBet; 
+  G = MatrixXd::Zero(nEqs,nObs);
+}
+
+// setData (location-scale model) (with default ctor)
+inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
+                                   const Ref<const MatrixXd>& _X,
+                                   const Ref<const MatrixXd>& _Z,
+                                   void* params) {
+  y = _y;
+  X = _X;
+  Z = _Z;
+  alpha = *(double*)(params);
+  nObs = y.size();
+  nBet = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
+  nEqs = nBet+nGam+1; 
+  G = MatrixXd::Zero(nEqs,nObs);
 }
 
 // revised L1 loss function for quantile regression
@@ -77,9 +98,15 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
 // form the G matrix (location-scale model)
 inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta, 
                                  const Ref<const VectorXd>& gamma) {
+  eZg.array() = (-gamma.transpose()*Z).array().exp();
+  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array()*eZg.array();
+  double phivalue; 
   for(int ii=0; ii<y.size(); ii++) {
-    this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
+    phivalue = phi_alpha(yXbeZg(ii), alpha);
+    this->G.block(0,ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
+    this->G.block(nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
   }
+  G.bottomRows(1).array() = yXbeZg.array()*yXbeZg.array()-1;
 }
 
 // set function for G matrix

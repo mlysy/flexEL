@@ -37,11 +37,15 @@
     .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma)
 }
 
-.QuantReg_evalG <- function(y, X, alpha, theta) {
-    .Call(`_bayesEL_QuantReg_evalG`, y, X, alpha, theta)
+.QuantReg_evalG <- function(y, X, alpha, beta) {
+    .Call(`_bayesEL_QuantReg_evalG`, y, X, alpha, beta)
 }
 
-.QuantReg_post <- function(y, X, alpha, nsamples, nburn, thetaInit, sigs, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_QuantReg_post`, y, X, alpha, nsamples, nburn, thetaInit, sigs, maxIter, relTol)
+.QuantRegLS_evalG <- function(y, X, Z, alpha, beta, gamma) {
+    .Call(`_bayesEL_QuantRegLS_evalG`, y, X, Z, alpha, beta, gamma)
+}
+
+.QuantReg_post <- function(y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_QuantReg_post`, y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter, relTol)
 }
 

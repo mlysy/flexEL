@@ -131,22 +131,38 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantReg_evalG
-Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, Eigen::VectorXd theta);
-RcppExport SEXP _bayesEL_QuantReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP thetaSEXP) {
+Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, Eigen::VectorXd beta);
+RcppExport SEXP _bayesEL_QuantReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type theta(thetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_evalG(y, X, alpha, theta));
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantReg_evalG(y, X, alpha, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// QuantRegLS_evalG
+Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, double alpha, Eigen::VectorXd beta, Eigen::VectorXd gamma);
+RcppExport SEXP _bayesEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG(y, X, Z, alpha, beta, gamma));
     return rcpp_result_gen;
 END_RCPP
 }
 // QuantReg_post
-Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, int nsamples, int nburn, Eigen::VectorXd thetaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_QuantReg_post(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP thetaInitSEXP, SEXP sigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, double alpha, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantReg_post(SEXP ySEXP, SEXP XSEXP, SEXP alphaSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP sigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -155,11 +171,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type thetaInit(thetaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type sigs(sigsSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_post(y, X, alpha, nsamples, nburn, thetaInit, sigs, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(QuantReg_post(y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -175,6 +191,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_MeanReg_evalG", (DL_FUNC) &_bayesEL_MeanReg_evalG, 3},
     {"_bayesEL_MeanRegLS_evalG", (DL_FUNC) &_bayesEL_MeanRegLS_evalG, 5},
     {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},
+    {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 6},
     {"_bayesEL_QuantReg_post", (DL_FUNC) &_bayesEL_QuantReg_post, 9},
     {NULL, NULL, 0}
 };
