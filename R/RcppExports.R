@@ -33,6 +33,10 @@
     .Call(`_bayesEL_MeanReg_evalG`, y, X, beta)
 }
 
+.MeanRegLS_evalG <- function(y, X, Z, beta, gamma) {
+    .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma)
+}
+
 .QuantReg_evalG <- function(y, X, alpha, theta) {
     .Call(`_bayesEL_QuantReg_evalG`, y, X, alpha, theta)
 }

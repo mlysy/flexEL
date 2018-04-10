@@ -19,6 +19,18 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(G); 
 }
 
+// [[Rcpp::export(".MeanRegLS_evalG")]]
+Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
+                                Eigen::MatrixXd X, Eigen::MatrixXd Z,
+                                Eigen::VectorXd beta,Eigen::VectorXd gamma) {
+  // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
+  InnerEL<MeanRegModel> MR;
+  MR.setData(y,X,Z,NULL); 
+  MR.evalG(beta,gamma);
+  Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+  return(G); 
+}
+
 // Old code:
 // // [[Rcpp::export(".MeanReg_logEL")]]
 // double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,

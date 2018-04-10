@@ -500,21 +500,35 @@ qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
 }
 
 
-## #---- Location-scale model ----
+# ---- Location-scale model ----
 
 mrls.evalG_R <- function(y, X, Z, beta, gamma) {
-    nObs <- nrow(X)
-    nBeta <- length(beta)
-    nGamma <- length(gamma)
-    G <- matrix(NaN, nObs, nBeta + nGamma + 1)
-    yXb <- y - X %*% beta
-    gZe <- exp(-2 * (Z %*% gamma))
-    WW <- c(yXb * gZe)
-    G[,1:nBeta] <- WW * X
-    WW <- c(yXb * WW)
-    G[,nBeta + 1:nGamma] <-  WW * Z
-    G[,nBeta + nGamma + 1] <- WW - 1
-    G
+  nObs <- nrow(X)
+  nBeta <- length(beta)
+  nGamma <- length(gamma)
+  G <- matrix(NaN, nObs, nBeta + nGamma + 1)
+  eZg <- c(exp(-Z %*% gamma))
+  eZg2 <- eZg^2
+  yXbeZg <- c((y - X %*% beta)*eZg)
+  yXbeZg2 <- yXbeZg^2
+  G[,1:nBeta] <- yXbeZg * eZg2 * X # times each col of X
+  G[,nBeta+1:nGamma] <- yXbeZg2 * eZg2 * Z # times each col of Z
+  G[,nBeta+nGamma+1] <- yXbeZg2 - 1
+  return(G)
+}
+
+qrls.evalG_R <- function(y, X, Z, beta, gamma, alpha) {
+  nObs <- nrow(X)
+  nBeta <- length(beta)
+  nGamma <- length(gamma)
+  G <- matrix(NaN, nObs, nBeta + nGamma + 1)
+  eZg <- c(exp(-Z %*% gamma))
+  yXbeZg <- c((y - X %*% beta)*eZg)
+  pyXbeZg <- phi_alpha(yXbeZg, alpha)
+  G[,1:nBeta] <- pyXbeZg * eZg * X # times each col of X
+  G[,nBeta+1:nGamma] <- pyXbeZg * yXbeZg * eZg * Z # times each col of Z
+  G[,nBeta+nGamma+1] <- yXbeZg^2 - 1
+  return(G)
 }
 
 ## LSevalG <- function(y, X, theta) {

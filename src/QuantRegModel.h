@@ -6,22 +6,29 @@
 
 class QuantRegModel {
 private:
-    double rho_alpha(double u, double alpha); // TODO: not needed?
-    double phi_alpha(double u, double alpha); 
+  double rho_alpha(double u, double alpha); // TODO: not needed?
+  double phi_alpha(double u, double alpha); 
 protected:
-    VectorXd y;
-    MatrixXd X;
-    double alpha; 
-    int nObs, nEqs;
-    MatrixXd G;
+  VectorXd y;
+  MatrixXd X;
+  double alpha; 
+  int nObs, nEqs;
+  MatrixXd G;
 public:
-    // QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
-    //               void* params); // constructor non-censor
-    void setData(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
-                 void* params); // set data with default ctor
-    void evalG(const Ref<const VectorXd>& beta);
-    void setG(const Ref<const MatrixXd>& _G); 
-    MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
+  // QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
+  //               void* params); // constructor non-censor
+  void setData(const Ref<const VectorXd>& _y, 
+               const Ref<const MatrixXd>& _X,
+               void* params); // set data with default ctor
+  void setData(const Ref<const VectorXd>& _y, 
+               const Ref<const MatrixXd>& _X,
+               const Ref<const MatrixXd>& _Z,
+               void* params); // set data with default ctor
+  void evalG(const Ref<const VectorXd>& beta);
+  void evalG(const Ref<const VectorXd>& beta, 
+             const Ref<const VectorXd>& gamma);
+  void setG(const Ref<const MatrixXd>& _G); 
+  MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
 };
 
 /*
@@ -60,11 +67,19 @@ inline double QuantRegModel::phi_alpha(double u, double alpha) {
     return((u <= 0) - alpha);
 }
 
-// form the G matrix
+// form the G matrix (location model)
 inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
     for(int ii=0; ii<y.size(); ii++) {
         this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
     }
+}
+
+// form the G matrix (location-scale model)
+inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta, 
+                                 const Ref<const VectorXd>& gamma) {
+  for(int ii=0; ii<y.size(); ii++) {
+    this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha)*X.col(ii);
+  }
 }
 
 // set function for G matrix
