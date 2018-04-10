@@ -6,7 +6,8 @@
 #' @param beta Length-\code{nBet} vector of coefficients in location model.
 #' @param gamma Length-\code{nGam} vector of coefficients in location model.
 #' @details Returns the G matrix for location-scale mean regression model. 
-#' @export
+#' @return G matrix for location-scale mean regression model. 
+#' @export mrls.evalG 
 mrls.evalG <- function(y, X, Z, beta, gamma) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")

@@ -12,14 +12,22 @@
 
 \item{X}{\code{nObs x nEqs} matrix of constraints.}
 
+\item{alpha}{A scalar of quantile level.}
+
+\item{nsamples}{Number of samples to obtain.}
+
+\item{nburn}{number of samples to discard before saving the chain.}
+
+\item{betaInit}{Length-\code{nEqs} vector of initial value for the chain.}
+
+\item{sigs}{Length-\code{nObs} vector of tuning parameters.}
+
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
 \item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
-
-\item{beta}{Length-\code{nVars} vector of coefficients.}
 }
 \value{
-Log empirical likelihood of the input beta
+\code{nEqs x nsamples} matrix of Markov Chain.
 }
 \description{
 Posterior sampler for quantile regression (location model)

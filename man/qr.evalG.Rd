@@ -9,13 +9,18 @@
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}
 
-\item{X}{\code{nObs x nEqns} matrix of covariates.}
+\item{X}{\code{nObs x nEqs} matrix of covariates.}
+
+\item{alpha}{a scalar of quantile level.}
 
 \item{beta}{Length-\code{nEqs} vector of coefficients in location model.}
+}
+\value{
+G matrix for location quantile regression model.
 }
 \description{
 Evaluate the G matrix for quantile regression (location model)
 }
 \details{
-Returns the G matrix for location mean regression model.
+...
 }

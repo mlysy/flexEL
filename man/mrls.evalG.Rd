@@ -17,6 +17,9 @@ mrls.evalG(y, X, Z, beta, gamma)
 
 \item{gamma}{Length-\code{nGam} vector of coefficients in location model.}
 }
+\value{
+G matrix for location-scale mean regression model.
+}
 \description{
 Evaluate the G matrix for mean regression (location-scale model)
 }

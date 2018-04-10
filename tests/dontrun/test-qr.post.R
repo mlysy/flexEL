@@ -27,11 +27,12 @@ nsamples <- 20000
 nburn <- 5000
 # betaInit <- mu0
 # betaInit <- rnorm(length(mu0), mean = mu0, sd = 1) # TODO: if init far away, problematic ..
+library(quantreg)
 betaInit <- c(rq(y ~ 1, tau = alpha, method = 'fn')$coefficients)
 betaInit
 sigs <- rep(0.25,1)
 qrout <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
-mu_chain <- qrout$theta_chain
+mu_chain <- qrout$beta_chain
 mu_paccept <- qrout$paccept 
 mu_paccept
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
@@ -86,7 +87,7 @@ sigs <- rep(0.2,2)
 system.time(
   qrout <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
 )
-beta_chain <- qrout$theta_chain
+beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept
 beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')
@@ -146,7 +147,7 @@ sigs <- c(0.4,0.2)
 system.time(
   qrout <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
 )
-beta_chain <- qrout$theta_chain
+beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept
 beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')
@@ -243,7 +244,7 @@ sigs <- c(1.5,0.9,1)
 system.time(
   qrout <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
 )
-beta_chain <- qrout$theta_chain
+beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept
 beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')

@@ -2,12 +2,16 @@
 #' 
 #' @param y Length-\code{nObs} vector of response values.
 #' @param X \code{nObs x nEqs} matrix of constraints.
-#' @param beta Length-\code{nVars} vector of coefficients.
+#' @param alpha A scalar of quantile level.
+#' @param nsamples Number of samples to obtain.
+#' @param nburn number of samples to discard before saving the chain.
+#' @param betaInit Length-\code{nEqs} vector of initial value for the chain. 
+#' @param sigs Length-\code{nObs} vector of tuning parameters. 
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
-#' @return Log empirical likelihood of the input beta
+#' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
-#' @export
+#' @export qr.post
 qr.post <- function(y, X, alpha, nsamples, nburn, betaInit, sigs, 
                     max_iter = 100, rel_tol = 1e-7) {
     # input checks
