@@ -14,13 +14,15 @@ require(Rcpp) # since package has C++ code
 # any time you add C++ code, run this:
 Rcpp::compileAttributes()
 
+# compiling environment settings:
+# Sys.setenv("PKG_CXXFLAGS"="-std=c++11") # to set compile with C++11 standard
+Sys.setenv("PKG_CXXFLAGS"="-w") # to suppress warning
+
 # to "compile" package
 require(devtools)
 devtools::install()
 
 # after installing, quit + restart R
-
-# QUESTION: seems need to create the bayesELnew-package.R file by hand before document()
 
 # step 2: wrap C++ code in an R function and document it.
 # to automate documentation with roxygen2, need to delete NAMESPACE,

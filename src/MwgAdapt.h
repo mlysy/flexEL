@@ -39,10 +39,10 @@ for(int ii=0; ii<number_of_iterations; ii++) {
 
 // -----------------------------------------------------------------------------
 
-#ifndef mwgAdapt_h
-#define mwgAdapt_h
+#ifndef MwgAdapt_h
+#define MwgAdapt_h
 
-class mwgAdapt {
+class MwgAdapt {
  private:
   int nRV; // number of components
   bool *doAdapt; // whether or not to update each component
@@ -50,33 +50,35 @@ class mwgAdapt {
   int nIter; // number of iterations
   int *nAccept; // number of accepted proposals per component
   static const double targAcc = 0.44; // ideal acceptance rate
+  // constexpr static const double targAcc = 0.44; // (constexpr specifier required since c++11)
   double acc, lsig, delta; // temporaries for adaptation function
   void initialize(int nrv); // allocate space the same way for all constructors
  public:
-  mwgAdapt(int nrv); // default adaptation parameters
+  MwgAdapt(int nrv); // default adaptation parameters
   // specify max/rates for each variable
-  mwgAdapt(int nrv, double *amax, double *arate);
+  MwgAdapt(int nrv, double *amax, double *arate);
   // same as before, but can set some of the parameters not to adapt.
   // this is mainly for debugging, e.g.,
   // when some of the parameters are fixed at known values.
-  mwgAdapt(int nrv, double *amax, double *arate, bool *adapt);
+  MwgAdapt(int nrv, double *amax, double *arate, bool *adapt);
   // same thing, but when adapt is integer-valued
   // this is because boolean inputs from R are actually ints, so can't be
   // converted to boolean arrays without memory allocation.
-  mwgAdapt(int nrv, double *amax, double *arate, int *adapt);
+  MwgAdapt(int nrv, double *amax, double *arate, int *adapt);
   // partial parameter updates, default adaptation parameters
-  mwgAdapt(int nrv, bool *adapt);
-  mwgAdapt(int nrv, int *adapt);
-  ~mwgAdapt;
+  MwgAdapt(int nrv, bool *adapt);
+  MwgAdapt(int nrv, int *adapt);
+  // ~MwgAdapt;
+  ~MwgAdapt();
   void adapt(double *mwgSd, bool *accept); // adapts the standard deviations
   void reset(); // resets the iteration count to zero
   // TODO: implement copy/move constuctors.
-  // for now, mwgAdapt is neither copyable nor movable.
-  mwgAdapt(const mwgAdapt&) = delete;
-  mwgAdapt& operator=(const mwgAdapt&) = delete;
+  // for now, MwgAdapt is neither copyable nor movable.
+  MwgAdapt(const MwgAdapt&) = delete;
+  MwgAdapt& operator=(const MwgAdapt&) = delete;
 };
 
-inline void mwgAdapt::adapt(double *mwgSd, bool *accept) {
+inline void MwgAdapt::adapt(double *mwgSd, bool *accept) {
   nIter++; // add one iteration
   for(int ii=0; ii<nRV; ii++) {
     if(doAdapt[ii]) {
@@ -89,19 +91,21 @@ inline void mwgAdapt::adapt(double *mwgSd, bool *accept) {
       mwgSd[ii] = exp(lsig);
     }
   }
-  return;
+  // return;
 }
 
-inline void mwgAdapt::reset() {
+inline void MwgAdapt::reset() {
   nIter = 0;
+  nAccept = new int[nRV]; // ADDED
   for(int ii=0; ii<nRV; ii++) {
-    nAccept = 0;
+    // nAccept = 0;
+    nAccept[ii] = 0;
   }
-  return;
+  // return;
 }
 
 // allocate memory and default initialization
-inline void mwgAdapt::initialize(int nrv) {
+inline void MwgAdapt::initialize(int nrv) {
   nRV = nrv; // number of components
   reset(); // initialize nIter and nAccept to 0
   // memory allocation
@@ -113,23 +117,27 @@ inline void mwgAdapt::initialize(int nrv) {
     adaptRate[ii] = 0.5;
     doAdapt[ii] = true;
   }
-  return;
+  // return;
 }
 
 // deallocate memory
-inline mwgAdapt::~mwgAdapt {
+// inline MwgAdapt::~MwgAdapt {
+inline MwgAdapt::~MwgAdapt() {
   delete [] adaptMax;
   delete [] adaptRate;
   delete [] doAdapt;
+  delete [] nAccept; // ADDED
 }
 
 // --- various constructors ----------------------------------------------------
 
-inline void mwgAdapt::mwgAdapt(int nrv) {
-  initialize(nrv);
+// inline void MwgAdapt::MwgAdapt(int nrv) {
+inline MwgAdapt::MwgAdapt(int nrv) {
+  // initialize(nrv);
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate) {
+// inline void MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate) {
+inline MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     adaptMax[ii] = amax[ii];
@@ -137,8 +145,10 @@ inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate) {
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
-			       bool *adapt) {
+// inline void MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate,
+// 			       bool *adapt) {
+inline MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate,
+                               bool *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     adaptMax[ii] = amax[ii];
@@ -147,8 +157,10 @@ inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
-			       int *adapt) {
+// inline void MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate,
+// 			       int *adapt) {
+inline MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate,
+                               int *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     adaptMax[ii] = amax[ii];
@@ -157,14 +169,16 @@ inline void mwgAdapt::mwgAdapt(int nrv, double *amax, double *arate,
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, bool *adapt) {
+// inline void MwgAdapt::MwgAdapt(int nrv, bool *adapt) {
+inline MwgAdapt::MwgAdapt(int nrv, bool *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     doAdapt[ii] = adapt[ii];
   }
 }
 
-inline void mwgAdapt::mwgAdapt(int nrv, int *adapt) {
+// inline void MwgAdapt::MwgAdapt(int nrv, int *adapt) {
+inline MwgAdapt::MwgAdapt(int nrv, int *adapt) {
   initialize(nrv);
   for(int ii=0; ii<nRV; ii++) {
     doAdapt[ii] = (adapt[ii] != 0);

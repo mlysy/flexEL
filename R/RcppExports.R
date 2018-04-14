@@ -45,6 +45,10 @@
     .Call(`_bayesEL_QuantRegLS_evalG`, y, X, Z, alpha, beta, gamma)
 }
 
+.QuantReg_post_adapt <- function(y, X, alpha, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_QuantReg_post_adapt`, y, X, alpha, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
+}
+
 .QuantReg_post <- function(y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter = 100L, relTol = 1e-7) {
     .Call(`_bayesEL_QuantReg_post`, y, X, alpha, nsamples, nburn, betaInit, sigs, maxIter, relTol)
 }

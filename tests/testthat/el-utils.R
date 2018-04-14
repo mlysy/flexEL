@@ -81,7 +81,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
     nObs <- ncol(G)
     nEqs <- nrow(G)
     if (is.null(lambdaOld)) {
-      # lambdaOld <- rnorm(nEqs) # TODO: initialize to random value? 
+      # lambdaOld <- rnorm(nEqs) # TODO: initialize to random value?
       lambdaOld <- rep(0,nEqs)
     }
     lambdaNew <- lambdaOld

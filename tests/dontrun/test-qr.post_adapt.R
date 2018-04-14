@@ -1,6 +1,7 @@
-# tests for quantile regression postSampler 
+# tests for quantile regression postSampler with adapt MCMC
 library(bayesEL)
 source("../testthat/el-utils.R")
+
 # ---- 1-d problem ----
 n <- 500
 mu <- 1
@@ -29,12 +30,12 @@ library(quantreg)
 betaInit <- c(rq(y ~ 1, tau = alpha, method = 'fn')$coefficients)
 betaInit
 sigs <- rep(0.25,1)
-qrout <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
+rvDoMcmc <- c(1,1)
+qrout <- qr.post_adapt(y, X, alpha, nsamples, nburn, betaInit, sigs, rvDoMcmc)
 mu_chain <- qrout$beta_chain
 mu_paccept <- qrout$paccept 
 mu_paccept
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
-
 # overlay gird plot to histogram
 hist(mu_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(mu), main='')
@@ -92,8 +93,9 @@ library(quantreg)
 betaInit <- c(rq(y ~ X1, tau = alpha, method = 'fn')$coefficients)
 betaInit
 sigs <- rep(0.2,2)
+rvDoMcmc <- c(1,1)
 system.time(
-  qrout <- qr.post(y, X, alpha, nsamples, nburn, betaInit, sigs)
+  qrout <- qr.post_adapt(y, X, alpha, nsamples, nburn, betaInit, sigs, rvDoMcmc)
 )
 beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept
@@ -119,4 +121,3 @@ abline(v=mean(beta_chain[2,]), col='blue')
 legend('topright',legend=c(expression('grid plot & mode'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
-

@@ -6,6 +6,7 @@
 using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
+#include "MwgAdapt.h" // for adaptive mcmc
 // [[Rcpp::depends(RcppEigen)]]
 
 template <typename ELModel>
@@ -28,6 +29,9 @@ private:
     LDLT<MatrixXd> Q2ldlt;
     VectorXd rho;
     VectorXd relErr;
+    // tolerance for Newton-Raphson lambdaNR (New)
+    int maxIter;
+    double relTol;
     // columnwise outer product (see below)
     void blockOuter(void);
     // maximum relative error in lambda: same for cens / non-cens
@@ -50,8 +54,10 @@ public:
     double logstar1(double x);
     double logstar2(double x);
     // Newton-Raphson algorithm
-    void lambdaNR(int& nIter, double& maxErr,
-                  int maxIter, double relTol);
+    void setTol(const int& _maxIter, const double& _relTol);
+    void lambdaNR(int& nIter, double& maxErr);
+    // void lambdaNR(int& nIter, double& maxErr,
+    //               int maxIter, double relTol);
     // calculate omegas given G and lambda (New)
     void evalOmegas();
     // find the best omegas given G (Old)
@@ -65,10 +71,14 @@ public:
     void setOmegas(const Ref<const VectorXd>& _omegas); 
     VectorXd getLambda(); // get function for lambdaNew
     VectorXd getOmegas(); // returns omegas
-    // posterior sampler: removed for now
+    // posterior samplers:
+    void mwgStep(VectorXd& thetaCur, const int& idx,
+                 const double& mwgsd, bool& isAccepted, double& logELCur);
+    MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit, 
+                             double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
     MatrixXd postSample(int nsamples, int nburn, VectorXd thetaInit,
-                        const Ref<const VectorXd>& sigs, VectorXd &paccept, 
-                        int maxIter, double relTol);
+                        const Ref<const VectorXd>& sigs, VectorXd &paccept);
+                        // int maxIter, double relTol);
 };
 
 /*
@@ -178,23 +188,23 @@ inline double InnerEL<ELModel>::logstar1(double x) {
 // d^2 logstar(x)/dx^2
 template<typename ELModel>
 inline double InnerEL<ELModel>::logstar2(double x) {
-    if(x >= trunc) {
+  if(x >= trunc) {
     return(-1.0/(x*x));
-    } else {
+  } else {
     // return(aa);
     return(2.0*aa); // TODO: should be 2aa ?
-    }
+  }
 }
 
 // for an (m x N) matrix G = [g1 ... gN], returns the (m x mN) matrix
 // GGt = [g1 g1' ... gN gN']
 template<typename ELModel>
 inline void InnerEL<ELModel>::blockOuter(void) {
-    // for each row of G, compute outer product and store as block
-    for(int ii=0; ii<nObs; ii++) {
+  // for each row of G, compute outer product and store as block
+  for(int ii=0; ii<nObs; ii++) {
     GGt.block(0,ii*nEqs,nEqs,nEqs).noalias() = G.col(ii) * G.col(ii).transpose();
-    }
-    return;
+  }
+  return;
 }
 
 // maximum relative error in lambda
@@ -205,10 +215,21 @@ inline double InnerEL<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
     return(relErr.maxCoeff());
 }
 
+template<typename ELModel>
+inline void InnerEL<ELModel>::setTol(const int& _maxIter,
+                                     const double& _relTol) {
+  maxIter = _maxIter;
+  relTol = _relTol;
+  // std::cout << "maxIter = " << maxIter << std::endl;
+  // std::cout << "relTol = " << relTol << std::endl;
+}
+
+// Note: maxIter and relTol must have been assigned 
 // Newton-Raphson algorithm
 template<typename ELModel>
-inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr,
-                              int maxIter, double relTol) {
+inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
+// inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr,
+//                               int maxIter, double relTol) {
     int ii, jj;
     blockOuter(); // initialize GGt
     //lambdaOld = lambdaIn; // initialize lambda
@@ -354,12 +375,99 @@ inline double InnerEL<ELModel>::logEL() {
 //     }
 // }
 
+// mwgStep updates the idx entry of thetaCur
+template<typename ELModel>
+inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
+                                      const int &idx,
+                                      const double &mwgsd,
+                                      bool &accept, 
+                                      double &logELCur) {
+  // std::cout << "---- in mwgStep ----" << std::endl;
+  // std::cout << "mwgthetaCursd = " << thetaCur.transpose() << std::endl;
+  // std::cout << "idx = " << idx << std::endl;
+  // std::cout << "mwgsd = " << mwgsd << std::endl;
+  // std::cout << "logELCur = " << logELCur << std::endl;
+  accept = false;
+  VectorXd thetaProp = thetaCur;
+  thetaProp(idx) += mwgsd*R::norm_rand();
+  ELModel::evalG(thetaProp);
+  int nIter;
+  double maxErr;
+  // lambdaNR(nIter, maxErr, maxIter, relTol);
+  lambdaNR(nIter, maxErr);
+  bool satisfy = false;
+  if (nIter < maxIter || maxErr <= relTol) satisfy = true;
+  // if does not satisfy, keep the old theta
+  if (satisfy == false) return;
+  // if does satisfy, flip a coin
+  double u = R::unif_rand();
+  VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
+    log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
+  double logELProp = logomegahat.sum();
+  double ratio = exp(logELProp-logELCur);
+  double a = std::min(1.0,ratio);
+  if (u < a) { // accepted
+    accept = true;
+    thetaCur = thetaProp;
+    logELCur = logELProp;
+  }
+}
+
+// Note: maxIter and relTol must have been assigned 
+// Note: the logical vector rvDoMcmc is for debuging -- true entries are updated 
+template<typename ELModel>
+inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
+    VectorXd thetaInit, double *mwgSd, bool *rvDoMcmc, VectorXd &paccept) {
+  
+  int thetalen = thetaInit.size();
+  MwgAdapt tuneMCMC(thetalen, rvDoMcmc);
+  // for (int ii=0; ii<thetaInit.size(); ii++) {
+  //   std::cout << "after: rvDoMcmc[" << ii << "] = " << rvDoMcmc[ii] << std::endl;
+  // }
+  bool *isAccepted = new bool[thetalen];
+  for (int ii=0; ii<thetalen; ii++) {
+    isAccepted[ii] = false;
+  }
+  MatrixXd theta_chain(thetalen,nsamples);
+  paccept = VectorXd::Zero(thetalen);
+  VectorXd thetaCur = thetaInit;
+  ELModel::evalG(thetaCur);
+  int nIter;
+  double maxErr;
+  lambdaNR(nIter, maxErr);
+  // TODO: throw an error ??
+  if (nIter == maxIter && maxErr > relTol) {
+    std::cout << "thetaInit not valid." << std::endl;
+  }
+  evalOmegas();
+  double logELCur = logEL();
+  // MCMC loop
+  for(int ii=-nburn; ii<nsamples; ii++) {
+    for(int jj=0; jj<thetalen; jj++) {
+      if(rvDoMcmc[jj]) {
+        // std::cout << "isAccepted[" << jj << "] = " << isAccepted[jj] << std::endl;
+        // modifies thetaCur's jj-th entry
+        mwgStep(thetaCur,jj,mwgSd[jj],isAccepted[jj],logELCur);
+        if (isAccepted[jj]) paccept(jj) += 1; // add 1 to paccept if accepted
+      }
+    }
+    if (ii >= 0) {
+      theta_chain.col(ii) = thetaCur;
+    }
+    tuneMCMC.adapt(mwgSd, isAccepted);
+  }
+  paccept /= (nsamples+nburn);
+  delete[] isAccepted; // deallocate memory
+  return(theta_chain);
+}
+
+// Note: maxIter and relTol must have been assigned 
 // posterior sampler: depend on evalG
 // paccept should be a vector of length(thetaInit)
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
 					     VectorXd thetaInit, const Ref<const VectorXd>& sigs,
-					     VectorXd &paccept, int maxIter, double relTol) {
+					     VectorXd &paccept) {
   VectorXd thetaOld = thetaInit;
   VectorXd thetaNew = thetaOld;
   VectorXd thetaProp = thetaOld;
@@ -368,8 +476,16 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   ELModel::evalG(thetaOld);
   int nIter;
   double maxErr;
-  lambdaNR(nIter, maxErr, maxIter, relTol); 
+  // lambdaNR(nIter, maxErr, maxIter, relTol); 
+  lambdaNR(nIter, maxErr);
   // TODO: what if not converged ?
+  if (nIter == maxIter && maxErr > relTol) {
+    // TODO: throw an error ??
+    std::cout << "thetaInit not valid." << std::endl;
+    // return NULL;
+  }
+  // std::cout << "thetaNew = " << thetaNew.transpose() << std::endl;
+  // std::cout << "G = \n" << G << std::endl;
   evalOmegas();
   double logELOld = logEL(); 
   double logELProp;
@@ -386,7 +502,8 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
       // check if proposed theta satisfies the constraint
       satisfy = false;
       ELModel::evalG(thetaProp); // NEW: change G with thetaProp
-      lambdaNR(nIter, maxErr, maxIter, relTol);
+      // lambdaNR(nIter, maxErr, maxIter, relTol);
+      lambdaNR(nIter, maxErr);
       if (nIter < maxIter) satisfy = true;
       // if does not satisfy, keep the old theta
       if (satisfy == false) break;
@@ -414,8 +531,5 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   paccept /= (nsamples+nburn); 
   return(theta_chain);
 }
-
-
-// ----- Old code -----
 
 #endif
