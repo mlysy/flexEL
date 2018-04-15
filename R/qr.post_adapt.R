@@ -23,6 +23,7 @@ qr.post_adapt <- function(y, X, alpha, nsamples, nburn, betaInit, mwgSd,
   if(ncol(X) != length(betaInit)) {
     stop("X and beta have inconsistent dimensions.")
   }
+  if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
   .QuantReg_post_adapt(y, t(X), alpha, nsamples, nburn, betaInit, mwgSd, 
                        rvDoMcmc, maxIter = max_iter, relTol = rel_tol)
 }

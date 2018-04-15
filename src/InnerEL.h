@@ -382,11 +382,6 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
                                       const double &mwgsd,
                                       bool &accept, 
                                       double &logELCur) {
-  // std::cout << "---- in mwgStep ----" << std::endl;
-  // std::cout << "mwgthetaCursd = " << thetaCur.transpose() << std::endl;
-  // std::cout << "idx = " << idx << std::endl;
-  // std::cout << "mwgsd = " << mwgsd << std::endl;
-  // std::cout << "logELCur = " << logELCur << std::endl;
   accept = false;
   VectorXd thetaProp = thetaCur;
   thetaProp(idx) += mwgsd*R::norm_rand();
@@ -421,9 +416,6 @@ inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
   
   int thetalen = thetaInit.size();
   MwgAdapt tuneMCMC(thetalen, rvDoMcmc);
-  // for (int ii=0; ii<thetaInit.size(); ii++) {
-  //   std::cout << "after: rvDoMcmc[" << ii << "] = " << rvDoMcmc[ii] << std::endl;
-  // }
   bool *isAccepted = new bool[thetalen];
   for (int ii=0; ii<thetalen; ii++) {
     isAccepted[ii] = false;
@@ -484,8 +476,6 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
     std::cout << "thetaInit not valid." << std::endl;
     // return NULL;
   }
-  // std::cout << "thetaNew = " << thetaNew.transpose() << std::endl;
-  // std::cout << "G = \n" << G << std::endl;
   evalOmegas();
   double logELOld = logEL(); 
   double logELProp;
@@ -511,7 +501,6 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
       u = R::unif_rand();
       // use the lambda calculate just now to get the logEL for Prop
       // to avoid an extra call of lambdaNR
-      // VectorXd rlg = 1/(1-(lambdaNew.transpose()*ELModel::G).array());
       VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
         log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
       logELProp = logomegahat.sum();
