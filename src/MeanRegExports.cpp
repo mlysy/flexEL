@@ -7,6 +7,7 @@ using namespace Rcpp;
 using namespace Eigen;
 #include "InnerEL.h"
 #include "MeanRegModel.h"
+#include "dVecTobArr.h"
 
 // [[Rcpp::export(".MeanReg_evalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
@@ -45,6 +46,48 @@ Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y,
 //     // TODO: check convergence here
 //     return(logELmean);
 // }
+
+// [[Rcpp::export(".MeanReg_post")]]
+Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
+                        int nsamples, int nburn, 
+                        Eigen::VectorXd betaInit, Eigen::VectorXd sigs, 
+                        int maxIter = 100, double relTol = 1e-7) {
+  InnerEL<MeanRegModel> MR;
+  MR.setData(y,X,NULL); 
+  // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
+  MR.setTol(maxIter, relTol);
+  Eigen::VectorXd paccept; 
+  Eigen::MatrixXd beta_chain = MR.postSample(nsamples, nburn, 
+                                             betaInit, sigs, paccept);
+  // return(beta_chain);
+  Rcpp::List retlst; 
+  retlst["beta_chain"] = beta_chain;
+  retlst["paccept"] = paccept; 
+  return(retlst); 
+}
+
+// TODO: rvDoMcmc uses 0/1 double converted to bool for now
+// [[Rcpp::export(".MeanReg_post_adapt")]]
+Rcpp::List MeanReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
+                               int nsamples, int nburn,
+                               Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
+                               Eigen::VectorXd rvDoMcmc,
+                               int maxIter = 100, double relTol = 1e-7) {
+  InnerEL<MeanRegModel> MR;
+  MR.setData(y,X,NULL);
+  MR.setTol(maxIter, relTol);
+  Eigen::VectorXd paccept;
+  bool *rvdomcmc = new bool[betaInit.size()];
+  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  Eigen::MatrixXd beta_chain = MR.postSampleAdapt(nsamples, nburn,
+                                                  betaInit, mwgSd.data(),
+                                                  rvdomcmc, paccept);
+  delete[] rvdomcmc;
+  Rcpp::List retlst;
+  retlst["beta_chain"] = beta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst);
+}
 
 /*
 // [[Rcpp::export(".MeanReg_PostSample")]]

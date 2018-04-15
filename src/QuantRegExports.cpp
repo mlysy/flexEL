@@ -7,6 +7,7 @@ using namespace Rcpp;
 using namespace Eigen;
 #include "InnerEL.h"
 #include "QuantRegModel.h"
+#include "dVecTobArr.h"
 
 // [[Rcpp::export(".QuantReg_evalG")]]
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
@@ -48,17 +49,7 @@ Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y,
 //     return(logELquant);
 // }
 
-// convert Eigen VectorXd dVec to C++ bool array bArr
-// bArr must have the same length as dVec
-void dVec_to_bArr(Eigen::VectorXd dVec, bool *bArr) {
-  // std::cout << "dVec.size() = " << dVec.size() << std::endl;
-  for (int ii=0; ii<dVec.size(); ii++) {
-    if (dVec(ii) == 0) bArr[ii] = false;
-    else bArr[ii] = true;
-  }
-}
-
-// TODO: rvDoMcmc uses 0/1 int for now
+// TODO: rvDoMcmc uses 0/1 double converted to bool for now
 // [[Rcpp::export(".QuantReg_post_adapt")]]
 Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X, 
                          double alpha, int nsamples, int nburn, 
@@ -71,17 +62,6 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   Eigen::VectorXd paccept;
   bool *rvdomcmc = new bool[betaInit.size()];
   dVec_to_bArr(rvDoMcmc, rvdomcmc);
-  // // BEGIN DEBUG
-  // std::cout << "betaInit = " << betaInit.transpose() << std::endl;
-  // for (int ii=0; ii<betaInit.size(); ii++) {
-  //   std::cout << "rvdomcmc[" << ii << "] = " << rvdomcmc[ii] << std::endl;
-  // }
-  // for (int ii=0; ii<betaInit.size(); ii++) {
-  //   std::cout << "mwgSd.data()[" << ii << "] = " << mwgSd.data()[ii] << std::endl;
-  // }
-  // // END DEBUG
-  // Eigen::MatrixXd beta_chain = QR.postSample(nsamples, nburn,
-  //                                            betaInit, mwgSd, paccept);
   Eigen::MatrixXd beta_chain = QR.postSampleAdapt(nsamples, nburn,
                                                   betaInit, mwgSd.data(),
                                                   rvdomcmc, paccept);

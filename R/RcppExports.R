@@ -37,6 +37,14 @@
     .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma)
 }
 
+.MeanReg_post <- function(y, X, nsamples, nburn, betaInit, sigs, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_MeanReg_post`, y, X, nsamples, nburn, betaInit, sigs, maxIter, relTol)
+}
+
+.MeanReg_post_adapt <- function(y, X, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_MeanReg_post_adapt`, y, X, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
+}
+
 .QuantReg_evalG <- function(y, X, alpha, beta) {
     .Call(`_bayesEL_QuantReg_evalG`, y, X, alpha, beta)
 }
