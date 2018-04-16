@@ -77,7 +77,8 @@ public:
     MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit, 
                              double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
     MatrixXd postSample(int nsamples, int nburn, VectorXd thetaInit,
-                        const Ref<const VectorXd>& sigs, VectorXd &paccept);
+                        const Ref<const VectorXd>& sigs, 
+                        VectorXd &paccept, int betalen);
                         // int maxIter, double relTol);
 };
 
@@ -118,24 +119,24 @@ template<typename ELModel>
 inline void InnerEL<ELModel>::setData(const Ref<const VectorXd>& _y,
                                       const Ref<const MatrixXd>& _X,
                                       void* _params) {
-    ELModel::setData(_y,_X,_params); // set base class data 
-    // logstar constants
-    omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
-    trunc = 1.0 / nObs;
-    aa = -.5 * nObs*nObs;
-    bb = 2.0 * nObs;
-    cc = -1.5 - log(nObs);
-    // Newton-Raphson initialization
-    GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-    lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-    lambdaNew = VectorXd::Zero(nEqs);
-    Q1 = VectorXd::Zero(nEqs);
-    Q2 = MatrixXd::Zero(nEqs,nEqs);
-    Glambda = VectorXd::Zero(nObs);
-    Gl11 = ArrayXd::Zero(nObs);
-    rho = VectorXd::Zero(nObs);
-    relErr = VectorXd::Zero(nEqs);
-    Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
+  ELModel::setData(_y,_X,_params); // set base class data 
+  // logstar constants
+  omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
+  trunc = 1.0 / nObs;
+  aa = -.5 * nObs*nObs;
+  bb = 2.0 * nObs;
+  cc = -1.5 - log(nObs);
+  // Newton-Raphson initialization
+  GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
+  lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
+  lambdaNew = VectorXd::Zero(nEqs);
+  Q1 = VectorXd::Zero(nEqs);
+  Q2 = MatrixXd::Zero(nEqs,nEqs);
+  Glambda = VectorXd::Zero(nObs);
+  Gl11 = ArrayXd::Zero(nObs);
+  rho = VectorXd::Zero(nObs);
+  relErr = VectorXd::Zero(nEqs);
+  Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
 }
 
 // set data with default ctor (location-scale model)
@@ -453,9 +454,87 @@ inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
   return(theta_chain);
 }
 
-// Note: maxIter and relTol must have been assigned 
 // posterior sampler: depend on evalG
-// paccept should be a vector of length(thetaInit)
+// Note: maxIter and relTol must have been assigned 
+//       paccept should be a vector of length(thetaInit)
+//       if lenBeta == thetaInit.size(), then use location model only 
+template<typename ELModel>
+inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
+                VectorXd thetaInit, const Ref<const VectorXd>& sigs,
+                VectorXd &paccept, int betalen) {
+  int thetalen = thetaInit.size();
+  MatrixXd theta_chain(thetalen,nsamples);
+  VectorXd thetaOld = thetaInit;
+  VectorXd thetaNew = thetaOld;
+  VectorXd thetaProp = thetaOld;
+  if (thetalen == betalen) {
+    ELModel::evalG(thetaOld);
+  }
+  else {
+    ELModel::evalG(thetaOld.head(betalen), thetaOld.tail(thetalen-betalen));
+  }
+  int nIter;
+  double maxErr;
+  // lambdaNR(nIter, maxErr, maxIter, relTol); 
+  lambdaNR(nIter, maxErr);
+  // TODO: what if not converged ?
+  if (nIter == maxIter && maxErr > relTol) {
+    // TODO: throw an error ??
+    std::cout << "thetaInit not valid." << std::endl;
+    // return NULL;
+  }
+  evalOmegas();
+  double logELOld = logEL(); 
+  double logELProp;
+  bool satisfy;
+  double u;
+  double a;
+  double ratio;
+  paccept = VectorXd::Zero(thetaInit.size()); // TODO: need to initialize to 0 ?
+  
+  for (int ii=-nburn; ii<nsamples; ii++) {
+    for (int jj=0; jj<thetalen; jj++) {
+      thetaProp = thetaOld;
+      thetaProp(jj) += sigs(jj)*R::norm_rand();
+      // check if proposed theta satisfies the constraint
+      satisfy = false;
+      // ELModel::evalG(thetaProp); // NEW: change G with thetaProp
+      if (thetalen == betalen) {
+        ELModel::evalG(thetaProp);
+      }
+      else {
+        ELModel::evalG(thetaProp.head(betalen), thetaProp.tail(thetalen-betalen));
+      }
+      // lambdaNR(nIter, maxErr, maxIter, relTol);
+      lambdaNR(nIter, maxErr);
+      if (nIter < maxIter) satisfy = true;
+      // if does not satisfy, keep the old theta
+      if (satisfy == false) break;
+      // if does satisfy, flip a coin
+      u = R::unif_rand();
+      // use the lambda calculate just now to get the logEL for Prop
+      // to avoid an extra call of lambdaNR
+      VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
+        log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
+      logELProp = logomegahat.sum();
+      ratio = exp(logELProp-logELOld);
+      a = std::min(1.0,ratio);
+      if (u < a) { // accepted
+        paccept(jj) += 1; 
+        thetaNew = thetaProp;
+        thetaOld = thetaNew;
+        logELOld = logELProp; // NEW: store the new one
+      }
+    }
+    if (ii >= 0) {
+      theta_chain.col(ii) = thetaNew;
+    }
+  }
+  paccept /= (nsamples+nburn); 
+  return(theta_chain);
+}
+
+/*
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
 					     VectorXd thetaInit, const Ref<const VectorXd>& sigs,
@@ -520,5 +599,6 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   paccept /= (nsamples+nburn); 
   return(theta_chain);
 }
+*/
 
 #endif

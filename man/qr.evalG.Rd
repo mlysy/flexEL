@@ -4,16 +4,16 @@
 \alias{qr.evalG}
 \title{Evaluate the G matrix for quantile regression (location model)}
 \usage{
-\method{qr}{evalG}(y, X, alpha, beta)
+\method{qr}{evalG}(y, X, alphas, Beta)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}
 
 \item{X}{\code{nObs x nEqs} matrix of covariates.}
 
-\item{alpha}{a scalar of quantile level.}
+\item{alphas}{a vector of quantile levels.}
 
-\item{beta}{Length-\code{nEqs} vector of coefficients in location model.}
+\item{Beta}{\code{nEqs x nQts} matrix, each column is a vector of coefficients in location model.}
 }
 \value{
 G matrix for location quantile regression model.

@@ -4,7 +4,7 @@
 \alias{qr.post}
 \title{Posterior sampler for quantile regression (location model)}
 \usage{
-\method{qr}{post}(y, X, alpha, nsamples, nburn, betaInit, sigs,
+\method{qr}{post}(y, X, alphas, nsamples, nburn, betaInit, sigs,
   max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
@@ -12,7 +12,7 @@
 
 \item{X}{\code{nObs x nEqs} matrix of constraints.}
 
-\item{alpha}{A scalar of quantile level.}
+\item{alphas}{a vector of quantile levels.}
 
 \item{nsamples}{Number of samples to obtain.}
 
@@ -20,7 +20,7 @@
 
 \item{betaInit}{Length-\code{nEqs} vector of initial value for the chain.}
 
-\item{sigs}{Length-\code{nObs} vector of tuning parameters.}
+\item{sigs}{Length-\code{nEqs} vector of tuning parameters.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 

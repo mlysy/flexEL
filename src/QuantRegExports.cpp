@@ -9,26 +9,30 @@ using namespace Eigen;
 #include "QuantRegModel.h"
 #include "dVecTobArr.h"
 
+// double alpha
 // [[Rcpp::export(".QuantReg_evalG")]]
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
-                              double alpha, Eigen::VectorXd beta) {
-    // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
-    InnerEL<QuantRegModel> QR;
-    QR.setData(y,X,&alpha); 
-    QR.evalG(beta);
-    Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-    return(G); 
+                               Eigen::VectorXd alphaArr, Eigen::MatrixXd Beta) {
+  // std::cout << "print col of vector? " << Beta.col(0).transpose() << std::endl;
+  // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
+  InnerEL<QuantRegModel> QR;
+  // QR.setData(y,X,&alpha); 
+  QR.setData(y,X,alphaArr.data());
+  QR.evalG(Beta);
+  Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
+  return(G); 
 }
 
 // [[Rcpp::export(".QuantRegLS_evalG")]]
 Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, 
                                  Eigen::MatrixXd X, Eigen::MatrixXd Z, 
-                                 double alpha, 
-                                 Eigen::VectorXd beta, Eigen::VectorXd gamma) {
+                                 Eigen::VectorXd alphaArr, 
+                                 Eigen::MatrixXd Beta, Eigen::MatrixXd Gamma) {
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
   InnerEL<QuantRegModel> QR;
-  QR.setData(y,X,Z,&alpha); 
-  QR.evalG(beta,gamma);
+  // QR.setData(y,X,Z,&alpha); 
+  QR.setData(y,X,Z,alphaArr.data());
+  QR.evalG(Beta,Gamma);
   Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
   return(G); 
 }
@@ -49,15 +53,17 @@ Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y,
 //     return(logELquant);
 // }
 
+// now can only sample for sinle quantile
 // TODO: rvDoMcmc uses 0/1 double converted to bool for now
 // [[Rcpp::export(".QuantReg_post_adapt")]]
 Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X, 
-                         double alpha, int nsamples, int nburn, 
-                         Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd, 
-                         Eigen::VectorXd rvDoMcmc,  
-                         int maxIter = 100, double relTol = 1e-7) {
+                               Eigen::VectorXd alphaArr, int nsamples, int nburn, 
+                               Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd, 
+                               Eigen::VectorXd rvDoMcmc,  
+                               int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
-  QR.setData(y,X,&alpha); 
+  // QR.setData(y,X,&alpha); 
+  QR.setData(y,X,alphaArr.data());
   QR.setTol(maxIter, relTol);
   Eigen::VectorXd paccept;
   bool *rvdomcmc = new bool[betaInit.size()];
@@ -72,18 +78,20 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   return(retlst);
 }
 
+// now can only sample for single quantile
 // [[Rcpp::export(".QuantReg_post")]]
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
-                             double alpha, int nsamples, int nburn, 
-                             Eigen::VectorXd betaInit, Eigen::VectorXd sigs, 
-                             int maxIter = 100, double relTol = 1e-7) {
+                         Eigen::VectorXd alphaArr, int nsamples, int nburn, 
+                         Eigen::VectorXd betaInit, Eigen::VectorXd sigs, 
+                         int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
-  QR.setData(y,X,&alpha); 
+  // QR.setData(y,X,&alpha); 
+  QR.setData(y,X,alphaArr.data());
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
   QR.setTol(maxIter, relTol);
   Eigen::VectorXd paccept; 
   Eigen::MatrixXd beta_chain = QR.postSample(nsamples, nburn, 
-                                             betaInit, sigs, paccept);
+                                             betaInit, sigs, paccept, betaInit.size());
   // return(beta_chain);
   Rcpp::List retlst; 
   retlst["beta_chain"] = beta_chain;

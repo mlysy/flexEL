@@ -507,12 +507,11 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
   nBeta <- length(beta)
   nGamma <- length(gamma)
   G <- matrix(NaN, nObs, nBeta + nGamma + 1)
-  eZg <- c(exp(-Z %*% gamma))
-  eZg2 <- eZg^2
-  yXbeZg <- c((y - X %*% beta)*eZg)
-  yXbeZg2 <- yXbeZg^2
-  G[,1:nBeta] <- yXbeZg * eZg2 * X # times each col of X
-  G[,nBeta+1:nGamma] <- yXbeZg2 * eZg2 * Z # times each col of Z
+  eZg <- c(exp(-Z %*% gamma)) # e^{-z'gamma}
+  yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
+  yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
+  G[,1:nBeta] <- yXbeZg * eZg * X
+  G[,nBeta+1:nGamma] <- yXbeZg2 * Z
   G[,nBeta+nGamma+1] <- yXbeZg2 - 1
   return(G)
 }

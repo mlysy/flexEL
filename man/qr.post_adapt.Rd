@@ -4,15 +4,15 @@
 \alias{qr.post_adapt}
 \title{Posterior sampler for quantile regression (location model)}
 \usage{
-\method{qr}{post_adapt}(y, X, alpha, nsamples, nburn, betaInit, mwgSd, rvDoMcmc,
-  max_iter = 100, rel_tol = 1e-07)
+\method{qr}{post_adapt}(y, X, alphas, nsamples, nburn, betaInit, mwgSd,
+  rvDoMcmc, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
 
 \item{X}{\code{nObs x nEqs} matrix of constraints.}
 
-\item{alpha}{A scalar of quantile level.}
+\item{alphas}{a vector of quantile levels.}
 
 \item{nsamples}{Number of samples to obtain.}
 

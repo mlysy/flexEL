@@ -3,15 +3,19 @@
 #' @param y Length-\code{nObs} vector of responses.
 #' @param X \code{nObs x nBet} matrix of covariates.
 #' @param Z \code{nObs x nGam} matrix of covariates.
-#' @param alpha a scalar of quantile level.
-#' @param beta Length-\code{nBet} vector of coefficients in location model.
-#' @param gamma Length-\code{nGam} vector of coefficients in location model.
+#' @param alphas a vector of quantile levels.
+#' @param Beta \code{nBet x nQts} matrix, each column is a vector of coefficients in location function.
+#' @param Gamma \code{nGam x nQts} matrix, each column is a vector of coefficients in scale function.
 #' @return G matrix for location-scale quantile regression model. 
 #' @export qrls.evalG
-qrls.evalG <- function(y, X, Z, alpha, beta, gamma) { 
+qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
-  G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, beta, gamma)
+  # if input is for single quantile and Beta, Gamma are vectors, convert to matrix form
+  if (is.vector(Beta)) Beta <- matrix(Beta,length(Beta),1)
+  if (is.vector(Gamma)) Gamma <- matrix(Gamma,length(Gamma),1)
+  alpha <- c(length(alphas), alphas) 
+  G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, Beta, Gamma)
   return(t(G))
 }

@@ -2,7 +2,7 @@
 #' 
 #' @param y Length-\code{nObs} vector of response values.
 #' @param X \code{nObs x nEqs} matrix of constraints.
-#' @param alpha A scalar of quantile level.
+#' @param alphas a vector of quantile levels.
 #' @param nsamples Number of samples to obtain.
 #' @param nburn number of samples to discard before saving the chain.
 #' @param betaInit Length-\code{nEqs} vector of initial value for the chain. 
@@ -13,7 +13,7 @@
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export qr.post_adapt
-qr.post_adapt <- function(y, X, alpha, nsamples, nburn, betaInit, mwgSd, 
+qr.post_adapt <- function(y, X, alphas, nsamples, nburn, betaInit, mwgSd, 
                           rvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
   # message("calling qr.post_adapt")
   # input checks
@@ -24,6 +24,8 @@ qr.post_adapt <- function(y, X, alpha, nsamples, nburn, betaInit, mwgSd,
     stop("X and beta have inconsistent dimensions.")
   }
   if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
+  # add a first entry of alpha as the number of quantile levels
+  alpha <- c(length(alphas), alphas) 
   .QuantReg_post_adapt(y, t(X), alpha, nsamples, nburn, betaInit, mwgSd, 
                        rvDoMcmc, maxIter = max_iter, relTol = rel_tol)
 }

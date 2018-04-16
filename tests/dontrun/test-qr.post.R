@@ -68,6 +68,7 @@ beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
+  # G <- qr.evalG(y,X,alpha,c(beta1.seq[ii],beta0[2]))
   G <- qr.evalG(y,X,alpha,c(beta1.seq[ii],beta0[2]))
   logel.seq[1,ii] <- logEL(G)
   G <- qr.evalG(y,X,alpha,c(beta0[1],beta2.seq[ii]))
@@ -79,7 +80,7 @@ logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1])
 # calculate marginal posterior
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 logel.mat <- apply(Beta.seq, 1, function(bb) {
-  G <- qr.evalG(y,X,alpha,c(bb[1],bb[2]))
+  G <- qr.evalG(y,X,alpha,matrix(c(bb[1],bb[2]),2,1))
   logEL(G)
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
