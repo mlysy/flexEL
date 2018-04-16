@@ -23,7 +23,7 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 // [[Rcpp::export(".MeanRegLS_evalG")]]
 Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
-                                Eigen::VectorXd beta,Eigen::VectorXd gamma) {
+                                Eigen::VectorXd beta, Eigen::VectorXd gamma) {
   // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
   InnerEL<MeanRegModel> MR;
   MR.setData(y,X,Z,NULL); 
@@ -89,25 +89,27 @@ Rcpp::List MeanReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   return(retlst);
 }
 
+// Note: BetaInit and GammaInit must have the same number of columns
 // [[Rcpp::export(".MeanRegLS_post")]]
 Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                         int nsamples, int nburn, 
-                        Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, 
-                        Eigen::VectorXd sigs, 
+                        Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, 
+                        Eigen::MatrixXd Sigs, 
                         int maxIter = 100, double relTol = 1e-7) {
-  // InnerEL<MeanRegModel> MR;
-  // MR.setData(y,X,Z,NULL);
-  // // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
-  // MR.setTol(maxIter, relTol);
-  // Eigen::VectorXd paccept; 
-  // Eigen::VectorXd thetaInit(betaInit.size()+gammaInit.size()); 
-  // thetaInit << betaInit, gammaInit;
-  // // std::cout << "MeanRegExports: thetaInit = " << thetaInit.transpose() << std::endl;
-  // Eigen::MatrixXd theta_chain = MR.postSample(nsamples, nburn,
-  //                                            thetaInit, sigs, paccept, betaInit.size());
+  InnerEL<MeanRegModel> MR;
+  MR.setData(y,X,Z,NULL);
+  // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
+  MR.setTol(maxIter, relTol);
+  Eigen::MatrixXd paccept;
+  // concatenate (stack) them together
+  Eigen::MatrixXd ThetaInit(BetaInit.rows()+GammaInit.rows(), BetaInit.cols());
+  ThetaInit << BetaInit, GammaInit;
+  // std::cout << "MeanRegExports: thetaInit = " << thetaInit.transpose() << std::endl;
+  Eigen::MatrixXd Theta_chain = MR.postSample(nsamples, nburn,
+                                              ThetaInit, Sigs, paccept, BetaInit.rows());
   Rcpp::List retlst; 
-  // retlst["theta_chain"] = theta_chain;
-  // retlst["paccept"] = paccept; 
+  retlst["Theta_chain"] = Theta_chain;
+  retlst["paccept"] = paccept;
   return(retlst); 
 }
 

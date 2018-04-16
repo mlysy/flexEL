@@ -1,5 +1,7 @@
 # check that logEL plot under location-scale models
 require(bayesEL)
+require(optimCheck)
+source("hlm-functions.R")
 source("../testthat/el-utils.R")
 
 #---- mean reg: X and Z both dim 1----
@@ -9,8 +11,8 @@ numpoints <- 100
 
 p <- 1
 q <- 1
-# X <- matrix(rep(1,n),n,p)
-X <- matrix(rnorm(n),n,p)
+X <- matrix(rep(1,n),n,p)
+# X <- matrix(rnorm(n),n,p)
 # Z <- matrix(rep(1,n),n,q)
 Z <- matrix(rnorm(n),n,q)
 
@@ -55,6 +57,38 @@ optim_proj(fun = loglik,
            xsol = c(theta.hat$beta, theta.hat$gamma),
            xnames = theta.names)
 
+# calculate marginal posterior
+Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq))
+logel.mat <- apply(Theta.seq, 1, function(bb) {
+  G <- mrls.evalG(y,X,Z,bb[1],bb[2])
+  logEL(G)
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+el.mat <- exp(logel.mat - max(logel.mat))
+logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
+
+# mcmc
+nsamples <- 20000
+nburn <- 3000
+betaInit <- theta.hat$beta
+gammaInit <- theta.hat$gamma
+sigs <- c(0.08,0.23)
+
+system.time(
+  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sigs)
+)
+theta_chain <- postout$Theta_chain
+theta_accept <- postout$paccept
+theta_accept
+hist(theta_chain[1,],breaks=50,freq=FALSE,
+     xlab = expression(beta[0]), main='')
+lines(beta.seq, norm_pdf(logel.marg[,1], beta.seq),
+      cex=0.1, col = 'red', type='l')
+hist(theta_chain[2,],breaks=50,freq=FALSE,
+     xlab = expression(beta[1]), main='')
+lines(gamma.seq, norm_pdf(logel.marg[,2], beta.seq),
+      cex=0.1, col = 'red', type='l')
+
 
 # ---- mean reg: X and Z both dim 2 ---- 
 # dimensions
@@ -63,14 +97,10 @@ numpoints <- 100
 
 p <- 2
 q <- 2
-# X <- matrix(rep(1,n),n,p)
-# X <- matrix(rnorm(n),n,p)
-# Z <- matrix(rep(1,n),n,q)
-# Z <- matrix(rnorm(n),n,q)
-
 X <- cbind(1,rnorm(n))
+# X <- matrix(rnorm(p*n),n,p)
+Z <- matrix(rnorm(q*n),n,q)
 # Z <- cbind(1,rnorm(n))
-Z <- cbind(rnorm(n),rnorm(n))
 
 # beta0 <- rnorm(p)
 # gamma0 <- rnorm(q)
@@ -103,11 +133,8 @@ abline(v=gamma0[1],col='red')
 plot(gamma2.seq, logel.seq[4,], type='l')
 abline(v=gamma0[2],col='red')
 
-# ---- test sampler ---- 
-source("hlm-functions.R")
-library(optimCheck)
+# solve by hlm
 theta.hat <- hlm.fit(y = y, X = X, W = Z)
-
 # quick check
 rbind(true = beta0, est = theta.hat$beta) # beta
 rbind(true = gamma0, est = theta.hat$gamma) # gamma
@@ -118,24 +145,23 @@ loglik <- function(theta) {
 }
 
 # optim check
-theta.names <- c(paste0("beta[", 1:p-1, "]"),
-                 paste0("gamma[", 1:q-1, "]"))
+theta.names <- c(paste0("beta[", 1:p-1, "]"), paste0("gamma[", 1:q-1, "]"))
 theta.names <- parse(text = theta.names) # convert to greek symbols
-
 optim_proj(fun = loglik,
            xsol = c(theta.hat$beta, theta.hat$gamma),
            xnames = theta.names)
 
+# mcmc
 nsamples <- 20000
 nburn <- 3000
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma
-sigs <- rep(0.1,length(betaInit)+length(gammaInit))
+sigs <- c(0.15,0.1,0.23,0.23)
 
 system.time(
   postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sigs)
 )
-theta_chain <- postout$theta_chain
+theta_chain <- postout$Theta_chain
 theta_accept <- postout$paccept
 theta_accept
 hist(theta_chain[1,],breaks=50,freq=FALSE,

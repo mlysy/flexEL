@@ -4,7 +4,7 @@
 \alias{mrls.post}
 \title{Posterior sampler for mean regression (location-scale model)}
 \usage{
-mrls.post(y, X, Z, nsamples, nburn, betaInit, gammaInit, sigs, max_iter = 100,
+mrls.post(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sigs, max_iter = 100,
   rel_tol = 1e-07)
 }
 \arguments{
@@ -18,17 +18,15 @@ mrls.post(y, X, Z, nsamples, nburn, betaInit, gammaInit, sigs, max_iter = 100,
 
 \item{nburn}{number of samples to discard before saving the chain.}
 
-\item{betaInit}{Length-\code{nBet} vector of initial value for the chain.}
+\item{BetaInit}{\code{nBet x numBeta} matrix of initial value for the chain.}
 
-\item{gammaInit}{Length-\code{nGam} vector of initial value for the chain.}
+\item{GammaInit}{\code{nGam x numGamma} matrix of initial value for the chain.}
 
-\item{sigs}{Length-\code{nEqs} vector of tuning parameters.}
+\item{Sigs}{Length-\code{nEqs} vector of tuning parameters.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
 \item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
-
-\item{betalen}{A scalar of the length of the location model parameter.}
 }
 \value{
 \code{nEqs x nsamples} matrix of Markov Chain.

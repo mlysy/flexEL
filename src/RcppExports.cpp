@@ -168,8 +168,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // MeanRegLS_post
-Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_MeanRegLS_post(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP sigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, Eigen::MatrixXd Sigs, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_MeanRegLS_post(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP GammaInitSEXP, SEXP SigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -178,12 +178,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gammaInit(gammaInitSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type sigs(sigsSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type BetaInit(BetaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type GammaInit(GammaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Sigs(SigsSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanRegLS_post(y, X, Z, nsamples, nburn, betaInit, gammaInit, sigs, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(MeanRegLS_post(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sigs, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
