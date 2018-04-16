@@ -146,3 +146,15 @@ hist(theta_chain[3,],breaks=50,freq=FALSE,
      xlab = expression(gamma[0]), main='')
 hist(theta_chain[4,],breaks=50,freq=FALSE,
      xlab = expression(gamma[1]), main='')
+
+# --------------------------------------------------------------------------- 
+# test qr.evalG for multiple quantile levels
+n <- 20
+alphas <- c(0.25,0.5)
+Beta <- matrix(c(0.5,1,1,1),2,2)
+x <- rnorm(n)
+y <- 1 + x + rnorm(n)
+X <- cbind(1,x)
+qr.evalG(y,X,alphas,Beta)
+qr.evalG(y,X,alphas[1],Beta[,1])
+qr.evalG(y,X,alphas[2],Beta[,2])

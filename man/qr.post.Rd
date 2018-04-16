@@ -4,7 +4,7 @@
 \alias{qr.post}
 \title{Posterior sampler for quantile regression (location model)}
 \usage{
-\method{qr}{post}(y, X, alphas, nsamples, nburn, betaInit, sigs,
+\method{qr}{post}(y, X, alphas, nsamples, nburn, BetaInit, Sigs,
   max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
@@ -18,9 +18,9 @@
 
 \item{nburn}{number of samples to discard before saving the chain.}
 
-\item{betaInit}{Length-\code{nEqs} vector of initial value for the chain.}
+\item{BetaInit}{\code{nEqs x numBeta} matrix of initial value for the chain. Each column is a beta vector. If a vector is passed to this function, it will be converted to a matrix with only one column.}
 
-\item{sigs}{Length-\code{nEqs} vector of tuning parameters.}
+\item{Sigs}{\code{nEqs x numBeta} matrix of tuning parameters.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 

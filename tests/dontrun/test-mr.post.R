@@ -27,7 +27,7 @@ betaInit <- round(c(lm(y ~ 1)$coefficients), digits = 6)
 betaInit
 sigs <- rep(0.12,1)
 qrout <- mr.post(y, X, nsamples, nburn, betaInit, sigs)
-mu_chain <- qrout$beta_chain
+mu_chain <- qrout$Beta_chain
 mu_paccept <- qrout$paccept 
 mu_paccept
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
@@ -82,13 +82,14 @@ logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
 nsamples <- 20000
 nburn <- 5000
-betaInit <- round(c(lm(y ~ X1)$coefficients),6)
+betaInit <- round(c(lm(y ~ X1)$coefficients),6) # TODO: ????
+# betaInit <- c(lm(y ~ X1)$coefficients)
 betaInit
 sigs <- rep(0.12,2)
 system.time(
   qrout <- mr.post(y, X, nsamples, nburn, betaInit, sigs)
 )
-beta_chain <- qrout$beta_chain
+beta_chain <- qrout$Beta_chain
 beta_paccept <- qrout$paccept
 beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')

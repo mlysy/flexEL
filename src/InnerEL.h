@@ -76,9 +76,12 @@ public:
                  const double& mwgsd, bool& isAccepted, double& logELCur);
     MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit, 
                              double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
-    MatrixXd postSample(int nsamples, int nburn, VectorXd thetaInit,
-                        const Ref<const VectorXd>& sigs, 
-                        VectorXd &paccept, int betalen);
+    MatrixXd postSample(int nsamples, int nburn, MatrixXd ThetaInit,
+                        const Ref<const MatrixXd>& Sigs,
+                        MatrixXd &paccept, int lenBeta);
+    // MatrixXd postSample(int nsamples, int nburn, VectorXd thetaInit,
+    //                     const Ref<const VectorXd>& sigs, 
+    //                     VectorXd &paccept, int betalen);
                         // int maxIter, double relTol);
 };
 
@@ -409,6 +412,7 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
   }
 }
 
+
 // Note: maxIter and relTol must have been assigned 
 // Note: the logical vector rvDoMcmc is for debuging -- true entries are updated 
 template<typename ELModel>
@@ -454,10 +458,96 @@ inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
   return(theta_chain);
 }
 
+// Note: each column of ThetaInit/Sigs is one theta vector; 
+//       ThetaInit and Sig should have the same dimensions
+template<typename ELModel>
+inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
+                MatrixXd ThetaInit, const Ref<const MatrixXd>& Sigs,
+                MatrixXd &paccept, int lenBeta) {
+  int lenTheta = ThetaInit.rows(); // dimension of theta
+  int numTheta = ThetaInit.cols(); // numer of thetas
+  MatrixXd Theta_chain(lenTheta*numTheta,nsamples);
+  MatrixXd ThetaOld = ThetaInit;
+  MatrixXd ThetaNew = ThetaOld;
+  MatrixXd ThetaProp = ThetaOld;
+  if (lenTheta == lenBeta) {
+    ELModel::evalG(ThetaOld);
+  }
+  else {
+    ELModel::evalG(ThetaOld.topRows(lenBeta), ThetaOld.bottomRows(lenTheta-lenBeta));
+  }
+  int nIter;
+  double maxErr;
+  // lambdaNR(nIter, maxErr, maxIter, relTol); 
+  lambdaNR(nIter, maxErr);
+  // TODO: what if not converged ?
+  if (nIter == maxIter && maxErr > relTol) {
+    // TODO: throw an error ??
+    std::cout << "ThetaInit not valid." << std::endl;
+    // return NULL;
+  }
+  evalOmegas();
+  double logELOld = logEL(); 
+  double logELProp;
+  bool satisfy;
+  double u;
+  double a;
+  double ratio;
+  paccept = MatrixXd::Zero(ThetaInit.rows(),ThetaInit.cols()); // TODO: need to initialize to 0 ?
+  
+  for (int ii=-nburn; ii<nsamples; ii++) {
+    for (int kk=0; kk<numTheta; kk++) {  
+      for (int jj=0; jj<lenTheta; jj++) {
+        ThetaProp = ThetaOld;
+        ThetaProp(jj,kk) += Sigs(jj,kk)*R::norm_rand();
+        // std::cout << "ThetaProp = \n" << ThetaProp << std::endl;
+        // check if proposed theta satisfies the constraint
+        satisfy = false;
+        // ELModel::evalG(thetaProp); // NEW: change G with thetaProp
+        if (lenTheta == lenBeta) { // location model
+          ELModel::evalG(ThetaProp);
+          // std::cout << "G = \n" << G << std::endl;
+        }
+        else { // location-scale model
+          ELModel::evalG(ThetaProp.topRows(lenBeta), ThetaProp.bottomRows(lenTheta-lenBeta));
+        }
+        // lambdaNR(nIter, maxErr, maxIter, relTol);
+        lambdaNR(nIter, maxErr);
+        // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
+        if (nIter < maxIter) satisfy = true;
+        // if does not satisfy, keep the old theta
+        if (satisfy == false) break;
+        // if does satisfy, flip a coin
+        u = R::unif_rand();
+        // use the lambda calculate just now to get the logEL for Prop
+        // to avoid an extra call of lambdaNR
+        VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
+          log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
+        logELProp = logomegahat.sum();
+        ratio = exp(logELProp-logELOld);
+        a = std::min(1.0,ratio);
+        if (u < a) { // accepted
+          paccept(jj,kk) += 1; 
+          ThetaNew = ThetaProp;
+          ThetaOld = ThetaNew;
+          logELOld = logELProp; // NEW: store the new one
+        }
+      }
+    }
+    if (ii >= 0) {
+      // Theta_chain.col(ii) = ThetaNew;
+      Theta_chain.col(ii) = Map<VectorXd>(ThetaNew.data(), ThetaNew.size());
+    }
+  }
+  paccept /= (nsamples+nburn); 
+  return(Theta_chain);
+}
+
+/* only works for single quantile (vector theta)
 // posterior sampler: depend on evalG
 // Note: maxIter and relTol must have been assigned 
 //       paccept should be a vector of length(thetaInit)
-//       if lenBeta == thetaInit.size(), then use location model only 
+//       if betalen == thetaInit.size(), then use location model only 
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
                 VectorXd thetaInit, const Ref<const VectorXd>& sigs,
@@ -533,8 +623,9 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   paccept /= (nsamples+nburn); 
   return(theta_chain);
 }
+*/
 
-/*
+/* only works for location model
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
 					     VectorXd thetaInit, const Ref<const VectorXd>& sigs,

@@ -82,19 +82,19 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
 // [[Rcpp::export(".QuantReg_post")]]
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                          Eigen::VectorXd alphaArr, int nsamples, int nburn, 
-                         Eigen::VectorXd betaInit, Eigen::VectorXd sigs, 
+                         Eigen::MatrixXd BetaInit, Eigen::MatrixXd Sigs, 
                          int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   // QR.setData(y,X,&alpha); 
   QR.setData(y,X,alphaArr.data());
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
   QR.setTol(maxIter, relTol);
-  Eigen::VectorXd paccept; 
-  Eigen::MatrixXd beta_chain = QR.postSample(nsamples, nburn, 
-                                             betaInit, sigs, paccept, betaInit.size());
-  // return(beta_chain);
+  Eigen::MatrixXd paccept; 
+  Eigen::MatrixXd Beta_chain = QR.postSample(nsamples, nburn, 
+                                             BetaInit, Sigs, paccept, BetaInit.rows());
+  // return(Beta_chain);
   Rcpp::List retlst; 
-  retlst["beta_chain"] = beta_chain;
+  retlst["Beta_chain"] = Beta_chain;
   retlst["paccept"] = paccept; 
   return(retlst); 
 }

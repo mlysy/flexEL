@@ -66,10 +66,9 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
   
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
-  nEqs = nBet; 
+  nEqs = nBet*nQts; // Total number of equations
   
-  // G = MatrixXd::Zero(nEqs,nObs);
-  G = MatrixXd::Zero(nQts*nEqs,nObs);
+  G = MatrixXd::Zero(nEqs,nObs);
 }
 
 // setData (location-scale model) (with default ctor)
@@ -88,10 +87,9 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
   nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
-  nEqs = nBet+nGam+1; 
+  nEqs = nQts*(nBet+nGam+1); 
   
-  // G = MatrixXd::Zero(nEqs,nObs);
-  G = MatrixXd::Zero(nQts*nEqs,nObs);
+  G = MatrixXd::Zero(nEqs,nObs);
 }
 
 // revised L1 loss function for quantile regression
@@ -118,7 +116,7 @@ inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta) {
   // stack multiple "Gs" for each quantile level
   for(int jj=0; jj<nQts; jj++) {
     for(int ii=0; ii<y.size(); ii++) {
-      this->G.block(jj*nQts,ii,nEqs,1) = phi_alpha(y(ii)-X.col(ii).transpose()*Beta.col(jj), alpha[jj])*X.col(ii);
+      this->G.block(jj*nBet,ii,nBet,1) = phi_alpha(y(ii)-X.col(ii).transpose()*Beta.col(jj), alpha[jj])*X.col(ii);
     }
   }
   // single quantile code:
@@ -151,8 +149,9 @@ inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta,
     double phivalue;
     for(int ii=0; ii<y.size(); ii++) {
       phivalue = phi_alpha(yXbeZg(ii), alpha[jj]);
-      this->G.block(jj*nQts,ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
-      this->G.block(jj*nQts+nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
+      // TODO: check the dimension
+      this->G.block(jj*nBet,ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
+      this->G.block(jj*nGam+nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
     }
     G.bottomRows(1).array() = yXbeZg.array()*yXbeZg.array()-1;
   }

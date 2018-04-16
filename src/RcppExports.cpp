@@ -131,8 +131,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // MeanReg_post
-Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_MeanReg_post(SEXP ySEXP, SEXP XSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP sigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd Sigs, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_MeanReg_post(SEXP ySEXP, SEXP XSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP SigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -140,11 +140,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
     Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type sigs(sigsSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type BetaInit(BetaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Sigs(SigsSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanReg_post(y, X, nsamples, nburn, betaInit, sigs, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(MeanReg_post(y, X, nsamples, nburn, BetaInit, Sigs, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -238,8 +238,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantReg_post
-Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd sigs, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_QuantReg_post(SEXP ySEXP, SEXP XSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP sigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd Sigs, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantReg_post(SEXP ySEXP, SEXP XSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP SigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -248,11 +248,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type alphaArr(alphaArrSEXP);
     Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type sigs(sigsSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type BetaInit(BetaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Sigs(SigsSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_post(y, X, alphaArr, nsamples, nburn, betaInit, sigs, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(QuantReg_post(y, X, alphaArr, nsamples, nburn, BetaInit, Sigs, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
