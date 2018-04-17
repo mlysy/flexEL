@@ -18,7 +18,7 @@ test_that("mr.evalG.R == mr.evalG.cpp", {
     alpha <- runif(1)
     beta <- rnorm(p)
     gamma <- rnorm(q)
-    y <- c(X %*% beta + exp(Z %*% gamma)) + rnorm(n) # with N(0,1) error term
+    y <- c(X %*% beta + exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
     max_iter <- sample(c(2, 10, 100), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     # checking G matrix from cpp and R
@@ -27,5 +27,4 @@ test_that("mr.evalG.R == mr.evalG.cpp", {
     expect_equal(G.cpp, G.R)
   }
 })
-
 

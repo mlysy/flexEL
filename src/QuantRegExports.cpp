@@ -98,3 +98,27 @@ Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
   retlst["paccept"] = paccept; 
   return(retlst); 
 }
+
+// Note: BetaInit and GammaInit must have the same number of columns
+// [[Rcpp::export(".QuantRegLS_post")]]
+Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
+                           Eigen::VectorXd alphaArr, int nsamples, int nburn, 
+                           Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, 
+                           Eigen::MatrixXd Sigs, 
+                           int maxIter = 100, double relTol = 1e-7) {
+  InnerEL<QuantRegModel> QR;
+  QR.setData(y,X,Z,alphaArr.data());
+  // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate QR(nObs, nEqs, alpha, lambda0);
+  QR.setTol(maxIter, relTol);
+  Eigen::MatrixXd paccept;
+  // concatenate (stack) them together
+  Eigen::MatrixXd ThetaInit(BetaInit.rows()+GammaInit.rows(), BetaInit.cols());
+  ThetaInit << BetaInit, GammaInit;
+  // std::cout << "MeanRegExports: thetaInit = " << thetaInit.transpose() << std::endl;
+  Eigen::MatrixXd Theta_chain = QR.postSample(nsamples, nburn,
+                                              ThetaInit, Sigs, paccept, BetaInit.rows());
+  Rcpp::List retlst; 
+  retlst["Theta_chain"] = Theta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst); 
+}

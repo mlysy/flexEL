@@ -87,7 +87,8 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
   nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
-  nEqs = nQts*(nBet+nGam+1); 
+  // nEqs = nQts*(nBet+nGam+1); 
+  nEqs = nQts*(nBet+nGam); 
   
   G = MatrixXd::Zero(nEqs,nObs);
 }
@@ -145,15 +146,22 @@ inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta,
                                  const Ref<const MatrixXd>& Gamma) {
   for (int jj=0; jj<nQts; jj++) {
     eZg.array() = (-Gamma.col(jj).transpose()*Z).array().exp();
+    // std::cout << "eZg = " << eZg << std::endl;
     yXbeZg.array() = (y.transpose()-Beta.col(jj).transpose()*X).array()*eZg.array();
+    // std::cout << "yXbeZg = " << yXbeZg << std::endl;
     double phivalue;
     for(int ii=0; ii<y.size(); ii++) {
       phivalue = phi_alpha(yXbeZg(ii), alpha[jj]);
       // TODO: check the dimension
-      this->G.block(jj*nBet,ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
-      this->G.block(jj*nGam+nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
+      // G.block(jj*(nBet+nGam+1),ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
+      G.block(jj*(nBet+nGam),ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
+      // std::cout << phivalue*eZg(ii)*X.col(ii) << std::endl;
+      // G.block(jj*(nBet+nGam+1)+nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
+      G.block(jj*(nBet+nGam)+nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
+      // std::cout << phivalue*yXbeZg(ii)*Z.col(ii) << std::endl;
     }
-    G.bottomRows(1).array() = yXbeZg.array()*yXbeZg.array()-1;
+    // remove the variance constraint for now 
+    // G.block((jj+1)*(nBet+nGam+1)-1,0,1,nObs).array() = yXbeZg.array()*yXbeZg.array()-1;
   }
   // single quantile code:
   // eZg.array() = (-gamma.transpose()*Z).array().exp();

@@ -13,8 +13,11 @@ qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma) {
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
   # if input is for single quantile and Beta, Gamma are vectors, convert to matrix form
-  if (is.vector(Beta)) Beta <- matrix(Beta,length(Beta),1)
-  if (is.vector(Gamma)) Gamma <- matrix(Gamma,length(Gamma),1)
+  if (length(alphas) == 1 && is.vector(Beta)) Beta <- matrix(Beta,length(Beta),1)
+  if (length(alphas) == 1 && is.vector(Gamma)) Gamma <- matrix(Gamma,length(Gamma),1)
+  if (length(alphas) > 1 && (is.vector(Beta) || is.vector(Gamma))) {
+    stop("Parameters must be in matrix form when alphas has more than one entry.")
+  }
   alpha <- c(length(alphas), alphas) 
   G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, Beta, Gamma)
   return(t(G))

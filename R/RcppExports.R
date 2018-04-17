@@ -65,3 +65,7 @@
     .Call(`_bayesEL_QuantReg_post`, y, X, alphaArr, nsamples, nburn, BetaInit, Sigs, maxIter, relTol)
 }
 
+.QuantRegLS_post <- function(y, X, Z, alphaArr, nsamples, nburn, BetaInit, GammaInit, Sigs, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_QuantRegLS_post`, y, X, Z, alphaArr, nsamples, nburn, BetaInit, GammaInit, Sigs, maxIter, relTol)
+}
+

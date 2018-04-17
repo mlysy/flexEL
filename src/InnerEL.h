@@ -466,6 +466,7 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
                 MatrixXd &paccept, int lenBeta) {
   int lenTheta = ThetaInit.rows(); // dimension of theta
   int numTheta = ThetaInit.cols(); // numer of thetas
+  // std::cout << "numTheta = " << numTheta << std::endl;
   MatrixXd Theta_chain(lenTheta*numTheta,nsamples);
   MatrixXd ThetaOld = ThetaInit;
   MatrixXd ThetaNew = ThetaOld;
@@ -475,11 +476,13 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   }
   else {
     ELModel::evalG(ThetaOld.topRows(lenBeta), ThetaOld.bottomRows(lenTheta-lenBeta));
+    // std::cout << "G = \n" << G << std::endl;
   }
   int nIter;
   double maxErr;
   // lambdaNR(nIter, maxErr, maxIter, relTol); 
   lambdaNR(nIter, maxErr);
+  // std::cout << "first lambdaNEW = " << lambdaNew.transpose() << std::endl;
   // TODO: what if not converged ?
   if (nIter == maxIter && maxErr > relTol) {
     // TODO: throw an error ??
@@ -500,6 +503,7 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
       for (int jj=0; jj<lenTheta; jj++) {
         ThetaProp = ThetaOld;
         ThetaProp(jj,kk) += Sigs(jj,kk)*R::norm_rand();
+        // ThetaProp(jj,kk) += Sigs(jj,kk)*1.5; // DEBUG
         // std::cout << "ThetaProp = \n" << ThetaProp << std::endl;
         // check if proposed theta satisfies the constraint
         satisfy = false;
@@ -510,6 +514,7 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
         }
         else { // location-scale model
           ELModel::evalG(ThetaProp.topRows(lenBeta), ThetaProp.bottomRows(lenTheta-lenBeta));
+          // std::cout << "G = \n" << G << std::endl;
         }
         // lambdaNR(nIter, maxErr, maxIter, relTol);
         lambdaNR(nIter, maxErr);
