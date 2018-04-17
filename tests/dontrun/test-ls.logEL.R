@@ -307,7 +307,7 @@ beta0 <- 2
 gamma0 <- -0.01
 theta0 <- c(beta0,gamma0)
 y <- c(X %*% beta0 + exp(Z %*% gamma0)*rnorm(n))
-alpha <- c(0.5,0.65)
+alpha <- c(0.25,0.75)
 
 theta.hat <- hlm.fit(y,X,Z)
 betaInit <- theta.hat$beta
@@ -333,14 +333,12 @@ hist(theta_chain[3,],breaks=50,freq=FALSE,
 hist(theta_chain[4,],breaks=50,freq=FALSE,
      xlab = expression(gamma[1]), main='')
 
-G <- qrls.evalG(y,X,Z,alpha,BetaInit,GammaInit)
-G1 <- qrls.evalG(y,X,Z,alpha[1],BetaInit[,1],GammaInit[,1])
-G2 <- qrls.evalG(y,X,Z,alpha[2],BetaInit[,2],GammaInit[,2])
+# G <- qrls.evalG(y,X,Z,alpha,BetaInit,GammaInit)
+# G1 <- qrls.evalG(y,X,Z,alpha[1],BetaInit[,1],GammaInit[,1])
+# G2 <- qrls.evalG(y,X,Z,alpha[2],BetaInit[,2],GammaInit[,2])
 
 postout1 <- qrls.post(y,X,Z,alpha[1],nsamples,nburn,BetaInit[,1],GammaInit[,1],Sigs[,1])
 postout2 <- qrls.post(y,X,Z,alpha[2],nsamples,nburn,BetaInit[,2],GammaInit[,2],Sigs[,2])
-hist(postout2$Theta_chain[2,],breaks=50,freq=FALSE,
-     xlab = expression(beta[0]), main='')
 hist(postout1$Theta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]), main='')
 hist(postout1$Theta_chain[2,],breaks=50,freq=FALSE,

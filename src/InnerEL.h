@@ -490,7 +490,9 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
     // return NULL;
   }
   evalOmegas();
+  // std::cout << "first omegas = " << omegas.transpose() << std::endl;
   double logELOld = logEL(); 
+  // std::cout << "first logEL = " << logELOld << std::endl;
   double logELProp;
   bool satisfy;
   double u;

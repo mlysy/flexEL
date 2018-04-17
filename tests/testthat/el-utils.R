@@ -520,13 +520,14 @@ qrls.evalG_R <- function(y, X, Z, alpha, beta, gamma) {
   nObs <- nrow(X)
   nBeta <- length(beta)
   nGamma <- length(gamma)
-  G <- matrix(NaN, nObs, nBeta + nGamma + 1)
+  # G <- matrix(NaN, nObs, nBeta + nGamma + 1)
+  G <- matrix(NaN, nObs, nBeta + nGamma)
   eZg <- c(exp(-Z %*% gamma))
   yXbeZg <- c((y - X %*% beta)*eZg)
   pyXbeZg <- phi_alpha(yXbeZg, alpha)
   G[,1:nBeta] <- pyXbeZg * eZg * X # times each col of X
   G[,nBeta+1:nGamma] <- pyXbeZg * yXbeZg * Z # times each col of Z
-  G[,nBeta+nGamma+1] <- yXbeZg^2 - 1
+  # G[,nBeta+nGamma+1] <- yXbeZg^2 - 1
   return(G)
 }
 
