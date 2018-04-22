@@ -8,13 +8,15 @@
 #' @param nburn number of samples to discard before saving the chain.
 #' @param BetaInit \code{nBet x numBeta} matrix of initial value for the chain. 
 #' @param GammaInit \code{nGam x numGamma} matrix of initial value for the chain. 
+#' @param NuInit Length-\code{numNu} vector of initial value for the chain.
 #' @param Sigs Length-\code{nEqs} vector of tuning parameters. 
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export qrls.post
-qrls.post <- function(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, 
+qrls.post <- function(y, X, Z, alphas, nsamples, nburn,
+                      BetaInit, GammaInit, NuInit, 
                       Sigs, max_iter = 100, rel_tol = 1e-7) {
   # input conversion
   if (length(alphas) == 1 && is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
@@ -41,11 +43,11 @@ qrls.post <- function(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit,
   if(ncol(BetaInit) != ncol(GammaInit)) {
     stop("BetaInit and GammaInit must have the same number of columns.")
   }
-  paramDims <- c(nrow(BetaInit)+nrow(GammaInit),ncol(BetaInit))
+  paramDims <- c(nrow(BetaInit)+nrow(GammaInit)+1,ncol(BetaInit))
   if(!all(paramDims == dim(Sigs))) {
     stop("BetaInit and Sigs have inconsistent dimensions.")
   }
   .QuantRegLS_post(y, t(X), t(Z), alpha, nsamples, nburn, 
-                   BetaInit, GammaInit, Sigs, 
+                   BetaInit, GammaInit, NuInit, Sigs, 
                    maxIter = max_iter, relTol = rel_tol)
 }

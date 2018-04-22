@@ -202,8 +202,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantRegLS_evalG
-Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, Eigen::MatrixXd Beta, Eigen::MatrixXd Gamma);
-RcppExport SEXP _bayesEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP BetaSEXP, SEXP GammaSEXP) {
+Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, Eigen::MatrixXd Beta, Eigen::MatrixXd Gamma, Eigen::VectorXd Nu);
+RcppExport SEXP _bayesEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP BetaSEXP, SEXP GammaSEXP, SEXP NuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -213,7 +213,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type alphaArr(alphaArrSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Beta(BetaSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Gamma(GammaSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG(y, X, Z, alphaArr, Beta, Gamma));
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type Nu(NuSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG(y, X, Z, alphaArr, Beta, Gamma, Nu));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -257,8 +258,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantRegLS_post
-Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, Eigen::MatrixXd Sigs, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_QuantRegLS_post(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP GammaInitSEXP, SEXP SigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, Eigen::VectorXd NuInit, Eigen::MatrixXd Sigs, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantRegLS_post(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP GammaInitSEXP, SEXP NuInitSEXP, SEXP SigsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -270,10 +271,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type BetaInit(BetaInitSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type GammaInit(GammaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type NuInit(NuInitSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Sigs(SigsSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post(y, X, Z, alphaArr, nsamples, nburn, BetaInit, GammaInit, Sigs, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post(y, X, Z, alphaArr, nsamples, nburn, BetaInit, GammaInit, NuInit, Sigs, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -292,10 +294,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_MeanReg_post_adapt", (DL_FUNC) &_bayesEL_MeanReg_post_adapt, 9},
     {"_bayesEL_MeanRegLS_post", (DL_FUNC) &_bayesEL_MeanRegLS_post, 10},
     {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},
-    {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 6},
+    {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 7},
     {"_bayesEL_QuantReg_post_adapt", (DL_FUNC) &_bayesEL_QuantReg_post_adapt, 10},
     {"_bayesEL_QuantReg_post", (DL_FUNC) &_bayesEL_QuantReg_post, 9},
-    {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 11},
+    {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 12},
     {NULL, NULL, 0}
 };
 

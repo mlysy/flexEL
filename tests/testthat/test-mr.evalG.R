@@ -6,12 +6,6 @@ source("el-utils.R")
 # library(testthat) # not loaded automatically
 context("mr.evalG")
 
-# # G function for mean regression (old)
-# Gmean <- function(y, X, beta) {
-#     z <- c(y - X %*% beta)
-#     cbind(z, z^2 - 1)
-# }
-
 ntest <- 50
 
 test_that("mr.evalG.R == mr.evalG.cpp", {

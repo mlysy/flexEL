@@ -1,5 +1,6 @@
 # ---- testing qrls.evalG implementations in R and C++ are equal ----
 
+# library(bayesEL)
 source("el-utils.R")
 # library(testthat)
 

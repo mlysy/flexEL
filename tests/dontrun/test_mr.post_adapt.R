@@ -114,3 +114,4 @@ abline(v=mean(beta_chain[2,]), col='blue')
 legend('topright',legend=c(expression('grid plot & mode'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
+

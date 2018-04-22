@@ -91,7 +91,7 @@ betaInit2
 BetaInit <- cbind(betaInit1,betaInit2)
 # BetaInit <- cbind(mu01,mu02)
 sigs1 <- rep(0.22,1)
-sigs2 <- rep(0.20,1)
+sigs2 <- rep(0.15,1)
 Sigs <- cbind(sigs1,sigs2)
 qrout <- qr.post(y, X, alphas, nsamples, nburn, BetaInit, Sigs)
 
@@ -198,8 +198,8 @@ legend('topright',legend=c(expression('grid plot & mode'),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
 # ---- 2-d problem with 2 quantile levels (1 intercept, 1 slope) ----
-n <- 100
-alphas <- c(0.5,0.75)
+n <- 500
+alphas <- c(0.75,0.9)
 X0 <- matrix(rep(1,n),n,1)
 # X1 <- matrix(seq(-2,2,length.out = n),n,1)
 X1 <- matrix(rnorm(n),n,1)
@@ -272,7 +272,8 @@ betaInit1
 betaInit2 <- c(rq(y ~ X1, tau = alphas[2], method = 'fn')$coefficients)
 betaInit2
 BetaInit <- cbind(betaInit1,betaInit2)
-Sigs <- cbind(c(0.27,0.23),c(0.27,0.26))
+# Sigs <- cbind(c(0.27,0.23),c(0.27,0.26))
+Sigs <- cbind(c(0.13,0.12),c(0.18,0.18))
 system.time(
   qrout <- qr.post(y, X, alphas, nsamples, nburn, BetaInit, Sigs)
 )
@@ -289,8 +290,9 @@ hist(beta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]),main='')
 lines(beta1.seq1, norm_pdf(logel.marg1[,1], beta1.seq1),
       cex=0.1, col = 'red', type='l')
+abline(v=beta01[1], col='red')
 abline(v=mean(beta_chain[1,]), col='blue')
-legend('topright',legend=c(expression('grid plot'),
+legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 # slope
@@ -298,8 +300,9 @@ hist(beta_chain[2,],breaks=50,freq=FALSE,
      xlab = expression(beta[1]),main='')
 lines(beta2.seq1, norm_pdf(logel.marg1[,2], beta2.seq1),
       cex=0.1, col = 'red', type='l')
+abline(v=beta01[2], col='red')
 abline(v=mean(beta_chain[2,]), col='blue')
-legend('topright',legend=c(expression('grid plot & mode'),
+legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 # intercept
@@ -307,8 +310,9 @@ hist(beta_chain[3,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]),main='')
 lines(beta1.seq2, norm_pdf(logel.marg2[,1], beta1.seq2),
       cex=0.1, col = 'red', type='l')
+abline(v=beta02[1], col='red')
 abline(v=mean(beta_chain[3,]), col='blue')
-legend('topright',legend=c(expression('grid plot'),
+legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 # slope
@@ -316,8 +320,9 @@ hist(beta_chain[4,],breaks=50,freq=FALSE,
      xlab = expression(beta[1]),main='')
 lines(beta2.seq2, norm_pdf(logel.marg2[,2], beta2.seq2),
       cex=0.1, col = 'red', type='l')
+abline(v=beta02[2], col='red')
 abline(v=mean(beta_chain[4,]), col='blue')
-legend('topright',legend=c(expression('grid plot & mode'),
+legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 

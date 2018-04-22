@@ -99,7 +99,8 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
         Q1 <- -G %*% rho
         lambdaNew <- lambdaOld - solve(Q2,Q1) # TODO: step size?
         maxErr <- MaxRelErr(lambdaNew, lambdaOld)
-        if (verbose && (nIter %% 5 == 0)){
+        # if (verbose && (nIter %% 5 == 0)){
+        if (verbose){
           message("nIter = ", nIter)
           message("err = ", maxErr)
         }
@@ -516,18 +517,17 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
   return(G)
 }
 
-qrls.evalG_R <- function(y, X, Z, alpha, beta, gamma) {
+qrls.evalG_R <- function(y, X, Z, alpha, beta, gamma, nu) {
   nObs <- nrow(X)
   nBeta <- length(beta)
   nGamma <- length(gamma)
-  # G <- matrix(NaN, nObs, nBeta + nGamma + 1)
-  G <- matrix(NaN, nObs, nBeta + nGamma)
+  G <- matrix(NaN, nObs, nBeta + nGamma + 1)
   eZg <- c(exp(-Z %*% gamma))
-  yXbeZg <- c((y - X %*% beta)*eZg)
+  yXbeZg <- c((y - X %*% beta)*eZg-nu)
   pyXbeZg <- phi_alpha(yXbeZg, alpha)
   G[,1:nBeta] <- pyXbeZg * eZg * X # times each col of X
   G[,nBeta+1:nGamma] <- pyXbeZg * yXbeZg * Z # times each col of Z
-  # G[,nBeta+nGamma+1] <- yXbeZg^2 - 1
+  G[,nBeta+nGamma+1] <- pyXbeZg
   return(G)
 }
 

@@ -6,9 +6,10 @@
 #' @param alphas a vector of quantile levels.
 #' @param Beta \code{nBet x nQts} matrix, each column is a vector of coefficients in location function.
 #' @param Gamma \code{nGam x nQts} matrix, each column is a vector of coefficients in scale function.
+#' @param Nu Length-\code{numNu} vector of initial value for the chain.
 #' @return G matrix for location-scale quantile regression model. 
 #' @export qrls.evalG
-qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma) { 
+qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma, Nu) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
@@ -19,6 +20,6 @@ qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma) {
     stop("Parameters must be in matrix form when alphas has more than one entry.")
   }
   alpha <- c(length(alphas), alphas) 
-  G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, Beta, Gamma)
+  G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, Beta, Gamma, Nu)
   return(t(G))
 }

@@ -4,7 +4,7 @@
 \alias{qrls.evalG}
 \title{Evaluate the G matrix for mean regression (location-scale model)}
 \usage{
-qrls.evalG(y, X, Z, alphas, Beta, Gamma)
+qrls.evalG(y, X, Z, alphas, Beta, Gamma, Nu)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}
@@ -18,6 +18,8 @@ qrls.evalG(y, X, Z, alphas, Beta, Gamma)
 \item{Beta}{\code{nBet x nQts} matrix, each column is a vector of coefficients in location function.}
 
 \item{Gamma}{\code{nGam x nQts} matrix, each column is a vector of coefficients in scale function.}
+
+\item{Nu}{Length-\code{numNu} vector of initial value for the chain.}
 }
 \value{
 G matrix for location-scale quantile regression model.

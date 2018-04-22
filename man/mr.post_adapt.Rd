@@ -16,7 +16,7 @@ mr.post_adapt(y, X, nsamples, nburn, betaInit, mwgSd, rvDoMcmc,
 
 \item{nburn}{number of samples to discard before saving the chain.}
 
-\item{betaInit}{Length-\code{nEqs} vector of initial value for the chain.}
+\item{betaInit}{\code{nEqs} vector of initial value for the chain.}
 
 \item{mwgSd}{Length-\code{nObs} vector of tuning parameters.}
 

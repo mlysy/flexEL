@@ -27,25 +27,10 @@ Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y,
   // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
   InnerEL<MeanRegModel> MR;
   MR.setData(y,X,Z,NULL); 
-  MR.evalG(beta,gamma);
+  MR.evalG(beta,gamma,Eigen::VectorXd::Zero(0));
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
   return(G); 
 }
-
-// Old code:
-// // [[Rcpp::export(".MeanReg_logEL")]]
-// double MeanReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta,
-//                      int maxIter = 100, double relTol = 1e-7) {
-//     // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
-//     InnerEL<MeanRegModel> MR;
-//     MR.setData(y,X,NULL); 
-//     MR.evalG(beta);
-//     // int nIter;
-//     // double maxErr; 
-//     double logELmean = MR.logEL(); 
-//     // TODO: check convergence here
-//     return(logELmean);
-// }
 
 // [[Rcpp::export(".MeanReg_post")]]
 Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
@@ -58,7 +43,7 @@ Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
   MR.setTol(maxIter, relTol);
   Eigen::MatrixXd paccept; 
   Eigen::MatrixXd Beta_chain = MR.postSample(nsamples, nburn, 
-                                             BetaInit, Sigs, paccept, BetaInit.rows());
+                                             BetaInit, Sigs, paccept);
   // return(Beta_chain);
   Rcpp::List retlst; 
   retlst["Beta_chain"] = Beta_chain;
@@ -76,9 +61,17 @@ Rcpp::List MeanReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   InnerEL<MeanRegModel> MR;
   MR.setData(y,X,NULL);
   MR.setTol(maxIter, relTol);
+  // Eigen::MatrixXd paccept;
   Eigen::VectorXd paccept;
-  bool *rvdomcmc = new bool[betaInit.size()];
+  // int nTheta = BetaInit.rows();
+  // int numTheta = BetaInit.cols();
+  // bool *rvdomcmc = new bool[nTheta*numTheta];
+  int nTheta = betaInit.size();
+  bool *rvdomcmc = new bool[nTheta];
   dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  // for (int ii=0; ii<numTheta; ii++) {
+  //   dVec_to_bArr(rvDoMcmc.col(ii), &rvdomcmc[ii*nTheta]);
+  // }
   Eigen::MatrixXd beta_chain = MR.postSampleAdapt(nsamples, nburn,
                                                   betaInit, mwgSd.data(),
                                                   rvdomcmc, paccept);
@@ -106,21 +99,10 @@ Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd 
   ThetaInit << BetaInit, GammaInit;
   // std::cout << "MeanRegExports: thetaInit = " << thetaInit.transpose() << std::endl;
   Eigen::MatrixXd Theta_chain = MR.postSample(nsamples, nburn,
-                                              ThetaInit, Sigs, paccept, BetaInit.rows());
+                                              ThetaInit, Sigs, paccept);
+                                              // BetaInit.rows(), GammaInit.rows());
   Rcpp::List retlst; 
   retlst["Theta_chain"] = Theta_chain;
   retlst["paccept"] = paccept;
   return(retlst); 
 }
-
-/*
-// [[Rcpp::export(".MeanReg_PostSample")]]
-Eigen::MatrixXd MeanReg_PostSample(Eigen::VectorXd y, Eigen::MatrixXd X, 
-                             int nObs, int nEqs, Eigen::VectorXd lambda0, 
-                             int nsamples, int nburn, Eigen::VectorXd betaInit,
-                             Eigen::VectorXd sigs, int maxIter = 100, double eps = 1e-7)  {
-    InnerEL<MeanRegModel> MR(y, X, nObs, nEqs, lambda0); // instantiate
-    Eigen::MatrixXd beta_chain = MR.PostSample(nsamples, nburn, betaInit, sigs, maxIter, eps);
-    return(beta_chain);
-}
-*/

@@ -1,6 +1,5 @@
 # test evalWeights is working properly
-## library(bayesEL) # always load the package (with library)
-## source("~/bayesEL/tests/testthat/el-utils.R")
+# library(bayesEL) # always load the package (with library)
 source("el-utils.R")
 
 # library(testthat) # not loaded automatically

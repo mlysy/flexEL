@@ -27,33 +27,19 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
 Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, 
                                  Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                                  Eigen::VectorXd alphaArr, 
-                                 Eigen::MatrixXd Beta, Eigen::MatrixXd Gamma) {
+                                 Eigen::MatrixXd Beta, 
+                                 Eigen::MatrixXd Gamma,
+                                 Eigen::VectorXd Nu) {
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
   InnerEL<QuantRegModel> QR;
   // QR.setData(y,X,Z,&alpha); 
   QR.setData(y,X,Z,alphaArr.data());
-  QR.evalG(Beta,Gamma);
+  QR.evalG(Beta,Gamma,Nu);
   Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
   return(G); 
 }
 
-// Old code:
-// // [[Rcpp::export(".QuantReg_logEL")]]
-// double QuantReg_logEL(Eigen::VectorXd y, Eigen::MatrixXd X, 
-//                  double alpha, Eigen::VectorXd beta, 
-//                  int maxIter = 100, double relTol = 1e-7) {
-//     // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
-//     InnerEL<QuantRegModel> QR;
-//     QR.setData(y,X,&alpha); 
-//     QR.evalG(beta); 
-//     // int nIter;
-//     // double maxErr;
-//     double logELquant = QR.logEL();
-//     // TODO: check convergence 
-//     return(logELquant);
-// }
-
-// now can only sample for sinle quantile
+// for location models
 // TODO: rvDoMcmc uses 0/1 double converted to bool for now
 // [[Rcpp::export(".QuantReg_post_adapt")]]
 Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X, 
@@ -65,9 +51,18 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   // QR.setData(y,X,&alpha); 
   QR.setData(y,X,alphaArr.data());
   QR.setTol(maxIter, relTol);
+  // Eigen::MatrixXd paccept;
   Eigen::VectorXd paccept;
-  bool *rvdomcmc = new bool[betaInit.size()];
+  int nTheta = betaInit.size();
+  bool *rvdomcmc = new bool[nTheta];
   dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  // int nTheta = BetaInit.rows();
+  // int numTheta = BetaInit.cols();
+  // bool *rvdomcmc = new bool[nTheta*numTheta];
+  // for (int ii=0; ii<numTheta; ii++) {
+  //   dVec_to_bArr(rvDoMcmc.col(ii), &rvdomcmc[ii*nTheta]);
+  //   // std::cout << "rvdomcmc[ii*nTheta] = " << rvdomcmc[ii*nTheta] << std::endl;
+  // }
   Eigen::MatrixXd beta_chain = QR.postSampleAdapt(nsamples, nburn,
                                                   betaInit, mwgSd.data(),
                                                   rvdomcmc, paccept);
@@ -78,7 +73,6 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   return(retlst);
 }
 
-// now can only sample for single quantile
 // [[Rcpp::export(".QuantReg_post")]]
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                          Eigen::VectorXd alphaArr, int nsamples, int nburn, 
@@ -91,7 +85,8 @@ Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
   QR.setTol(maxIter, relTol);
   Eigen::MatrixXd paccept; 
   Eigen::MatrixXd Beta_chain = QR.postSample(nsamples, nburn, 
-                                             BetaInit, Sigs, paccept, BetaInit.rows());
+                                             BetaInit, Sigs, paccept); 
+                                             // BetaInit.rows(), 0);
   // return(Beta_chain);
   Rcpp::List retlst; 
   retlst["Beta_chain"] = Beta_chain;
@@ -104,7 +99,7 @@ Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
 Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                            Eigen::VectorXd alphaArr, int nsamples, int nburn, 
                            Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, 
-                           Eigen::MatrixXd Sigs, 
+                           Eigen::VectorXd NuInit, Eigen::MatrixXd Sigs, 
                            int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   QR.setData(y,X,Z,alphaArr.data());
@@ -112,11 +107,14 @@ Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd
   QR.setTol(maxIter, relTol);
   Eigen::MatrixXd paccept;
   // concatenate (stack) them together
-  Eigen::MatrixXd ThetaInit(BetaInit.rows()+GammaInit.rows(), BetaInit.cols());
-  ThetaInit << BetaInit, GammaInit;
-  // std::cout << "MeanRegExports: thetaInit = " << thetaInit.transpose() << std::endl;
+  Eigen::MatrixXd ThetaInit(BetaInit.rows()+GammaInit.rows()+1, BetaInit.cols());
+  ThetaInit.topRows(BetaInit.rows()) = BetaInit;
+  ThetaInit.block(BetaInit.rows(),0,GammaInit.rows(),GammaInit.cols()) = GammaInit;
+  ThetaInit.bottomRows(1) = NuInit.transpose();
+  // std::cout << "MeanRegExports: ThetaInit = \n" << ThetaInit << std::endl;
   Eigen::MatrixXd Theta_chain = QR.postSample(nsamples, nburn,
-                                              ThetaInit, Sigs, paccept, BetaInit.rows());
+                                              ThetaInit, Sigs, paccept);
+                                              // BetaInit.rows(), GammaInit.rows());
   Rcpp::List retlst; 
   retlst["Theta_chain"] = Theta_chain;
   retlst["paccept"] = paccept;

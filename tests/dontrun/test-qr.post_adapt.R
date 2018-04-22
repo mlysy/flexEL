@@ -50,7 +50,7 @@ legend('topright',legend=c(expression('grid plot & mode'),
 # ---- 2-d problem (1 intercept, 1 slope) ----
 n <- 500
 p <- 2
-alpha <- 0.75
+alpha <- 0.9
 X0 <- matrix(rep(1,n),n,1)
 # X1 <- matrix(seq(-2,2,length.out = n),n,1)
 X1 <- matrix(rnorm(n),n,1)
@@ -108,8 +108,9 @@ hist(beta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]),main='')
 lines(beta1.seq, norm_pdf(logel.marg[,1], beta1.seq),
       cex=0.1, col = 'red', type='l')
+abline(v=beta0[1], col='red')
 abline(v=mean(beta_chain[1,]), col='blue')
-legend('topright',legend=c(expression('grid plot'),
+legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 # slope
@@ -117,6 +118,7 @@ hist(beta_chain[2,],breaks=50,freq=FALSE,
      xlab = expression(beta[1]),main='')
 lines(beta2.seq, norm_pdf(logel.marg[,2], beta2.seq),
       cex=0.1, col = 'red', type='l')
+abline(v=beta0[1], col='red')
 abline(v=mean(beta_chain[2,]), col='blue')
 legend('topright',legend=c(expression('grid plot & mode'),
                            expression('sample mean')),

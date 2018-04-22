@@ -33,7 +33,8 @@ public:
   void evalG(const Ref<const VectorXd>& beta); 
   // for location-scale linear regression models
   void evalG(const Ref<const VectorXd>& beta, 
-             const Ref<const VectorXd>& gamma); 
+             const Ref<const VectorXd>& gamma, 
+             const Ref<const VectorXd>& dummy);
   void setG(const Ref<const MatrixXd>& _G); 
   MatrixXd getG();
 };
@@ -61,6 +62,7 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
   X = _X;
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam = 0; 
   nEqs = nBet; 
   G = MatrixXd::Zero(nBet,nObs);
   tG = MatrixXd::Zero(nObs, nBet);
@@ -102,15 +104,11 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
 
 // form the G matrix for location-scale linear regression model 
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
-                                const Ref<const VectorXd>& gamma) {
+                                const Ref<const VectorXd>& gamma,
+                                const Ref<const VectorXd>& dummy) {
   eZg.array() = (-gamma.transpose()*Z).array().exp();
-  // std::cout << "eZg = " << eZg << std::endl;
-  // eZg2.array() = eZg.array()*eZg.array();
-  // std::cout << "eZg2 = " << eZg2 << std::endl;
   yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
-  // std::cout << "yXbeZg = " << yXbeZg << std::endl;
   yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
-  // std::cout << "yXbeZg2 = " << yXbeZg2 << std::endl;
   tG.block(0,0,nObs,nBet) = X.transpose();
   tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
   tG.block(0,nBet,nObs,nGam) = Z.transpose();

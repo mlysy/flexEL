@@ -2,7 +2,6 @@
 # library(bayesEL) # always load the package (with library)
 # library(optimCheck)
 source("el-utils.R")
-# source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically
 context("logEL")

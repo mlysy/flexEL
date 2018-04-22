@@ -4,7 +4,7 @@
 \alias{qrls.post}
 \title{Posterior sampler for quantile regression (location-scale model)}
 \usage{
-qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, Sigs,
+qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, NuInit, Sigs,
   max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
@@ -23,6 +23,8 @@ qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, Sigs,
 \item{BetaInit}{\code{nBet x numBeta} matrix of initial value for the chain.}
 
 \item{GammaInit}{\code{nGam x numGamma} matrix of initial value for the chain.}
+
+\item{NuInit}{Length-\code{numNu} vector of initial value for the chain.}
 
 \item{Sigs}{Length-\code{nEqs} vector of tuning parameters.}
 

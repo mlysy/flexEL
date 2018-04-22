@@ -22,10 +22,10 @@ logelmode
 
 nsamples <- 20000
 nburn <- 5000
-# betaInit <- c(lm(y ~ 1)$coefficients) # TODO: does not work ???
-betaInit <- round(c(lm(y ~ 1)$coefficients), digits = 6)
+betaInit <- c(lm(y ~ 1)$coefficients) # TODO: does not work ???
+# betaInit <- round(c(lm(y ~ 1)$coefficients), digits = 6)
 betaInit
-sigs <- rep(0.12,1)
+sigs <- rep(0.25,1)
 qrout <- mr.post(y, X, nsamples, nburn, betaInit, sigs)
 mu_chain <- qrout$Beta_chain
 mu_paccept <- qrout$paccept 

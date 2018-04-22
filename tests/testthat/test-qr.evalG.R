@@ -1,7 +1,6 @@
 #---- testing qr.eval.G (location model) ----
-## library(bayesEL) # always load the package (with library)
+# library(bayesEL) # always load the package (with library)
 source("el-utils.R")
-## source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically
 context("qr.evalG")

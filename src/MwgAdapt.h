@@ -96,7 +96,7 @@ inline void MwgAdapt::adapt(double *mwgSd, bool *accept) {
 
 inline void MwgAdapt::reset() {
   nIter = 0;
-  nAccept = new int[nRV]; // ADDED
+  // nAccept = new int[nRV]; // ADDED
   for(int ii=0; ii<nRV; ii++) {
     // nAccept = 0;
     nAccept[ii] = 0;
@@ -107,6 +107,7 @@ inline void MwgAdapt::reset() {
 // allocate memory and default initialization
 inline void MwgAdapt::initialize(int nrv) {
   nRV = nrv; // number of components
+  nAccept = new int[nRV]; // ADDED
   reset(); // initialize nIter and nAccept to 0
   // memory allocation
   adaptMax = new double[nRV];
@@ -133,7 +134,7 @@ inline MwgAdapt::~MwgAdapt() {
 
 // inline void MwgAdapt::MwgAdapt(int nrv) {
 inline MwgAdapt::MwgAdapt(int nrv) {
-  // initialize(nrv);
+  initialize(nrv);
 }
 
 // inline void MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate) {

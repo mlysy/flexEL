@@ -95,25 +95,6 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda) {
   return omegasnew;
 }
 
-/* Old code
-Eigen::VectorXd omegaHat(Eigen::MatrixXd G, 
-                         int maxIter, double relTol, bool verbose) {
-  // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
-  int nObs = G.cols();
-  int nEqs = G.rows();
-  VectorXd y = VectorXd::Zero(nObs);
-  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-  // Here init with an MeanRegModel, but it is the same using QuantRegModel
-  // InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-  InnerEL<MeanRegModel> IL;
-  IL.setData(y,X,NULL);
-  IL.setG(G); // assign the given G
-  IL.evalOmegas(maxIter, relTol); // calculate omegas
-  VectorXd omegasnew = IL.getOmegas(); // get omegas
-  return omegasnew;
-}
-*/
-
 // This version finds the maximized loglikelihood, 
 //      or -Inf if no feasible omegas satisfies constraints.
 // [[Rcpp::export(".logEL")]]
@@ -124,37 +105,3 @@ double logEL(Eigen::VectorXd omegas) {
   return logel; 
 }
 
-/*
-double logEL(Eigen::MatrixXd G,
-                 int maxIter, double relTol, bool verbose) {
-    // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
-    int nObs = G.cols();
-    int nEqs = G.rows();
-    VectorXd y = VectorXd::Zero(nObs);
-    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-    // Here init with an MeanRegModel, but it is the same using QuantRegModel
-    // InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-    InnerEL<MeanRegModel> IL;
-    IL.setData(y,X,NULL);
-    IL.setG(G); // assign the given G
-    double logel = IL.logEL(maxIter, relTol);
-    return logel; 
-}
-*/ 
-
-// // This version gives the loglikelihood, 
-// //      or -Inf if omegas does not satisfy constraints.
-// // [[Rcpp::export(".logEL")]]
-// double logEL(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
-//              int maxIter, double relTol, bool verbose) {
-//     int nObs = G.cols();
-//     int nEqs = G.rows();
-//     VectorXd y = VectorXd::Zero(nObs);
-//     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-//     InnerEL<MeanRegModel> IL;
-//     IL.setData(y,X,NULL);
-//     IL.setG(G); // set the given G
-//     IL.setOmegas(omegas); // set the given omegas
-//     double logel = IL.logEL();
-//     return logel; 
-// }
