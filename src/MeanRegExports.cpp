@@ -20,13 +20,17 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
     return(G); 
 }
 
+// Note: sig2 should actually be scaler, but have to put in vector to be 
+// consistent with the implementation for quantreg.
 // [[Rcpp::export(".MeanRegLS_evalG")]]
 Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
                                 Eigen::VectorXd beta, Eigen::VectorXd gamma) {
+                                // Eigen::VectorXd sig2) {
   // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
   InnerEL<MeanRegModel> MR;
   MR.setData(y,X,Z,NULL); 
+  // MR.evalG(beta,gamma,sig2);
   MR.evalG(beta,gamma,Eigen::VectorXd::Zero(0));
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
   return(G); 

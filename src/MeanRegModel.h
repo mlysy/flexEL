@@ -103,6 +103,7 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
 }
 
 // form the G matrix for location-scale linear regression model 
+/*
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
                                 const Ref<const VectorXd>& gamma,
                                 const Ref<const VectorXd>& dummy) {
@@ -114,6 +115,21 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
   tG.block(0,nBet,nObs,nGam) = Z.transpose();
   tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
   tG.rightCols(1).array() = yXbeZg2.transpose().array()-1;
+  G = tG.transpose();
+}
+*/
+inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
+                                const Ref<const VectorXd>& gamma,
+                                const Ref<const VectorXd>& dummy) {
+  eZg.array() = (-gamma.transpose()*Z).array().exp();
+  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
+  yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
+  tG.block(0,0,nObs,nBet) = X.transpose();
+  tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
+  tG.block(0,nBet,nObs,nGam) = Z.transpose();
+  tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  tG.rightCols(1).array() = yXbeZg2.transpose().array()-1;
+  // tG.rightCols(1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
   G = tG.transpose();
 }
 

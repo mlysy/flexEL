@@ -1,24 +1,43 @@
 require(bayesEL)
-require(optimCheck)
+# require(optimCheck)
 source("hlm-functions.R")
 source("../testthat/el-utils.R")
+
 #---- mean reg: X and Z both dim 1----
 # dimensions
 n <- 100 # number of observations
 p <- 1
 q <- 1
+
+# covariates
 # X <- matrix(rep(1,n),n,p)
 X <- matrix(rnorm(n),n,p)
 # Z <- matrix(rep(1,n),n,q) # Z should not contain an intercept
 Z <- matrix(rnorm(n),n,q)
 
+# parameters
 beta0 <- rnorm(p)
 gamma0 <- rnorm(q)
-theta0 <- c(beta0,gamma0)
-y <- c(X %*% beta0 + exp(Z %*% gamma0)*rnorm(n))
-# plot(X,y,cex=0.3)
 
-numpoints <- 100
+# normal(0,1) error
+eps <- rnorm(n)
+
+# t error with mean 0 var 1
+df <- 5
+v <- df/(df-2)
+eps <- rt(n, df=df)/sqrt(v)
+
+# chi-sqr with mean 0 var 1
+df <- 3
+v <- 2*df
+m <- df
+eps <- (rchisq(n, df=df)-m)/sqrt(v)
+
+# response
+y <- c(X %*% beta0 + exp(Z %*% gamma0)*eps)
+plot(X,y,cex=0.3)
+
+numpoints <- 50
 beta.seq <- seq(-.5+beta0, .5+beta0, length.out = numpoints)
 gamma.seq <- seq(-.5+gamma0, .5+gamma0, length.out = numpoints)
 
@@ -38,7 +57,7 @@ nburn <- 3000
 theta.hat <- hlm.fit(y = y, X = X, W = Z) # solve by hlm:
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma
-sigs <- c(0.15,0.2)
+sigs <- c(0.25,0.2)
 
 system.time(
   postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sigs)
@@ -65,7 +84,7 @@ legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
-#---- mean reg: X and Z both dim 1----
+#---- mean reg: X and Z both dim 2 ----
 # dimensions
 n <- 100 # number of observations
 p <- 2
