@@ -4,7 +4,7 @@
 \alias{mrls.evalG}
 \title{Evaluate the G matrix for mean regression (location-scale model)}
 \usage{
-mrls.evalG(y, X, Z, beta, gamma)
+mrls.evalG(y, X, Z, beta, gamma, sig2)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}
@@ -16,6 +16,8 @@ mrls.evalG(y, X, Z, beta, gamma)
 \item{beta}{Length-\code{nBet} vector of coefficients in location model.}
 
 \item{gamma}{Length-\code{nGam} vector of coefficients in location model.}
+
+\item{sig2}{A scalar where sqrt(sig2) is the scale parameter for the error term.}
 }
 \value{
 G matrix for location-scale mean regression model.

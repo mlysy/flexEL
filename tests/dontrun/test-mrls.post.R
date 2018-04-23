@@ -10,14 +10,15 @@ p <- 1
 q <- 1
 
 # covariates
-# X <- matrix(rep(1,n),n,p)
-X <- matrix(rnorm(n),n,p)
+X <- matrix(rep(1,n),n,p)
+# X <- matrix(rnorm(n),n,p)
 # Z <- matrix(rep(1,n),n,q) # Z should not contain an intercept
 Z <- matrix(rnorm(n),n,q)
 
 # parameters
 beta0 <- rnorm(p)
 gamma0 <- rnorm(q)
+sig20 <- abs(rnorm(1)) # NEW: scale param
 
 # normal(0,1) error
 eps <- rnorm(n)
@@ -34,52 +35,86 @@ m <- df
 eps <- (rchisq(n, df=df)-m)/sqrt(v)
 
 # response
-y <- c(X %*% beta0 + exp(Z %*% gamma0)*eps)
-plot(X,y,cex=0.3)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
+plot(y,cex=0.3)
+# plot(X,y,cex=0.3)
 
+# # calculate marginal posterior
+# numpoints <- 50
+# beta.seq <- seq(-.5+beta0, .5+beta0, length.out = numpoints)
+# gamma.seq <- seq(-.5+gamma0, .5+gamma0, length.out = numpoints)
+# 
+# Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq))
+# logel.mat <- apply(Theta.seq, 1, function(bb) {
+#   G <- mrls.evalG(y,X,Z,bb[1],bb[2])
+#   logEL(G)
+# })
+# logel.mat <- matrix(logel.mat, numpoints, numpoints)
+# el.mat <- exp(logel.mat - max(logel.mat))
+# logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
+
+# calculate the marginal posterior distribution
 numpoints <- 50
-beta.seq <- seq(-.5+beta0, .5+beta0, length.out = numpoints)
-gamma.seq <- seq(-.5+gamma0, .5+gamma0, length.out = numpoints)
+beta.seq <- seq(-1+beta0, 1+beta0, length.out = numpoints)
+gamma.seq <- seq(-1+gamma0, 1+gamma0, length.out = numpoints)
+sig2.seq <- seq(-1+sig20, 1+sig20, length.out = numpoints)
 
-# calculate marginal posterior
-Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq))
+Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq, sig2.seq))
 logel.mat <- apply(Theta.seq, 1, function(bb) {
-  G <- mrls.evalG(y,X,Z,bb[1],bb[2])
+  G <- mrls.evalG(y,X,Z,bb[1],bb[2],bb[3])
   logEL(G)
 })
-logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat <- array(logel.mat, c(numpoints, numpoints,numpoints))
 el.mat <- exp(logel.mat - max(logel.mat))
-logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
+logel.marg1 <- log(apply(el.mat, MARGIN=1, sum))
+logel.marg2 <- log(apply(el.mat, MARGIN=2, sum))
+logel.marg3 <- log(apply(el.mat, MARGIN=3, sum))
 
 # mcmc
 nsamples <- 20000
 nburn <- 3000
-theta.hat <- hlm.fit(y = y, X = X, W = Z) # solve by hlm:
+theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm:
 betaInit <- theta.hat$beta
-gammaInit <- theta.hat$gamma
-sigs <- c(0.25,0.2)
+gammaInit <- theta.hat$gamma[2]
+sig2Init <- exp(2*theta.hat$gamma[1])
+mwgSd <- c(0.15,0.25,0.1)
 
 system.time(
-  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sigs)
+  # postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,mwgSd)
+  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
 )
 theta_chain <- postout$Theta_chain
 theta_accept <- postout$paccept
 theta_accept
 hist(theta_chain[1,],breaks=50,freq=FALSE,
-     xlab = expression(beta[0]), main='')
-lines(beta.seq, norm_pdf(logel.marg[,1], beta.seq),
+     xlab = expression(beta), main='')
+lines(beta.seq, norm_pdf(logel.marg1, beta.seq),
       cex=0.1, col = 'red', type='l')
+# lines(beta.seq, norm_pdf(logel.marg[,1], beta.seq),
+#       cex=0.1, col = 'red', type='l')
 abline(v=beta0,col='red')
 abline(v=mean(theta_chain[1,]),col='blue')
 legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 hist(theta_chain[2,],breaks=50,freq=FALSE,
-     xlab = expression(beta[1]), main='')
-lines(gamma.seq, norm_pdf(logel.marg[,2], beta.seq),
+     xlab = expression(gamma), main='')
+lines(gamma.seq, norm_pdf(logel.marg2, gamma.seq),
       cex=0.1, col = 'red', type='l')
+# lines(gamma.seq, norm_pdf(logel.marg[,2], beta.seq),
+#       cex=0.1, col = 'red', type='l')
 abline(v=gamma0,col='red')
 abline(v=mean(theta_chain[2,]),col='blue')
+legend('topright',legend=c(expression('grid plot & true param'),
+                           expression('sample mean')),
+       lty = c(1,1), col = c('red','blue'), cex = 0.6)
+
+hist(theta_chain[3,],breaks=50,freq=FALSE,
+     xlab = expression(sigma), main='')
+lines(sig2.seq, norm_pdf(logel.marg3, sig2.seq),
+      cex=0.1, col = 'red', type='l')
+abline(v=sig20,col='red')
+abline(v=mean(theta_chain[3,]),col='blue')
 legend('topright',legend=c(expression('grid plot & true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
@@ -111,10 +146,10 @@ nburn <- 3000
 theta.hat <- hlm.fit(y = y, X = X, W = Z)
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma
-sigs <- c(0.15,0.2,0.23,0.23)
+mwgSd <- c(0.15,0.2,0.23,0.23)
 
 system.time(
-  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sigs)
+  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,mwgSd)
 )
 theta_chain <- postout$Theta_chain
 theta_accept <- postout$paccept

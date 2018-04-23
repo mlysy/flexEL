@@ -5,20 +5,21 @@
 #' @param Z \code{nObs x nGam} matrix of scale function covariates.
 #' @param nsamples Number of samples to obtain.
 #' @param nburn number of samples to discard before saving the chain.
-#' @param BetaInit \code{nBet x numBeta} matrix of initial value for the chain. 
-#' @param GammaInit \code{nGam x numGamma} matrix of initial value for the chain. 
-#' @param Sigs Length-\code{nEqs} vector of tuning parameters. 
+#' @param BetaInit \code{nBet x numTheta} matrix of initial value for the parameters in the linear location function. 
+#' @param GammaInit \code{nGam x numTheta} matrix of initial value for the parameters in the exponential scale function. 
+#' @param Sig2Init \code{numTheta} vector of initial value for the squared scale parameter.
+#' @param mwgSd Length-\code{nEqs} vector of tuning parameters. 
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export mrls.post
-mrls.post <- function(y, X, Z, nsamples, nburn, BetaInit, GammaInit, 
-                      Sigs, max_iter = 100, rel_tol = 1e-7) {
+mrls.post <- function(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sig2Init, 
+                      mwgSd, max_iter = 100, rel_tol = 1e-7) {
   # input conversion
   if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   if (is.vector(GammaInit)) GammaInit <- matrix(GammaInit,length(GammaInit),1)
-  if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
+  if (is.vector(mwgSd)) mwgSd <- matrix(mwgSd,length(mwgSd),1)
   # input checks
   if(nrow(X) != length(y)) {
     stop("X and y have inconsistent dimensions.")
@@ -33,6 +34,6 @@ mrls.post <- function(y, X, Z, nsamples, nburn, BetaInit, GammaInit,
     stop("Z and gamma have inconsistent dimensions.")
   }
   .MeanRegLS_post(y, t(X), t(Z), nsamples, nburn, 
-                  BetaInit, GammaInit, Sigs, 
+                  BetaInit, GammaInit, Sig2Init, mwgSd, 
                   maxIter = max_iter, relTol = rel_tol)
 }

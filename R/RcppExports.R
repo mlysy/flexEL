@@ -33,20 +33,20 @@
     .Call(`_bayesEL_MeanReg_evalG`, y, X, beta)
 }
 
-.MeanRegLS_evalG <- function(y, X, Z, beta, gamma) {
-    .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma)
+.MeanRegLS_evalG <- function(y, X, Z, beta, gamma, sig2) {
+    .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
 }
 
-.MeanReg_post <- function(y, X, nsamples, nburn, BetaInit, Sigs, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanReg_post`, y, X, nsamples, nburn, BetaInit, Sigs, maxIter, relTol)
+.MeanReg_post <- function(y, X, nsamples, nburn, BetaInit, mwgSd, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_MeanReg_post`, y, X, nsamples, nburn, BetaInit, mwgSd, maxIter, relTol)
 }
 
 .MeanReg_post_adapt <- function(y, X, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
     .Call(`_bayesEL_MeanReg_post_adapt`, y, X, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
 }
 
-.MeanRegLS_post <- function(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sigs, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanRegLS_post`, y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sigs, maxIter, relTol)
+.MeanRegLS_post <- function(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sig2Init, mwgSd, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_MeanRegLS_post`, y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sig2Init, mwgSd, maxIter, relTol)
 }
 
 .QuantReg_evalG <- function(y, X, alphaArr, Beta) {

@@ -356,12 +356,12 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   if (nTheta == nBet) { // location regs
     ELModel::evalG(ThetaOld);
   }
-  else if (nTheta == nBet + nGam){ // LS mean reg
-    ELModel::evalG(ThetaOld.topRows(nBet),
-                   ThetaOld.bottomRows(nGam), 
-                   VectorXd::Zero(0));
-    // std::cout << "G = \n" << G << std::endl;
-  }
+  // else if (nTheta == nBet + nGam){ // LS mean reg
+  //   ELModel::evalG(ThetaOld.topRows(nBet),
+  //                  ThetaOld.bottomRows(nGam), 
+  //                  VectorXd::Zero(0));
+  //   // std::cout << "G = \n" << G << std::endl;
+  // }
   else { // LS quant reg
     ELModel::evalG(ThetaOld.topRows(nBet), 
                    ThetaOld.block(nBet,0,nGam,numTheta), 
