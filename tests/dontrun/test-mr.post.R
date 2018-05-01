@@ -82,8 +82,8 @@ logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
 nsamples <- 20000
 nburn <- 5000
-betaInit <- round(c(lm(y ~ X1)$coefficients),6) # TODO: ????
-# betaInit <- c(lm(y ~ X1)$coefficients)
+# betaInit <- round(c(lm(y ~ X1)$coefficients),6) # TODO: ????
+betaInit <- c(lm(y ~ X1)$coefficients)
 betaInit
 sigs <- rep(0.12,2)
 system.time(

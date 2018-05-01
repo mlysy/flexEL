@@ -215,8 +215,11 @@ inline void InnerEL<ELModel>::blockOuter(void) {
 template<typename ELModel>
 inline double InnerEL<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
                                  const Ref<const VectorXd>& lambdaOld) {
-    relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
-    return(relErr.maxCoeff());
+  // TODO: added for numerical stability, what is a good tolerance to use ?
+  if ((lambdaNew - lambdaOld).array().abs().maxCoeff() < 1e-10) return(0);
+  
+  relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
+  return(relErr.maxCoeff());
 }
 
 template<typename ELModel>

@@ -1,5 +1,4 @@
 require(bayesEL)
-# require(optimCheck)
 source("hlm-functions.R")
 source("../testthat/el-utils.R")
 
@@ -34,6 +33,13 @@ v <- 2*df
 m <- df
 eps <- (rchisq(n, df=df)-m)/sqrt(v)
 
+# log-normal with mean 0 var 1
+mn <- 0
+sn <- 1
+m <- exp(mn+sn^2/2)
+v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
+eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
+
 # response
 y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 plot(y,cex=0.3)
@@ -54,6 +60,7 @@ plot(y,cex=0.3)
 # logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
 # calculate the marginal posterior distribution
+# Note: this might take some time to calculate
 numpoints <- 50
 beta.seq <- seq(-1+beta0, 1+beta0, length.out = numpoints)
 gamma.seq <- seq(-1+gamma0, 1+gamma0, length.out = numpoints)
@@ -77,7 +84,7 @@ theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm:
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2]
 sig2Init <- exp(2*theta.hat$gamma[1])
-mwgSd <- c(0.15,0.25,0.1)
+mwgSd <- c(0.1,0.25,0.15)
 
 system.time(
   # postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,mwgSd)
@@ -133,7 +140,7 @@ beta0 <- rnorm(p)
 gamma0 <- rnorm(q)
 y <- c(X %*% beta0 + exp(Z %*% gamma0)*rnorm(n))
 
-numpoints <- 100
+# numpoints <- 100
 # beta1.seq <- seq(-.5+beta0[1], .5+beta0[1], length.out = numpoints)
 # beta2.seq <- seq(-.5+beta0[2], .5+beta0[2], length.out = numpoints)
 # gamma1.seq <- seq(-.5+gamma0[1], .5+gamma0[1], length.out = numpoints)
@@ -143,13 +150,14 @@ numpoints <- 100
 nsamples <- 20000
 nburn <- 3000
 # solve by hlm
-theta.hat <- hlm.fit(y = y, X = X, W = Z)
+theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z))
 betaInit <- theta.hat$beta
-gammaInit <- theta.hat$gamma
-mwgSd <- c(0.15,0.2,0.23,0.23)
+gammaInit <- theta.hat$gamma[2:(q+1)]
+sig2Init <- exp(2*theta.hat$gamma[1])
+mwgSd <- c(0.2,0.2,0.23,0.23,0.35)
 
 system.time(
-  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,mwgSd)
+  postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
 )
 theta_chain <- postout$Theta_chain
 theta_accept <- postout$paccept

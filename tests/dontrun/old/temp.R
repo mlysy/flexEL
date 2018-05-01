@@ -1,11 +1,11 @@
 library(bayesEL)
 library(testthat)
-source("../testthat/el-utils.R")
+source("../../testthat/el-utils.R")
 
 n <- 10
 mu0 <- 1
-# X <- matrix(rep(1,n), n, 1) # each row of X is one observation
-X <- matrix(rnorm(n), n, 1)
+X <- matrix(rep(1,n), n, 1) # each row of X is one observation
+# X <- matrix(rnorm(n), n, 1)
 eps <- rnorm(n) # N(0,1) error term
 y <- c(X * mu0) + eps
 betaInit <- c(lm(y ~ 1)$coefficients) # TODO: does not work ???

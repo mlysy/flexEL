@@ -36,8 +36,11 @@ norm_pdf <- function(ly, x) {
 }
 
 MaxRelErr <- function(lambdaNew, lambdaOld) {
-    relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
-    return(max(relErr))
+  # TODO: added for numerical stability, what is a good tolerance ?
+  if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
+  
+  relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
+  return(max(relErr))
 }
 
 #---- non-censoring EL ----
@@ -503,7 +506,7 @@ qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
 
 # ---- Location-scale model ----
 
-mrls.evalG_R <- function(y, X, Z, beta, gamma) {
+mrls.evalG_R <- function(y, X, Z, beta, gamma, sig2) {
   nObs <- nrow(X)
   nBeta <- length(beta)
   nGamma <- length(gamma)
@@ -513,7 +516,8 @@ mrls.evalG_R <- function(y, X, Z, beta, gamma) {
   yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
   G[,1:nBeta] <- yXbeZg * eZg * X
   G[,nBeta+1:nGamma] <- yXbeZg2 * Z
-  G[,nBeta+nGamma+1] <- yXbeZg2 - 1
+  # G[,nBeta+nGamma+1] <- yXbeZg2 - 1
+  G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
   return(G)
 }
 
