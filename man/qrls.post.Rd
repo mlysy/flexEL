@@ -5,7 +5,7 @@
 \title{Posterior sampler for quantile regression (location-scale model)}
 \usage{
 qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, NuInit, Sigs,
-  max_iter = 100, rel_tol = 1e-07)
+  RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
@@ -27,6 +27,8 @@ qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, NuInit, Sigs,
 \item{NuInit}{Length-\code{numNu} vector of initial value for the chain.}
 
 \item{Sigs}{Length-\code{nEqs} vector of tuning parameters.}
+
+\item{RvDoMcmc}{\code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 

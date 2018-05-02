@@ -10,18 +10,25 @@
 #' @param GammaInit \code{nGam x numGamma} matrix of initial value for the chain. 
 #' @param NuInit Length-\code{numNu} vector of initial value for the chain.
 #' @param Sigs Length-\code{nEqs} vector of tuning parameters. 
+#' @param RvDoMcmc \code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export qrls.post
 qrls.post <- function(y, X, Z, alphas, nsamples, nburn,
-                      BetaInit, GammaInit, NuInit, 
-                      Sigs, max_iter = 100, rel_tol = 1e-7) {
+                      BetaInit, GammaInit, NuInit, Sigs, RvDoMcmc, 
+                      max_iter = 100, rel_tol = 1e-7) {
   # input conversion
   if (length(alphas) == 1 && is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   if (length(alphas) == 1 && is.vector(GammaInit)) GammaInit <- matrix(GammaInit,length(GammaInit),1)
   if (length(alphas) == 1 && is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
+  # if RvDoMcmc is not specified, then all get updated
+  if (missing(RvDoMcmc)) {
+    RvDoMcmc <- matrix(1, nrow = nrow(BetaInit)+nrow(GammaInit)+1,
+                       ncol = ncol(BetaInit))
+  }
+  if (is.vector(RvDoMcmc)) RvDoMcmc <- matrix(RvDoMcmc,length(RvDoMcmc),1)
   # add a first entry of alpha as the number of quantile levels
   alpha <- c(length(alphas), alphas) 
   # input checks
@@ -48,6 +55,6 @@ qrls.post <- function(y, X, Z, alphas, nsamples, nburn,
     stop("BetaInit and Sigs have inconsistent dimensions.")
   }
   .QuantRegLS_post(y, t(X), t(Z), alpha, nsamples, nburn, 
-                   BetaInit, GammaInit, NuInit, Sigs, 
+                   BetaInit, GammaInit, NuInit, Sigs, RvDoMcmc, 
                    maxIter = max_iter, relTol = rel_tol)
 }

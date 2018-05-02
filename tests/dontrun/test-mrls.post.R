@@ -138,30 +138,28 @@ Z <- matrix(rnorm(q*n),n,q)
 
 beta0 <- rnorm(p)
 gamma0 <- rnorm(q)
-y <- c(X %*% beta0 + exp(Z %*% gamma0)*rnorm(n))
+sig20 <- abs(rnorm(1))
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*rnorm(n))
 
-# numpoints <- 100
-# beta1.seq <- seq(-.5+beta0[1], .5+beta0[1], length.out = numpoints)
-# beta2.seq <- seq(-.5+beta0[2], .5+beta0[2], length.out = numpoints)
-# gamma1.seq <- seq(-.5+gamma0[1], .5+gamma0[1], length.out = numpoints)
-# gamma2.seq <- seq(-.5+gamma0[2], .5+gamma0[2], length.out = numpoints)
-
+# solve by hlm
+theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z))
 # mcmc
 nsamples <- 20000
 nburn <- 3000
-# solve by hlm
-theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z))
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2:(q+1)]
 sig2Init <- exp(2*theta.hat$gamma[1])
 mwgSd <- c(0.2,0.2,0.23,0.23,0.35)
-
+RvDoMcmc <- matrix(c(1,1,1,1,1),nrow=5,ncol=1)
 system.time(
   postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
 )
 theta_chain <- postout$Theta_chain
 theta_accept <- postout$paccept
 theta_accept
+# mixing of the chains
+plot(theta_chain[5,],type = 'l')
+# histograms
 hist(theta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]), main='')
 abline(v=beta0[1],col='red')
@@ -178,3 +176,8 @@ hist(theta_chain[4,],breaks=50,freq=FALSE,
      xlab = expression(gamma[1]), main='')
 abline(v=gamma0[2],col='red')
 abline(v=mean(theta_chain[4,]),col='blue')
+hist(theta_chain[5,],breaks=50,freq=FALSE,
+     xlab = expression(sigma^2), main='')
+abline(v=sig20,col='red')
+abline(v=mean(theta_chain[5,]),col='blue')
+

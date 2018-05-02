@@ -77,6 +77,7 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                          Eigen::VectorXd alphaArr, int nsamples, int nburn, 
                          Eigen::MatrixXd BetaInit, Eigen::MatrixXd Sigs, 
+                         Eigen::MatrixXd RvDoMcmc, 
                          int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   // QR.setData(y,X,&alpha); 
@@ -85,7 +86,8 @@ Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
   QR.setTol(maxIter, relTol);
   Eigen::MatrixXd paccept; 
   Eigen::MatrixXd Beta_chain = QR.postSample(nsamples, nburn, 
-                                             BetaInit, Sigs, paccept); 
+                                             BetaInit, Sigs, 
+                                             RvDoMcmc, paccept); 
                                              // BetaInit.rows(), 0);
   // return(Beta_chain);
   Rcpp::List retlst; 
@@ -100,6 +102,7 @@ Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd
                            Eigen::VectorXd alphaArr, int nsamples, int nburn, 
                            Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, 
                            Eigen::VectorXd NuInit, Eigen::MatrixXd Sigs, 
+                           Eigen::MatrixXd RvDoMcmc, 
                            int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   QR.setData(y,X,Z,alphaArr.data());
@@ -113,7 +116,8 @@ Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd
   ThetaInit.bottomRows(1) = NuInit.transpose();
   // std::cout << "MeanRegExports: ThetaInit = \n" << ThetaInit << std::endl;
   Eigen::MatrixXd Theta_chain = QR.postSample(nsamples, nburn,
-                                              ThetaInit, Sigs, paccept);
+                                              ThetaInit, Sigs, 
+                                              RvDoMcmc, paccept);
                                               // BetaInit.rows(), GammaInit.rows());
   Rcpp::List retlst; 
   retlst["Theta_chain"] = Theta_chain;

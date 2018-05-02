@@ -5,7 +5,7 @@
 \title{Posterior sampler for mean regression (location-scale model)}
 \usage{
 mrls.post(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sig2Init, mwgSd,
-  max_iter = 100, rel_tol = 1e-07)
+  RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
@@ -25,6 +25,8 @@ mrls.post(y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sig2Init, mwgSd,
 \item{Sig2Init}{\code{numTheta} vector of initial value for the squared scale parameter.}
 
 \item{mwgSd}{Length-\code{nEqs} vector of tuning parameters.}
+
+\item{RvDoMcmc}{\code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 

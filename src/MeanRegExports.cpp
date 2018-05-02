@@ -40,6 +40,7 @@ Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y,
 Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                         int nsamples, int nburn, 
                         Eigen::MatrixXd BetaInit, Eigen::MatrixXd mwgSd, 
+                        Eigen::MatrixXd RvDoMcmc, 
                         int maxIter = 100, double relTol = 1e-7) {
   InnerEL<MeanRegModel> MR;
   MR.setData(y,X,NULL); 
@@ -47,7 +48,8 @@ Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X,
   MR.setTol(maxIter, relTol);
   Eigen::MatrixXd paccept; 
   Eigen::MatrixXd Beta_chain = MR.postSample(nsamples, nburn, 
-                                             BetaInit, mwgSd, paccept);
+                                             BetaInit, mwgSd, 
+                                             RvDoMcmc, paccept);
   // return(Beta_chain);
   Rcpp::List retlst; 
   retlst["Beta_chain"] = Beta_chain;
@@ -92,6 +94,7 @@ Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd 
                         int nsamples, int nburn, 
                         Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, 
                         Eigen::VectorXd Sig2Init, Eigen::MatrixXd mwgSd, 
+                        Eigen::MatrixXd RvDoMcmc, 
                         int maxIter = 100, double relTol = 1e-7) {
   InnerEL<MeanRegModel> MR;
   MR.setData(y,X,Z,NULL);
@@ -111,7 +114,8 @@ Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd 
   
   // std::cout << "MeanRegExports: thetaInit = " << thetaInit.transpose() << std::endl;
   Eigen::MatrixXd Theta_chain = MR.postSample(nsamples, nburn,
-                                              ThetaInit, mwgSd, paccept);
+                                              ThetaInit, mwgSd,
+                                              RvDoMcmc, paccept);
                                               // BetaInit.rows(), GammaInit.rows());
   Rcpp::List retlst; 
   retlst["Theta_chain"] = Theta_chain;

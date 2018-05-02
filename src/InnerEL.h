@@ -79,7 +79,8 @@ public:
     // MatrixXd postSampleAdapt(int nsamples, int nburn, MatrixXd ThetaInit,
     //                          double *mwgSd, bool *rvDoMcmc, MatrixXd &paccept);
     MatrixXd postSample(int nsamples, int nburn, MatrixXd ThetaInit,
-                        const Ref<const MatrixXd>& Sigs, MatrixXd &paccept);
+                        const Ref<const MatrixXd>& Sigs, 
+                        MatrixXd &RvDoMcmc, MatrixXd &paccept);
     // MatrixXd postSample(int nsamples, int nburn, VectorXd thetaInit,
     //                     const Ref<const VectorXd>& sigs, 
     //                     VectorXd &paccept, int betalen);
@@ -349,7 +350,7 @@ inline double InnerEL<ELModel>::logEL() {
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
                 MatrixXd ThetaInit, const Ref<const MatrixXd>& Sigs,
-                MatrixXd &paccept) {
+                MatrixXd &RvDoMcmc, MatrixXd &paccept) {
   int nTheta = ThetaInit.rows(); // dimension of theta
   int numTheta = ThetaInit.cols(); // numer of thetas
   MatrixXd Theta_chain(nTheta*numTheta,nsamples);
@@ -402,59 +403,61 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
     for (int kk=0; kk<numTheta; kk++) {  
       if (go_next == true) break;
       for (int jj=0; jj<nTheta; jj++) {
-        ThetaProp = ThetaOld;
-        ThetaProp(jj,kk) += Sigs(jj,kk)*R::norm_rand();
-        // ThetaProp(jj,kk) += Sigs(jj,kk)*1.5; // DEBUG
-        // std::cout << "ThetaProp = \n" << ThetaProp.transpose() << std::endl;
-        // check if proposed theta satisfies the constraint
-        satisfy = false;
-        // ELModel::evalG(thetaProp); // NEW: change G with thetaProp
-        if (nTheta == nBet) { // location models
-          ELModel::evalG(ThetaProp);
-          // std::cout << "G = \n" << G << std::endl;
-        }
-        else if (nTheta == nBet + nGam){
-          ELModel::evalG(ThetaProp.topRows(nBet), 
-                         ThetaProp.bottomRows(nTheta-nBet), 
-                         VectorXd::Zero(0));
-          // std::cout << "G = \n" << G << std::endl;
-        }
-        else {
-          // std::cout << "calling LS quant evalG" << std::endl;
-          ELModel::evalG(ThetaProp.topRows(nBet), 
-                         ThetaProp.block(nBet,0,nGam,numTheta), 
-                         ThetaProp.bottomRows(1));
-        }
-        // lambdaNR(nIter, maxErr, maxIter, relTol);
-        // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
-        // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
-        lambdaNR(nIter, maxErr);
-        // std::cout << "nIter = " << nIter << std::endl;
-        // std::cout << "maxErr = " << maxErr << std::endl;
-        // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
-        if (nIter < maxIter) satisfy = true;
-        // if does not satisfy, keep the old theta
-        if (satisfy == false) {
-          // std::cout << "go out 2 loops" << std::endl;
-          go_next = true; // break out two loops
-          break;
-        }
-        // if does satisfy, flip a coin
-        u = R::unif_rand();
-        // use the lambda calculate just now to get the logEL for Prop
-        // to avoid an extra call of lambdaNR
-        VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
-          log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
-        logELProp = logomegahat.sum();
-        ratio = exp(logELProp-logELOld);
-        // std::cout << "logELProp = " << logELProp << std::endl; 
-        // std::cout << "ratio = " << ratio << std::endl;
-        a = std::min(1.0,ratio);
-        if (u < a) { // accepted
-          paccept(jj,kk) += 1; 
-          ThetaNew = ThetaProp;
-          ThetaOld = ThetaNew;
-          logELOld = logELProp; // NEW: store the new one
+        if (RvDoMcmc(jj,kk)) {
+          ThetaProp = ThetaOld;
+          ThetaProp(jj,kk) += Sigs(jj,kk)*R::norm_rand();
+          // ThetaProp(jj,kk) += Sigs(jj,kk)*1.5; // DEBUG
+          // std::cout << "ThetaProp = \n" << ThetaProp.transpose() << std::endl;
+          // check if proposed theta satisfies the constraint
+          satisfy = false;
+          // ELModel::evalG(thetaProp); // NEW: change G with thetaProp
+          if (nTheta == nBet) { // location models
+            ELModel::evalG(ThetaProp);
+            // std::cout << "G = \n" << G << std::endl;
+          }
+          else if (nTheta == nBet + nGam){
+            ELModel::evalG(ThetaProp.topRows(nBet), 
+                           ThetaProp.bottomRows(nTheta-nBet), 
+                           VectorXd::Zero(0));
+            // std::cout << "G = \n" << G << std::endl;
+          }
+          else {
+            // std::cout << "calling LS quant evalG" << std::endl;
+            ELModel::evalG(ThetaProp.topRows(nBet), 
+                           ThetaProp.block(nBet,0,nGam,numTheta), 
+                           ThetaProp.bottomRows(1));
+          }
+          // lambdaNR(nIter, maxErr, maxIter, relTol);
+          // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
+          // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
+          lambdaNR(nIter, maxErr);
+          // std::cout << "nIter = " << nIter << std::endl;
+          // std::cout << "maxErr = " << maxErr << std::endl;
+          // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
+          if (nIter < maxIter) satisfy = true;
+          // if does not satisfy, keep the old theta
+          if (satisfy == false) {
+            // std::cout << "go out 2 loops" << std::endl;
+            go_next = true; // break out two loops
+            break;
+          }
+          // if does satisfy, flip a coin
+          u = R::unif_rand();
+          // use the lambda calculate just now to get the logEL for Prop
+          // to avoid an extra call of lambdaNR
+          VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
+            log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
+          logELProp = logomegahat.sum();
+          ratio = exp(logELProp-logELOld);
+          // std::cout << "logELProp = " << logELProp << std::endl; 
+          // std::cout << "ratio = " << ratio << std::endl;
+          a = std::min(1.0,ratio);
+          if (u < a) { // accepted
+            paccept(jj,kk) += 1; 
+            ThetaNew = ThetaProp;
+            ThetaOld = ThetaNew;
+            logELOld = logELProp; // NEW: store the new one
+          }
         }
       }
     }

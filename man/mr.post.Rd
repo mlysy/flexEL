@@ -4,7 +4,7 @@
 \alias{mr.post}
 \title{Posterior sampler for mean regression (location model)}
 \usage{
-mr.post(y, X, nsamples, nburn, BetaInit, Sigs, max_iter = 100,
+mr.post(y, X, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, max_iter = 100,
   rel_tol = 1e-07)
 }
 \arguments{
@@ -19,6 +19,8 @@ mr.post(y, X, nsamples, nburn, BetaInit, Sigs, max_iter = 100,
 \item{BetaInit}{\code{nEqs x numBeta} matrix of initial value for the chain. Each column is a beta vector. If a vector is passed to this function, it will be converted to a matrix with only one column.}
 
 \item{Sigs}{\code{nEqs x numBeta} matrix of tuning parameters.}
+
+\item{RvDoMcmc}{\code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.}
 
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
