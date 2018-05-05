@@ -45,7 +45,7 @@ test_that("no censoring: omegahat.cpp is optimal", {
 })
 
 # Censored case:
-test_that("under censroing: omegahatC.R == omegahatC.cpp", {
+test_that("under censoring: omegahatC.R == omegahatC.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)

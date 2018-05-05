@@ -20,7 +20,7 @@ public:
 
 // return indices after sorting 
 // TODO: this could be a void function and pass the inds as an argument too 
-VectorXi sort_inds(const VectorXd &vec) {
+inline VectorXi sort_inds(const VectorXd &vec) {
     int n = vec.size();
     VectorXi inds(n);
     for (int ii=0; ii<n; ii++) {

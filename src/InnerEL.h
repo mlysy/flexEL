@@ -357,6 +357,10 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   MatrixXd ThetaOld = ThetaInit;
   MatrixXd ThetaNew = ThetaOld;
   MatrixXd ThetaProp = ThetaOld;
+  // std::cout << "ThetaInit = " << ThetaInit.transpose() << std::endl;
+  // std::cout << "nTheta = " << nTheta << std::endl;
+  // std::cout << "nBet = " << nBet << std::endl;
+  // std::cout << "nGam = " << nGam << std::endl;
   if (nTheta == nBet) { // location regs
     ELModel::evalG(ThetaOld);
   }
@@ -406,8 +410,7 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
         if (RvDoMcmc(jj,kk)) {
           ThetaProp = ThetaOld;
           ThetaProp(jj,kk) += Sigs(jj,kk)*R::norm_rand();
-          // ThetaProp(jj,kk) += Sigs(jj,kk)*1.5; // DEBUG
-          // std::cout << "ThetaProp = \n" << ThetaProp.transpose() << std::endl;
+          // std::cout << "ThetaProp = " << ThetaProp.transpose() << std::endl;
           // check if proposed theta satisfies the constraint
           satisfy = false;
           // ELModel::evalG(thetaProp); // NEW: change G with thetaProp
@@ -415,12 +418,12 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
             ELModel::evalG(ThetaProp);
             // std::cout << "G = \n" << G << std::endl;
           }
-          else if (nTheta == nBet + nGam){
-            ELModel::evalG(ThetaProp.topRows(nBet), 
-                           ThetaProp.bottomRows(nTheta-nBet), 
-                           VectorXd::Zero(0));
-            // std::cout << "G = \n" << G << std::endl;
-          }
+          // else if (nTheta == nBet + nGam){
+          //   ELModel::evalG(ThetaProp.topRows(nBet), 
+          //                  ThetaProp.bottomRows(nTheta-nBet), 
+          //                  VectorXd::Zero(0));
+          //   // std::cout << "G = \n" << G << std::endl;
+          // }
           else {
             // std::cout << "calling LS quant evalG" << std::endl;
             ELModel::evalG(ThetaProp.topRows(nBet), 
@@ -445,8 +448,10 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
           u = R::unif_rand();
           // use the lambda calculate just now to get the logEL for Prop
           // to avoid an extra call of lambdaNR
-          VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
-            log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
+          VectorXd logomegahat = 1/(1-(lambdaNew.transpose()*G).array());
+          logomegahat = log(logomegahat.array()) - log(logomegahat.sum());
+          // VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
+          //   log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
           logELProp = logomegahat.sum();
           ratio = exp(logELProp-logELOld);
           // std::cout << "logELProp = " << logELProp << std::endl; 

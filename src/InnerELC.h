@@ -40,6 +40,9 @@ private:
     LDLT<MatrixXd> Q2ldlt;
     VectorXd rho;
     VectorXd relErr;
+    // tolerance for Newton-Raphson lambdaNR and evalOmegas (New)
+    int maxIter;
+    double relTol;
     VectorXd epsilons; // error term used to order omegas in evalWeights
     // vector<size_t> epsOrd; // C vector of indicies of ordered epsilons
     VectorXi epsOrd; // vector of indicies of ordered epsilons
@@ -65,12 +68,16 @@ public:
     double logsharp1(double x, double q);
     double logsharp2(double x, double q);
     // Newton-Raphson algorithm
-    void lambdaNR(int& nIter, double& maxErr, 
-                  int maxIter, double relTol);
+    void setTol(const int& _maxIter, const double& _relTol);
+    void lambdaNR(int& nIter, double& maxErr);
+    // void lambdaNR(int& nIter, double& maxErr, 
+    //               int maxIter, double relTol);
     // eval functions 
+    void evalEpsilons(const Ref<const VectorXd>& beta); // for location model 
     void evalWeights(); // calculate weights according to epsilons 
     // void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
-    void evalOmegas(int maxIter, double relTol);
+    // void evalOmegas(int maxIter, double relTol);
+    void evalOmegas();
     // log empirical likelihood calculation with given omegas and G
     double logEL();
     // double logEL(int maxIter, double relTol); 
@@ -84,10 +91,10 @@ public:
     VectorXd getOmegas(); 
     // log empirical likelihood calculation 
     // double logEL(const Ref<const VectorXd>& theta, int maxIter, double relTol); 
-    // // posterior sampler
-    // MatrixXd PostSample(int nsamples, int nburn, VectorXd betaInit,
-    //                     const Ref<const VectorXd>& sigs,
-    // 		      int maxIter, double relTol);
+    // posterior sampler
+    MatrixXd postSample(int nsamples,int nburn,VectorXd betaInit, 
+                        const Ref<const VectorXd>& sigs, 
+                        VectorXd &RvDoMcmc,VectorXd &paccept);
 };
 
 /*
@@ -155,6 +162,13 @@ inline void InnerELC<ELModel>::setData(const Ref<const VectorXd>& _y,
     Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
 }
 
+template<typename ELModel>
+inline void InnerELC<ELModel>::setTol(const int& _maxIter,
+                                     const double& _relTol) {
+  maxIter = _maxIter;
+  relTol = _relTol;
+}
+
 // logsharp
 template<typename ELModel>
 inline double InnerELC<ELModel>::logsharp(double x, double q) {
@@ -202,15 +216,17 @@ inline void InnerELC<ELModel>::blockOuter(void) {
 template<typename ELModel>
 inline double InnerELC<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
                                            const Ref<const VectorXd>& lambdaOld) {
-    // std::cout << "In maxRelErr: lambdaNew = " << lambdaNew << ", lambdaOld = " << lambdaOld << std::endl;
-    relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
-    return(relErr.maxCoeff());
+  // TODO: added for numerical stability, what is a good tolerance to use ?
+  if ((lambdaNew - lambdaOld).array().abs().maxCoeff() < 1e-10) return(0);
+  
+  // std::cout << "In maxRelErr: lambdaNew = " << lambdaNew << ", lambdaOld = " << lambdaOld << std::endl;
+  relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
+  return(relErr.maxCoeff());
 }
 
 // Newton-Raphson algorithm
 template<typename ELModel>
-inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr,
-                                        int maxIter, double relTol) {
+inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr) {
     int ii, jj;
     blockOuter(); // initialize GGt according to epsilons order (epsOrd)
     // newton-raphson loop
@@ -268,6 +284,12 @@ inline void InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& _epsilons)
   
 }
 
+// evaluate epsilons
+template<typename ELModel>
+inline void InnerELC<ELModel>::evalEpsilons(const Ref<const VectorXd>& beta) {
+  epsilons = (y.transpose() - beta.transpose() * X).transpose(); 
+}
+
 // Note: epsilons must have been assigned
 template<typename ELModel>
 inline void InnerELC<ELModel>::evalWeights() {
@@ -293,8 +315,10 @@ inline void InnerELC<ELModel>::evalWeights() {
 
 // exported as `omega.hat.EM`
 // Note: epsilons must have been assigned
+// Note: maxIter and relTol are the same for lambdaNR, and should have been assigned
 template<typename ELModel>
-inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
+inline void InnerELC<ELModel>::evalOmegas() {
+// inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
   // Problem: have to save this o.w. lambdaOld got modified
   VectorXd lambdaOldEM = lambdaOld; 
     int ii; 
@@ -306,7 +330,8 @@ inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
         // std::cout << "weights = " << weights.transpose() << std::endl;
         // M-step:
         // std::cout << "lambdaOldEM = " << lambdaOldEM.transpose() << std::endl;
-        lambdaNR(nIter, maxErr, maxIter, relTol); 
+        // lambdaNR(nIter, maxErr, maxIter, relTol); 
+        lambdaNR(nIter, maxErr);
         // Check convergence of NR here
         if (nIter == maxIter & maxErr > relTol) {
           std::cout << "lambdaNRC did not converge in EM" << std::endl;
@@ -401,53 +426,74 @@ inline double InnerELC<ELModel>::logEL() {
 //     }
 // }
 
-// // posterior sampler
-// inline MatrixXd InnerELC::PostSample(int nsamples, int nburn,
-//                                     VectorXd y, MatrixXd X, VectorXd betaInit,
-//                                     VectorXd sigs, int maxIter, double relTol) {
-//   VectorXd betaOld = betaInit;
-//   VectorXd betaNew = betaOld;
-//   VectorXd betaProp = betaOld;
-//   int betalen = betaInit.size();
-//   MatrixXd beta_chain(betaInit.size(),nsamples);
-//   double logELOld = logEL(y, X, betaOld, maxIter, relTol); // NEW: chache old
-//   
-//   for (int ii=-nburn; ii<nsamples; ii++) {
-//     for (int jj=0; jj<betalen; jj++) {
-//       betaProp = betaOld;
-//       betaProp(jj) = betaOld(jj) + sigs(jj)*R::norm_rand();
-//       // check if proposed beta satisfies the constraint
-//       bool satisfy = false;
-//       int nIter = 0;
-//       double maxErr;
-//       // had a BUG here?! Didn't change G!!!
-//       Gfun(y,X,betaProp); // NEW: change G with betaProp
-//       InnerELC::lambdaNR(nIter, maxErr, maxIter, relTol);
-//       if (nIter < maxIter) satisfy = true;
-//       // if does not satisfy, keep the old beta
-//       if (satisfy == false) break;
-//       // if does satisfy, flip a coin
-//       double u = R::unif_rand();
-//       // use the lambda calculate just now to get the logEL for Prop
-//       // to avoid an extra call of lambdaNR
-//       VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*G).array())) - 
-//         log((1/(1-(lambdaNew.transpose()*G).array())).sum());
-//       double logELProp = logomegahat.sum();
-//       double ratio = exp(logELProp-logELOld);
-//       // double ratio = exp(logEL(y, X, betaProp, maxIter, relTol) -
-//       //                    logEL(y, X, betaOld, maxIter, relTol));
-//       double a = std::min(1.0,ratio);
-//       if (u < a) { // accepted
-//         betaNew = betaProp;
-//         betaOld = betaNew;
-//         logELOld = logELProp; // NEW: store the new one
-//       }
-//     }
-//     if (ii >= 0) {
-//       beta_chain.col(ii) = betaNew;
-//     }
-//   }
-//   return(beta_chain);
-// }
+// posterior sampler: location model, single quantile case
+template<typename ELModel>
+inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
+                                              VectorXd betaInit, 
+                                              const Ref<const VectorXd>& sigs,
+                                              VectorXd &RvDoMcmc, VectorXd &paccept) {
+  VectorXd betaOld = betaInit;
+  VectorXd betaNew = betaOld;
+  VectorXd betaProp = betaOld;
+  int betalen = betaInit.size();
+  MatrixXd beta_chain(betalen,nsamples);
+  ELModel::evalG(betaOld);
+  int nIter; 
+  double maxErr;
+  evalEpsilons(betaInit);
+  evalWeights();
+  lambdaNR(nIter, maxErr);
+  if (nIter == maxIter && maxErr > relTol) {
+    // TODO: throw an error ??
+    std::cout << "betaInit not valid." << std::endl;
+    // return NULL;
+  }
+  evalOmegas();
+  double logELOld = logEL();
+  double logELProp;
+  bool satisfy;
+  double u;
+  double a;
+  double ratio;
+  paccept = VectorXd::Zero(betaInit.size());
+
+  for (int ii=-nburn; ii<nsamples; ii++) {
+    for (int jj=0; jj<betalen; jj++) {
+      if (RvDoMcmc(jj)) {
+        betaProp = betaOld;
+        betaProp(jj) += sigs(jj)*R::norm_rand();
+        // check if proposed beta satisfies the constraint
+        bool satisfy = false;
+        ELModel::evalG(betaProp);
+        evalEpsilons(betaProp);
+        evalWeights();
+        lambdaNR(nIter, maxErr);
+        if (nIter < maxIter) satisfy = true;
+        // if does not satisfy, keep the old beta
+        if (satisfy == false) break;
+        // if does satisfy, flip a coin
+        u = R::unif_rand();
+        // use the lambda calculate just now to get the logEL for Prop
+        // to avoid an extra call of lambdaNR
+        VectorXd logomegahat = log(weights.array() / 
+          (weights.transpose() + lambdaNew.transpose() * G).array().sum());
+        logELProp = (weights.array()*logomegahat.array()).sum();
+        ratio = exp(logELProp-logELOld);
+         a = std::min(1.0,ratio);
+        if (u < a) { // accepted
+          paccept(jj) += 1;
+          betaNew = betaProp;
+          betaOld = betaNew;
+          logELOld = logELProp; // store the new one
+        }
+      }
+    }
+    if (ii >= 0) {
+      beta_chain.col(ii) = betaNew;
+    }
+  }
+  paccept /= (nsamples+nburn);
+  return(beta_chain);
+}
 
 #endif

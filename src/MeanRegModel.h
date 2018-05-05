@@ -21,7 +21,7 @@ protected:
 public:
   // MeanRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
   //              void* params); // old ctor 
-  // MeanRegModel(); // default ctor -- it shouldn't have one actually 
+  // MeanRegModel(); // default ctor -- it shouldn't have one actually
   void setData(const Ref<const VectorXd>& _y, 
                const Ref<const MatrixXd>& _X,
                void* params); // set data with default ctor
@@ -53,6 +53,9 @@ inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& _y,
     yXb = RowVectorXd::Zero(nObs);
 }
 */
+
+// // default ctor
+// inline MeanRegModel::MeanRegModel() {}
 
 // setData location model (with default ctor)
 inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,

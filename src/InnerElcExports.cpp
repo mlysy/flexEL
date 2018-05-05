@@ -8,7 +8,6 @@ using namespace Eigen;
 #include "InnerELC.h"
 #include "MeanRegModel.h"
 
-
 // TODO: getWeights does not need y X, only depends on deltas, epsilons and omegas, 
 //       remove y X and use pesudo input to init
 // returns weights for the weighted NR algorithm 
@@ -61,7 +60,8 @@ Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
   double maxErr;
   VectorXd lambda;
   bool not_conv;
-  ILC.lambdaNR(nIter, maxErr, maxIter, relTol);
+  ILC.setTol(maxIter, relTol);
+  ILC.lambdaNR(nIter, maxErr);
   lambda = ILC.getLambda(); // output
   // check convergence
   not_conv = (nIter == maxIter) && (maxErr > relTol);
@@ -125,9 +125,10 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
     ILC.setData(y,X,deltas,NULL); 
     ILC.setG(G); // assign a given G
     ILC.setEpsilons(epsilons); 
+    ILC.setTol(maxIter, relTol);
     // Note: set initial omegas from uncensored omega.hat
     ILC.setOmegas(omegasInit);
-    ILC.evalOmegas(maxIter, relTol);
+    ILC.evalOmegas();
     VectorXd omegasnew = ILC.getOmegas(); // output
     return omegasnew; 
 }

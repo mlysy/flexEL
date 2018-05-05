@@ -6,6 +6,7 @@ using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
 #include "InnerEL.h"
+#include "InnerELC.h"
 #include "MeanRegModel.h"
 #include "dVecTobArr.h"
 
@@ -121,4 +122,24 @@ Rcpp::List MeanRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd 
   retlst["Theta_chain"] = Theta_chain;
   retlst["paccept"] = paccept;
   return(retlst); 
+}
+
+// [[Rcpp::export(".MeanRegCens_post")]]
+Rcpp::List MeanRegCens_post(Eigen::VectorXd y, Eigen::MatrixXd X,
+                            Eigen::VectorXd deltas,
+                            int nsamples, int nburn,
+                            Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
+                            Eigen::VectorXd RvDoMcmc,
+                            int maxIter = 100, double relTol = 1e-7) {
+  InnerELC<MeanRegModel> MRC;
+  MRC.setData(y,X,deltas,NULL);
+  MRC.setTol(maxIter, relTol);
+  Eigen::VectorXd paccept;
+  Eigen::MatrixXd beta_chain = MRC.postSample(nsamples, nburn,
+                                              betaInit, mwgSd,
+                                              RvDoMcmc, paccept);
+  Rcpp::List retlst;
+  retlst["beta_chain"] = beta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst);
 }
