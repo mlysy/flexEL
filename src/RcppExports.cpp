@@ -327,6 +327,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// QuantRegLS_post_adapt
+Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, Eigen::VectorXd nuInit, Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantRegLS_post_adapt(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP nuInitSEXP, SEXP mwgSdSEXP, SEXP rvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type alphaArr(alphaArrSEXP);
+    Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
+    Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gammaInit(gammaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type nuInit(nuInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type mwgSd(mwgSdSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type rvDoMcmc(rvDoMcmcSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post_adapt(y, X, Z, alphaArr, nsamples, nburn, betaInit, gammaInit, nuInit, mwgSd, rvDoMcmc, maxIter, relTol));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
@@ -348,6 +371,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_QuantReg_post_adapt", (DL_FUNC) &_bayesEL_QuantReg_post_adapt, 10},
     {"_bayesEL_QuantReg_post", (DL_FUNC) &_bayesEL_QuantReg_post, 10},
     {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 13},
+    {"_bayesEL_QuantRegLS_post_adapt", (DL_FUNC) &_bayesEL_QuantRegLS_post_adapt, 13},
     {NULL, NULL, 0}
 };
 

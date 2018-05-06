@@ -114,7 +114,7 @@ Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd
   ThetaInit.topRows(BetaInit.rows()) = BetaInit;
   ThetaInit.block(BetaInit.rows(),0,GammaInit.rows(),GammaInit.cols()) = GammaInit;
   ThetaInit.bottomRows(1) = NuInit.transpose();
-  // std::cout << "MeanRegExports: ThetaInit = \n" << ThetaInit << std::endl;
+  // std::cout << "QuantRegExports: ThetaInit = \n" << ThetaInit << std::endl;
   Eigen::MatrixXd Theta_chain = QR.postSample(nsamples, nburn,
                                               ThetaInit, Sigs, 
                                               RvDoMcmc, paccept);
@@ -124,3 +124,44 @@ Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd
   retlst["paccept"] = paccept;
   return(retlst); 
 }
+
+// Note: BetaInit and GammaInit must have the same number of columns
+// [[Rcpp::export(".QuantRegLS_post_adapt")]]
+Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
+                                 Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, 
+                                 int nsamples, int nburn,
+                                 Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, 
+                                 Eigen::VectorXd nuInit,
+                                 Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc,
+                                 int maxIter = 100, double relTol = 1e-7) {
+  InnerEL<QuantRegModel> QR;
+  QR.setData(y,X,Z,alphaArr.data());
+  QR.setTol(maxIter, relTol);
+  // Eigen::MatrixXd paccept;
+  Eigen::VectorXd paccept;
+  // int nTheta = BetaInit.rows();
+  // int numTheta = BetaInit.cols();
+  // bool *rvdomcmc = new bool[nTheta*numTheta];
+  
+  // concatenate (stack) them together
+  Eigen::VectorXd thetaInit(betaInit.size()+gammaInit.size()+1, betaInit.size());
+  thetaInit.head(betaInit.size()) = betaInit;
+  thetaInit.segment(betaInit.size(),gammaInit.size()) = gammaInit;
+  thetaInit.tail(1) = nuInit;
+  
+  int nTheta = thetaInit.size();
+  bool *rvdomcmc = new bool[nTheta];
+  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  // for (int ii=0; ii<numTheta; ii++) {
+  //   dVec_to_bArr(rvDoMcmc.col(ii), &rvdomcmc[ii*nTheta]);
+  // }
+  Eigen::MatrixXd theta_chain = QR.postSampleAdapt(nsamples, nburn,
+                                                   thetaInit, mwgSd.data(),
+                                                   rvdomcmc, paccept);
+  delete[] rvdomcmc;
+  Rcpp::List retlst;
+  retlst["theta_chain"] = theta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst);
+}
+

@@ -24,7 +24,7 @@ gamma0 <- rnorm(q)
 gamma0
 # beta0 <- 0.5
 # gamma0 <- -0.5
-# alpha <- 0.75
+alpha <- 0.75
 
 # normal(0,1) error
 eps <- rnorm(n)
@@ -108,17 +108,17 @@ gammaInit <- theta.hat$gamma/2
 eps_new <- c((y - X %*% theta.hat$beta)*exp(-0.5*Z %*% theta.hat$gamma))
 nuInit <- quantile(eps_new,alpha)
 sigs <- c(0.2,0.2,0.2)
-RvDoMcmc <- c(0,0,1)
+RvDoMcmc <- c(0,1,0)
 system.time(
   # postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nu0,sigs,RvDoMcmc)
-  postout <- qrls.post_adapt(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nuInit,sigs,RvDoMcmc)
+  postout <- qrls.post_adapt(y,X,Z,alpha,nsamples,nburn,beta0,gammaInit,nu0,sigs,RvDoMcmc)
 )
-theta_chain <- postout$Theta_chain
+theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 
 # mixing of the chain
-plot(theta_chain[3,],type = 'l')
+plot(theta_chain[2,],type = 'l')
 
 # histograms
 hist(theta_chain[1,],breaks=50,freq=FALSE,
@@ -261,7 +261,7 @@ theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z))
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2:(q+1)]/2
 nuInit <- quantile((y-X %*% betaInit)*exp(-0.5*Z %*% gammaInit),alpha)
-mwgSd <- c(0.15,0.2,0.2,0.2,0.25)
+mwgSd <- c(0.2,0.2,0.2,0.2,0.2)
 
 # choose which parameters to update, and others are fixed
 RvDoMcmc <- rep(0,5)
@@ -269,9 +269,9 @@ RvDoMcmc[5] <- 1
 
 system.time(
   # postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nu0,mwgSd,RvDoMcmc)
-  postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nuInit,mwgSd,RvDoMcmc)
+  postout <- qrls.post_adapt(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nuInit,mwgSd,RvDoMcmc)
 )
-theta_chain <- postout$Theta_chain
+theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 

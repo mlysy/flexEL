@@ -16,8 +16,11 @@ Z <- matrix(rnorm(n),n,q)
 
 # parameters
 beta0 <- rnorm(p)
+beta0
 gamma0 <- rnorm(q)
+gamma0
 sig20 <- abs(rnorm(1)) # NEW: scale param
+sig20
 
 # normal(0,1) error
 eps <- rnorm(n)
@@ -83,20 +86,20 @@ logel.marg3 <- log(apply(el.mat, MARGIN=3, sum))
 # calculate the conditional posterior
 numpoints <- 100
 beta.seq <- seq(beta0-1,beta0+1,length.out = numpoints)
-gamma.seq <- seq(gamma0-1,gamma0+1,length.out = numpoints)
-sig2.seq <- seq(sig20-0.1,sig20+0.1,length.out = numpoints)
+gamma.seq <- seq(gamma0/2-1,gamma0/2+1,length.out = numpoints)
+sig2.seq <- seq(sig20-0.5,sig20+0.5,length.out = numpoints)
 # Note: need to keep the sig2.seq range > 0 mostly
 logel.seq <- matrix(rep(NA,3*numpoints),3,numpoints)
 for (ii in 1:numpoints) {
-  G <- mrls.evalG(y,X,Z,beta.seq[ii],gamma0,sig20)
+  G <- mrls.evalG(y,X,Z,beta.seq[ii],gamma0/2,sig20)
   logel.seq[1,ii] <- logEL(G)
   G <- mrls.evalG(y,X,Z,beta0,gamma.seq[ii],sig20)
   logel.seq[2,ii] <- logEL(G)
-  G <- mrls.evalG(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  G <- mrls.evalG(y,X,Z,beta0,gamma0/2,sig2.seq[ii])
   logel.seq[3,ii] <- logEL(G)
 }
 logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
-logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))
+logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0/2, NA, expression(gamma))
 logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(nu))
 
 # mcmc
@@ -114,7 +117,7 @@ mwgSd <- c(0.1,0.1,0.1)
 RvDoMcmc <- c(0,0,1)
 system.time(
   # postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
-  postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,betaInit,gamma0,sig20,mwgSd,RvDoMcmc)
+  postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,beta0,gamma0/2,sig2Init,mwgSd,RvDoMcmc)
   # postout <- mrls.post(y,X,Z,nsamples,nburn,beta0,gamma0,sig20,mwgSd)
 )
 theta_chain <- postout$theta_chain
