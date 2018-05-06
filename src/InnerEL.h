@@ -482,6 +482,101 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
                                       const double &mwgsd,
                                       bool &accept, 
                                       double &logELCur) {
+  int nTheta = thetaCur.size();
+  accept = false;
+  VectorXd thetaProp = thetaCur;
+  thetaProp(idx) += mwgsd*R::norm_rand();
+  if (nTheta == nBet) {
+    ELModel::evalG(thetaProp);
+  }
+  else {
+    ELModel::evalG(thetaProp.head(nBet), 
+                   thetaProp.segment(nBet,nGam), 
+                   thetaProp.tail(1));
+  }
+  int nIter;
+  double maxErr;
+  // lambdaNR(nIter, maxErr, maxIter, relTol);
+  lambdaNR(nIter, maxErr);
+  bool satisfy = false;
+  if (nIter < maxIter || maxErr <= relTol) satisfy = true;
+  // if does not satisfy, keep the old theta
+  if (satisfy == false) return;
+  // if does satisfy, flip a coin
+  double u = R::unif_rand();
+  VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
+    log((1/(1-(lambdaNew.transpose()*ELModel::G).array())).sum());
+  double logELProp = logomegahat.sum();
+  double ratio = exp(logELProp-logELCur);
+  double a = std::min(1.0,ratio);
+  if (u < a) { // accepted
+    accept = true;
+    thetaCur = thetaProp;
+    logELCur = logELProp;
+  }
+}
+
+// TODO: cts here
+template<typename ELModel>
+inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
+                                                  VectorXd thetaInit,
+                                                  double *mwgSd, bool *rvDoMcmc,
+                                                  VectorXd &paccept) {
+  
+  int nTheta = thetaInit.size();
+  MwgAdapt tuneMCMC(nTheta, rvDoMcmc);
+  bool *isAccepted = new bool[nTheta];
+  for (int ii=0; ii<nTheta; ii++) {
+    isAccepted[ii] = false;
+  }
+  MatrixXd theta_chain(nTheta,nsamples);
+  paccept = VectorXd::Zero(nTheta);
+  VectorXd thetaCur = thetaInit;
+  if (nTheta == nBet) {
+    ELModel::evalG(thetaCur);
+  }
+  else {
+    ELModel::evalG(thetaCur.head(nBet), 
+                   thetaCur.segment(nBet,nGam), 
+                   thetaCur.tail(1));
+  }
+  int nIter;
+  double maxErr;
+  lambdaNR(nIter, maxErr);
+  // TODO: throw an error ??
+  if (nIter == maxIter && maxErr > relTol) {
+    std::cout << "thetaInit not valid." << std::endl;
+  }
+  evalOmegas();
+  double logELCur = logEL();
+  // MCMC loop
+  for(int ii=-nburn; ii<nsamples; ii++) {
+    for(int jj=0; jj<nTheta; jj++) {
+      if(rvDoMcmc[jj]) {
+        // std::cout << "isAccepted[" << jj << "] = " << isAccepted[jj] << std::endl;
+        // modifies thetaCur's jj-th entry
+        mwgStep(thetaCur,jj,mwgSd[jj],isAccepted[jj],logELCur);
+        if (isAccepted[jj]) paccept(jj) += 1; // add 1 to paccept if accepted
+      }
+    }
+    if (ii >= 0) {
+      theta_chain.col(ii) = thetaCur;
+    }
+    tuneMCMC.adapt(mwgSd, isAccepted);
+  }
+  paccept /= (nsamples+nburn);
+  delete[] isAccepted; // deallocate memory
+  return(theta_chain);
+}
+
+/* only works for location model
+// mwgStep updates the idx entry of thetaCur
+template<typename ELModel>
+inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
+                                      const int &idx,
+                                      const double &mwgsd,
+                                      bool &accept, 
+                                      double &logELCur) {
   accept = false;
   VectorXd thetaProp = thetaCur;
   thetaProp(idx) += mwgsd*R::norm_rand();
@@ -507,7 +602,9 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
     logELCur = logELProp;
   }
 }
+*/
 
+/*
 // only works for single quantile (vector theta)
 // Note: maxIter and relTol must have been assigned 
 // Note: the logical vector rvDoMcmc is for debuging -- true entries are updated 
@@ -555,6 +652,7 @@ inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
   delete[] isAccepted; // deallocate memory
   return(theta_chain);
 }
+*/
 
 /* only works for single quantile (vector theta)
 // posterior sampler: depend on evalG

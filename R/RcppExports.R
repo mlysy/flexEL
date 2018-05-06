@@ -49,6 +49,10 @@
     .Call(`_bayesEL_MeanRegLS_post`, y, X, Z, nsamples, nburn, BetaInit, GammaInit, Sig2Init, mwgSd, RvDoMcmc, maxIter, relTol)
 }
 
+.MeanRegLS_post_adapt <- function(y, X, Z, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_MeanRegLS_post_adapt`, y, X, Z, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, maxIter, relTol)
+}
+
 .MeanRegCens_post <- function(y, X, deltas, nsamples, nburn, betaInit, mwgSd, RvDoMcmc, maxIter = 100L, relTol = 1e-7) {
     .Call(`_bayesEL_MeanRegCens_post`, y, X, deltas, nsamples, nburn, betaInit, mwgSd, RvDoMcmc, maxIter, relTol)
 }

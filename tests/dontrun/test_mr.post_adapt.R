@@ -22,7 +22,7 @@ logelmode
 
 nsamples <- 20000
 nburn <- 5000
-betaInit <- round(c(lm(y ~ 1)$coefficients),digits=6) # TODO: ????
+betaInit <- c(lm(y ~ 1)$coefficients)
 betaInit
 sigs <- rep(0.25,1)
 rvDoMcmc <- c(1)
@@ -43,7 +43,7 @@ legend('topright',legend=c(expression('grid plot & mode'),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
 # ---- 2-d problem (1 intercept, 1 slope) ----
-n <- 500
+n <- 200
 p <- 2
 X0 <- matrix(rep(1,n),n,1)
 # X1 <- matrix(seq(-2,2,length.out = n),n,1)
@@ -83,12 +83,13 @@ logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
 nsamples <- 20000
 nburn <- 5000
-betaInit <- round(lm(y ~ X1)$coefficients,digits = 6)
+betaInit <- lm(y ~ X1)$coefficients
 betaInit
 sigs <- rep(0.2,2)
-rvDoMcmc <- c(1,1)
+rvDoMcmc <- c(0,1)
 system.time(
-  qrout <- mr.post_adapt(y, X, nsamples, nburn, betaInit, sigs, rvDoMcmc)
+  # qrout <- mr.post_adapt(y, X, nsamples, nburn, betaInit, sigs, rvDoMcmc)
+  qrout <- mr.post_adapt(y, X, nsamples, nburn, c(beta0[1],betaInit[2]), sigs, rvDoMcmc)
 )
 beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept
@@ -99,19 +100,30 @@ plot(beta_chain[2,], xlab = expression(beta[1]), ylab = 'EL', type='l')
 # intercept
 hist(beta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]),main='')
+# marginal line
 lines(beta1.seq, norm_pdf(logel.marg[,1], beta1.seq),
       cex=0.1, col = 'red', type='l')
+# conditional line
+lines(beta1.seq, norm_pdf(logel.seq[1,], beta1.seq),
+      cex=0.1, col = 'blue', type='l')
+abline(v=beta0[1], col='red')
 abline(v=mean(beta_chain[1,]), col='blue')
-legend('topright',legend=c(expression('grid plot'),
+legend('topright',legend=c(expression('true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
+
 # slope
 hist(beta_chain[2,],breaks=50,freq=FALSE,
      xlab = expression(beta[1]),main='')
+# marginal line
 lines(beta2.seq, norm_pdf(logel.marg[,2], beta2.seq),
       cex=0.1, col = 'red', type='l')
+# conditonal line
+lines(beta2.seq, norm_pdf(logel.seq[2,], beta2.seq),
+      cex=0.1, col = 'blue', type='l')
+abline(v=beta0[2], col='red')
 abline(v=mean(beta_chain[2,]), col='blue')
-legend('topright',legend=c(expression('grid plot & mode'),
+legend('topright',legend=c(expression('true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
