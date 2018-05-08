@@ -124,6 +124,9 @@ theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 
+# mixing of the chain
+plot(theta_chain[3,],type = 'l')
+
 # overlay marginal / conditional gird plot to histogram
 hist(theta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta), main='')
@@ -175,8 +178,8 @@ p <- 2
 q <- 2
 
 # covariates
-# X <- cbind(rep(1,n),rnorm(n))
-X <- matrix(rnorm(p*n),n,p)
+X <- cbind(rep(1,n),rnorm(n))
+# X <- matrix(rnorm(p*n),n,p)
 # Z <- matrix(rep(1,n),n,q) # Z should not contain an intercept
 Z <- matrix(rnorm(q*n),n,q)
 

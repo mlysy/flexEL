@@ -53,8 +53,8 @@
     .Call(`_bayesEL_MeanRegLS_post_adapt`, y, X, Z, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, maxIter, relTol)
 }
 
-.MeanRegCens_post <- function(y, X, deltas, nsamples, nburn, betaInit, mwgSd, RvDoMcmc, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanRegCens_post`, y, X, deltas, nsamples, nburn, betaInit, mwgSd, RvDoMcmc, maxIter, relTol)
+.MeanRegCens_post <- function(omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_MeanRegCens_post`, omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
 }
 
 .QuantReg_evalG <- function(y, X, alphaArr, Beta) {

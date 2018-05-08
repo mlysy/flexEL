@@ -292,31 +292,6 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     return(weights)
 }
 
-# find a solution in the null space of G s.t. >= 0 and sum to 1. 
-# G is nObs x nEqs 
-# library(MASS)
-# Warning: this does not guarantee to find a solution
-# searchSol <- function(G) {
-#     n <- nrow(G)
-#     p <- ncol(G)
-#     con.mat1 <- cbind(G,-G)
-#     con.mat <- rbind(con.mat1, colSums(con.mat1))
-#     con.dir <- c(rep(">=",n),"==")
-#     con.rhs <- c(rep(0,n),1)
-#     sol <- matrix(nrow=150, ncol=n) 
-#     for (i in 1:n) { 
-#         obj.in <- rnorm(p)
-#         obj.in <- cbind(obj.in, -obj.in)
-#         out <- lp (objective.in = obj.in, 
-#                    const.mat = con.mat, 
-#                    const.dir = con.dir, 
-#                    const.rhs = con.rhs)
-#         sol[i,] <- con.mat1 %*% out$solution 
-#     } 
-#     sol <- unique(round(sol, digits=10)) 
-#     omegas <- t(sol[1,])
-# }
-
 # G is nObs x nEqs matrix 
 omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
     n <- nrow(G)

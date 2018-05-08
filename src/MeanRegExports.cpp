@@ -166,19 +166,21 @@ Rcpp::List MeanRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
 }
 
 // [[Rcpp::export(".MeanRegCens_post")]]
-Rcpp::List MeanRegCens_post(Eigen::VectorXd y, Eigen::MatrixXd X,
+Rcpp::List MeanRegCens_post(Eigen::VectorXd omegasInit, 
+                            Eigen::VectorXd y, Eigen::MatrixXd X,
                             Eigen::VectorXd deltas,
                             int nsamples, int nburn,
                             Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
-                            Eigen::VectorXd RvDoMcmc,
+                            Eigen::VectorXd rvDoMcmc,
                             int maxIter = 100, double relTol = 1e-7) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,deltas,NULL);
   MRC.setTol(maxIter, relTol);
   Eigen::VectorXd paccept;
+  MRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::MatrixXd beta_chain = MRC.postSample(nsamples, nburn,
                                               betaInit, mwgSd,
-                                              RvDoMcmc, paccept);
+                                              rvDoMcmc, paccept);
   Rcpp::List retlst;
   retlst["beta_chain"] = beta_chain;
   retlst["paccept"] = paccept;
