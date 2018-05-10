@@ -1,6 +1,8 @@
 #---- testing mr.evalG (location model) ----
 ## library(bayesEL) # always load the package (with library)
 source("el-utils.R")
+source("el-rfuns.R")
+source("el-model.R")
 ## source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically

@@ -128,6 +128,7 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
     ILC.setTol(maxIter, relTol);
     // Note: set initial omegas from uncensored omega.hat
     ILC.setOmegas(omegasInit);
+    // std::cout << "omegasInit = " << omegasInit.transpose() << std::endl;
     ILC.evalOmegas();
     VectorXd omegasnew = ILC.getOmegas(); // output
     return omegasnew; 

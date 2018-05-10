@@ -2,6 +2,8 @@
 
 # library(bayesEL)
 source("el-utils.R")
+source("el-rfuns.R")
+source("el-model.R")
 # library(testthat)
 
 context("mrls.evalG")

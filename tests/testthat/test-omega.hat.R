@@ -2,6 +2,8 @@
 # library(bayesEL) # always load the package (with library)
 library(optimCheck)
 source("el-utils.R")
+source("el-rfuns.R")
+source("el-model.R")
 
 # library(testthat) # not loaded automatically
 context("omega.hat")
@@ -81,6 +83,7 @@ test_that("under censoring: omegahat.cpp is optimal", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
+    # omega.hat(G,max_iter = max_iter)
     omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
   }
   if (!any(is.nan(omegahat.cpp))) {

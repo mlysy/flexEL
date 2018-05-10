@@ -1,6 +1,8 @@
 # test evalWeights is working properly
 # library(bayesEL) # always load the package (with library)
 source("el-utils.R")
+source("el-rfuns.R")
+source("el-model.R")
 
 # library(testthat) # not loaded automatically
 context("evalWeights")

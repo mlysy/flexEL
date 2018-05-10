@@ -1,6 +1,8 @@
 # tests for mean regression postSampler 
 library(bayesEL)
 source("../testthat/el-utils.R")
+source("../testthat/el-rfuns.R")
+source("../testthat/el-model.R")
 
 # ---- 1-d problem ----
 n <- 20
@@ -35,7 +37,7 @@ for (ii in 1:numpoints) {
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
-nsamples <- 150
+nsamples <- 10
 nburn <- 0
 betaInit <- c(lm(y ~ 1)$coefficients) 
 betaInit
