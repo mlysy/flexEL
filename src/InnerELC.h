@@ -216,6 +216,10 @@ inline void InnerELC<ELModel>::blockOuter(void) {
 template<typename ELModel>
 inline double InnerELC<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
                                            const Ref<const VectorXd>& lambdaOld) {
+  // TODO: have to find another way to check convergence of omegas
+  // maybe write another function abs err or rel error 
+  // since the omegas could be really small and thus hard to determine convergence
+  
   // TODO: added for numerical stability, what is a good tolerance to use ?
   if ((lambdaNew - lambdaOld).array().abs().maxCoeff() < 1e-10) return(0);
   
@@ -227,32 +231,35 @@ inline double InnerELC<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
 // Newton-Raphson algorithm
 template<typename ELModel>
 inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr) {
-    int ii, jj;
-    blockOuter(); // initialize GGt according to epsilons order (epsOrd)
-    // newton-raphson loop
-    for(ii=0; ii<maxIter; ii++) {
-        // Q1 and Q2
-        Glambda.noalias() = lambdaOld.transpose() * G;
-        Glambda = weights.sum() + Glambda.array();
-        Q2.fill(0.0); 
-        for(jj=0; jj<nObs; jj++) {
-            rho(jj) = logsharp1(Glambda(jj), weights(jj));
-            Q2 += weights(jj) * logsharp2(Glambda(jj), weights(jj)) * GGt.block(0,jj*nEqs,nEqs,nEqs);
-        }
-        Q1 = G * (rho.array()*weights.array()).matrix();
-        // update lambda
-        Q2ldlt.compute(Q2);
-        // std::cout << "Q2invQ1 = " << Q2ldlt.solve(Q1).transpose() << std::endl;
-        lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
-        maxErr = maxRelErr(lambdaNew, lambdaOld); // maximum relative error
-        // std::cout << "maxErr = " << maxErr << std::endl;
-        if (maxErr < relTol) {
-            break;
-        }
-        lambdaOld = lambdaNew; // complete cycle
+  // prevent bad starting values
+  lambdaNew.fill(0.0);
+  lambdaOld.fill(0.0);
+  int ii, jj;
+  blockOuter(); // initialize GGt according to epsilons order (epsOrd)
+  // newton-raphson loop
+  for(ii=0; ii<maxIter; ii++) {
+    // Q1 and Q2
+    Glambda.noalias() = lambdaOld.transpose() * G;
+    Glambda = weights.sum() + Glambda.array();
+    Q2.fill(0.0); 
+    for(jj=0; jj<nObs; jj++) {
+        rho(jj) = logsharp1(Glambda(jj), weights(jj));
+        Q2 += weights(jj) * logsharp2(Glambda(jj), weights(jj)) * GGt.block(0,jj*nEqs,nEqs,nEqs);
     }
-    nIter = ii; // output lambda and also nIter and maxErr
-    return;
+    Q1 = G * (rho.array()*weights.array()).matrix();
+    // update lambda
+    Q2ldlt.compute(Q2);
+    // std::cout << "Q2invQ1 = " << Q2ldlt.solve(Q1).transpose() << std::endl;
+    lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
+    maxErr = maxRelErr(lambdaNew, lambdaOld); // maximum relative error
+    // std::cout << "maxErr = " << maxErr << std::endl;
+    if (maxErr < relTol) {
+        break;
+    }
+    lambdaOld = lambdaNew; // complete cycle
+  }
+  nIter = ii; // output lambda and also nIter and maxErr
+  return;
 }
 
 template<typename ELModel>
@@ -281,13 +288,13 @@ template<typename ELModel>
 inline void InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& _epsilons) {
   epsilons = _epsilons;
   epsOrd = sort_inds(epsilons); 
-  
 }
 
 // evaluate epsilons
 template<typename ELModel>
 inline void InnerELC<ELModel>::evalEpsilons(const Ref<const VectorXd>& beta) {
   epsilons = (y.transpose() - beta.transpose() * X).transpose(); 
+  epsOrd = sort_inds(epsilons);
 }
 
 // Note: epsilons must have been assigned
@@ -295,16 +302,26 @@ template<typename ELModel>
 inline void InnerELC<ELModel>::evalWeights() {
   // std::cout << "---- In evalWeights ----" << std::endl;
   // find the indices for increasing order of epsilons 
-  epsOrd = sort_inds(epsilons);  // TODO: might remove it from here
-  // std::cout << "omegas = " << omegas.transpose() << std::endl;
+  // epsOrd = sort_inds(epsilons);  // TODO: might remove it from here
+  // std::cout << "epsOrd = " << epsOrd.transpose() << std::endl;
   psots.fill(0.0);
   int kk;
+  double psos;
   for (int ii=0; ii<nObs; ii++) {
     for (int jj=0; jj<nObs; jj++) {
       kk = epsOrd(jj);
       if (deltas(kk) == 0) {
-        // std::cout << "evalPsos(kk) = " << evalPsos(kk) << std::endl;
-        psots(ii) += omegas(ii)/evalPsos(kk);
+        // if (ii == 6) {
+        //   std::cout << "evalPsos(kk) = " << evalPsos(kk) << std::endl;
+        // }
+        psos = evalPsos(kk);
+        // to prevent dividing by 0
+        if (abs(psos) >= 1e-10) psots(ii) += omegas(ii)/psos;
+        else if (omegas(ii) >= 1e-10 && evalPsos(kk) < 1e-10) {
+          // TODO: this means a problem
+          std::cout << "evalWeights: dividing by 0 problem." << std::endl;
+        }
+        // psots(ii) += omegas(ii)/evalPsos(kk); // old code
       }
       if (kk == ii) break;
     }
@@ -324,42 +341,47 @@ template<typename ELModel>
 inline void InnerELC<ELModel>::evalOmegas() {
   // inline void InnerELC<ELModel>::evalOmegas(int maxIter, double relTol) {
   // std::cout << "**** In evalOmegas ****" << std::endl;
+  if (omegas != omegas) return; // if initial value nan, stop
   int ii;
   int nIter;
   double maxErr;
   VectorXd lGq;
   // omegas.fill(1.0/nObs);
   VectorXd omegasOld = omegas;
-  // std::cout << "omegas = " << omegas.transpose() << std::endl;
+  // std::cout << "Initial lambdaNew = " << lambdaNew.transpose() << std::endl;
+  // std::cout << "Initial lambdaOld = " << lambdaOld.transpose() << std::endl;
+  // std::cout << "Initial omegas = " << omegas.transpose() << std::endl;
   for(ii=0; ii<maxIter; ii++) {
     // E-step:
     evalWeights(); // assigns weights according to epsilons
     // std::cout << "weights = " << weights.transpose() << std::endl;
     // M-step:
-    // std::cout << "lambdaOldEM = " << lambdaOldEM.transpose() << std::endl;
+    // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
     // lambdaNR(nIter, maxErr, maxIter, relTol); 
     lambdaNR(nIter, maxErr);
+    // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
     // Check convergence of NR here
-    if (nIter == maxIter & maxErr > relTol) {
+    if (nIter == maxIter && maxErr > relTol) {
       std::cout << "lambdaNRC did not converge in EM" << std::endl;
     }
     lGq = ((lambdaNew.transpose() * G).array() + weights.sum()).transpose();
-    // std::cout << "lambdaNew = " << lambdaNew.transpose() << std::endl;
+    // std::cout << "lGq = " << lGq.transpose() << std::endl;
     // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
-    // std::cout << "lambdaOldEM = " << lambdaOldEM.transpose() << std::endl;
     omegas.array() = weights.array() / lGq.array();
     // std::cout << "In evalOmegas before normalize: omegas = \n" << omegas.transpose() << std::endl;
     omegas.array() = omegas.array() / (omegas.array().sum()); // normalize
-    // std::cout << "In evalOmegas: omegas = \n" << omegas.transpose() << std::endl;
+    // std::cout << "In evalOmegas: omegas = " << omegas.transpose() << std::endl;
     maxErr = maxRelErr(omegas, omegasOld); 
     // std::cout << "In evalOmegas: maxErr = " << maxErr << std::endl;
     if (maxErr < relTol) break;
     omegasOld = omegas;
   }
   nIter = ii; 
-  if (nIter == maxIter & maxErr > relTol) {
-    // omegas = VectorXd::Zero(nObs); 
-    // std::cout << "evalOmegas not converged." << std::endl;
+  // std::cout << "nIter = " << nIter << std::endl;
+  if (nIter == maxIter && maxErr > relTol) {
+    // std::cout << "evalOmegas not converged. maxErr = " << maxErr << std::endl;
+    // std::cout << "the omegas now = " << omegas.transpose() << std::endl;
+    // TODO: maybe should assign nan elsewhere 
     for (int ii=0; ii<nObs; ii++) {
       omegas(ii) = std::numeric_limits<double>::quiet_NaN();
     }
@@ -369,6 +391,16 @@ inline void InnerELC<ELModel>::evalOmegas() {
   // std::cout << "lGq = \n" << lGq.transpose() << std::endl;
   // std::cout << "weights = \n" << weights.transpose() << std::endl;
   // std::cout << "In evalOmegas: omegas = \n" << omegas.transpose() << std::endl;
+  // if ((omegas.array() < 0.0).any()) {
+  //   std::cout << "!!! ---- negative omegas ---- !!!" << std::endl;
+  //   std::cout << "nIter = " << nIter << std::endl;
+  //   std::cout << "omegas = " << omegas.transpose() << std::endl;
+  //   std::cout << "weights = " << weights.transpose() << std::endl;
+  //   std::cout << "epsilons = " << epsilons.transpose() << std::endl;
+  //   std::cout << "G = " << G << std::endl;
+  //   // std::cout << "lGq = " << lGq.transpose() << std::endl;
+  // }
+  // std::cout << "**** End of evalOmegas ****" << std::endl;
   return;
 }
 
@@ -456,15 +488,32 @@ template<typename ELModel>
 inline double InnerELC<ELModel>::logEL() {
   // evalOmegas(maxIter,relTol); 
   if (omegas != omegas) return -INFINITY; // (NaN is not equal to themselves)
+  else if ((omegas.array() < 0.0).any()) return -INFINITY;
   else {
     VectorXd psos(nObs); 
     for (int ii=0; ii<nObs; ii++) {
       psos(ii) = evalPsos(ii);
     }
+    // std::cout << "weights = " << weights.transpose() << std::endl;
+    // std::cout << "omegas = " << omegas.transpose() << std::endl;
     // std::cout << "epsOrd = " << epsOrd.transpose() << std::endl;
-    // std::cout << "psos = " << psos.transpose() << std::endl;
-    return((deltas.array()*omegas.array().log()
-              + (1-deltas.array())*psos.array().log()).sum());
+    // std::cout << "1st part way 1 = " << (deltas.array()*(omegas.array().log())).transpose() << std::endl;
+    // std::cout << "1st part = " << (deltas.array()*omegas.array().log()).transpose() << std::endl;
+    // std::cout << "2nd part way 1 = " << ((1-deltas.array())*(psos.array().log())).transpose() << std::endl;
+    // std::cout << "2nd part = " << ((1-deltas.array())*psos.array().log()).transpose() << std::endl;
+    // std::cout << "psos = " << psos.array().transpose() << std::endl;
+    // std::cout << "psos.log() = " << psos.array().log().transpose() << std::endl;
+    
+    ArrayXd logel(nObs);
+    for (int jj=0; jj<nObs; jj++) {
+      if (deltas(jj) == 1) logel(jj) = log(omegas(jj));
+      else  logel(jj) = log(psos(jj));
+    }
+    // std::cout << "logel = " << logel.transpose() << std::endl;
+    return(logel.sum());
+    
+    // return((deltas.array()*omegas.array().log()
+    //           + (1-deltas.array())*psos.array().log()).sum());
   }
 }
 
@@ -514,9 +563,9 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
   //   std::cout << "betaInit not valid." << std::endl;
   //   // return NULL;
   // }
-  std::cout << "Initial omegas = " << omegas.transpose() << std::endl;
+  // std::cout << "Initial omegas = " << omegas.transpose() << std::endl;
   evalOmegas(); // omegasInit should have been assigned
-  std::cout << "First omegas = " << omegas.transpose() << std::endl;
+  // std::cout << "First omegas = " << omegas.transpose() << std::endl;
   double logELOld = logEL();
   double logELProp;
   bool satisfy;
@@ -526,7 +575,7 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
   paccept = VectorXd::Zero(betaInit.size());
 
   for (int ii=-nburn; ii<nsamples; ii++) {
-    std::cout << "#### ii = " << ii << " ####" << std::endl;
+    // std::cout << "#### ii = " << ii << " ####" << std::endl;
     for (int jj=0; jj<betalen; jj++) {
       if (RvDoMcmc(jj)) {
         betaProp = betaOld;
@@ -536,10 +585,13 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
         bool satisfy = false;
         ELModel::evalG(betaProp);
         evalEpsilons(betaProp);
+        // std::cout << "epsilons = " << epsilons.transpose() << std::endl;
         evalWeights();
         // std::cout << "weights = " << weights.transpose() << std::endl;
         // check whether the constrains are satisfied or not
+        // std::cout << "old lambdaNew = " << lambdaNew.transpose() << std::endl;
         lambdaNR(nIter, maxErr);
+        // std::cout << "new lambdaNew = " << lambdaNew << std::endl;
         if (nIter < maxIter) satisfy = true;
         // if does not satisfy, keep the old beta
         if (satisfy == false) break;

@@ -1,9 +1,16 @@
 # ---- common functions ---- 
 
 MaxRelErr <- function(lambdaNew, lambdaOld) {
+  # lambdaSum <- abs(lambdaNew) + abs(lambdaOld)
+  # inds <- (lambdaSum < 1e-10) # indices of entires that are very close to 0
+  # relErr <- rep(NA,length(lambdaNew))
+  # # those entires that are very close to 0 use abs err
+  # relErr[inds] <- abs(lambdaNew - lambdaOld)[inds]
+  # # other entires use relative err
+  # relErr[!inds] <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))[!inds]
+  
   # TODO: added for numerical stability, what is a good tolerance ?
   if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
-  
   relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
   return(max(relErr))
 }
@@ -246,8 +253,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     omegas <- omegas/sum(omegas)
     # err <- MaxRelErr(lambdaNew,lambdaOld)
     err <- MaxRelErr(omegas,omegasOld)
-    if (verbose && iter %% 20 == 0) {
-      message("iter = ", iter)
+    if (verbose && nIter %% 20 == 0) {
+      message("nIter = ", nIter)
       message("err = ", err)
     }
     if (err < rel_tol) break

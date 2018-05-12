@@ -236,44 +236,46 @@ template<typename ELModel>
 inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
 // inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr,
 //                               int maxIter, double relTol) {
-    int ii, jj;
-    blockOuter(); // initialize GGt
-    //lambdaOld = lambdaIn; // initialize lambda
-    // newton-raphson loop
-    for(ii=0; ii<maxIter; ii++) {
-        // Q1 and Q2
-        // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
-        Glambda.noalias() = lambdaOld.transpose() * G;
-        Glambda = 1.0 - Glambda.array();
-        // std::cout << "Glambda = " << Glambda.transpose() << std::endl;
-        // if (Glambda.maxCoeff() > 1000) {
-        // std::cout << "G = \n" << G.transpose() << std::endl;
-        // }
-        Q2.fill(0.0);
-        for(jj=0; jj<nObs; jj++) {
-            rho(jj) = logstar1(Glambda(jj));
-            Q2 += logstar2(Glambda(jj)) * GGt.block(0,jj*nEqs,nEqs,nEqs);
-        }
-        Q1 = -G * rho;
-        // std::cout << "rho = " << rho.transpose() << std::endl;
-        // if (ii == 0) {
-        //   std::cout << "Q2 = \n" << Q2 << std::endl;
-        // }
-        // std::cout << "Q1 = " << Q1.transpose() << std::endl;
-        // update lambda
-        Q2ldlt.compute(Q2);
-        // std::cout << "Q2ldlt.solve(Q1) = " << Q2ldlt.solve(Q1).transpose() << std::endl;
-        lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
-        // std::cout << "lambdaNew ="  << lambdaNew.transpose() << std::endl;
-        // std::cout << "lambdaOld ="  << lambdaOld.transpose() << std::endl;
-        maxErr = maxRelErr(lambdaNew, lambdaOld); // maximum relative error
-        if (maxErr < relTol) {
-            break;
-        }
-        lambdaOld = lambdaNew; // complete cycle
+  lambdaOld.fill(0.0);
+  lambdaNew.fill(0.0);
+  int ii, jj;
+  blockOuter(); // initialize GGt
+  //lambdaOld = lambdaIn; // initialize lambda
+  // newton-raphson loop
+  for(ii=0; ii<maxIter; ii++) {
+    // Q1 and Q2
+    // std::cout << "lambdaOld = " << lambdaOld.transpose() << std::endl;
+    Glambda.noalias() = lambdaOld.transpose() * G;
+    Glambda = 1.0 - Glambda.array();
+    // std::cout << "Glambda = " << Glambda.transpose() << std::endl;
+    // if (Glambda.maxCoeff() > 1000) {
+    // std::cout << "G = \n" << G.transpose() << std::endl;
+    // }
+    Q2.fill(0.0);
+    for(jj=0; jj<nObs; jj++) {
+        rho(jj) = logstar1(Glambda(jj));
+        Q2 += logstar2(Glambda(jj)) * GGt.block(0,jj*nEqs,nEqs,nEqs);
     }
-    nIter = ii; // output lambda and also nIter and maxErr
-    return;
+    Q1 = -G * rho;
+    // std::cout << "rho = " << rho.transpose() << std::endl;
+    // if (ii == 0) {
+    //   std::cout << "Q2 = \n" << Q2 << std::endl;
+    // }
+    // std::cout << "Q1 = " << Q1.transpose() << std::endl;
+    // update lambda
+    Q2ldlt.compute(Q2);
+    // std::cout << "Q2ldlt.solve(Q1) = " << Q2ldlt.solve(Q1).transpose() << std::endl;
+    lambdaNew.noalias() = lambdaOld - Q2ldlt.solve(Q1);
+    // std::cout << "lambdaNew ="  << lambdaNew.transpose() << std::endl;
+    // std::cout << "lambdaOld ="  << lambdaOld.transpose() << std::endl;
+    maxErr = maxRelErr(lambdaNew, lambdaOld); // maximum relative error
+    if (maxErr < relTol) {
+        break;
+    }
+    lambdaOld = lambdaNew; // complete cycle
+  }
+  nIter = ii; // output lambda and also nIter and maxErr
+  return;
 }
 
 template<typename ELModel>

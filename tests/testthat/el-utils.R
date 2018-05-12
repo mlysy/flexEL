@@ -59,7 +59,13 @@ omega.check <- function(x, omegas, G, deltas, epsilons) {
       psos[ii] <- evalPsos_R(ii, epsOrd, xNG) 
     }
     # print(psos)
-    return(sum(deltas*log(xNG)+(1-deltas)*log(psos)))
+    
+    logel <- rep(NA,n)
+    logel[deltas==1] <- log(xNG[deltas==1])
+    logel[deltas==0] <- log(psos[deltas==0])
+    return(sum(logel))
+    
+    # return(sum(deltas*log(xNG)+(1-deltas)*log(psos)))
   }
 }
 

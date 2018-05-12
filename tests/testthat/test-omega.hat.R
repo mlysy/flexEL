@@ -62,7 +62,7 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
     omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     omegahat.R <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
-      message("R version did not converge but C++ does, still checks optimality!")
+      message("R version did not converge but C++ does.")
     }
     else {
       expect_equal(omegahat.cpp, omegahat.R)
@@ -76,7 +76,9 @@ test_that("under censoring: omegahat.cpp is optimal", {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
     max_iter <- sample(c(2, 10, 100), 1)
+    # max_iter <- 100
     rel_tol <- runif(1, 1e-6, 1e-5)
+    # rel_tol <- 1e-6
     G <- matrix(rnorm(n*p), n, p)
     deltas <- rep(1,n)
     numcens <- sample(round(n/2),1)
@@ -89,7 +91,7 @@ test_that("under censoring: omegahat.cpp is optimal", {
   if (!any(is.nan(omegahat.cpp))) {
     ocheck <- optim_proj(xsol = rep(1,n-p),
                          xrng = 0.05,
-                         npts = 101, # 101 would have x exactly 1, o.w. sometimes does not work
+                         npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
                          fun = function(x) {omega.check(x, omegahat.cpp, G, deltas, epsilons)},
                          plot = FALSE)
     # print(ocheck)
