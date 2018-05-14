@@ -15,14 +15,14 @@ max.xdiff <- function(x) {
     max(pmin(xdiff[,1], xdiff[,2]))
 }
 
-plotEL <- function(mu.seq, logel.seq, trueval, meanobs = NA, mu.name = "param") {
+plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = "param") {
     plot(mu.seq, exp(logel.seq-max(logel.seq)),
          cex=0.2, xlab = mu.name, ylab = 'log EL', type = 'l')
     abline(v = trueval, col = 'red', lty=2) # true param
     abline(v = mu.seq[which.max(logel.seq)], lty=2) # mode of EL
-    if (!is.na(meanobs)) {
-        abline(v = meanobs, col='blue', lty=2) # mean of observation
-        legend('topleft',legend=c('true param', 'logEL mode', 'observed mean'),
+    if (!is.na(obs)) {
+        abline(v = obs, col='blue', lty=2) # observed mean / quantile
+        legend('topleft',legend=c('true param', 'logEL mode', 'observed'),
                lty = c(2,2,2), col = c('red','black','blue'), cex = 0.6)
     }
     else{

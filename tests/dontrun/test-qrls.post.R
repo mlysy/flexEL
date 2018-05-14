@@ -1,6 +1,9 @@
 require(bayesEL)
 source("hlm-functions.R")
 source("../testthat/el-utils.R")
+source("../testthat/el-rfuns.R")
+source("../testthat/el-model.R")
+source("gen_eps.R")
 
 ##### 1 quantile level #####
 
@@ -24,33 +27,12 @@ gamma0 <- rnorm(q)
 gamma0
 # beta0 <- 0.5
 # gamma0 <- -0.5
-# alpha <- 0.75
+alpha <- 0.75
 
-# normal(0,1) error
-eps <- rnorm(n)
-nu0 <- qnorm(alpha)
-
-# t error with mean 0 var 1
-df <- 5
-v <- df/(df-2)
-eps <- rt(n, df=df)/sqrt(v)
-nu0 <- qt(alpha,df=df)/sqrt(v)
-
-# chi-sqr with mean 0 var 1
-df <- 3
-m <- df
-v <- 2*df
-eps <- (rchisq(n, df=df)-m)/sqrt(v)
-nu0 <- (qchisq(alpha, df)-m)/sqrt(v)
-
-# log-normal with mean 0 var 1
-# {\displaystyle [\exp(\sigma ^{2})-1]\exp(2\mu +\sigma ^{2})}
-mn <- 0
-sn <- 1
-m <- exp(mn+sn^2/2)
-v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
-eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
-nu0 <- (qlnorm(alpha,mn,sn)-m)/sqrt(v)
+# dist is one of "norm","t","chisq","lnorm"
+genout <- gen_eps(n, dist = "t", df = 5, tau = alpha)
+eps <- genout$eps
+nu0 <- genout$nu0
 
 # response
 y <- c(X %*% beta0 + exp(0.5 * Z %*% gamma0)*eps)
@@ -180,31 +162,10 @@ gamma0 <- rnorm(q)
 gamma0
 alpha <- 0.75
 
-# normal(0,1) error
-eps <- rnorm(n)
-nu0 <- qnorm(alpha)
-
-# t error with mean 0 var 1
-df <- 5
-v <- df/(df-2)
-eps <- rt(n, df=df)/sqrt(v)
-nu0 <- qt(alpha,df=df)/sqrt(v)
-
-# chi-sqr with mean 0 var 1
-df <- 3
-m <- df
-v <- 2*df
-eps <- (rchisq(n, df=df)-m)/sqrt(v)
-nu0 <- (qchisq(alpha, df)-m)/sqrt(v)
-
-# log-normal with mean 0 var 1
-# {\displaystyle [\exp(\sigma ^{2})-1]\exp(2\mu +\sigma ^{2})}
-mn <- 0
-sn <- 1
-m <- exp(mn+sn^2/2)
-v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
-eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
-nu0 <- (qlnorm(alpha,mn,sn)-m)/sqrt(v)
+# dist is one of "norm","t","chisq","lnorm"
+genout <- gen_eps(n, dist = "t", df = 5, tau = alpha)
+eps <- genout$eps
+nu0 <- genout$nu0
 
 # response
 y <- c(X %*% beta0 + exp(0.5 * Z %*% gamma0)*eps)

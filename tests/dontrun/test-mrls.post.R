@@ -1,6 +1,9 @@
 require(bayesEL)
 source("hlm-functions.R")
 source("../testthat/el-utils.R")
+source("../testthat/el-rfuns.R")
+source("../testthat/el-model.R")
+source("gen_eps.R")
 
 #---- mean reg: X and Z both dim 1----
 # dimensions
@@ -19,26 +22,8 @@ beta0 <- rnorm(p)
 gamma0 <- rnorm(q)
 sig20 <- abs(rnorm(1)) # NEW: scale param
 
-# normal(0,1) error
-eps <- rnorm(n)
-
-# t error with mean 0 var 1
-df <- 5
-v <- df/(df-2)
-eps <- rt(n, df=df)/sqrt(v)
-
-# chi-sqr with mean 0 var 1
-df <- 3
-v <- 2*df
-m <- df
-eps <- (rchisq(n, df=df)-m)/sqrt(v)
-
-# log-normal with mean 0 var 1
-mn <- 0
-sn <- 1
-m <- exp(mn+sn^2/2)
-v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
-eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
+# dist is one of "norm","t","chisq","lnorm"
+eps <- gen_eps(n, dist = "t", df = 5)
 
 # response
 # Note: the 0.5 is consistent with hlm.fit but not the LS model in MCMC
@@ -187,26 +172,8 @@ beta0 <- c(0.5,1.5)
 gamma0 <- c(-0.5,0.5)
 sig20 <- 0.5
 
-# normal(0,1) error
-eps <- rnorm(n)
-
-# t error with mean 0 var 1
-df <- 5
-v <- df/(df-2)
-eps <- rt(n, df=df)/sqrt(v)
-
-# chi-sqr with mean 0 var 1
-df <- 3
-v <- 2*df
-m <- df
-eps <- (rchisq(n, df=df)-m)/sqrt(v)
-
-# log-normal with mean 0 var 1
-mn <- 0
-sn <- 1
-m <- exp(mn+sn^2/2)
-v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
-eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
+# dist is one of "norm","t","chisq","lnorm"
+eps <- gen_eps(n, dist = "t", df = 5)
 
 # response
 y <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)

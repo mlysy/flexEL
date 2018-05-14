@@ -39,7 +39,9 @@ private:
     MatrixXd Q2;
     LDLT<MatrixXd> Q2ldlt;
     VectorXd rho;
-    VectorXd relErr;
+    // VectorXd relErr;
+    double relErr; // new
+    double absErr; // new
     // tolerance for Newton-Raphson lambdaNR and evalOmegas (New)
     int maxIter;
     double relTol;
@@ -158,7 +160,7 @@ inline void InnerELC<ELModel>::setData(const Ref<const VectorXd>& _y,
     Glambda = VectorXd::Zero(nObs);
     Gl11 = ArrayXd::Zero(nObs);
     rho = VectorXd::Zero(nObs);
-    relErr = VectorXd::Zero(nEqs);
+    // relErr = VectorXd::Zero(nEqs);
     Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
 }
 
@@ -221,11 +223,14 @@ inline double InnerELC<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
   // since the omegas could be really small and thus hard to determine convergence
   
   // TODO: added for numerical stability, what is a good tolerance to use ?
-  if ((lambdaNew - lambdaOld).array().abs().maxCoeff() < 1e-10) return(0);
-  
-  // std::cout << "In maxRelErr: lambdaNew = " << lambdaNew << ", lambdaOld = " << lambdaOld << std::endl;
-  relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs();
-  return(relErr.maxCoeff());
+  // if ((lambdaNew - lambdaOld).array().abs().maxCoeff() < 1e-10) return(0);
+  // relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs().maxCoeff();
+  // // return(relErr.maxCoeff());
+  // return(relErr);
+
+  absErr = (lambdaNew - lambdaOld).array().abs().maxCoeff();
+  relErr = ((lambdaNew - lambdaOld).array() / (lambdaNew + lambdaOld).array()).abs().maxCoeff();
+  return(std::min(absErr,relErr));
 }
 
 // Newton-Raphson algorithm
@@ -546,7 +551,7 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
                                               VectorXd betaInit, 
                                               const Ref<const VectorXd>& sigs,
                                               VectorXd &RvDoMcmc, VectorXd &paccept) {
-  // std::cout << "--------------------------- In postSample ----------------------------" << std::endl;
+  std::cout << "--------------------------- In postSample ----------------------------" << std::endl;
   VectorXd betaOld = betaInit;
   VectorXd betaNew = betaOld;
   VectorXd betaProp = betaOld;
@@ -575,7 +580,9 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
   paccept = VectorXd::Zero(betaInit.size());
 
   for (int ii=-nburn; ii<nsamples; ii++) {
-    // std::cout << "#### ii = " << ii << " ####" << std::endl;
+    if (ii % 200 == 0) {
+      std::cout << "ii = " << ii << std::endl;
+    }
     for (int jj=0; jj<betalen; jj++) {
       if (RvDoMcmc(jj)) {
         betaProp = betaOld;

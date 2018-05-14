@@ -4,16 +4,40 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 
-# ---- 1-d problem ----
-n <- 30
-mu0 <- rnorm(1,0,1)
-X <- matrix(rnorm(n,0,1),n,1) # each row of X is one observation
-# X <- matrix(rep(1,n), n, 1)
-eps <- rnorm(n) # N(0,1) error term
-yy <- c(X * mu0) + eps
+# randseed <- .Random.seed
 
+# ---- 1-d problem ----
+n <- 200
+mu0 <- rnorm(1,0,1)
+# X <- matrix(rnorm(n,0,1),n,1) # each row of X is one observation
+X <- matrix(rep(1,n), n, 1)
+# eps <- rnorm(n) # N(0,1) error term
+
+# normal(0,1) error
+eps <- rnorm(n)
+
+# t error with mean 0 var 1
+df <- 5
+v <- df/(df-2)
+eps <- rt(n, df=df)/sqrt(v)
+
+# chi-sqr with mean 0 var 1
+df <- 3
+m <- df
+v <- 2*df
+eps <- (rchisq(n, df=df)-m)/sqrt(v)
+
+# log-normal with mean 0 var 1
+# {\displaystyle [\exp(\sigma ^{2})-1]\exp(2\mu +\sigma ^{2})}
+mn <- 0
+sn <- 1
+m <- exp(mn+sn^2/2)
+v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
+eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
+
+yy <- c(X * mu0) + eps
 # random censoring
-cc <- rnorm(n,mean=1.5*abs(yy),sd=1)
+cc <- rnorm(n,mean=1*abs(yy),sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -28,7 +52,7 @@ y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 # y <- yy
 # y[as.logical(1-deltas)] <- cc
 
-# gird plot
+# grid plot
 numpoints <- 100
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
@@ -37,7 +61,7 @@ for (ii in 1:numpoints) {
   epsilons <- y - c(X * mu.seq[ii])
   logel.seq[ii] <- logEL(G,deltas,epsilons)
 }
-logelmode <- plotEL(mu.seq, logel.seq, mu0, NA, expression(mu))
+logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
 nsamples <- 20000
 nburn <- 3000
@@ -53,7 +77,7 @@ mu_paccept <- qrout$paccept
 mu_paccept
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
 
-# overlay gird plot to histogram
+# overlay grid plot to histogram
 hist(mu_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(mu), main='')
 lines(mu.seq, norm_pdf(logel.seq, mu.seq),
@@ -69,9 +93,14 @@ n <- 50
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
 X <- cbind(1,X1)
-eps <- rnorm(n) # N(0,1) error term
-beta_I <- 1
-beta_S <- 1.5
+# eps <- rnorm(n) # N(0,1) error term
+
+
+
+# beta_I <- 1
+# beta_S <- 1.5
+beta_I <- rnorm(1)
+beta_S <- rnorm(1)
 yy <- beta_I + c(X1 %*% beta_S) + eps 
 beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
@@ -130,7 +159,7 @@ beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')
 plot(beta_chain[2,], xlab = expression(beta[1]), ylab = 'EL', type='l')
 
-# overlay marginal gird plot to histogram
+# overlay marginal grid plot to histogram
 # intercept
 hist(beta_chain[1,],breaks=50,freq=FALSE,
      xlab = expression(beta[0]),main='')
@@ -140,8 +169,9 @@ lines(beta1.seq, norm_pdf(logel.marg[,1], beta1.seq),
 # conditional line
 lines(beta1.seq, norm_pdf(logel.seq[1,], beta1.seq),
       cex=0.1, col = 'red', type='l')
+abline(v=beta0[1],col='red')
 abline(v=mean(beta_chain[1,]), col='blue')
-legend('topright',legend=c(expression('grid plot'),
+legend('topright',legend=c(expression('true value'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 # slope
@@ -153,7 +183,8 @@ lines(beta2.seq, norm_pdf(logel.marg[,2], beta2.seq),
 # conditional line
 lines(beta2.seq, norm_pdf(logel.seq[2,], beta2.seq),
       cex=0.1, col = 'red', type='l')
+abline(v=beta0[2],col='red')
 abline(v=mean(beta_chain[2,]), col='blue')
-legend('topright',legend=c(expression('grid plot & mode'),
+legend('topright',legend=c(expression('true value'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
