@@ -16,7 +16,8 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    max_iter <- sample(c(2, 10, 100), 1)
+    # max_iter <- sample(c(2, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
     omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
@@ -30,7 +31,8 @@ test_that("no censoring: omegahat.cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    max_iter <- sample(c(5, 10, 100), 1)
+    # max_iter <- sample(c(5, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
     omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
@@ -51,7 +53,8 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    max_iter <- sample(c(2, 10, 100), 1)
+    # max_iter <- sample(c(2, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p), n, p)
     deltas <- rep(1,n)
@@ -75,18 +78,16 @@ test_that("under censoring: omegahat.cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    max_iter <- sample(c(2, 10, 100), 1)
-    # max_iter <- 100
+    # max_iter <- sample(c(2, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
-    # rel_tol <- 1e-6
     G <- matrix(rnorm(n*p), n, p)
     deltas <- rep(1,n)
     numcens <- sample(round(n/2),1)
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    # omega.hat(G,max_iter = max_iter)
-    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol)
   }
   if (!any(is.nan(omegahat.cpp))) {
     ocheck <- optim_proj(xsol = rep(1,n-p),

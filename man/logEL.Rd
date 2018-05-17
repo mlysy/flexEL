@@ -4,19 +4,14 @@
 \alias{logEL}
 \title{log empirical likelihood}
 \usage{
-logEL(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
-  verbose = FALSE)
+logEL(omegas, epsilons, deltas)
 }
 \arguments{
-\item{G}{\code{nObs x nEqs} matrix of constraints.}
-
-\item{deltas}{\code{nObs} vector of censoring indicators.}
+\item{omegas}{\code{nObs} vector of empirical distribution.}
 
 \item{epsilons}{\code{nObs} vector of residuals.}
 
-\item{max_iter}{Maximum number of Newton-Raphson steps.}
-
-\item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
+\item{deltas}{\code{nObs} vector of censoring indicators.}
 }
 \value{
 Log empirical likelihood of the input beta

@@ -40,6 +40,7 @@ mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc
   # TODO: here
   lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
   omegasInit <- .omega.hat(t(G), lambda)
-  .MeanRegCens_post(omegasInit, y, t(X), deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
+  .MeanRegCens_post(omegasInit, y, t(X), deltas, nsamples, nburn, BetaInit, 
+                    Sigs, RvDoMcmc, 
                     maxIter = max_iter, relTol = rel_tol)
 }

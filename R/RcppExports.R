@@ -13,8 +13,8 @@
     .Call(`_bayesEL_omegaHatEM`, omegasInit, G, deltas, epsilons, maxIter, relTol, verbose)
 }
 
-.logELC <- function(omegas, G, deltas, epsilons) {
-    .Call(`_bayesEL_logELC`, omegas, G, deltas, epsilons)
+.logELC <- function(omegas, epsilons, deltas) {
+    .Call(`_bayesEL_logELC`, omegas, epsilons, deltas)
 }
 
 .lambdaNR <- function(G, maxIter, relTol, verbose) {

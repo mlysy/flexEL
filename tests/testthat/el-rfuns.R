@@ -233,7 +233,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
   nIter <- 0
   # initialize omegas with uncensored solution 
   omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
-  omegasOld <- omegas
+  # omegasOld <- omegas
+  logelOld <- logEL_R(omegas,epsilons,deltas)
   if (any(is.nan(omegas))) return(rep(NaN,n))
   for (ii in 1:max_iter) {
     nIter <- ii
@@ -244,7 +245,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose)
     # TODO: what if not converged ?? use a random weights and continue ? 
     if (!lambdaOut$convergence) {
-      message("lambdaNRC did not converge in EM")
+      # message("lambdaNRC did not converge in EM")
       return(rep(NaN,n))
     }
     lambdaNew <- lambdaOut$lambda
@@ -252,14 +253,17 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     omegas <- weights/qlg
     omegas <- omegas/sum(omegas)
     # err <- MaxRelErr(lambdaNew,lambdaOld)
-    err <- MaxRelErr(omegas,omegasOld)
+    # err <- MaxRelErr(omegas,omegasOld)
+    logel <- logEL_R(omegas,epsilons,deltas)
+    err <- MaxRelErr(logel,logelOld)
     if (verbose && nIter %% 20 == 0) {
       message("nIter = ", nIter)
       message("err = ", err)
     }
     if (err < rel_tol) break
     # lambdaOld <- lambdaNew
-    omegasOld <- omegas
+    # omegasOld <- omegas
+    logelOld <- logel
   }
   notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
   if (notconv) {
@@ -283,40 +287,50 @@ omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, ver
 }
 
 # G is nObs x nEqs matrix
-logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
-  # non-censored case:
-  if (missing(deltas) && missing(epsilons)) {
-    omegas <- omega.hat.NC_R(G, max_iter, rel_tol)
-    if (any(is.nan(omegas))) return(-Inf)
-    else return(sum(log(omegas)))
+logEL_R <- function(omegas, epsilons, deltas) {
+  if (any(is.nan(omegas))) return(-Inf)
+  if (missing(deltas)) {
+    sum(log(omegas))
   }
-  # censored case:
   else {
-    if (length(deltas) != length(epsilons)) {
-      stop("deltas and epsilons have inconsistent dimensions.")
+    epsOrd <- order(epsilons) # ascending order of epsilons
+    n <- length(omegas)
+    psos <- rep(0,n)
+    for (ii in 1:n) {
+      psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
     }
-    if (nrow(G) != length(deltas)) {
-      stop("deltas and G have inconsistent dimensions.")
-    }
-    omegas <- omega.hat.EM_R(G, deltas, epsilons, max_iter, rel_tol)
-    if (any(is.nan(omegas))) return(-Inf)
-    else {
-      epsOrd <- order(epsilons) # ascending order of epsilons
-      n <- length(omegas)
-      psos <- rep(0,n)
-      for (ii in 1:n) {
-        psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
-      }
-      return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
-    }
+    # numerical stability: watch out for extremely small negative values
+    omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
+    return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
   }
 }
 
-# TODO: changed ?
-mrls.logel_R <- function(y, X, Z, beta, gamma) {
-  # max_iter = 100, rel_tol = 1e-07, verbose = FALSE
-  G <- mrls.evalG_R(y, X, Z, beta, gamma)
-  # lambda <- lambdaNR(G = G, max_iter, rel_tol, verbose)
-  omegahat <- omega.hat.NC_R(G = G)
-  sum(log(omegahat))
-}
+# # G is nObs x nEqs matrix
+# logEL_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7) {
+#   # non-censored case:
+#   if (missing(deltas) && missing(epsilons)) {
+#     omegas <- omega.hat.NC_R(G, max_iter, rel_tol)
+#     if (any(is.nan(omegas))) return(-Inf)
+#     else return(sum(log(omegas)))
+#   }
+#   # censored case:
+#   else {
+#     if (length(deltas) != length(epsilons)) {
+#       stop("deltas and epsilons have inconsistent dimensions.")
+#     }
+#     if (nrow(G) != length(deltas)) {
+#       stop("deltas and G have inconsistent dimensions.")
+#     }
+#     omegas <- omega.hat.EM_R(G, deltas, epsilons, max_iter, rel_tol)
+#     if (any(is.nan(omegas))) return(-Inf)
+#     else {
+#       epsOrd <- order(epsilons) # ascending order of epsilons
+#       n <- length(omegas)
+#       psos <- rep(0,n)
+#       for (ii in 1:n) {
+#         psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+#       }
+#       return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+#     }
+#   }
+# }

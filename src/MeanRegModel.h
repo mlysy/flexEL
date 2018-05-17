@@ -94,10 +94,11 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
 
 // form the G matrix for location linear regression model 
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
-    yXb.noalias() = y.transpose() - beta.transpose() * X;
-    tG = X.transpose();
-    tG.array().colwise() *= yXb.transpose().array();
-    G = tG.transpose();
+  // std::cout << "evalG: beta = " << beta.transpose() << std::endl;
+  yXb.noalias() = y.transpose() - beta.transpose() * X;
+  tG = X.transpose();
+  tG.array().colwise() *= yXb.transpose().array();
+  G = tG.transpose();
     // Note: rowwise is slower in general 
     // yXb.noalias() = y.transpose() - beta.transpose() * X;
     // G = X;

@@ -134,22 +134,37 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
     return omegasnew; 
 }
 
-// Returns the maximized log empirical likelihood given G, 
-//      or -Inf if no omegas satisfies G.
-// Note: omegas should be the returned value from censored omega.hat
 // [[Rcpp::export(".logELC")]]
-double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
-              Eigen::VectorXd deltas, Eigen::VectorXd epsilons) {
-    int nObs = G.cols();
-    int nEqs = G.rows();
-    VectorXd y = VectorXd::Zero(nObs);
-    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-    InnerELC<MeanRegModel> ILC;
-    ILC.setData(y,X,deltas,NULL);
-    ILC.setG(G); // set the given G
-    ILC.setEpsilons(epsilons); 
-    // set omegas which is obtained from EM algorithm 
-    ILC.setOmegas(omegas);
-    double logel = ILC.logEL();
-    return logel; 
+double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, 
+              Eigen::VectorXd deltas) {
+  int nObs = omegas.size();
+  VectorXd y = VectorXd::Zero(nObs);
+  MatrixXd X = MatrixXd::Zero(1, nObs);
+  InnerELC<MeanRegModel> ILC;
+  ILC.setData(y,X,deltas,NULL);
+  ILC.setEpsilons(epsilons); 
+  // set omegas which is obtained from EM algorithm 
+  ILC.setOmegas(omegas);
+  double logel = ILC.logEL();
+  return logel; 
 }
+
+// // Returns the maximized log empirical likelihood given G, 
+// //      or -Inf if no omegas satisfies G.
+// // Note: omegas should be the returned value from uncensored omega.hat
+// // [[Rcpp::export(".logELC")]]
+// double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, 
+//               Eigen::VectorXd deltas, Eigen::VectorXd epsilons) {
+//     int nObs = G.cols();
+//     int nEqs = G.rows();
+//     VectorXd y = VectorXd::Zero(nObs);
+//     MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+//     InnerELC<MeanRegModel> ILC;
+//     ILC.setData(y,X,deltas,NULL);
+//     ILC.setG(G); // set the given G
+//     ILC.setEpsilons(epsilons); 
+//     // set omegas which is obtained from EM algorithm 
+//     ILC.setOmegas(omegas);
+//     double logel = ILC.logEL();
+//     return logel; 
+// }

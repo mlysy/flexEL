@@ -52,16 +52,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // logELC
-double logELC(Eigen::VectorXd omegas, Eigen::MatrixXd G, Eigen::VectorXd deltas, Eigen::VectorXd epsilons);
-RcppExport SEXP _bayesEL_logELC(SEXP omegasSEXP, SEXP GSEXP, SEXP deltasSEXP, SEXP epsilonsSEXP) {
+double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas);
+RcppExport SEXP _bayesEL_logELC(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
-    rcpp_result_gen = Rcpp::wrap(logELC(omegas, G, deltas, epsilons));
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    rcpp_result_gen = Rcpp::wrap(logELC(omegas, epsilons, deltas));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -378,7 +377,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_omegaHatEM", (DL_FUNC) &_bayesEL_omegaHatEM, 7},
-    {"_bayesEL_logELC", (DL_FUNC) &_bayesEL_logELC, 4},
+    {"_bayesEL_logELC", (DL_FUNC) &_bayesEL_logELC, 3},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
     {"_bayesEL_omegaHat", (DL_FUNC) &_bayesEL_omegaHat, 2},
     {"_bayesEL_logEL", (DL_FUNC) &_bayesEL_logEL, 1},
