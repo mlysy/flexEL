@@ -23,7 +23,7 @@ mu0 <- mu+nu0
 mu0
 
 # random censoring
-cc <- rnorm(n,mean=1*abs(yy),sd=1)
+cc <- rnorm(n,mean=2,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -47,9 +47,11 @@ mu.seq <- seq(-1+mu0,1+mu0,length.out = numpoints)
 # mu.seq <- seq(-1+quantile(yy,alpha),1+quantile(yy,alpha),length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
   G <- qr.evalG(y,X,alpha,mu.seq[ii])
   epsilons <- y - c(X * mu.seq[ii])
-  logel.seq[ii] <- logEL(G,deltas,epsilons,max_iter = 500)
+  omegas <- omega.hat(G,deltas,epsilons)
+  logel.seq[ii] <- logEL(omegas,epsilons,deltas)
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, quantile(y,alpha), expression(mu))
 
@@ -60,7 +62,7 @@ betaInit <- c(rq(y ~ 1, tau = alpha, method = 'fn')$coefficients)
 betaInit
 sigs <- rep(0.2,1)
 system.time(
-  qrout <- qr_cens.post(y, X, deltas,alpha, nsamples, nburn, betaInit, sigs, max_iter = 500)
+  qrout <- qr_cens.post_adapt(y, X, deltas,alpha, nsamples, nburn, betaInit, sigs)
 )
 mu_chain <- qrout$beta_chain
 mu_paccept <- qrout$paccept 
@@ -219,11 +221,13 @@ logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
   G <- qr.evalG(y,X,alpha,c(beta1.seq[ii],beta0[2]))
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
-  logel.seq[1,ii] <- logEL(G,deltas,epsilons)
+  omegas <- omega.hat(G,deltas,epsilons)
+  logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
   
   G <- qr.evalG(y,X,alpha,c(beta0[1],beta2.seq[ii]))
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
-  logel.seq[2,ii] <- logEL(G,deltas,epsilons)
+  omegas <- omega.hat(G,deltas,epsilons)
+  logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
 }
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
@@ -242,14 +246,14 @@ logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 library(quantreg)
 betaInit <- c(rq(y ~ X1, tau = alpha, method = 'fn')$coefficients)
 betaInit
-nsamples <- 1000
-nburn <- 0
-sigs <- c(0.1,0.1)
+nsamples <- 10000
+nburn <- 3000
+sigs <- c(0.15,0.15)
 RvDoMcmc <- rbind(1,1)
 k <- which(as.logical(RvDoMcmc))
 betaInit[-k] <- beta0[-k]
 system.time(
-  qrout <- qr_cens.post(y, X, deltas,alpha, nsamples, nburn, 
+  qrout <- qr_cens.post_adapt(y, X, deltas,alpha, nsamples, nburn, 
                         betaInit, sigs, RvDoMcmc)
   # c(betaInit[1],beta0[2])
 )

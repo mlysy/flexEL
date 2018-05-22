@@ -393,6 +393,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// QuantRegCens_post_adapt
+Rcpp::List QuantRegCens_post_adapt(Eigen::VectorXd omegasInit, Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd deltas, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantRegCens_post_adapt(SEXP omegasInitSEXP, SEXP ySEXP, SEXP XSEXP, SEXP deltasSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP mwgSdSEXP, SEXP rvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegasInit(omegasInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type alphaArr(alphaArrSEXP);
+    Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
+    Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type mwgSd(mwgSdSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type rvDoMcmc(rvDoMcmcSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantRegCens_post_adapt(omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
@@ -417,6 +439,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 13},
     {"_bayesEL_QuantRegLS_post_adapt", (DL_FUNC) &_bayesEL_QuantRegLS_post_adapt, 13},
     {"_bayesEL_QuantRegCens_post", (DL_FUNC) &_bayesEL_QuantRegCens_post, 12},
+    {"_bayesEL_QuantRegCens_post_adapt", (DL_FUNC) &_bayesEL_QuantRegCens_post_adapt, 12},
     {NULL, NULL, 0}
 };
 

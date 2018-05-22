@@ -17,7 +17,7 @@ eps <- gen_eps(n, dist = "norm", df = NULL)
 
 yy <- c(X * mu0) + eps
 # random censoring
-cc <- rnorm(n,mean=1,sd=1)
+cc <- rnorm(n,mean=2,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -52,7 +52,7 @@ betaInit <- c(lm(y ~ 1)$coefficients)
 betaInit
 sigs <- rep(0.18,1)
 system.time(
-  qrout <- mr_cens.post(y, X, deltas, nsamples, nburn, betaInit, sigs)
+  qrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs)
 )
 
 mu_chain <- qrout$beta_chain
@@ -135,11 +135,11 @@ betaInit
 sigs <- c(0.2,0.2)
 # Note: For matching the conditional grid plot and histogram, pay attention to 
 #   their inital values, the fixed params need to be the same.
-RvDoMcmc <- c(1,0)
+RvDoMcmc <- c(1,1)
 k <- which(as.logical(RvDoMcmc))
 betaInit[-k] <- beta0[-k] # fix other params at their true values
 system.time(
-  qrout <- mr_cens.post(y, X, deltas, nsamples, nburn, c(betaInit[1],beta0[2]), sigs, RvDoMcmc)
+  qrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
 )
 beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept

@@ -89,3 +89,7 @@
     .Call(`_bayesEL_QuantRegCens_post`, omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
 }
 
+.QuantRegCens_post_adapt <- function(omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
+    .Call(`_bayesEL_QuantRegCens_post_adapt`, omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
+}
+

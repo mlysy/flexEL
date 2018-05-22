@@ -12,7 +12,7 @@
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
-#' @export mr.post_adapt
+#' @export mr_cens.post_adapt
 mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit, 
                                mwgSd, rvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
   # # input conversion

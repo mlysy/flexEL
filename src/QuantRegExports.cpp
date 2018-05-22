@@ -189,3 +189,38 @@ Rcpp::List QuantRegCens_post(Eigen::VectorXd omegasInit,
   return(retlst);
 }
 
+// [[Rcpp::export(".QuantRegCens_post_adapt")]]
+Rcpp::List QuantRegCens_post_adapt(Eigen::VectorXd omegasInit, 
+                                  Eigen::VectorXd y, Eigen::MatrixXd X,
+                                  Eigen::VectorXd deltas,
+                                  Eigen::VectorXd alphaArr,
+                                  int nsamples, int nburn,
+                                  Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
+                                  Eigen::VectorXd rvDoMcmc,
+                                  int maxIter = 100, double relTol = 1e-7) {
+  InnerELC<QuantRegModel> QRC;
+  QRC.setData(y,X,deltas,alphaArr.data());
+  QRC.setTol(maxIter, relTol);
+  int nTheta = betaInit.size();
+  Eigen::VectorXd paccept(nTheta);
+  bool *rvdomcmc = new bool[nTheta];
+  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  // std::cout << "betaInit = " << betaInit.transpose() << std::endl;
+  // std::cout << "rvdomcmc = "; 
+  // for (int ii=0; ii<nTheta; ii++) {
+  //   std::cout << rvdomcmc[ii] << " ";
+  // }
+  // std::cout << std::endl;
+  // std::cout << "mwgSd = " << mwgSd.transpose() << std::endl;
+  QRC.setOmegas(omegasInit); // set initial value for first EM
+  Eigen::MatrixXd beta_chain = QRC.postSampleAdapt(nsamples, nburn,
+                                                   betaInit, mwgSd.data(),
+                                                   rvdomcmc, paccept);
+  // Eigen::MatrixXd beta_chain = Eigen::MatrixXd::Zero(1,1);
+  delete[] rvdomcmc;
+  Rcpp::List retlst;
+  retlst["beta_chain"] = beta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst);
+}
+
