@@ -176,11 +176,45 @@ Rcpp::List MeanRegCens_post(Eigen::VectorXd omegasInit,
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,deltas,NULL);
   MRC.setTol(maxIter, relTol);
-  Eigen::VectorXd paccept;
+  Eigen::VectorXd paccept(betaInit.size());
   MRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::MatrixXd beta_chain = MRC.postSample(nsamples, nburn,
                                               betaInit, mwgSd,
                                               rvDoMcmc, paccept);
+  Rcpp::List retlst;
+  retlst["beta_chain"] = beta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst);
+}
+
+// [[Rcpp::export(".MeanRegCens_post_adapt")]]
+Rcpp::List MeanRegCens_post_adapt(Eigen::VectorXd omegasInit, 
+                                  Eigen::VectorXd y, Eigen::MatrixXd X,
+                                  Eigen::VectorXd deltas,
+                                  int nsamples, int nburn,
+                                  Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
+                                  Eigen::VectorXd rvDoMcmc,
+                                  int maxIter = 100, double relTol = 1e-7) {
+  InnerELC<MeanRegModel> MRC;
+  MRC.setData(y,X,deltas,NULL);
+  MRC.setTol(maxIter, relTol);
+  int nTheta = betaInit.size();
+  Eigen::VectorXd paccept(nTheta);
+  bool *rvdomcmc = new bool[nTheta];
+  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  // std::cout << "betaInit = " << betaInit.transpose() << std::endl;
+  // std::cout << "rvdomcmc = "; 
+  // for (int ii=0; ii<nTheta; ii++) {
+  //   std::cout << rvdomcmc[ii] << " ";
+  // }
+  // std::cout << std::endl;
+  // std::cout << "mwgSd = " << mwgSd.transpose() << std::endl;
+  MRC.setOmegas(omegasInit); // set initial value for first EM
+  Eigen::MatrixXd beta_chain = MRC.postSampleAdapt(nsamples, nburn,
+                                                   betaInit, mwgSd.data(),
+                                                   rvdomcmc, paccept);
+  // Eigen::MatrixXd beta_chain = Eigen::MatrixXd::Zero(1,1);
+  delete[] rvdomcmc;
   Rcpp::List retlst;
   retlst["beta_chain"] = beta_chain;
   retlst["paccept"] = paccept;

@@ -12,6 +12,7 @@
 using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
+#include "MwgAdapt.h" // for adaptive mcmc
 // [[Rcpp::depends(RcppEigen)]]
 
 
@@ -19,88 +20,94 @@ using namespace Eigen;
 template <typename ELModel>
 class InnerELC : public ELModel { 
 private:
-    using ELModel::nObs;
-    using ELModel::nEqs;
-    using ELModel::X; // need access to X, y in evalWeights
-    using ELModel::y;
-    using ELModel::G;
-    VectorXd deltas; 
-    VectorXd weights; 
-    VectorXd omegasInit; // new
-    VectorXd omegas; 
-    VectorXd omegasps; // partial sum of omegas 
-    // constants for logsharp calculations
-    // double trunc, aa, bb, cc; 
-    // temporary storage for Newton-Raphson
-    VectorXd lambdaOld;
-    VectorXd lambdaNew;
-    MatrixXd GGt;
-    VectorXd Glambda;
-    ArrayXd Gl11;
-    VectorXd Q1;
-    MatrixXd Q2;
-    LDLT<MatrixXd> Q2ldlt;
-    VectorXd rho;
-    // VectorXd relErr;
-    double relErr; // new
-    double absErr; // new
-    // tolerance for Newton-Raphson lambdaNR and evalOmegas (New)
-    int maxIter;
-    double relTol;
-    VectorXd epsilons; // error term used to order omegas in evalWeights
-    // vector<size_t> epsOrd; // C vector of indicies of ordered epsilons
-    VectorXi epsOrd; // vector of indicies of ordered epsilons
-    VectorXd psots; // partial sum of omegatildas
-    // columnwise outer product (see below)
-    void blockOuter(void);
-    // maximum relative error in lambda: same for cens / non-cens
-    double maxRelErr(const Ref<const VectorXd>& lambdaNew,
-                     const Ref<const VectorXd>& lambdaOld);
-    double maxRelErr(const double& valnew,
-                     const double& valold);
-    // helper function for evalWeights: calculate partial sum of omegas
-    // partial sum of omegas_jj s.t. eps_jj >= eps_ii
-    double evalPsos(const int ii);
+  using ELModel::nObs;
+  using ELModel::nEqs;
+  using ELModel::nBet;
+  using ELModel::nGam;
+  using ELModel::X; // need access to X, y in evalWeights
+  using ELModel::y;
+  using ELModel::G;
+  VectorXd deltas; 
+  VectorXd weights; 
+  VectorXd omegasInit; // new
+  VectorXd omegas; 
+  VectorXd omegasps; // partial sum of omegas 
+  // constants for logsharp calculations
+  // double trunc, aa, bb, cc; 
+  // temporary storage for Newton-Raphson
+  VectorXd lambdaOld;
+  VectorXd lambdaNew;
+  MatrixXd GGt;
+  VectorXd Glambda;
+  ArrayXd Gl11;
+  VectorXd Q1;
+  MatrixXd Q2;
+  LDLT<MatrixXd> Q2ldlt;
+  VectorXd rho;
+  // VectorXd relErr;
+  double relErr; // new
+  double absErr; // new
+  // tolerance for Newton-Raphson lambdaNR and evalOmegas (New)
+  int maxIter;
+  double relTol;
+  VectorXd epsilons; // error term used to order omegas in evalWeights
+  // vector<size_t> epsOrd; // C vector of indicies of ordered epsilons
+  VectorXi epsOrd; // vector of indicies of ordered epsilons
+  VectorXd psots; // partial sum of omegatildas
+  // columnwise outer product (see below)
+  void blockOuter(void);
+  // maximum relative error in lambda: same for cens / non-cens
+  double maxRelErr(const Ref<const VectorXd>& lambdaNew,
+                   const Ref<const VectorXd>& lambdaOld);
+  double maxRelErr(const double& valnew,
+                   const double& valold);
+  // helper function for evalWeights: calculate partial sum of omegas
+  // partial sum of omegas_jj s.t. eps_jj >= eps_ii
+  double evalPsos(const int ii);
 public:
-    // constructor for regression-like problems
-    // InnerELC(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X, 
-    //          const Ref<const VectorXd>& _deltas,
-    //          void* params);
-    InnerELC(); // default ctor
-    void setData(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X, 
-                 const Ref<const VectorXd>& _deltas, void* params); 
-    // logsharp and its derivatives
-    double logsharp(double x, double q);
-    double logsharp1(double x, double q);
-    double logsharp2(double x, double q);
-    // Newton-Raphson algorithm
-    void setTol(const int& _maxIter, const double& _relTol);
-    void lambdaNR(int& nIter, double& maxErr);
-    // void lambdaNR(int& nIter, double& maxErr, 
-    //               int maxIter, double relTol);
-    // eval functions 
-    void evalEpsilons(const Ref<const VectorXd>& beta); // for location model 
-    void evalWeights(); // calculate weights according to epsilons 
-    // void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
-    // void evalOmegas(int maxIter, double relTol);
-    void evalOmegas();
-    // log empirical likelihood calculation with given omegas and G
-    double logEL();
-    // double logEL(int maxIter, double relTol); 
-    // set and get functions 
-    void setLambda(const Ref<const VectorXd>& _lambda); // assigned to lambdaNew
-    void setWeights(const Ref<const VectorXd>& _weights); 
-    void setOmegas(const Ref<const VectorXd>& _omegas);
-    void setEpsilons(const Ref<const VectorXd>& _epsilons);
-    VectorXd getLambda(); 
-    VectorXd getWeights(); 
-    VectorXd getOmegas(); 
-    // log empirical likelihood calculation 
-    // double logEL(const Ref<const VectorXd>& theta, int maxIter, double relTol); 
-    // posterior sampler
-    MatrixXd postSample(int nsamples,int nburn,VectorXd betaInit, 
-                        const Ref<const VectorXd>& sigs, 
-                        VectorXd &RvDoMcmc,VectorXd &paccept);
+  // constructor for regression-like problems
+  // InnerELC(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X, 
+  //          const Ref<const VectorXd>& _deltas,
+  //          void* params);
+  InnerELC(); // default ctor
+  void setData(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X, 
+               const Ref<const VectorXd>& _deltas, void* params); 
+  // logsharp and its derivatives
+  double logsharp(double x, double q);
+  double logsharp1(double x, double q);
+  double logsharp2(double x, double q);
+  // Newton-Raphson algorithm
+  void setTol(const int& _maxIter, const double& _relTol);
+  void lambdaNR(int& nIter, double& maxErr);
+  // void lambdaNR(int& nIter, double& maxErr, 
+  //               int maxIter, double relTol);
+  // eval functions 
+  void evalEpsilons(const Ref<const VectorXd>& beta); // for location model 
+  void evalWeights(); // calculate weights according to epsilons 
+  // void evalOmegas(int& nIter, double& maxErr, int maxIter, double relTol);
+  // void evalOmegas(int maxIter, double relTol);
+  void evalOmegas();
+  // log empirical likelihood calculation with given omegas and G
+  double logEL();
+  // double logEL(int maxIter, double relTol); 
+  // set and get functions 
+  void setLambda(const Ref<const VectorXd>& _lambda); // assigned to lambdaNew
+  void setWeights(const Ref<const VectorXd>& _weights); 
+  void setOmegas(const Ref<const VectorXd>& _omegas);
+  void setEpsilons(const Ref<const VectorXd>& _epsilons);
+  VectorXd getLambda(); 
+  VectorXd getWeights(); 
+  VectorXd getOmegas(); 
+  // log empirical likelihood calculation 
+  // double logEL(const Ref<const VectorXd>& theta, int maxIter, double relTol); 
+  // posterior sampler
+  MatrixXd postSample(int nsamples,int nburn,VectorXd betaInit, 
+                      const Ref<const VectorXd>& sigs, 
+                      VectorXd &RvDoMcmc,VectorXd &paccept);
+  void mwgStep(VectorXd &thetaCur, const int &idx, const double &mwgsd,
+               bool &accept, double &logELCur);
+  MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit,
+                           double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
 };
 
 /*
@@ -568,6 +575,100 @@ inline double InnerELC<ELModel>::logEL() {
 //     }
 // }
 
+template<typename ELModel>
+inline void InnerELC<ELModel>::mwgStep(VectorXd &thetaCur,
+                                      const int &idx,
+                                      const double &mwgsd,
+                                      bool &accept, 
+                                      double &logELCur) {
+  int nTheta = thetaCur.size();
+  accept = false;
+  VectorXd thetaProp = thetaCur;
+  thetaProp(idx) += mwgsd*R::norm_rand();
+  if (nTheta == nBet) {
+    // std::cout << "location model." << std::endl;
+    ELModel::evalG(thetaProp);
+  }
+  else {
+    ELModel::evalG(thetaProp.head(nBet), 
+                   thetaProp.segment(nBet,nGam), 
+                   thetaProp.tail(1));
+  }
+  int nIter;
+  double maxErr;
+  evalEpsilons(thetaProp);
+  evalWeights();
+  lambdaNR(nIter, maxErr);
+  bool satisfy = false;
+  if (nIter < maxIter || maxErr <= relTol) satisfy = true;
+  // if does not satisfy, keep the old theta
+  if (satisfy == false) return;
+  // if does satisfy, flip a coin
+  double u = R::unif_rand();
+  // std::cout << "before evalOmegas" << std::endl;
+  evalOmegas();
+  // std::cout << "omegas = " << omegas.transpose() << std::endl;
+  double logELProp = logEL();
+  // std::cout << "logELProp = " << logELProp << std::endl;
+  double ratio = exp(logELProp-logELCur);
+  double a = std::min(1.0,ratio);
+  if (u < a) { // accepted
+    accept = true;
+    thetaCur = thetaProp;
+    logELCur = logELProp;
+  }
+}
+
+template<typename ELModel>
+inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn, 
+                                                   VectorXd thetaInit,
+                                                   double *mwgSd, bool *rvDoMcmc, 
+                                                   VectorXd &paccept) {
+  int nTheta = thetaInit.size();
+  MwgAdapt tuneMCMC(nTheta, rvDoMcmc);
+  bool *isAccepted = new bool[nTheta];
+  for (int ii=0; ii<nTheta; ii++) {
+    isAccepted[ii] = false;
+  }
+  MatrixXd theta_chain(nTheta,nsamples);
+  // theta_chain.fill(0.0); // debug
+  // paccept.fill(0.0);
+  paccept = VectorXd::Zero(nTheta);
+  VectorXd thetaCur = thetaInit;
+  if (nTheta == nBet) {
+    // std::cout << "location model." << std::endl;
+    ELModel::evalG(thetaCur);
+  }
+  else {
+    ELModel::evalG(thetaCur.head(nBet), 
+                   thetaCur.segment(nBet,nGam), 
+                   thetaCur.tail(1));
+  }
+  evalEpsilons(thetaCur);
+  evalOmegas();
+  double logELCur = logEL();
+  // MCMC loop
+  for(int ii=-nburn; ii<nsamples; ii++) {
+    if (ii % 200 == 0) {
+      std::cout << "ii = " << ii << std::endl;
+    }
+    for(int jj=0; jj<nTheta; jj++) {
+      if(rvDoMcmc[jj]) {
+        // modifies thetaCur's jj-th entry
+        mwgStep(thetaCur,jj,mwgSd[jj],isAccepted[jj],logELCur);
+        if (isAccepted[jj]) paccept(jj) += 1; // add 1 to paccept if accepted
+      }
+    }
+    if (ii >= 0) {
+      theta_chain.col(ii) = thetaCur;
+    }
+    tuneMCMC.adapt(mwgSd, isAccepted);
+  }
+  paccept /= (nsamples+nburn);
+  delete[] isAccepted; // deallocate memory
+  return(theta_chain);
+}
+
 // posterior sampler: location model, single quantile case
 // Note: omegasInit needed as the starting value for EM?
 template<typename ELModel>
@@ -577,15 +678,13 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
                                               VectorXd &RvDoMcmc, VectorXd &paccept) {
   std::cout << "--------------------------- ELC postSample ----------------------------" << std::endl;
   VectorXd betaOld = betaInit;
-  VectorXd betaNew = betaOld;
-  VectorXd betaProp = betaOld;
+  VectorXd betaNew = betaInit;
+  VectorXd betaProp = betaInit;
   int betalen = betaInit.size();
   MatrixXd beta_chain(betalen,nsamples); 
   // beta_chain.fill(0.0); // debug
   ELModel::evalG(betaInit);
-  // std::cout << "G = " << G << std::endl;
   evalEpsilons(betaInit);
-  // std::cout << "omegas = " << omegas.transpose() << std::endl;
   evalOmegas(); // omegasInit should have been assigned
   double logELOld = logEL();
   // std::cout << "after calling logEL()." << std::endl;
@@ -596,7 +695,11 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
   double ratio;
   int nIter;
   double maxErr;
-  paccept = VectorXd::Zero(betaInit.size());
+  // paccept.fill(0.0);
+  paccept = VectorXd::Zero(betalen);
+  // std::cout << "sigs = " << sigs.transpose() << std::endl;
+  // std::cout << "paccept = " << paccept.transpose() << std::endl;
+  // std::cout << "RvDoMcmc = " << RvDoMcmc.transpose() << std::endl;
 
   for (int ii=-nburn; ii<nsamples; ii++) {
     if (ii % 200 == 0) {
@@ -611,7 +714,6 @@ inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
         satisfy = false;
         ELModel::evalG(betaProp);
         evalEpsilons(betaProp);
-        // std::cout << "epsilons = " << epsilons.transpose() << std::endl;
         evalWeights();
         // std::cout << "weights = " << weights.transpose() << std::endl;
         // check whether the constrains are satisfied or not

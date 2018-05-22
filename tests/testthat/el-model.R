@@ -6,9 +6,20 @@
 # return: a nObs x nEqs matrix G
 mr.evalG_R <- function(y, X, beta) {
   tX <- t(X)
-  yXb <- y - c(beta %*% tX)
+  # yXb <- y - c(beta %*% tX)
+  yXb <- y - c(X %*% beta)
   G <- sweep(tX, MARGIN = 2, yXb, `*`)
   return(t(G))
+}
+
+# adjusted EM by chen-et-al2008
+mr.evalGadj_R <- function(y,X,beta) {
+  G <- mr.evalG_R(y,X,beta)
+  n <- length(y)
+  gbar <- 1/n*colSums(G)
+  an <- max(1,0.5*log(n))
+  gadd <- -an*gbar
+  return(rbind(G,gadd))
 }
 
 # location-scale model
@@ -112,5 +123,101 @@ qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
     }
   }
   return(beta_chain)
+}
+
+# ---- posterior samplers ----
+
+post_R <- function(Gfun, nThe, nBet, nGam,
+                   y, X, nsamples, nburn, 
+                   ThetaInit, Sigs, RvDoMcmc, 
+                   max_iter = 100, rel_tol = 1e-07) {
+  nThe <- nrow(ThetaInit)
+  numThe <- ncol(ThetaInit)
+  Theta_chain <- matrix(NA,nrow=nThe*numThe,nsamples)
+  paccept <- matrix(0,nThe,numThe)
+  if (missing(RvDoMcmc)) {
+    RvDoMcmc <- matrix(rep(1,nThe*numThe),nThe,numThe)
+  }
+  
+  ThetaOld <- ThetaInit
+  ThetaNew <- ThetaInit
+  ThetaCur <- ThetaInit
+  
+  if (nThe == nBet) {
+    G <- Gfun(y, X, ThetaInit)
+  }
+  else {
+    G <- Gfun(y, X, Z, 
+              ThetaInit[1:nBet,],
+              ThetaInit[(nBet+1):nThe],
+              ThetaInit[nThe+1,])
+  }
+  
+  lout <- lambdaNR_R(G, max_iter, rel_tol, verbose = FALSE)
+  if (!lout$convergence) message("BetaInit not valid.")
+  omegas <- omega.hat_R(G)
+  logelOld <- logEL_R(omegas)
+  logelCur <- logelOld
+  
+  satisfy <- FALSE
+  u <- 0
+  a <- 0
+  ratio <- 0
+  lambda <- NaN
+  
+  go_next <- FALSE
+  for (ii in -nburn:nsamples) {
+    if (ii %% 200 == 0) message("ii = ", ii)
+    go_next <- FALSE
+    for (kk in 1:numThe) {
+      if (go_next) break
+      for (jj in 1:nThe) {
+        if (RvDoMcmc[jj,kk]) {
+          ThetaCur <- ThetaOld
+          ThetaCur[jj,kk] <- ThetaCur[jj,kk] + Sigs[jj,kk]*rnorm(1)
+          satisfy <- FALSE
+          
+          if (nThe == nBet) {
+            G <- Gfun(y,X,ThetaCur)
+          }
+          else {
+            G <- Gfun(y,X,Z,
+                      ThetaCur[1:nBet,],
+                      ThetaCur[(nBet+1):nThe],
+                      ThetaCur[nThe+1,])
+          }
+          
+          lout <- lambdaNR_R(G, max_iter, rel_tol, verbose = FALSE)
+          if (!lout$convergence) {
+            go_next <- TRUE
+            break
+          }
+          else {
+            satisfy <- TRUE
+            lambda <- lout$lambda
+          }
+          
+          u <- runif(1)
+          logomegahat <- 1/(1 - G %*% lambda)
+          logomegahat <- log(logomegahat)-log(sum(logomegahat))
+          logelCur <- sum(logomegahat)
+          ratio <- exp(logelCur-logelOld)
+          a <- min(1.0,ratio)
+          if (u < a) {
+            paccept[jj,kk] <- paccept[jj,kk]+1
+            ThetaNew <- ThetaCur
+            ThetaOld <- ThetaCur
+            logelOld <- logelCur
+          }
+        }
+      }
+    }
+    if (ii > 0) {
+      Theta_chain[,ii] <- as.vector(ThetaNew)
+    }
+  }
+  paccept <- paccept/(nburn+nsamples)
+  return(list(Theta_chain = Theta_chain,
+              paccept = paccept))
 }
 

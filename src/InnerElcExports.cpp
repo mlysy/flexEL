@@ -43,7 +43,7 @@ Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
 // lambda0: m-vector of starting values
 // [[Rcpp::export(".lambdaNRC")]]
 Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
-                     int maxIter, double relTol, bool verbose) {
+                          int maxIter, double relTol, bool verbose) {
   // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
   int nObs = G.cols();
   int nEqs = G.rows();

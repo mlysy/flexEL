@@ -80,14 +80,17 @@ test_that("under censoring: omegahat.cpp is optimal", {
     p <- sample(1:(n-2), 1)
     # max_iter <- sample(c(2, 10, 100), 1)
     max_iter <- sample(c(10, 100, 500), 1)
+    # max_iter <- 200
     rel_tol <- runif(1, 1e-6, 1e-5)
+    # rel_tol <- 1e-7
     G <- matrix(rnorm(n*p), n, p)
     deltas <- rep(1,n)
     numcens <- sample(round(n/2),1)
+    # numcens <- 3
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol)
+    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
   }
   if (!any(is.nan(omegahat.cpp))) {
     ocheck <- optim_proj(xsol = rep(1,n-p),
@@ -95,6 +98,12 @@ test_that("under censoring: omegahat.cpp is optimal", {
                          npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
                          fun = function(x) {omega.check(x, omegahat.cpp, G, deltas, epsilons)},
                          plot = FALSE)
+    # idx <- which(abs(omegahat.cpp) < n*rel_tol)
+    # ocheck <- optim_proj(xsol = rep(1,n-p-length(idx)),
+    #                      xrng = 0.05,
+    #                      npts = 201, # 101 would contain x exactly 1, o.w. sometimes does not work
+    #                      fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx, rel_tol)},
+    #                      plot = TRUE)
     # print(ocheck)
     expect_lt(max.xdiff(ocheck), 0.01)
   }

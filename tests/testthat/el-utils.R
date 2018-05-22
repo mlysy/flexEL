@@ -69,3 +69,13 @@ omega.check <- function(x, omegas, G, deltas, epsilons) {
   }
 }
 
+# partial check: only on the omegas that are significantly nonzero
+omega.pcheck <- function(x, omegas, G, deltas, epsilons, idx, rel_tol) {
+  p <- ncol(G)
+  n <- nrow(G)
+  nbar <- length(idx)
+  Gext <- rbind(matrix(0,n-nbar,nbar), diag(nbar))
+  Gbar <- cbind(G,Gext)
+  # omegasbar <- c(omegas,omegas[idx])
+  omega.check(x, omegas, Gbar, deltas, epsilons)
+}

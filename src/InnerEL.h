@@ -10,7 +10,7 @@ using namespace Eigen;
 // [[Rcpp::depends(RcppEigen)]]
 
 template <typename ELModel>
-class InnerEL : public ELModel { 
+class InnerEL : public ELModel {
 private:
     using ELModel::nObs;
     using ELModel::nEqs;
@@ -518,7 +518,6 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
   }
 }
 
-// TODO: cts here
 template<typename ELModel>
 inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
                                                   VectorXd thetaInit,
