@@ -30,12 +30,13 @@ Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y,
                                  Eigen::VectorXd alphaArr, 
                                  Eigen::MatrixXd Beta, 
                                  Eigen::MatrixXd Gamma,
+                                 Eigen::VectorXd Sig2,
                                  Eigen::VectorXd Nu) {
   // InnerEL<QuantRegModel> QR(y, X, &alpha); // instantiate
   InnerEL<QuantRegModel> QR;
   // QR.setData(y,X,Z,&alpha); 
   QR.setData(y,X,Z,alphaArr.data());
-  QR.evalG(Beta,Gamma,Nu);
+  QR.evalG(Beta,Gamma,Sig2,Nu);
   Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
   return(G); 
 }
@@ -102,8 +103,8 @@ Rcpp::List QuantReg_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
 Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                            Eigen::VectorXd alphaArr, int nsamples, int nburn, 
                            Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, 
-                           Eigen::VectorXd NuInit, Eigen::MatrixXd Sigs, 
-                           Eigen::MatrixXd RvDoMcmc, 
+                           Eigen::VectorXd Sig2Init, Eigen::VectorXd NuInit, 
+                           Eigen::MatrixXd Sigs, Eigen::MatrixXd RvDoMcmc, 
                            int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
   QR.setData(y,X,Z,alphaArr.data());
@@ -114,6 +115,7 @@ Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd
   Eigen::MatrixXd ThetaInit(BetaInit.rows()+GammaInit.rows()+1, BetaInit.cols());
   ThetaInit.topRows(BetaInit.rows()) = BetaInit;
   ThetaInit.block(BetaInit.rows(),0,GammaInit.rows(),GammaInit.cols()) = GammaInit;
+  ThetaInit.block(BetaInit.rows()+GammaInit.rows(),0,1,GammaInit.cols()) = Sig2Init;
   ThetaInit.bottomRows(1) = NuInit.transpose();
   // std::cout << "QuantRegExports: ThetaInit = \n" << ThetaInit << std::endl;
   Eigen::MatrixXd Theta_chain = QR.postSample(nsamples, nburn,
@@ -132,7 +134,7 @@ Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
                                  Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, 
                                  int nsamples, int nburn,
                                  Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, 
-                                 Eigen::VectorXd nuInit,
+                                 Eigen::VectorXd sig2Init, Eigen::VectorXd nuInit,
                                  Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc,
                                  int maxIter = 100, double relTol = 1e-7) {
   InnerEL<QuantRegModel> QR;
@@ -145,10 +147,12 @@ Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   // bool *rvdomcmc = new bool[nTheta*numTheta];
   
   // concatenate (stack) them together
-  Eigen::VectorXd thetaInit(betaInit.size()+gammaInit.size()+1, betaInit.size());
+  Eigen::VectorXd thetaInit(betaInit.size()+gammaInit.size()+2, betaInit.size());
   thetaInit.head(betaInit.size()) = betaInit;
   thetaInit.segment(betaInit.size(),gammaInit.size()) = gammaInit;
+  thetaInit.segment(betaInit.size()+gammaInit.size(),1) = sig2Init;
   thetaInit.tail(1) = nuInit;
+  // std::cout << "thetaInit = " << thetaInit.transpose() << std::endl;
   
   int nTheta = thetaInit.size();
   bool *rvdomcmc = new bool[nTheta];
@@ -159,6 +163,7 @@ Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X,
   Eigen::MatrixXd theta_chain = QR.postSampleAdapt(nsamples, nburn,
                                                    thetaInit, mwgSd.data(),
                                                    rvdomcmc, paccept);
+  // Eigen::MatrixXd theta_chain = Eigen::MatrixXd::Zero(1,1);
   delete[] rvdomcmc;
   Rcpp::List retlst;
   retlst["theta_chain"] = theta_chain;

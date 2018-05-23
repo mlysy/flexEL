@@ -4,8 +4,8 @@
 \alias{qrls.post}
 \title{Posterior sampler for quantile regression (location-scale model)}
 \usage{
-qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, NuInit, Sigs,
-  RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
+qrls.post(y, X, Z, alphas, nsamples, nburn, BetaInit, GammaInit, Sig2Init,
+  NuInit, Sigs, RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}

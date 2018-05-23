@@ -269,8 +269,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantRegLS_evalG
-Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, Eigen::MatrixXd Beta, Eigen::MatrixXd Gamma, Eigen::VectorXd Nu);
-RcppExport SEXP _bayesEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP BetaSEXP, SEXP GammaSEXP, SEXP NuSEXP) {
+Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, Eigen::MatrixXd Beta, Eigen::MatrixXd Gamma, Eigen::VectorXd Sig2, Eigen::VectorXd Nu);
+RcppExport SEXP _bayesEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP BetaSEXP, SEXP GammaSEXP, SEXP Sig2SEXP, SEXP NuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -280,8 +280,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type alphaArr(alphaArrSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Beta(BetaSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Gamma(GammaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type Sig2(Sig2SEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type Nu(NuSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG(y, X, Z, alphaArr, Beta, Gamma, Nu));
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG(y, X, Z, alphaArr, Beta, Gamma, Sig2, Nu));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -326,8 +327,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantRegLS_post
-Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, Eigen::VectorXd NuInit, Eigen::MatrixXd Sigs, Eigen::MatrixXd RvDoMcmc, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_QuantRegLS_post(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP GammaInitSEXP, SEXP NuInitSEXP, SEXP SigsSEXP, SEXP RvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List QuantRegLS_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd GammaInit, Eigen::VectorXd Sig2Init, Eigen::VectorXd NuInit, Eigen::MatrixXd Sigs, Eigen::MatrixXd RvDoMcmc, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantRegLS_post(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP GammaInitSEXP, SEXP Sig2InitSEXP, SEXP NuInitSEXP, SEXP SigsSEXP, SEXP RvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -339,18 +340,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type BetaInit(BetaInitSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type GammaInit(GammaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type Sig2Init(Sig2InitSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type NuInit(NuInitSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Sigs(SigsSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type RvDoMcmc(RvDoMcmcSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post(y, X, Z, alphaArr, nsamples, nburn, BetaInit, GammaInit, NuInit, Sigs, RvDoMcmc, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post(y, X, Z, alphaArr, nsamples, nburn, BetaInit, GammaInit, Sig2Init, NuInit, Sigs, RvDoMcmc, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
 // QuantRegLS_post_adapt
-Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, Eigen::VectorXd nuInit, Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc, int maxIter, double relTol);
-RcppExport SEXP _bayesEL_QuantRegLS_post_adapt(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP nuInitSEXP, SEXP mwgSdSEXP, SEXP rvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+Rcpp::List QuantRegLS_post_adapt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, Eigen::VectorXd sig2Init, Eigen::VectorXd nuInit, Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_QuantRegLS_post_adapt(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP sig2InitSEXP, SEXP nuInitSEXP, SEXP mwgSdSEXP, SEXP rvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -362,12 +364,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type gammaInit(gammaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type sig2Init(sig2InitSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type nuInit(nuInitSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type mwgSd(mwgSdSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type rvDoMcmc(rvDoMcmcSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post_adapt(y, X, Z, alphaArr, nsamples, nburn, betaInit, gammaInit, nuInit, mwgSd, rvDoMcmc, maxIter, relTol));
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_post_adapt(y, X, Z, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, maxIter, relTol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -433,11 +436,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_MeanRegCens_post", (DL_FUNC) &_bayesEL_MeanRegCens_post, 11},
     {"_bayesEL_MeanRegCens_post_adapt", (DL_FUNC) &_bayesEL_MeanRegCens_post_adapt, 11},
     {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},
-    {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 7},
+    {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 8},
     {"_bayesEL_QuantReg_post", (DL_FUNC) &_bayesEL_QuantReg_post, 10},
     {"_bayesEL_QuantReg_post_adapt", (DL_FUNC) &_bayesEL_QuantReg_post_adapt, 10},
-    {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 13},
-    {"_bayesEL_QuantRegLS_post_adapt", (DL_FUNC) &_bayesEL_QuantRegLS_post_adapt, 13},
+    {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 14},
+    {"_bayesEL_QuantRegLS_post_adapt", (DL_FUNC) &_bayesEL_QuantRegLS_post_adapt, 14},
     {"_bayesEL_QuantRegCens_post", (DL_FUNC) &_bayesEL_QuantRegCens_post, 12},
     {"_bayesEL_QuantRegCens_post_adapt", (DL_FUNC) &_bayesEL_QuantRegCens_post_adapt, 12},
     {NULL, NULL, 0}

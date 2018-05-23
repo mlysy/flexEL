@@ -34,7 +34,8 @@ public:
   // for location-scale linear regression models
   void evalG(const Ref<const VectorXd>& beta, 
              const Ref<const VectorXd>& gamma, 
-             const Ref<const VectorXd>& sig2);
+             const Ref<const VectorXd>& sig2,
+             const Ref<const VectorXd>& dummy);
   void setG(const Ref<const MatrixXd>& _G); 
   MatrixXd getG();
 };
@@ -124,8 +125,8 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
 */
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
                                 const Ref<const VectorXd>& gamma,
-                                const Ref<const VectorXd>& sig2) {
-                                // const Ref<const VectorXd>& dummy) {
+                                const Ref<const VectorXd>& sig2,
+                                const Ref<const VectorXd>& dummy) {
   eZg.array() = (-gamma.transpose()*Z).array().exp();
   yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
   yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();

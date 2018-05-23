@@ -17,7 +17,7 @@
 #' @details ...
 #' @export qrls.post
 qrls.post <- function(y, X, Z, alphas, nsamples, nburn,
-                      BetaInit, GammaInit, NuInit, Sigs, RvDoMcmc, 
+                      BetaInit, GammaInit, Sig2Init, NuInit, Sigs, RvDoMcmc, 
                       max_iter = 100, rel_tol = 1e-7) {
   # input conversion
   if (length(alphas) == 1 && is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
@@ -55,6 +55,6 @@ qrls.post <- function(y, X, Z, alphas, nsamples, nburn,
     stop("BetaInit and Sigs have inconsistent dimensions.")
   }
   .QuantRegLS_post(y, t(X), t(Z), alpha, nsamples, nburn, 
-                   BetaInit, GammaInit, NuInit, Sigs, RvDoMcmc, 
+                   BetaInit, GammaInit, Sig2Init, NuInit, Sigs, RvDoMcmc, 
                    maxIter = max_iter, relTol = rel_tol)
 }

@@ -9,7 +9,7 @@
 #' @param Nu Length-\code{numNu} vector of initial value for the chain.
 #' @return G matrix for location-scale quantile regression model. 
 #' @export qrls.evalG
-qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma, Nu) { 
+qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
@@ -20,6 +20,6 @@ qrls.evalG <- function(y, X, Z, alphas, Beta, Gamma, Nu) {
     stop("Parameters must be in matrix form when alphas has more than one entry.")
   }
   alpha <- c(length(alphas), alphas) 
-  G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, Beta, Gamma, Nu)
+  G <- .QuantRegLS_evalG(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu)
   return(t(G))
 }

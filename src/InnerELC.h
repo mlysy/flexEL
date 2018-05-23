@@ -589,11 +589,23 @@ inline void InnerELC<ELModel>::mwgStep(VectorXd &thetaCur,
     // std::cout << "location model." << std::endl;
     ELModel::evalG(thetaProp);
   }
+  else if (nTheta == nBet + nGam + 1){
+    ELModel::evalG(thetaProp.head(nBet), 
+                   thetaProp.segment(nBet,nGam), 
+                   thetaProp.tail(1),
+                   VectorXd::Zero(0));
+  }
   else {
     ELModel::evalG(thetaProp.head(nBet), 
                    thetaProp.segment(nBet,nGam), 
+                   thetaCur.segment(nBet+nGam,1),
                    thetaProp.tail(1));
   }
+  // else {
+  //   ELModel::evalG(thetaProp.head(nBet), 
+  //                  thetaProp.segment(nBet,nGam), 
+  //                  thetaProp.tail(1));
+  // }
   int nIter;
   double maxErr;
   evalEpsilons(thetaProp);
@@ -639,11 +651,23 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
     // std::cout << "location model." << std::endl;
     ELModel::evalG(thetaCur);
   }
+  else if (nTheta == nBet + nGam + 1){
+    ELModel::evalG(thetaCur.head(nBet), 
+                   thetaCur.segment(nBet,nGam), 
+                   thetaCur.tail(1),
+                   VectorXd::Zero(0));
+  }
   else {
     ELModel::evalG(thetaCur.head(nBet), 
                    thetaCur.segment(nBet,nGam), 
+                   thetaCur.segment(nBet+nGam,1),
                    thetaCur.tail(1));
   }
+  // else {
+  //   ELModel::evalG(thetaCur.head(nBet), 
+  //                  thetaCur.segment(nBet,nGam), 
+  //                  thetaCur.tail(1));
+  // }
   evalEpsilons(thetaCur);
   evalOmegas();
   double logELCur = logEL();

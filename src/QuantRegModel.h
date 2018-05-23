@@ -33,8 +33,12 @@ public:
   void evalG(const Ref<const MatrixXd>& Beta);
   // void evalG(const Ref<const VectorXd>& beta,
   //            const Ref<const VectorXd>& gamma);
+  // void evalG(const Ref<const MatrixXd>& Beta, 
+  //            const Ref<const MatrixXd>& Gamma,
+  //            const Ref<const VectorXd>& Nu);
   void evalG(const Ref<const MatrixXd>& Beta, 
              const Ref<const MatrixXd>& Gamma,
+             const Ref<const VectorXd>& Sig2,
              const Ref<const VectorXd>& Nu);
   void setG(const Ref<const MatrixXd>& _G); 
   MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
@@ -96,7 +100,7 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
   nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
-  nEqs = nQts*(nBet+nGam+1);
+  nEqs = nQts*(nBet+nGam+2);
   // nEqs = nQts*(nBet+nGam);
   
   G = MatrixXd::Zero(nEqs,nObs);
@@ -162,8 +166,34 @@ inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta) {
 //   }
 // }
 
+// include the variance and scale param
+inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta,
+                                 const Ref<const MatrixXd>& Gamma,
+                                 const Ref<const VectorXd>& Sig2,
+                                 const Ref<const VectorXd>& Nu) {
+  // std::cout << "nQts = " << nQts << std::endl;
+  if ((Sig2.array() < 0).any()) {
+    std::cout << "negative variance." << std::endl;
+  }
+  double phivalue;
+  for (int jj=0; jj<nQts; jj++) {
+    eZg.array() = (-Gamma.col(jj).transpose()*Z).array().exp();
+    // std::cout << "eZg = " << eZg << std::endl;
+    yXbeZg.array() = (y.transpose()-Beta.col(jj).transpose()*X).array()*eZg.array()/sqrt(Sig2(jj))-Nu(jj);
+    // std::cout << "yXbeZg = " << yXbeZg << std::endl;
+    for(int ii=0; ii<y.size(); ii++) {
+      phivalue = phi_alpha(yXbeZg(ii), alpha[jj]);
+      G.block(jj*(nBet+nGam+1),ii,nBet,1) = phivalue*eZg(ii)*X.col(ii);
+      G.block(jj*(nBet+nGam+1)+nBet,ii,nGam,1) = phivalue*yXbeZg(ii)*Z.col(ii);
+      G((jj+1)*(nBet+nGam+1)-1,ii) = phivalue;
+    }
+    G.block((jj+1)*(nBet+nGam+1),0,1,nObs).array() = yXbeZg.array()*yXbeZg.array()-1;
+  }
+}
+
 // multiple quantile case
 // form the G matrix (location-scale model)
+/*
 inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta,
                                  const Ref<const MatrixXd>& Gamma,
                                  const Ref<const VectorXd>& Nu) {
@@ -184,6 +214,8 @@ inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta,
     // G.block((jj+1)*(nBet+nGam+1)-1,0,1,nObs).array() = yXbeZg.array()*yXbeZg.array()-1;
   }
 }
+*/
+
 
 // set function for G matrix
 inline void QuantRegModel::setG(const Ref<const MatrixXd>& _G) {

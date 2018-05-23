@@ -62,7 +62,7 @@ betaInit <- c(rq(y ~ 1, tau = alpha, method = 'fn')$coefficients)
 betaInit
 sigs <- rep(0.2,1)
 system.time(
-  qrout <- qr_cens.post_adapt(y, X, deltas,alpha, nsamples, nburn, betaInit, sigs)
+  qrout <- qr_cens.post_adapt(y, X, deltas, alpha, nsamples, nburn, betaInit, sigs)
 )
 mu_chain <- qrout$beta_chain
 mu_paccept <- qrout$paccept 
@@ -70,7 +70,7 @@ mu_paccept
 
 # 10000+2000 with sigs = 0.2
 # user  system elapsed 
-# 930.123   3.755 942.467 
+# 93.837   0.404  94.887 
 
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
 
@@ -207,7 +207,7 @@ beta0 <- c(beta_I, beta_S)
 beta0
 
 # random censoring
-cc <- rnorm(n,mean=1.5*abs(yy),sd=1)
+cc <- rnorm(n,mean=1.5,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -237,7 +237,8 @@ Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 logel.mat <- apply(Beta.seq, 1, function(bb) {
   G <- qr.evalG(y,X,alpha,matrix(c(bb[1],bb[2]),2,1))
   epsilons <- y - c(X %*% matrix(c(bb[1],bb[2]),2,1))
-  logEL(G,deltas,epsilons)
+  omegas <- omega.hat(G,deltas,epsilons)
+  logEL(omegas,epsilons,deltas)
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))
@@ -253,7 +254,7 @@ RvDoMcmc <- rbind(1,1)
 k <- which(as.logical(RvDoMcmc))
 betaInit[-k] <- beta0[-k]
 system.time(
-  qrout <- qr_cens.post_adapt(y, X, deltas,alpha, nsamples, nburn, 
+  qrout <- qr_cens.post_adapt(y, X, deltas, alpha, nsamples, nburn, 
                         betaInit, sigs, RvDoMcmc)
   # c(betaInit[1],beta0[2])
 )

@@ -4,7 +4,7 @@
 \alias{qrls.evalG}
 \title{Evaluate the G matrix for mean regression (location-scale model)}
 \usage{
-qrls.evalG(y, X, Z, alphas, Beta, Gamma, Nu)
+qrls.evalG(y, X, Z, alphas, Beta, Gamma, Sig2, Nu)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}

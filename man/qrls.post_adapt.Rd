@@ -4,8 +4,8 @@
 \alias{qrls.post_adapt}
 \title{Adaptive posterior sampler for qunatile regression (location-scale model)}
 \usage{
-qrls.post_adapt(y, X, Z, alpha, nsamples, nburn, betaInit, gammaInit, nuInit,
-  mwgSd, RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
+qrls.post_adapt(y, X, Z, alpha, nsamples, nburn, betaInit, gammaInit, sig2Init,
+  nuInit, mwgSd, RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
@@ -23,6 +23,8 @@ qrls.post_adapt(y, X, Z, alpha, nsamples, nburn, betaInit, gammaInit, nuInit,
 \item{betaInit}{\code{nBet} vector of initial value for the parameters in the linear location function.}
 
 \item{gammaInit}{\code{nGam} vector of initial value for the parameters in the exponential scale function.}
+
+\item{sig2Init}{A scalar of initial value for scale parameter.}
 
 \item{nuInit}{A scalar of initial value for the quantile value of the error term.}
 

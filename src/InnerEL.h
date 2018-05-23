@@ -366,15 +366,20 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   if (nTheta == nBet) { // location regs
     ELModel::evalG(ThetaOld);
   }
-  // else if (nTheta == nBet + nGam){ // LS mean reg
-  //   ELModel::evalG(ThetaOld.topRows(nBet),
-  //                  ThetaOld.bottomRows(nGam), 
-  //                  VectorXd::Zero(0));
-  //   // std::cout << "G = \n" << G << std::endl;
-  // }
+  else if (nTheta == nBet + nGam + 1){ // LS mean reg
+    ELModel::evalG(ThetaOld.topRows(nBet), 
+                   ThetaOld.block(nBet,0,nGam,numTheta), 
+                   ThetaOld.bottomRows(1),
+                   VectorXd::Zero(0));
+    // ELModel::evalG(ThetaOld.topRows(nBet),
+    //                ThetaOld.bottomRows(nGam),
+    //                VectorXd::Zero(0));
+    // std::cout << "G = \n" << G << std::endl;
+  }
   else { // LS quant reg
     ELModel::evalG(ThetaOld.topRows(nBet), 
                    ThetaOld.block(nBet,0,nGam,numTheta), 
+                   ThetaOld.block(nBet+nGam,0,1,numTheta),
                    ThetaOld.bottomRows(1));
     // std::cout << "ThetaOld.topRows(nBet) = " << ThetaOld.topRows(nBet) << std::endl;
     // std::cout << "ThetaOld.block(nBet,0,nGam,numTheta) = " << ThetaOld.block(nBet,0,nGam,numTheta) << std::endl;
@@ -420,16 +425,21 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
             ELModel::evalG(ThetaProp);
             // std::cout << "G = \n" << G << std::endl;
           }
-          // else if (nTheta == nBet + nGam){
-          //   ELModel::evalG(ThetaProp.topRows(nBet), 
-          //                  ThetaProp.bottomRows(nTheta-nBet), 
-          //                  VectorXd::Zero(0));
-          //   // std::cout << "G = \n" << G << std::endl;
-          // }
+          else if (nTheta == nBet + nGam + 1){
+            // ELModel::evalG(ThetaProp.topRows(nBet),
+            //                ThetaProp.bottomRows(nTheta-nBet),
+            //                VectorXd::Zero(0));
+            ELModel::evalG(ThetaProp.topRows(nBet), 
+                           ThetaProp.block(nBet,0,nGam,numTheta), 
+                           ThetaProp.bottomRows(1),
+                           VectorXd::Zero(0));
+            // std::cout << "G = \n" << G << std::endl;
+          }
           else {
             // std::cout << "calling LS quant evalG" << std::endl;
             ELModel::evalG(ThetaProp.topRows(nBet), 
                            ThetaProp.block(nBet,0,nGam,numTheta), 
+                           ThetaProp.block(nBet+nGam,0,1,numTheta),
                            ThetaProp.bottomRows(1));
           }
           // lambdaNR(nIter, maxErr, maxIter, relTol);
@@ -488,12 +498,22 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
   accept = false;
   VectorXd thetaProp = thetaCur;
   thetaProp(idx) += mwgsd*R::norm_rand();
+  // sig2 has to be positive
+  if (idx == nBet+nGam && thetaProp(idx) < 0) return;
+  
   if (nTheta == nBet) {
     ELModel::evalG(thetaProp);
+  }
+  else if (nTheta == nBet + nGam + 1){
+    ELModel::evalG(thetaProp.head(nBet), 
+                   thetaProp.segment(nBet,nGam), 
+                   thetaProp.tail(1),
+                   VectorXd::Zero(0));
   }
   else {
     ELModel::evalG(thetaProp.head(nBet), 
                    thetaProp.segment(nBet,nGam), 
+                   thetaProp.segment(nBet+nGam,1),
                    thetaProp.tail(1));
   }
   int nIter;
@@ -536,10 +556,18 @@ inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
   if (nTheta == nBet) {
     ELModel::evalG(thetaCur);
   }
+  else if (nTheta == nBet + nGam + 1){
+    ELModel::evalG(thetaCur.head(nBet), 
+                   thetaCur.segment(nBet,nGam), 
+                   thetaCur.tail(1),
+                   VectorXd::Zero(0));
+  }
   else {
     ELModel::evalG(thetaCur.head(nBet), 
                    thetaCur.segment(nBet,nGam), 
+                   thetaCur.segment(nBet+nGam,1),
                    thetaCur.tail(1));
+    // std::cout << "G = \n" << G << std::endl;
   }
   int nIter;
   double maxErr;

@@ -9,7 +9,7 @@ source("gen_eps.R")
 
 # ---- X and Z both dim 1 (works fine for all eps here) ----
 # dimensions
-n <- 200 # number of observations
+n <- 300 # number of observations
 p <- 1
 q <- 1
 
@@ -25,6 +25,7 @@ beta0 <- rnorm(p)
 beta0
 gamma0 <- rnorm(q)
 gamma0
+sig20 <- abs(rnorm(1))
 # beta0 <- 0.5
 # gamma0 <- -0.5
 alpha <- 0.75
@@ -35,19 +36,22 @@ eps <- genout$eps
 nu0 <- genout$nu0
 
 # response
-y <- c(X %*% beta0 + exp(0.5 * Z %*% gamma0)*eps)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 plot(y~X, cex=0.3)
 
 # calculate the marginal posterior distributions
 numpoints <- 50
 beta.seq <- seq(-1+beta0, 1+beta0, length.out = numpoints)
 gamma.seq <- seq(-1+gamma0, 1+gamma0, length.out = numpoints)
+sig2.seq <- seq(sig20-1,sig20+1,length.out = numpoints)
 nu.seq <- seq(-1+nu0, 1+nu0, length.out = numpoints)
 
-Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq, nu.seq))
+# Note: this may take a long while to calculate 
+Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq, sig2.seq, nu.seq))
 logel.mat <- apply(Theta.seq, 1, function(bb) {
-  G <- qrls.evalG(y,X,Z,alpha,bb[1],bb[2],bb[3])
-  logEL(G)
+  G <- qrls.evalG(y,X,Z,alpha,bb[1],bb[2],bb[3],bb[4])
+  omegas <- omega.hat(G)
+  logEL(omegas)
 })
 logel.mat <- array(logel.mat, c(numpoints, numpoints,numpoints))
 el.mat <- exp(logel.mat - max(logel.mat))
@@ -60,42 +64,55 @@ numpoints <- 100
 beta.seq <- seq(-1+beta0,1+beta0,length.out = numpoints)
 logel.seq1 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta.seq[ii],gamma0/2,nu0)
-  logel.seq1[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,beta.seq[ii],gamma0/2,sig20,nu0)
+  omegas <- omega.hat(G)
+  logel.seq1[ii] <- logEL(omegas)
 }
 logelmode1 <- plotEL(beta.seq, logel.seq1, beta0, NA, expression(beta[0]))
 
 gamma.seq <- seq(-1+gamma0/2,1+gamma0/2,length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma.seq[ii],nu0)
-  logel.seq2[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma.seq[ii],sig20,nu0)
+  omegas <- omega.hat(G)
+  logel.seq2[ii] <- logEL(omegas)
 }
 logelmode2 <- plotEL(gamma.seq, logel.seq2, gamma0/2, NA, expression(gamma[0]))
 
-nu.seq <- seq(-1+nu0,1+nu0,length.out = numpoints)
+sig2.seq <- seq(-.5+sig20,.5+sig20,length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,nu.seq[ii])
-  logel.seq3[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig2.seq[ii],nu0)
+  omegas <- omega.hat(G)
+  logel.seq3[ii] <- logEL(omegas)
 }
-logelmode3 <- plotEL(nu.seq, logel.seq3, nu0, NA, expression(nu))
+logelmode3 <- plotEL(sig2.seq, logel.seq3, sig20, NA, expression(sigma^2))
+
+nu.seq <- seq(-1+nu0,1+nu0,length.out = numpoints)
+logel.seq4 <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig20,nu.seq[ii])
+  omegas <- omega.hat(G)
+  logel.seq4[ii] <- logEL(omegas)
+}
+logelmode4 <- plotEL(nu.seq, logel.seq4, nu0, NA, expression(nu))
 
 # mcmc
-nsamples <- 20000
+nsamples <- 10000
 nburn <- 3000
-theta.hat <- hlm.fit(y = y, X = X, W = Z) # solve by hlm
+theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm
 betaInit <- theta.hat$beta
-gammaInit <- theta.hat$gamma/2
-eps_new <- c((y - X %*% theta.hat$beta)*exp(-0.5*Z %*% theta.hat$gamma))
+gammaInit <- theta.hat$gamma[2]/2
+sig2Init <- exp(theta.hat$gamma[1])
+eps_new <- c((y - X %*% betaInit)*exp(-Z %*% gammaInit)/sqrt(sig2Init))
 nuInit <- quantile(eps_new,alpha)
-sigs <- c(0.2,0.2,0.2)
-RvDoMcmc <- c(0,0,1)
+sigs <- c(0.2,0.2,0.1,0.2)
+RvDoMcmc <- c(0,0,1,0)
 system.time(
-  # postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nu0,sigs,RvDoMcmc)
-  postout <- qrls.post_adapt(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nuInit,sigs,RvDoMcmc)
+  # postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,sig20,nu0,sigs,RvDoMcmc)
+  postout <- qrls.post_adapt(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,sig2Init,nu0, sigs,RvDoMcmc)
 )
-theta_chain <- postout$Theta_chain
+theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 
@@ -134,20 +151,34 @@ legend('topright',legend=c(expression('true param'),
 hist(theta_chain[3,],breaks=50,freq=FALSE,
      xlab = expression(nu), main='')
 # marginal line
-lines(nu.seq, norm_pdf(logel.marg3, nu.seq),
+lines(sig2.seq, norm_pdf(logel.marg3, sig2.seq),
       cex=0.1, col = 'red', type='l')
 # conditional line
-lines(nu.seq, norm_pdf(logel.seq3, nu.seq),
+lines(sig2.seq, norm_pdf(logel.seq3, sig2.seq),
+      cex=0.1, col = 'blue', type='l')
+abline(v=sig20, col='red')
+abline(v=mean(theta_chain[3,]), col='blue')
+legend('topright',legend=c(expression('true param'),
+                           expression('sample mean')),
+       lty = c(1,1), col = c('red','blue'), cex = 0.6)
+
+hist(theta_chain[4,],breaks=50,freq=FALSE,
+     xlab = expression(nu), main='')
+# marginal line
+lines(nu.seq, norm_pdf(logel.marg4, nu.seq),
+      cex=0.1, col = 'red', type='l')
+# conditional line
+lines(nu.seq, norm_pdf(logel.seq4, nu.seq),
       cex=0.1, col = 'blue', type='l')
 abline(v=nu0, col='red')
-abline(v=mean(theta_chain[3,]), col='blue')
+abline(v=mean(theta_chain[4,]), col='blue')
 legend('topright',legend=c(expression('true param'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
 # ---- X and Z both dim 2 ----
 # dimensions
-n <- 200 # number of observations
+n <- 300 # number of observations
 p <- 2
 q <- 2
 X <- cbind(rep(1,n),rnorm(n))
@@ -160,6 +191,7 @@ beta0 <- rnorm(p)
 beta0
 gamma0 <- rnorm(q)
 gamma0
+sig20 <- abs(rnorm(1))
 alpha <- 0.75
 
 # dist is one of "norm","t","chisq","lnorm"
@@ -168,7 +200,7 @@ eps <- genout$eps
 nu0 <- genout$nu0
 
 # response
-y <- c(X %*% beta0 + exp(0.5 * Z %*% gamma0)*eps)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 # plot(y~X[,2], cex=0.3)
 
 # for plotting conditional curves
@@ -177,42 +209,56 @@ numpoints <- 100
 beta.seq1 <- seq(-1+beta0[1],1+beta0[1],length.out = numpoints)
 logel.seq1 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,c(beta.seq1[ii],beta0[2]),gamma0/2,nu0)
-  logel.seq1[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,c(beta.seq1[ii],beta0[2]),gamma0/2,sig20,nu0)
+  omegas <- omega.hat(G)
+  logel.seq1[ii] <- logEL(omegas)
 }
 logelmode1 <- plotEL(beta.seq1, logel.seq1, beta0[1], NA, expression(beta[0]))
 
 beta.seq2 <- seq(-1+beta0[2],1+beta0[2],length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,c(beta0[1],beta.seq2[ii]),gamma0/2,nu0)
-  logel.seq2[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,c(beta0[1],beta.seq2[ii]),gamma0/2,sig20,nu0)
+  omegas <- omega.hat(G)
+  logel.seq2[ii] <- logEL(omegas)
 }
 logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
 
 gamma.seq1 <- seq(-1+gamma0[1]/2,1+gamma0[1]/2,length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma.seq1[ii],gamma0[2]/2),nu0)
-  logel.seq3[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma.seq1[ii],gamma0[2]/2),sig20,nu0)
+  omegas <- omega.hat(G)
+  logel.seq3[ii] <- logEL(omegas)
 }
 logelmode3 <- plotEL(gamma.seq1, logel.seq3, gamma0[1]/2, NA, expression(gamma[0]))
 
 gamma.seq2 <- seq(-1+gamma0[2]/2,1+gamma0[2]/2,length.out = numpoints)
 logel.seq4 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma0[1]/2,gamma.seq2[ii]),nu0)
-  logel.seq4[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma0[1]/2,gamma.seq2[ii]),sig20,nu0)
+  omegas <- omega.hat(G)
+  logel.seq4[ii] <- logEL(omegas)
 }
 logelmode4 <- plotEL(gamma.seq2, logel.seq4, gamma0[2]/2, NA, expression(gamma[1]))
 
-nu.seq <- seq(-1+nu0,1+nu0,length.out = numpoints)
+sig2.seq <- seq(-.75+sig20,1+sig20,length.out = numpoints)
 logel.seq5 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,nu.seq[ii])
-  logel.seq5[ii] <- logEL(G = G)
+  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig2.seq[ii],nu0)
+  omegas <- omega.hat(G)
+  logel.seq5[ii] <- logEL(omegas)
 }
 logelmode5 <- plotEL(nu.seq, logel.seq5, nu0, NA, expression(nu))
+
+nu.seq <- seq(-1+nu0,1+nu0,length.out = numpoints)
+logel.seq6 <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig20,nu.seq[ii])
+  omegas <- omega.hat(G)
+  logel.seq6[ii] <- logEL(omegas)
+}
+logelmode6 <- plotEL(nu.seq, logel.seq6, nu0, NA, expression(nu))
 
 # mcmc
 nsamples <- 20000
@@ -221,18 +267,20 @@ nburn <- 3000
 theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z))
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2:(q+1)]/2
-nuInit <- quantile((y-X %*% betaInit)*exp(-0.5*Z %*% gammaInit),alpha)
-mwgSd <- c(0.15,0.2,0.2,0.2,0.25)
+sig2Init <- exp(theta.hat$gamma[1])
+nuInit <- quantile((y-X %*% betaInit)*exp(-0.5*Z %*% gammaInit)/sqrt(sig2Init),alpha)
+mwgSd <- c(0.15,0.2,0.2,0.2,0.2,0.25)
 
 # choose which parameters to update, and others are fixed
-RvDoMcmc <- rep(0,5)
+RvDoMcmc <- rep(0,6)
 RvDoMcmc[5] <- 1
 
 system.time(
   # postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nu0,mwgSd,RvDoMcmc)
-  postout <- qrls.post(y,X,Z,alpha,nsamples,nburn,beta0,gamma0/2,nuInit,mwgSd,RvDoMcmc)
+  postout <- qrls.post_adapt(y,X,Z,alpha,nsamples,nburn,
+                             beta0,gamma0/2,sig2Init,nu0,mwgSd,RvDoMcmc)
 )
-theta_chain <- postout$Theta_chain
+theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 
@@ -273,11 +321,18 @@ abline(v=gamma0[2],col='red')
 abline(v=mean(theta_chain[4,]),col='blue')
 
 hist(theta_chain[5,],breaks=50,freq=FALSE,
+     xlab = expression(sigma^2), main='')
+# conditional line
+lines(sig2.seq, norm_pdf(logel.seq5, sig2.seq),
+      cex=0.1, col = 'blue', type='l')
+abline(v=sig20,col='red')
+abline(v=mean(theta_chain[5,]),col='blue')
+
+hist(theta_chain[6,],breaks=50,freq=FALSE,
      xlab = expression(nu), main='')
 # conditional line
-lines(nu.seq, norm_pdf(logel.seq5, nu.seq),
+lines(nu.seq, norm_pdf(logel.seq6, nu.seq),
       cex=0.1, col = 'blue', type='l')
 abline(v=nu0,col='red')
 abline(v=mean(theta_chain[5,]),col='blue')
-
 

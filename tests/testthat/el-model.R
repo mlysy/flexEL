@@ -63,17 +63,18 @@ qr.evalG_R <- function(y, X, alpha, beta) {
 }
 
 # location-scale model
-qrls.evalG_R <- function(y, X, Z, alpha, beta, gamma, nu) {
+qrls.evalG_R <- function(y, X, Z, alpha, beta, gamma, sig2, nu) {
   nObs <- nrow(X)
   nBeta <- length(beta)
   nGamma <- length(gamma)
-  G <- matrix(NaN, nObs, nBeta + nGamma + 1)
+  G <- matrix(NaN, nObs, nBeta + nGamma + 2)
   eZg <- c(exp(-Z %*% gamma))
-  yXbeZg <- c((y - X %*% beta)*eZg-nu)
+  yXbeZg <- c((y - X %*% beta)*eZg/sqrt(sig2)-nu)
   pyXbeZg <- phi_alpha(yXbeZg, alpha)
   G[,1:nBeta] <- pyXbeZg * eZg * X # times each col of X
   G[,nBeta+1:nGamma] <- pyXbeZg * yXbeZg * Z # times each col of Z
   G[,nBeta+nGamma+1] <- pyXbeZg
+  G[,nBeta+nGamma+2] <- yXbeZg*yXbeZg-1
   return(G)
 }
 

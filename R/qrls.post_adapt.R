@@ -8,6 +8,7 @@
 #' @param nburn number of samples to discard before saving the chain.
 #' @param betaInit \code{nBet} vector of initial value for the parameters in the linear location function. 
 #' @param gammaInit \code{nGam} vector of initial value for the parameters in the exponential scale function. 
+#' @param sig2Init A scalar of initial value for scale parameter.
 #' @param nuInit A scalar of initial value for the quantile value of the error term.
 #' @param mwgSd Length-\code{nEqs} vector of tuning parameters. 
 #' @param RvDoMcmc \code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.
@@ -17,7 +18,7 @@
 #' @details ...
 #' @export qrls.post_adapt
 qrls.post_adapt <- function(y, X, Z, alpha, nsamples, nburn, 
-                            betaInit, gammaInit, nuInit, 
+                            betaInit, gammaInit, sig2Init, nuInit, 
                             mwgSd, RvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
   # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
@@ -30,7 +31,8 @@ qrls.post_adapt <- function(y, X, Z, alpha, nsamples, nburn,
   # }
   # if (is.vector(RvDoMcmc)) RvDoMcmc <- matrix(RvDoMcmc,length(RvDoMcmc),1)
   if (missing(RvDoMcmc)) {
-    RvDoMcmc <- rep(1, nrow(betaInit)+nrow(gammaInit)+1)
+    RvDoMcmc <- rep(1, length(betaInit)+length(gammaInit)+2)
+    # RvDoMcmc <- rep(1, nrow(betaInit)+nrow(gammaInit)+2)
   }
   # input checks
   if(nrow(X) != length(y)) {
@@ -46,6 +48,6 @@ qrls.post_adapt <- function(y, X, Z, alpha, nsamples, nburn,
     stop("Z and gamma have inconsistent dimensions.")
   }
   .QuantRegLS_post_adapt(y, t(X), t(Z), c(1,alpha), nsamples, nburn, 
-                        betaInit, gammaInit, nuInit, mwgSd, RvDoMcmc, 
+                        betaInit, gammaInit,sig2Init, nuInit, mwgSd, RvDoMcmc, 
                         maxIter = max_iter, relTol = rel_tol)
 }
