@@ -642,7 +642,7 @@ inline void InnerELC<ELModel>::mwgStep(VectorXd &thetaCur,
   thetaProp(idx) += mwgsd*R::norm_rand();
   // sig2 has to be positive
   if (idx == nBet+nGam && thetaProp(idx) < 0) {
-    std::cout << "negative sig2 = " << thetaProp(idx) << std::endl;
+    // std::cout << "negative sig2 = " << thetaProp(idx) << std::endl;
     return;
   }
   
