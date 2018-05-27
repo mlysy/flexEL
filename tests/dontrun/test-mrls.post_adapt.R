@@ -1,6 +1,9 @@
 require(bayesEL)
 source("hlm-functions.R")
 source("../testthat/el-utils.R")
+source("../testthat/el-rfuns.R")
+source("../testthat/el-model.R")
+source("gen_eps.R")
 
 #---- mean reg: X and Z both dim 1----
 # dimensions

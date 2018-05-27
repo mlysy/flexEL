@@ -129,7 +129,7 @@ qr.post_R <- function(y, X, alpha, nsamples, nburn, betaInit, sigs) {
 # ---- posterior samplers ----
 
 post_R <- function(Gfun, nThe, nBet, nGam,
-                   y, X, nsamples, nburn, 
+                   y, X, Z, nsamples, nburn, 
                    ThetaInit, Sigs, RvDoMcmc, 
                    max_iter = 100, rel_tol = 1e-07) {
   nThe <- nrow(ThetaInit)
@@ -222,3 +222,34 @@ post_R <- function(Gfun, nThe, nBet, nGam,
               paccept = paccept))
 }
 
+
+
+postCens_R <- function(Gfun, nThe, nBet, nGam,
+                       y, X, Z, nsamples, nburn, 
+                       thetaInit, mwgSds, rvDoMcmc, 
+                       max_iter = 100, rel_tol = 1e-07) {
+  nThe <- length(thetaInit)
+  paccept < rep(0,nThe)
+  theta_chain <- matrix(NA,nThe,nsamples)
+  
+  thetaOld <- thetaInit
+  thetaCur <- thetaInit
+  thetaNew <- thetaInit
+  
+  if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,nThe)
+  
+  if (nThe == nBet) {
+    G <- Gfun(thetaCur)
+  }
+  else if (nTheta == nBet + nGam + 1){
+    G <- Gfun(thetaCur[1:nBet], thetaCur[nBet+1:nGam], 
+              thetaCur[nBet+nGam+1])
+  }
+  else {
+    G <- Gfun(thetaCur[1:nBet], thetaCur[nBet+1:nGam], 
+              thetaCur[nBet+nGam+1], thetaCur[nBet+nGam+2])
+  }
+  
+  
+  
+}

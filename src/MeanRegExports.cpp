@@ -202,21 +202,49 @@ Rcpp::List MeanRegCens_post_adapt(Eigen::VectorXd omegasInit,
   Eigen::VectorXd paccept(nTheta);
   bool *rvdomcmc = new bool[nTheta];
   dVec_to_bArr(rvDoMcmc, rvdomcmc);
-  // std::cout << "betaInit = " << betaInit.transpose() << std::endl;
-  // std::cout << "rvdomcmc = "; 
-  // for (int ii=0; ii<nTheta; ii++) {
-  //   std::cout << rvdomcmc[ii] << " ";
-  // }
-  // std::cout << std::endl;
-  // std::cout << "mwgSd = " << mwgSd.transpose() << std::endl;
   MRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::MatrixXd beta_chain = MRC.postSampleAdapt(nsamples, nburn,
                                                    betaInit, mwgSd.data(),
                                                    rvdomcmc, paccept);
-  // Eigen::MatrixXd beta_chain = Eigen::MatrixXd::Zero(1,1);
   delete[] rvdomcmc;
   Rcpp::List retlst;
   retlst["beta_chain"] = beta_chain;
+  retlst["paccept"] = paccept;
+  return(retlst);
+}
+
+// Note: BetaInit and GammaInit must have the same number of columns
+// [[Rcpp::export(".MeanRegCensLS_post_adapt")]]
+Rcpp::List MeanRegCensLS_post_adapt(Eigen::VectorXd omegasInit, 
+                                    Eigen::VectorXd y, Eigen::MatrixXd X,
+                                    Eigen::MatrixXd Z, Eigen::VectorXd deltas, 
+                                    int nsamples, int nburn,
+                                    Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, 
+                                    Eigen::VectorXd sig2Init,
+                                    Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc,
+                                    int maxIter = 100, double relTol = 1e-7) {
+  InnerELC<MeanRegModel> MRC;
+  MRC.setData(y,X,Z,deltas,NULL);
+  MRC.setTol(maxIter, relTol);
+  MRC.setOmegas(omegasInit); // set initial value for first EM
+  Eigen::VectorXd paccept;
+  
+  // concatenate (stack) them together
+  Eigen::VectorXd thetaInit(betaInit.size()+gammaInit.size()+1, betaInit.size());
+  thetaInit.head(betaInit.size()) = betaInit;
+  thetaInit.segment(betaInit.size(),gammaInit.size()) = gammaInit;
+  thetaInit.tail(1) = sig2Init;
+  
+  int nTheta = thetaInit.size();
+  bool *rvdomcmc = new bool[nTheta];
+  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  Eigen::MatrixXd theta_chain = MRC.postSampleAdapt(nsamples, nburn,
+                                                    thetaInit, mwgSd.data(),
+                                                    rvdomcmc, paccept);
+  // Eigen::MatrixXd theta_chain = Eigen::MatrixXd::Zero(1,1);
+  delete[] rvdomcmc;
+  Rcpp::List retlst;
+  retlst["theta_chain"] = theta_chain;
   retlst["paccept"] = paccept;
   return(retlst);
 }

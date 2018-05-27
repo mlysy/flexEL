@@ -6,6 +6,22 @@
 
 using namespace Rcpp;
 
+// evalEpsilonsLS
+Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
+RcppExport SEXP _bayesEL_evalEpsilonsLS(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
+    rcpp_result_gen = Rcpp::wrap(evalEpsilonsLS(y, X, Z, beta, gamma, sig2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // evalWeights
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons);
 RcppExport SEXP _bayesEL_evalWeights(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP) {
@@ -254,6 +270,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// MeanRegCensLS_post_adapt
+Rcpp::List MeanRegCensLS_post_adapt(Eigen::VectorXd omegasInit, Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd deltas, int nsamples, int nburn, Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, Eigen::VectorXd sig2Init, Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc, int maxIter, double relTol);
+RcppExport SEXP _bayesEL_MeanRegCensLS_post_adapt(SEXP omegasInitSEXP, SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP deltasSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP sig2InitSEXP, SEXP mwgSdSEXP, SEXP rvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegasInit(omegasInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
+    Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type betaInit(betaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gammaInit(gammaInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type sig2Init(sig2InitSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type mwgSd(mwgSdSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type rvDoMcmc(rvDoMcmcSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    rcpp_result_gen = Rcpp::wrap(MeanRegCensLS_post_adapt(omegasInit, y, X, Z, deltas, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, maxIter, relTol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // QuantReg_evalG
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd alphaArr, Eigen::MatrixXd Beta);
 RcppExport SEXP _bayesEL_QuantReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP alphaArrSEXP, SEXP BetaSEXP) {
@@ -420,6 +460,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_bayesEL_evalEpsilonsLS", (DL_FUNC) &_bayesEL_evalEpsilonsLS, 6},
     {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_omegaHatEM", (DL_FUNC) &_bayesEL_omegaHatEM, 7},
@@ -435,6 +476,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_MeanRegLS_post_adapt", (DL_FUNC) &_bayesEL_MeanRegLS_post_adapt, 12},
     {"_bayesEL_MeanRegCens_post", (DL_FUNC) &_bayesEL_MeanRegCens_post, 11},
     {"_bayesEL_MeanRegCens_post_adapt", (DL_FUNC) &_bayesEL_MeanRegCens_post_adapt, 11},
+    {"_bayesEL_MeanRegCensLS_post_adapt", (DL_FUNC) &_bayesEL_MeanRegCensLS_post_adapt, 14},
     {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},
     {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 8},
     {"_bayesEL_QuantReg_post", (DL_FUNC) &_bayesEL_QuantReg_post, 10},

@@ -90,7 +90,7 @@ beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=1.5*beta_I,sd=1)
+cc <- rnorm(n,mean=7*beta_I,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -128,18 +128,18 @@ logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))
 logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
-nsamples <- 10000
+nsamples <- 20000
 nburn <- 3000
 betaInit <- c(lm(y ~ X1)$coefficients)
 betaInit
-sigs <- c(0.2,0.2)
+sigs <- c(0.1,0.1)
 # Note: For matching the conditional grid plot and histogram, pay attention to 
 #   their inital values, the fixed params need to be the same.
-RvDoMcmc <- c(1,1)
+RvDoMcmc <- c(1,0)
 k <- which(as.logical(RvDoMcmc))
 betaInit[-k] <- beta0[-k] # fix other params at their true values
 system.time(
-  qrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
+  qrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, c(betaInit[1],beta0[2]), sigs, RvDoMcmc)
 )
 beta_chain <- qrout$beta_chain
 beta_paccept <- qrout$paccept

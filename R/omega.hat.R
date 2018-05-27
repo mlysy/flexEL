@@ -16,9 +16,12 @@ omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbo
   }
   else {
     # Note: inital omegas obtained from non-censored optimization
-    lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+    lambda <- .lambdaNR(t(G), maxIter = 100, relTol = rel_tol, verbose = verbose)
     omegasInit <- .omega.hat(t(G), lambda)
-    # if (any(is.nan(omegasInit))) return(rep(NaN,length(deltas)))
+    if (any(is.nan(omegasInit))) {
+      # stop("Initial omegas are nans.")
+      return(rep(NaN,length(deltas)))
+    }
     omegahat <- .omega.hat.EM(omegasInit, t(G), deltas, epsilons,
                               max_iter, rel_tol, verbose)
   }

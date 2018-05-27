@@ -8,6 +8,17 @@ using namespace Eigen;
 #include "InnerELC.h"
 #include "MeanRegModel.h"
 
+// [[Rcpp::export(".evalEpsilonsLS")]]
+Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
+                               Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2) {
+  InnerELC<MeanRegModel> ILC; 
+  Eigen::VectorXd deltas = VectorXd::Zero(y.size()).array()+1.0;
+  ILC.setData(y,X,Z,deltas,NULL); 
+  ILC.evalEpsilons(beta,gamma,sig2);
+  Eigen::VectorXd epsilons = ILC.getEpsilons();
+  return(epsilons);
+}
+
 // TODO: getWeights does not need y X, only depends on deltas, epsilons and omegas, 
 //       remove y X and use pesudo input to init
 // returns weights for the weighted NR algorithm 

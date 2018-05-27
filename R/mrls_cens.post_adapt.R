@@ -1,4 +1,4 @@
-#' Posterior sampler for mean regression (location model)
+#' Posterior sampler for mean regression (location-scale model)
 #' 
 #' @param y Length-\code{nObs} vector of response values.
 #' @param X \code{nObs x nEqs} matrix of constraints.
@@ -12,12 +12,10 @@
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
-#' @export mr_cens.post_adapt
-mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit, 
-                               mwgSd, rvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
-  # # input conversion
-  # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
-  # if (is.vector(mwgSd)) mwgSd <- matrix(mwgSd,length(mwgSd),1)
+#' @export mrls_cens.post_adapt
+mrls_cens.post_adapt <- function(y, X, Z, deltas, nsamples, nburn, 
+                                 betaInit, gammaInit, sig2Init,
+                                 mwgSd, rvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
   # input checks
   if(nrow(X) != length(y)) {
     stop("X and y have inconsistent dimensions.")
@@ -25,18 +23,17 @@ mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit,
   if(ncol(X) != length(betaInit)) {
     stop("X and beta have inconsistent dimensions.")
   }
-  # nBet <- nrow(BetaInit)
-  # numBet <- ncol(BetaInit)
-  
   # obtain initial value for first EM from uncensored case
-  G <- mr.evalG(y,X,betaInit)
+  G <- mrls.evalG(y,X,Z,betaInit,gammaInit,sig2Init)
   weights <- evalWeights(deltas,omegas,epsilons)
   lambda <- .lambdaNRC(t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
   omegasInit <- .omega.hat(t(G), lambda)
   if (anyNA(omegasInit)) {
-    stop("Initial omegas are nans.")
+    stop("Initial omegas not converged.")
+    # print(omegasInit)
   }
   if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
-  .MeanRegCens_post_adapt(omegasInit, y, t(X), deltas, nsamples, nburn, betaInit, 
-                          mwgSd, rvDoMcmc, maxIter = max_iter, relTol = rel_tol)
+  .MeanRegCensLS_post_adapt(omegasInit, y, t(X), t(Z), deltas, nsamples, nburn, 
+                            betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, 
+                            maxIter = max_iter, relTol = rel_tol)
 }

@@ -170,10 +170,17 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     rho <- rep(NaN,nObs)
     Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
     for (jj in 1:nObs) {
-      rho[jj] <- log.sharp1(Glambda[jj], weights[jj]);
-      Q2 <- Q2 + weights[jj]*log.sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
+      rho[jj] <- log.sharp1(Glambda[jj], weights[jj])
+      # to avoid numerical problem?
+      if (weights[jj] > rel_tol*nObs) {
+        Q2 <- Q2 + weights[jj]*log.sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
+      }
     }
-    Q1 <- G %*% (rho * weights)
+    weights.sav <- weights
+    weights.sav[weights.sav < rel_tol*nObs] <- 0
+    rho[is.infinite(rho) & !weights.sav] <- 0 
+    # Q1 <- G %*% (rho * weights)
+    Q1 <- G %*% (rho * weights.sav)
     # print("Q2invQ1 = ")
     # print(t(solve(Q2,Q1)))
     lambdaNew <- lambdaOld - solve(Q2,Q1)
@@ -224,6 +231,11 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
   return(weights)
 }
 
+evalEpsilonsLS_R <- function(y,X,Z,beta,gamma,sig2) {
+  eps <- (y - X %*% beta)*exp(-Z %*% gamma)/sqrt(sig2)
+  return(eps)
+}
+
 # G is nObs x nEqs matrix 
 omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
   n <- nrow(G)
@@ -233,6 +245,10 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
   nIter <- 0
   # initialize omegas with uncensored solution 
   omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
+  if (any(is.nan(omegas))) {
+    message("Initial omegas are nans.")
+    return(rep(NaN,length(deltas)))
+  }
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas,epsilons,deltas)
   if (any(is.nan(omegas))) return(rep(NaN,n))
@@ -242,8 +258,13 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     weights <- evalWeights_R(deltas, omegas, epsilons)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
+    # TODO: continue here, seems the Cpp version works?
+    # lambdaNew <- lambdaNR(G, weights, max_iter, rel_tol, verbose)
+    # if (anyNA(lambdaNew)) {
+    #   return(rep(NaN,n))
+    # }
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose)
-    # TODO: what if not converged ?? use a random weights and continue ? 
+    # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")
       return(rep(NaN,n))
