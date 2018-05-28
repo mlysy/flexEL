@@ -223,7 +223,6 @@ post_R <- function(Gfun, nThe, nBet, nGam,
 }
 
 
-
 postCens_R <- function(Gfun, nThe, nBet, nGam,
                        y, X, Z, nsamples, nburn, 
                        thetaInit, mwgSds, rvDoMcmc, 

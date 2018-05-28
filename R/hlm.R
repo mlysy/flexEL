@@ -68,6 +68,11 @@ hlm <- function(y, delta, X, W,
   # covariates for censored observations
   Xc <- as.matrix(X[!delta,])
   Wc <- as.matrix(W[!delta,])
+  # (added: in case that R drops dimention if there's only one cencored obs.)
+  if (sum(!delta)==1) {
+    Xc <- t(Xc)
+    Wc <- t(Wc)
+  }
   yc <- y[!delta]
   # T_tilde and U_tilde.  some of these values will never be updated
   T <- y
@@ -75,8 +80,27 @@ hlm <- function(y, delta, X, W,
   ## if(debug) browser()
   # initialize the model parameters
   betat <- coef(lm.fit(x = X, y = y))
-  gammat <- coef(glm.fit(x = W, y = (y-X%*%betat)^2,
-                         family = Gamma(link = "log")))
+  # (removed)
+  # gammat <- coef(glm.fit(x = W, y = (y-X%*%betat)^2,
+  #                        family = Gamma(link = "log")))
+  # (added)
+  glm_conv <- TRUE
+  gammat <- tryCatch(expr = coef(glm.fit(x = W, 
+                                         y = (y-X%*%betat)^2, 
+                                         family = Gamma(link = "log"))),
+                     warning = function(w) {glm_conv <<- FALSE;coef(glm.fit(x = W, 
+                                                                            y = (y-X%*%betat)^2, 
+                                                                            family = Gamma(link = "log")))},
+                     error = function(e) {rep(NA,pw)})
+  # (added)
+  if (anyNA(gammat)) {
+    out <- list(conv = FALSE,
+                coef = list(beta = betat, gamma = gammat),
+                niter = 0)
+    return(out)
+  }
+  # (added)
+  conv <- TRUE
   # main loop
   for(ii in 1:max_iter) {
     # E-step
@@ -100,7 +124,15 @@ hlm <- function(y, delta, X, W,
     # M-step: gamma
     Xb <- c(X %*% beta)
     R <- U - 2*T*Xb + Xb^2
-    gamma <- coef(glm.fit(x = W, y = R, family = Gamma(link = "log")))
+    # (removed)
+    # gamma <- coef(glm.fit(x = W, y = R, family = Gamma(link = "log")))
+    # (added: tryCatch)
+    glm_conv <- TRUE
+    gamma <- tryCatch(expr = coef(glm.fit(x = W, y = R, family = Gamma(link = "log"))),
+                      warning = function(w) {glm_conv <<- FALSE; coef(glm.fit(x = W, y = R, family = Gamma(link = "log")))},
+                      error = function(e) {rep(NA,pw)})
+    # (added: stop when glm returns an error)
+    if (anyNA(gamma)) break
     # relative error
     theta_rel <- rel_err(c(beta, gamma), c(betat, gammat))
     # update
@@ -108,8 +140,19 @@ hlm <- function(y, delta, X, W,
     gammat <- gamma
     if(max(theta_rel) < rel_tol) break
   }
-  if(ii == max_iter && max(theta_rel) > rel_tol) {
-    stop("ECM algorithm did not converge.")
+  niter <- ii # (added)
+  # (added: to handle glm error or warning)
+  if((!glm_conv) || anyNA(gamma) || (ii == max_iter && max(theta_rel) > rel_tol)) {
+  # (removed)
+  # if(ii == max_iter && max(theta_rel) > rel_tol) {
+    # (removed: for the ease of optimCheck)
+    # stop("ECM algorithm did not converge.")
+    # (added)
+    conv <- FALSE
+    out <- list(conv = conv,
+                coef = list(beta = betat, gamma = gammat),
+                niter = niter)
+    return(out)
   }
   # return some relevant values
   theta_hat <- c(betat, gammat)
@@ -117,11 +160,20 @@ hlm <- function(y, delta, X, W,
   ll_max <- loglik(theta_hat)
   ## ll_max_orig <- loglik_orig(theta_hat)
   var_hat <- solve(-hessian(func=loglik,x=theta_hat))
+  # (added: tryCatch)
+  # var_hat <- tryCatch(expr=solve(-hessian(func=loglik,x=theta_hat)),
+  #                     error=function(e){matrix(NA,ncol=length(theta_hat),
+  #                                              nrow=length(theta_hat))})
   colnames(var_hat) <- XW_names
   rownames(var_hat) <- XW_names
-  out <- list(coef = list(beta = betat, gamma = gammat),
-              vcov = var_hat, score = grad_hat,
-              loglik = ll_max, niter)
+  # (added)
+  out <- list(conv = conv, 
+              coef = list(beta = betat, gamma = gammat),
+              vcov = var_hat, loglik = ll_max, niter = niter)
+  # (removed: grad_hat removed since it is not assigned)
+  # out <- list(coef = list(beta = betat, gamma = gammat),
+  #             vcov = var_hat, score = grad_hat,
+  #             loglik = ll_max, niter)
   return(out)
 }
 

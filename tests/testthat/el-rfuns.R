@@ -15,6 +15,15 @@ MaxRelErr <- function(lambdaNew, lambdaOld) {
   return(max(relErr))
 }
 
+# adjusted EM by chen-et-al2008
+adjG_R <- function(G) {
+  n <- nrow(G)
+  gbar <- 1/n*colSums(G)
+  an <- max(1,0.5*log(n))
+  gadd <- -an*gbar
+  return(rbind(G,gadd))
+}
+
 # ---- non-censoring EL ----
 
 log.star <- function(x, n) {
@@ -237,7 +246,8 @@ evalEpsilonsLS_R <- function(y,X,Z,beta,gamma,sig2) {
 }
 
 # G is nObs x nEqs matrix 
-omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
+omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
+                           max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
@@ -249,6 +259,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     message("Initial omegas are nans.")
     return(rep(NaN,length(deltas)))
   }
+  if (adjust) omegas <- omegas[1:(n-1)]
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas,epsilons,deltas)
   if (any(is.nan(omegas))) return(rep(NaN,n))
@@ -256,13 +267,9 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
+    if (adjust) weights <- c(weights,0)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
-    # TODO: continue here, seems the Cpp version works?
-    # lambdaNew <- lambdaNR(G, weights, max_iter, rel_tol, verbose)
-    # if (anyNA(lambdaNew)) {
-    #   return(rep(NaN,n))
-    # }
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
@@ -293,16 +300,68 @@ omega.hat.EM_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
   return(omegas)
 }
 
+# omega.hat.EM_R <- function(G, deltas,
+#                            max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
+#   n <- nrow(G)
+#   m <- ncol(G)
+#   err <- Inf
+#   # lambdaOld <- rep(0,m)
+#   nIter <- 0
+#   # initialize omegas with uncensored solution 
+#   omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
+#   if (any(is.nan(omegas))) {
+#     message("Initial omegas are nans.")
+#     return(rep(NaN,length(deltas)))
+#   }
+#   # omegasOld <- omegas
+#   logelOld <- logEL_R(omegas,epsilons,deltas)
+#   if (any(is.nan(omegas))) return(rep(NaN,n))
+#   for (ii in 1:max_iter) {
+#     nIter <- ii
+#     # E step: calculating weights
+#     weights <- evalWeights_R(deltas, omegas, epsilons)
+#     # M step:
+#     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
+#     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose)
+#     # TODO: what if not converged ?? use a random weights and continue ?
+#     if (!lambdaOut$convergence) {
+#       # message("lambdaNRC did not converge in EM")
+#       return(rep(NaN,n))
+#     }
+#     lambdaNew <- lambdaOut$lambda
+#     qlg <- c(sum(weights) + lambdaNew %*% t(G))
+#     omegas <- weights/qlg
+#     omegas <- omegas/sum(omegas)
+#     # err <- MaxRelErr(lambdaNew,lambdaOld)
+#     # err <- MaxRelErr(omegas,omegasOld)
+#     logel <- logEL_R(omegas,epsilons,deltas)
+#     err <- MaxRelErr(logel,logelOld)
+#     if (verbose && nIter %% 20 == 0) {
+#       message("nIter = ", nIter)
+#       message("err = ", err)
+#     }
+#     if (err < rel_tol) break
+#     # lambdaOld <- lambdaNew
+#     # omegasOld <- omegas
+#     logelOld <- logel
+#   }
+#   notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
+#   if (notconv) {
+#     omegas = rep(NaN,n)
+#   }
+#   return(omegas)
+# }
+
 # ---- wrapper functions ----
 
 # wrapper function for censor and non-censor omega.hat
 omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
-    omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
+    omegas <- omega.hat.NC_R(G, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   else {
     omegas <- omega.hat.EM_R(G, deltas, epsilons,
-                             max_iter, rel_tol, verbose)
+                             max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   return(c(omegas))
 }
