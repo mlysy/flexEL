@@ -36,10 +36,9 @@ mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc
   # }
   
   # obtain initial value for first EM from uncensored case
-  G <- mr.evalG(y,X,BetaInit)
-  # TODO: here
-  lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
-  omegasInit <- .omega.hat(t(G), lambda)
+  G <- .MeanReg_evalG(y,t(X), BetaInit)
+  lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
+  omegasInit <- .omega.hat(G, lambda)
   .MeanRegCens_post(omegasInit, y, t(X), deltas, nsamples, nburn, BetaInit, 
                     Sigs, RvDoMcmc, 
                     maxIter = max_iter, relTol = rel_tol)

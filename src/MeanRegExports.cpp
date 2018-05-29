@@ -206,6 +206,10 @@ Rcpp::List MeanRegCens_post_adapt(Eigen::VectorXd omegasInit,
   Eigen::MatrixXd beta_chain = MRC.postSampleAdapt(nsamples, nburn,
                                                    betaInit, mwgSd.data(),
                                                    rvdomcmc, paccept);
+  // MatrixXd beta_chain = MatrixXd::Zero(1,1);
+  // std::cout << "betaInit = " << betaInit.transpose() << std::endl;
+  // std::cout << "mwgSd = " << mwgSd.transpose() << std::endl;
+  // std::cout << "rvDoMcmc = " << rvDoMcmc.transpose() << std::endl;
   delete[] rvdomcmc;
   Rcpp::List retlst;
   retlst["beta_chain"] = beta_chain;

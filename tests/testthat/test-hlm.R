@@ -1,5 +1,5 @@
 # test that hlm is working properly
-source("../../R/hlm.R")
+# source("../../R/hlm.R")
 source("el-utils.R")
 library(optimCheck)
 library(numDeriv)

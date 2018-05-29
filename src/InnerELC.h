@@ -648,24 +648,27 @@ inline void InnerELC<ELModel>::mwgStep(VectorXd &thetaCur,
   
   if (nTheta == nBet) {
     ELModel::evalG(thetaProp);
-  }
-  else if (nTheta == nBet + nGam + 1){
-    ELModel::evalG(thetaProp.head(nBet), 
-                   thetaProp.segment(nBet,nGam), 
-                   thetaProp.tail(1),
-                   VectorXd::Zero(0));
+    evalEpsilons(thetaProp);
   }
   else {
-    ELModel::evalG(thetaProp.head(nBet), 
-                   thetaProp.segment(nBet,nGam), 
-                   thetaProp.segment(nBet+nGam,1),
-                   thetaProp.tail(1));
+    if (nTheta == nBet + nGam + 1){
+      ELModel::evalG(thetaProp.head(nBet), 
+                     thetaProp.segment(nBet,nGam), 
+                     thetaProp.tail(1),
+                     VectorXd::Zero(0));
+    }
+    else {
+      ELModel::evalG(thetaProp.head(nBet), 
+                     thetaProp.segment(nBet,nGam), 
+                     thetaProp.segment(nBet+nGam,1),
+                     thetaProp.tail(1));
+    }
+    evalEpsilons(thetaProp.head(nBet),
+                 thetaProp.segment(nBet,nGam),
+                 thetaProp.segment(nBet+nGam,1)(0));
   }
   int nIter;
   double maxErr;
-  evalEpsilons(thetaProp.head(nBet),
-               thetaProp.segment(nBet,nGam),
-               thetaProp.segment(nBet+nGam,1)(0));
   evalWeights();
   lambdaNR(nIter, maxErr);
   bool satisfy = false;
@@ -699,35 +702,39 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
                                                    double *mwgSd, bool *rvDoMcmc, 
                                                    VectorXd &paccept) {
   int nTheta = thetaInit.size();
+  MatrixXd theta_chain(nTheta,nsamples);
+  paccept = VectorXd::Zero(nTheta);
+  // theta_chain.fill(0.0); // debug
+  // paccept.fill(0.0);
   MwgAdapt tuneMCMC(nTheta, rvDoMcmc);
   bool *isAccepted = new bool[nTheta];
   for (int ii=0; ii<nTheta; ii++) {
     isAccepted[ii] = false;
   }
-  MatrixXd theta_chain(nTheta,nsamples);
-  // theta_chain.fill(0.0); // debug
-  // paccept.fill(0.0);
-  paccept = VectorXd::Zero(nTheta);
   VectorXd thetaCur = thetaInit;
   if (nTheta == nBet) {
-    // std::cout << "location model." << std::endl;
+    std::cout << "location model." << std::endl;
     ELModel::evalG(thetaCur);
-  }
-  else if (nTheta == nBet + nGam + 1){
-    ELModel::evalG(thetaCur.head(nBet), 
-                   thetaCur.segment(nBet,nGam), 
-                   thetaCur.tail(1),
-                   VectorXd::Zero(0));
+    evalEpsilons(thetaCur);
   }
   else {
-    ELModel::evalG(thetaCur.head(nBet), 
-                   thetaCur.segment(nBet,nGam), 
-                   thetaCur.segment(nBet+nGam,1),
-                   thetaCur.tail(1));
+    // std::cout << "location-scale model." << std::endl;
+    if (nTheta == nBet + nGam + 1) {
+      ELModel::evalG(thetaCur.head(nBet),
+                     thetaCur.segment(nBet,nGam),
+                     thetaCur.tail(1),
+                     VectorXd::Zero(0));
+    }
+    else {
+      ELModel::evalG(thetaCur.head(nBet),
+                     thetaCur.segment(nBet,nGam),
+                     thetaCur.segment(nBet+nGam,1),
+                     thetaCur.tail(1));
+    }
+    evalEpsilons(thetaCur.head(nBet),
+                 thetaCur.segment(nBet,nGam),
+                 thetaCur.segment(nBet+nGam,1)(0)); // Note: have to take the element here
   }
-  evalEpsilons(thetaCur.head(nBet),
-               thetaCur.segment(nBet,nGam),
-               thetaCur.segment(nBet+nGam,1)(0)); // Note: have to take the element here
   evalOmegas();
   // std::cout << "initial omegas = " << omegas.transpose() << std::endl;
   double logELCur = logEL();

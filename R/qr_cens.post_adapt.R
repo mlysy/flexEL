@@ -14,15 +14,15 @@
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export qr_cens.post_adapt
-qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs, rvDoMcmc, 
+qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
                          max_iter = 100, rel_tol = 1e-7) {
   # # input conversion
-  # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
-  # if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
-  # if (missing(RvDoMcmc)) {
-  #   RvDoMcmc <- matrix(1, nrow = nrow(BetaInit), ncol = ncol(BetaInit))
-  # }
-  # if (is.vector(RvDoMcmc)) RvDoMcmc <- matrix(RvDoMcmc, length(RvDoMcmc), 1)
+  if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
+  if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
+  if (missing(RvDoMcmc)) {
+    RvDoMcmc <- matrix(1, nrow = nrow(BetaInit), ncol = ncol(BetaInit))
+  }
+  if (is.vector(RvDoMcmc)) RvDoMcmc <- matrix(RvDoMcmc, length(RvDoMcmc), 1)
   # input checks
   if(nrow(X) != length(y)) {
     stop("X and y have inconsistent dimensions.")
@@ -38,12 +38,11 @@ qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, S
   # }
   
   # obtain initial value for first EM from uncensored case
-  G <- qr.evalG(y,X,alpha,BetaInit)
-  weights <- evalWeights(deltas,omegas,epsilons)
-  lambda <- .lambdaNRC(t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
-  omegasInit <- .omega.hat(t(G), lambda)
-  if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
+  G <- .QuantReg_evalG(y, t(X), c(1,alpha), BetaInit)
+  lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
+  omegasInit <- .omega.hat(G, lambda)
+  # if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(BetaInit))
   .QuantRegCens_post_adapt(omegasInit, y, t(X), deltas, c(1,alpha), nsamples, nburn, 
-                           BetaInit, Sigs, rvDoMcmc, 
+                           BetaInit, Sigs, RvDoMcmc, 
                            maxIter = max_iter, relTol = rel_tol)
 }

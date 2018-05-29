@@ -37,10 +37,9 @@ qr_cens.post <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs, R
   # }
   
   # obtain initial value for first EM from uncensored case
-  G <- qr.evalG(y,X,alpha,BetaInit)
-  # TODO: here
-  lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
-  omegasInit <- .omega.hat(t(G), lambda)
+  G <- .QuantReg_evalG(y,t(X), c(1,alpha), BetaInit)
+  lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
+  omegasInit <- .omega.hat(G, lambda)
   .QuantRegCens_post(omegasInit, y, t(X), deltas, c(1,alpha), nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
                     maxIter = max_iter, relTol = rel_tol)
 }

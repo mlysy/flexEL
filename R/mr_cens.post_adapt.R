@@ -29,10 +29,9 @@ mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit,
   # numBet <- ncol(BetaInit)
   
   # obtain initial value for first EM from uncensored case
-  G <- mr.evalG(y,X,betaInit)
-  weights <- evalWeights(deltas,omegas,epsilons)
-  lambda <- .lambdaNRC(t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
-  omegasInit <- .omega.hat(t(G), lambda)
+  G <- .MeanReg_evalG(y,t(X), betaInit)
+  lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
+  omegasInit <- .omega.hat(G, lambda)
   if (anyNA(omegasInit)) {
     stop("Initial omegas are nans.")
   }

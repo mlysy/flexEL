@@ -24,10 +24,9 @@ mrls_cens.post_adapt <- function(y, X, Z, deltas, nsamples, nburn,
     stop("X and beta have inconsistent dimensions.")
   }
   # obtain initial value for first EM from uncensored case
-  G <- mrls.evalG(y,X,Z,betaInit,gammaInit,sig2Init)
-  weights <- evalWeights(deltas,omegas,epsilons)
-  lambda <- .lambdaNRC(t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
-  omegasInit <- .omega.hat(t(G), lambda)
+  G <- .MeanRegLS_evalG(y,t(X),t(Z),betaInit,gammaInit,sig2Init)
+  lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
+  omegasInit <- .omega.hat(G,lambda)
   if (anyNA(omegasInit)) {
     stop("Initial omegas not converged.")
     # print(omegasInit)

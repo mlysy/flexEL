@@ -5,7 +5,7 @@
 \title{Posterior sampler for quantile regression with censoring (location model)}
 \usage{
 qr_cens.post_adapt(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs,
-  rvDoMcmc, max_iter = 100, rel_tol = 1e-07)
+  RvDoMcmc, max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}
@@ -24,11 +24,11 @@ qr_cens.post_adapt(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs,
 
 \item{Sigs}{\code{nEqs x numBeta} matrix of tuning parameters.}
 
-\item{rvDoMcmc}{\code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.}
-
 \item{max_iter}{Maximum number of Newton-Raphson steps.}
 
 \item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
+
+\item{rvDoMcmc}{\code{nEqs x numBeta} matrix of indicators (1 or 0) for whether or not updating the corresponding parameter.}
 }
 \value{
 \code{nEqs x nsamples} matrix of Markov Chain.
