@@ -222,13 +222,66 @@ post_R <- function(Gfun, nThe, nBet, nGam,
               paccept = paccept))
 }
 
+mwgStep_R <- function(Gfun, nThe, nBet, nGam, 
+                      thetaCur, logelCur, idx, mwgsd, 
+                      max_iter = 100, rel_tol = 1e-07) {
+  accept <- FALSE
+  thetaProp <- thetaCur
+  thetaProp[idx] <- thetaProp[idx] + mwgsd*rnorm(1)
+  
+  if (idx == nBet+nGam+1 && thetaProp[idx] < 0) {
+    out <- list(accept=accept, thetaCur=thetaCur, logelCur=logelCur)
+    return(out)
+  }
+  
+  if (nThe == nBet) {
+    G <- Gfun(y,X,thetaProp)
+    epsilons <- evalEpsilons_R(y,X,thetaProp)
+  }
+  else {
+    if (nThe == nBet + nGam + 1){
+      G <- Gfun(y,X,Z,thetaProp[1:nBet],
+                thetaProp[(nBet+1):nGam],
+                thetaProp[nGam+1])
+    }
+    else {
+      G <- Gfun(y,X,Z,thetaProp[1:nBet],
+                thetaProp[(nBet+1):nGam],
+                thetaProp[nGam+1],
+                thetaProp[nGam+2])
+    }
+    epsilons <- evalEpsilonsLS_R(y,X,Z,thetaProp[1:nBet],
+                                 thetaProp[(nBet+1):nGam],
+                                 thetaProp[nGam+1])
+  }
+  
+  weights <- evalWeights_R(deltas, omegas, epsilons)
+  lout <- lambdaNRC_R(G,weights,max_iter,rel_tol)
+  if (!lout$convergence) {
+    out <- list(accept=accept, thetaCur=thetaCur, logelCur=logelCur)
+    return(out)
+  }
+  
+  omegas <- omega.hat_R(G,deltas,epsilons,max_iter,rel_tol)
+  logelProp <- logEL_R(omegas,epsilons,deltas)
+  u <- runif(1)
+  ratio <- exp(logelProp-logelCur)
+  a <- min(1.0,ratio)
+  if (u < a) {
+    accept <- TRUE
+    thetaCur <- thetaProp
+    logelCur <- logelProp
+  }
+  out <- list(accept=accept, thetaCur=thetaCur, logelCur=logelCur)
+  return(out)
+}
 
 postCens_R <- function(Gfun, nThe, nBet, nGam,
-                       y, X, Z, nsamples, nburn, 
+                       y, X, Z, deltas, nsamples, nburn, 
                        thetaInit, mwgSds, rvDoMcmc, 
                        max_iter = 100, rel_tol = 1e-07) {
-  nThe <- length(thetaInit)
-  paccept < rep(0,nThe)
+  # nThe <- length(thetaInit)
+  paccept <- rep(0,nThe)
   theta_chain <- matrix(NA,nThe,nsamples)
   
   thetaOld <- thetaInit
@@ -238,17 +291,42 @@ postCens_R <- function(Gfun, nThe, nBet, nGam,
   if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,nThe)
   
   if (nThe == nBet) {
-    G <- Gfun(thetaCur)
-  }
-  else if (nTheta == nBet + nGam + 1){
-    G <- Gfun(thetaCur[1:nBet], thetaCur[nBet+1:nGam], 
-              thetaCur[nBet+nGam+1])
+    G <- Gfun(y,X,thetaCur)
+    epsilons <- evalEpsilons_R(y,X,thetaCur)
   }
   else {
-    G <- Gfun(thetaCur[1:nBet], thetaCur[nBet+1:nGam], 
-              thetaCur[nBet+nGam+1], thetaCur[nBet+nGam+2])
+    if (nThe == nBet + nGam + 1){
+      G <- Gfun(y,X,Z,thetaCur[1:nBet], thetaCur[nBet+1:nGam], 
+                thetaCur[nBet+nGam+1])
+    }
+    else {
+      G <- Gfun(y,X,Z,thetaCur[1:nBet], thetaCur[nBet+1:nGam], 
+                thetaCur[nBet+nGam+1], thetaCur[nBet+nGam+2])
+    }
+    epsilons <- evalEpsilonsLS_R(y,X,Z,thetaProp[1:nBet],
+                                 thetaCur[(nBet+1):nGam],
+                                 thetaCur[nGam+1])
   }
+  omegas <- omega.hat_R(G,deltas,epsilons,max_iter,rel_tol)
+  logelCur <- logEL_R(omegas,epsilons,deltas)
   
-  
-  
+  for (ii in (-nburn+1):nsamples) {
+    if (ii %% 10 == 0) {
+      message("ii = ", ii)
+    }
+    for (jj in 1:nThe) {
+      if (rvDoMcmc[jj]) {
+        stepout <- mwgStep_R(Gfun,nThe,nBet,nGam,thetaCur,logelCur,jj,
+                             mwgSds[jj],max_iter,rel_tol)
+        paccept[jj] <- paccept[jj] + stepout$accept
+        thetaCur <- stepout$thetaCur
+        logelCur <- stepout$logelCur
+      }
+    }
+    if (ii > 0) {
+      theta_chain[,ii] <- thetaCur
+    }
+  }
+  paccept <- paccept/(nsamples+nburn)
+  return(list(theta_chain=theta_chain,paccept=paccept))
 }

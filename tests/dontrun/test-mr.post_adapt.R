@@ -1,6 +1,10 @@
 # tests for mean regression postSampler with adapt MCMC
 library(bayesEL)
+source("hlm-functions.R")
 source("../testthat/el-utils.R")
+source("../testthat/el-rfuns.R")
+source("../testthat/el-model.R")
+source("gen_eps.R")
 
 # ---- 1-d problem ----
 n <- 500

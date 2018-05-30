@@ -240,6 +240,11 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
   return(weights)
 }
 
+evalEpsilons_R <- function(y,X,beta) {
+  eps <- y - X %*% beta
+  return(eps)
+}
+
 evalEpsilonsLS_R <- function(y,X,Z,beta,gamma,sig2) {
   eps <- (y - X %*% beta)*exp(-Z %*% gamma)/sqrt(sig2)
   return(eps)

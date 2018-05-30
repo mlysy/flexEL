@@ -46,17 +46,21 @@ for (ii in 1:numpoints) {
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
-nsamples <- 20000
-nburn <- 3000
+nsamples <- 2000
+nburn <- 1000
 betaInit <- c(lm(y ~ 1)$coefficients) 
 betaInit
 sigs <- rep(0.18,1)
 system.time(
-  qrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs)
+  # mrout <- postCens_R(Gfun=mr.evalG_R,nThe=1,nBet=1,nGam=0,
+  #                       y=y,X=X,deltas=deltas,thetaInit=betaInit,
+  #                       nsamples=nsamples,nburn=nburn,
+  #                       mwgSds=sigs)
+  mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs)
 )
 
-mu_chain <- qrout$beta_chain
-mu_paccept <- qrout$paccept 
+mu_chain <- mrout$theta_chain
+mu_paccept <- mrout$paccept 
 mu_paccept
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
 
@@ -129,8 +133,8 @@ logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))
 logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
-nsamples <- 10000
-nburn <- 3000
+nsamples <- 200
+nburn <- 100
 betaInit <- c(lm(y ~ X1)$coefficients)
 betaInit
 sigs <- c(0.1,0.1)
@@ -140,10 +144,14 @@ RvDoMcmc <- c(1,1)
 k <- which(as.logical(RvDoMcmc))
 betaInit[-k] <- beta0[-k] # fix other params at their true values
 system.time(
-  qrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
+  mrout <- postCens_R(Gfun=mr.evalG_R,nThe=2,nBet=2,nGam=0,
+                        y=y,X=X,deltas=deltas,thetaInit=betaInit,
+                        nsamples=nsamples,nburn=nburn,
+                        mwgSds=sigs)
+  # mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
 )
-beta_chain <- qrout$beta_chain
-beta_paccept <- qrout$paccept
+beta_chain <- mrout$theta_chain
+beta_paccept <- mrout$paccept
 beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')
 plot(beta_chain[2,], xlab = expression(beta[1]), ylab = 'EL', type='l')

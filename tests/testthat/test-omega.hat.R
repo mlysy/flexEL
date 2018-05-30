@@ -95,7 +95,7 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
 # checking optimality of the solution from C++
 test_that("under censoring: omegahat.cpp is optimal", {
   for(ii in 1:ntest) {
-    n <- sample(10:20,1)
+    n <- sample(10:30,1)
     p <- sample(1:(n-2), 1)
     # max_iter <- sample(c(2, 10, 100), 1)
     max_iter <- sample(c(10, 100, 500), 1)
@@ -111,21 +111,21 @@ test_that("under censoring: omegahat.cpp is optimal", {
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
     omegahat.cpp <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-  }
-  if (!any(is.nan(omegahat.cpp))) {
-    ocheck <- optim_proj(xsol = rep(1,n-p),
-                         xrng = 0.05,
-                         npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
-                         fun = function(x) {omega.check(x, omegahat.cpp, G, deltas, epsilons)},
-                         plot = FALSE)
-    # idx <- which(abs(omegahat.cpp) < n*rel_tol)
-    # ocheck <- optim_proj(xsol = rep(1,n-p-length(idx)),
-    #                      xrng = 0.05,
-    #                      npts = 201, # 101 would contain x exactly 1, o.w. sometimes does not work
-    #                      fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx, rel_tol)},
-    #                      plot = TRUE)
-    # print(ocheck)
-    expect_lt(max.xdiff(ocheck), 0.01)
+    if (!any(is.nan(omegahat.cpp))) {
+      # ocheck <- optim_proj(xsol = rep(1,n-p),
+      #                      xrng = 0.05,
+      #                      npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
+      #                      fun = function(x) {omega.check(x, omegahat.cpp, G, deltas, epsilons)},
+      #                      plot = TRUE)
+      idx0 <- abs(omegahat.cpp) < n*rel_tol
+      ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
+                           xrng = 0.05,
+                           npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
+                           fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, rel_tol)},
+                           plot = TRUE)
+      # print(ocheck)
+      expect_lt(max.xdiff(ocheck), 0.01)
+    }
   }
 })
 
