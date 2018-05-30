@@ -92,6 +92,14 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
   }
 })
 
+# save.ome <- list()
+# save.del <- list()
+# save.G <- list()
+# save.eps <- list()
+# save.ite <- list()
+# save.tol <- list()
+# count <- 0
+
 # checking optimality of the solution from C++
 test_that("under censoring: omegahat.cpp is optimal", {
   for(ii in 1:ntest) {
@@ -100,13 +108,11 @@ test_that("under censoring: omegahat.cpp is optimal", {
     # max_iter <- sample(c(2, 10, 100), 1)
     max_iter <- sample(c(10, 100, 500), 1)
     # max_iter <- 200
-    rel_tol <- runif(1, 1e-6, 1e-5)
+    rel_tol <- runif(1, 1e-8, 1e-6)
     # rel_tol <- 1e-7
     G <- matrix(rnorm(n*p), n, p)
-    # G <- adjG_R(G)
     deltas <- rep(1,n)
     numcens <- sample(round(n/2),1)
-    # numcens <- 3
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
@@ -117,14 +123,23 @@ test_that("under censoring: omegahat.cpp is optimal", {
       #                      npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
       #                      fun = function(x) {omega.check(x, omegahat.cpp, G, deltas, epsilons)},
       #                      plot = TRUE)
-      idx0 <- abs(omegahat.cpp) < n*rel_tol
-      ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
-                           xrng = 0.05,
-                           npts = 101, # 101 would contain x exactly 1, o.w. sometimes does not work
-                           fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, rel_tol)},
-                           plot = TRUE)
-      # print(ocheck)
-      expect_lt(max.xdiff(ocheck), 0.01)
+      # count <- count + 1
+      # save.ome[[count]] <- omegahat.cpp
+      # save.del[[count]] <- deltas
+      # save.G[[count]] <- G
+      # save.eps[[count]] <- epsilons
+      # save.ite[[count]] <- max_iter
+      # save.tol[[count]] <- rel_tol
+      idx0 <- (abs(omegahat.cpp) < 1e-3 & !deltas)
+      if (n-p-sum(idx0) > 0) {
+        ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
+                             xrng = 0.02,
+                             npts = 201, 
+                             fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, rel_tol)},
+                             plot = FALSE)
+        # print(ocheck)
+        expect_lt(max.xdiff(ocheck), 0.01)
+      }
     }
   }
 })
