@@ -14,13 +14,15 @@
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export qr_cens.post
-qr_cens.post <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
+qr_cens.post <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, 
+                         Sigs, RvDoMcmc, DoAdapt,
                          max_iter = 100, rel_tol = 1e-7) {
   # # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   # if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
   # if RvDoMcmc is not specified, then all get updated
   if (missing(RvDoMcmc)) RvDoMcmc <- rep(1,length(BetaInit))
+  if (missing(DoAdapt)) DoAdapt <- rep(1,length(BetaInit))
   # if (missing(RvDoMcmc)) {
   #   RvDoMcmc <- matrix(1, nrow = nrow(BetaInit), ncol = ncol(BetaInit))
   # }
@@ -40,6 +42,7 @@ qr_cens.post <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs, R
   G <- .QuantReg_evalG(y,t(X), c(1,alpha), BetaInit)
   lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
   omegasInit <- .omega.hat(G, lambda)
-  .QuantRegCens_post(omegasInit, y, t(X), deltas, c(1,alpha), nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
-                    maxIter = max_iter, relTol = rel_tol)
+  .QuantRegCens_post(omegasInit, y, t(X), deltas, c(1,alpha), 
+                     nsamples, nburn, BetaInit, Sigs, RvDoMcmc, DoAdapt, 
+                     maxIter = max_iter, relTol = rel_tol)
 }

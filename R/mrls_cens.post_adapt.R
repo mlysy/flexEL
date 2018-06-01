@@ -15,7 +15,8 @@
 #' @export mrls_cens.post_adapt
 mrls_cens.post_adapt <- function(y, X, Z, deltas, nsamples, nburn, 
                                  betaInit, gammaInit, sig2Init,
-                                 mwgSd, rvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
+                                 mwgSd, rvDoMcmc, doAdapt,
+                                 max_iter = 100, rel_tol = 1e-7) {
   # input checks
   if(nrow(X) != length(y)) {
     stop("X and y have inconsistent dimensions.")
@@ -32,7 +33,9 @@ mrls_cens.post_adapt <- function(y, X, Z, deltas, nsamples, nburn,
     # print(omegasInit)
   }
   if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
+  if (missing(doAdapt)) doAdapt <- rep(1,length(betaInit))
   .MeanRegCensLS_post_adapt(omegasInit, y, t(X), t(Z), deltas, nsamples, nburn, 
-                            betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, 
+                            betaInit, gammaInit, sig2Init,
+                            mwgSd, rvDoMcmc, doAdapt, 
                             maxIter = max_iter, relTol = rel_tol)
 }

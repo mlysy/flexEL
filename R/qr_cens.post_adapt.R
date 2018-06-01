@@ -14,15 +14,20 @@
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export qr_cens.post_adapt
-qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
-                         max_iter = 100, rel_tol = 1e-7) {
+qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, 
+                               Sigs, RvDoMcmc, DoAdapt,
+                               max_iter = 100, rel_tol = 1e-7) {
   # # input conversion
   if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
   if (missing(RvDoMcmc)) {
     RvDoMcmc <- matrix(1, nrow = nrow(BetaInit), ncol = ncol(BetaInit))
   }
+  if (missing(DoAdapt)) {
+    DoAdapt <- matrix(1, nrow = nrow(BetaInit), ncol = ncol(BetaInit))
+  }
   if (is.vector(RvDoMcmc)) RvDoMcmc <- matrix(RvDoMcmc, length(RvDoMcmc), 1)
+  if (is.vector(DoAdapt)) DoAdapt <- matrix(RvDoMcmc, length(RvDoMcmc), 1)
   # input checks
   if(nrow(X) != length(y)) {
     stop("X and y have inconsistent dimensions.")
@@ -43,6 +48,6 @@ qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, S
   omegasInit <- .omega.hat(G, lambda)
   # if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(BetaInit))
   .QuantRegCens_post_adapt(omegasInit, y, t(X), deltas, c(1,alpha), nsamples, nburn, 
-                           BetaInit, Sigs, RvDoMcmc, 
+                           BetaInit, Sigs, RvDoMcmc, DoAdapt, 
                            maxIter = max_iter, relTol = rel_tol)
 }

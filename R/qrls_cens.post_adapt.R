@@ -19,7 +19,8 @@
 #' @export qrls_cens.post_adapt
 qrls_cens.post_adapt <- function(y, X, Z, deltas, alpha, nsamples, nburn, 
                                  betaInit, gammaInit, sig2Init, nuInit, 
-                                 mwgSd, rvDoMcmc, max_iter = 100, rel_tol = 1e-7) {
+                                 mwgSd, rvDoMcmc, doAdapt,
+                                 max_iter = 100, rel_tol = 1e-7) {
   # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   # if (is.vector(GammaInit)) GammaInit <- matrix(GammaInit,length(GammaInit),1)
@@ -32,6 +33,10 @@ qrls_cens.post_adapt <- function(y, X, Z, deltas, alpha, nsamples, nburn,
   # if (is.vector(RvDoMcmc)) RvDoMcmc <- matrix(RvDoMcmc,length(RvDoMcmc),1)
   if (missing(rvDoMcmc)) {
     rvDoMcmc <- rep(1, length(betaInit)+length(gammaInit)+2)
+    # RvDoMcmc <- rep(1, nrow(betaInit)+nrow(gammaInit)+2)
+  }
+  if (missing(doAdapt)) {
+    doAdapt <- rep(1, length(betaInit)+length(gammaInit)+2)
     # RvDoMcmc <- rep(1, nrow(betaInit)+nrow(gammaInit)+2)
   }
   # input checks
@@ -58,6 +63,6 @@ qrls_cens.post_adapt <- function(y, X, Z, deltas, alpha, nsamples, nburn,
   .QuantRegCensLS_post_adapt(omegasInit, y, t(X), t(Z), deltas, c(1,alpha),
                              nsamples, nburn, 
                              betaInit, gammaInit,sig2Init, nuInit,
-                             mwgSd, rvDoMcmc, 
+                             mwgSd, rvDoMcmc, doAdapt,
                              maxIter = max_iter, relTol = rel_tol)
 }

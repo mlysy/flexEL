@@ -120,7 +120,10 @@ public:
   void mwgStep(VectorXd &thetaCur, const int &idx, const double &mwgsd,
                bool &accept, double &logELCur);
   MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit,
-                           double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
+                           double *mwgSd, VectorXd &rvDoMcmc, bool *doAdapt, 
+                           VectorXd &paccept);
+  // MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit,
+  //                          double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
 };
 
 /*
@@ -696,17 +699,24 @@ inline void InnerELC<ELModel>::mwgStep(VectorXd &thetaCur,
   }
 }
 
+// template<typename ELModel>
+// inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn, 
+//                                                    VectorXd thetaInit,
+//                                                    double *mwgSd, bool *rvDoMcmc, 
+//                                                    VectorXd &paccept) {
 template<typename ELModel>
 inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn, 
                                                    VectorXd thetaInit,
-                                                   double *mwgSd, bool *rvDoMcmc, 
+                                                   double *mwgSd,
+                                                   VectorXd &rvDoMcmc,
+                                                   bool *doAdapt, 
                                                    VectorXd &paccept) {
   int nTheta = thetaInit.size();
   MatrixXd theta_chain(nTheta,nsamples);
   paccept = VectorXd::Zero(nTheta);
   // theta_chain.fill(0.0); // debug
   // paccept.fill(0.0);
-  MwgAdapt tuneMCMC(nTheta, rvDoMcmc);
+  MwgAdapt tuneMCMC(nTheta, doAdapt);
   bool *isAccepted = new bool[nTheta];
   for (int ii=0; ii<nTheta; ii++) {
     isAccepted[ii] = false;

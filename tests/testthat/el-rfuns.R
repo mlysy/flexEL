@@ -16,10 +16,10 @@ MaxRelErr <- function(lambdaNew, lambdaOld) {
 }
 
 # adjusted EM by chen-et-al2008
-adjG_R <- function(G) {
+adjG_R <- function(G, an) {
   n <- nrow(G)
   gbar <- 1/n*colSums(G)
-  an <- max(1,0.5*log(n))
+  if (missing(an)) an <- max(1,0.5*log(n))
   gadd <- -an*gbar
   return(rbind(G,gadd))
 }
@@ -99,7 +99,8 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
 }
 
 # G is nObs x nEqs matrix
-omega.hat.NC_R <- function(G, max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
+omega.hat.NC_R <- function(G, adjust = FALSE, 
+                           max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
   lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
   # nIter <- lambdaout$nIter
   # maxErr <- lambdaout$maxErr
@@ -259,20 +260,23 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   # lambdaOld <- rep(0,m)
   nIter <- 0
   # initialize omegas with uncensored solution 
-  omegas <- omega.hat.NC_R(G, max_iter, rel_tol, verbose)
+  omegas <- omega.hat.NC_R(G, adjust, max_iter, rel_tol, verbose)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     return(rep(NaN,length(deltas)))
   }
-  if (adjust) omegas <- omegas[1:(n-1)]
+  # if (adjust) omegas <- omegas[1:(n-1)]
+  if (adjust) {
+    epsilons <- c(epsilons,0)
+    deltas <- c(deltas,0)
+  }
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas,epsilons,deltas)
-  if (any(is.nan(omegas))) return(rep(NaN,n))
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
-    if (adjust) weights <- c(weights,0)
+    # if (adjust) weights <- c(weights,0)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose)
@@ -285,8 +289,11 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     qlg <- c(sum(weights) + lambdaNew %*% t(G))
     omegas <- weights/qlg
     omegas <- omegas/sum(omegas)
+    if (any(omegas < -rel_tol)) message("omega.hat.EM_R: negative omegas.")
+    omegas <- abs(omegas)
     # err <- MaxRelErr(lambdaNew,lambdaOld)
     # err <- MaxRelErr(omegas,omegasOld)
+    # if (adjust) omegas <- omegas[1:(n-1)]
     logel <- logEL_R(omegas,epsilons,deltas)
     err <- MaxRelErr(logel,logelOld)
     if (verbose && nIter %% 20 == 0) {
@@ -304,6 +311,12 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   }
   return(omegas)
 }
+
+# accelerate EM wang-et-al08
+vecinv_R <- function(x) {
+  return(x/sum(x*x))
+}
+
 
 # omega.hat.EM_R <- function(G, deltas,
 #                            max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
@@ -360,24 +373,29 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
 # ---- wrapper functions ----
 
 # wrapper function for censor and non-censor omega.hat
-omega.hat_R <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
+omega.hat_R <- function(G, deltas, epsilons, adjust=FALSE,
+                        max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
-    omegas <- omega.hat.NC_R(G, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
+    omegas <- omega.hat.NC_R(G, adjust, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   else {
-    omegas <- omega.hat.EM_R(G, deltas, epsilons,
+    omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust, 
                              max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   return(c(omegas))
 }
 
 # G is nObs x nEqs matrix
-logEL_R <- function(omegas, epsilons, deltas) {
+logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
   if (any(is.nan(omegas))) return(-Inf)
   if (missing(deltas)) {
     sum(log(omegas))
   }
   else {
+    if (adjust) {
+      epsilons <- c(epsilons,0)
+      deltas <- c(deltas,0)
+    }
     epsOrd <- order(epsilons) # ascending order of epsilons
     n <- length(omegas)
     psos <- rep(0,n)

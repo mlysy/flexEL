@@ -6,10 +6,11 @@ source("../testthat/el-model.R")
 source("gen_eps.R")
 
 # ---- 1-d problem ----
-n <- 200
+n <- 300
 mu0 <- rnorm(1,0,1)
 # X <- matrix(rnorm(n,0,1),n,1) # each row of X is one observation
 X <- matrix(rep(1,n), n, 1)
+# X <- matrix(sample(15:25,n,replace = TRUE),n,1)
 # eps <- rnorm(n) # N(0,1) error term
 
 # dist is one of "norm","t","chisq","lnorm"
@@ -17,7 +18,7 @@ eps <- gen_eps(n, dist = "norm", df = NULL)
 
 yy <- c(X * mu0) + eps
 # random censoring
-cc <- rnorm(n,mean=1.5,sd=1)
+cc <- rnorm(n,mean=1,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -36,30 +37,38 @@ y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 numpoints <- 100
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
+adjust <- FALSE
 for (ii in 1:numpoints) {
   if (ii %% 10 == 0) message("ii = ", ii)
   G <- mr.evalG(y,X,mu.seq[ii])
+  if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X * mu.seq[ii])
-  omegas <- omega.hat(G,deltas,epsilons)
-  logel.seq[ii] <- logEL(omegas,epsilons,deltas)
-  # logel.seq[ii] <- logEL(G,deltas,epsilons)
+  if (adjust) {
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust = adjust)
+    logel.seq[ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logel.seq[ii] <- logEL(omegas,epsilons,deltas)
+  }
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
-nsamples <- 2000
-nburn <- 1000
-betaInit <- c(lm(y ~ 1)$coefficients) 
+nsamples <- 10000
+nburn <- 2000
+betaInit <- c(lm(y ~ X-1)$coefficients) 
 betaInit
-sigs <- rep(0.18,1)
+sigs <- rep(0.1,1)
 system.time(
   # mrout <- postCens_R(Gfun=mr.evalG_R,nThe=1,nBet=1,nGam=0,
   #                       y=y,X=X,deltas=deltas,thetaInit=betaInit,
   #                       nsamples=nsamples,nburn=nburn,
-  #                       mwgSds=sigs)
-  mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs)
+  #                       mwgSds=sigs,adjust = TRUE)
+  mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, 
+                              mwgSd = sigs, DoAdapt = 1)
 )
 
-mu_chain <- mrout$theta_chain
+mu_chain <- mrout$beta_chain
 mu_paccept <- mrout$paccept 
 mu_paccept
 plot(mu_chain[1,], xlab = 'mu', ylab = 'EL', type='l')
@@ -78,7 +87,8 @@ legend('topright',legend=c(expression('true value'),
 # ---- 2-d problem (1 intercept, 1 slope) ----
 n <- 200
 p <- 2
-X1 <- matrix(rnorm(n),n,1)
+# X1 <- matrix(rnorm(n),n,1)
+X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
 X <- cbind(1,X1)
 # eps <- rnorm(n) # N(0,1) error term
 
@@ -94,7 +104,7 @@ beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=0.05*beta_I,sd=1)
+cc <- rnorm(n,mean=15,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -106,16 +116,21 @@ beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+adjust <- TRUE
 for (ii in 1:numpoints) {
+  message("ii = ", ii)
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
   
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
+  if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
-  omegas <- omega.hat(G,deltas,epsilons)
-  logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
+  # omegas <- omega.hat(G,deltas,epsilons)
+  # logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
+  omegas <- omega.hat_R(G,deltas,epsilons,adjust = adjust)
+  logel.seq[2,ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
 }
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
@@ -123,21 +138,25 @@ logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1])
 # calculate marginal posterior
 # Note: this may take a while to calculate
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+adjust <- TRUE
 logel.mat <- apply(Beta.seq, 1, function(bb) {
   G <- mr.evalG(y,X,c(bb[1],bb[2]))
+  if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(bb[1],bb[2]))
-  omegas <- omega.hat(G,deltas,epsilons)
-  logEL(omegas,epsilons,deltas)
+  # omegas <- omega.hat(G,deltas,epsilons)
+  # logEL(omegas,epsilons,deltas)
+  omegas <- omega.hat_R(G,deltas,epsilons,adjust)
+  logEL_R(omegas,epsilons,deltas,adjust)
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))
 logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
-nsamples <- 200
+nsamples <- 300
 nburn <- 100
 betaInit <- c(lm(y ~ X1)$coefficients)
 betaInit
-sigs <- c(0.1,0.1)
+sigs <- c(0.1,0.02)
 # Note: For matching the conditional grid plot and histogram, pay attention to 
 #   their inital values, the fixed params need to be the same.
 RvDoMcmc <- c(1,1)
@@ -147,7 +166,7 @@ system.time(
   mrout <- postCens_R(Gfun=mr.evalG_R,nThe=2,nBet=2,nGam=0,
                         y=y,X=X,deltas=deltas,thetaInit=betaInit,
                         nsamples=nsamples,nburn=nburn,
-                        mwgSds=sigs)
+                        mwgSds=sigs,adjust = TRUE)
   # mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
 )
 beta_chain <- mrout$theta_chain

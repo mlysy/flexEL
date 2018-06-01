@@ -13,13 +13,15 @@
 #' @return \code{nEqs x nsamples} matrix of Markov Chain.
 #' @details ...
 #' @export mr_cens.post
-mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, 
+mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit, 
+                         Sigs, RvDoMcmc, DoAdapt, 
                          max_iter = 100, rel_tol = 1e-7) {
   # # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   # if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
   # if RvDoMcmc is not specified, then all get updated
   if (missing(RvDoMcmc)) RvDoMcmc <- rep(1,length(BetaInit))
+  if (missing(DoAdapt)) DoAdapt <- rep(1,length(BetaInit))
   # if (missing(RvDoMcmc)) {
   #   RvDoMcmc <- matrix(1, nrow = nrow(BetaInit), ncol = ncol(BetaInit))
   # }
@@ -40,6 +42,6 @@ mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc
   lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
   omegasInit <- .omega.hat(G, lambda)
   .MeanRegCens_post(omegasInit, y, t(X), deltas, nsamples, nburn, BetaInit, 
-                    Sigs, RvDoMcmc, 
+                    Sigs, RvDoMcmc, DoAdapt, 
                     maxIter = max_iter, relTol = rel_tol)
 }

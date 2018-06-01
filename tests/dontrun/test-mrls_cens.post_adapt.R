@@ -32,7 +32,7 @@ eps <- gen_eps(n, dist = "norm", df = NULL)
 yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 plot(yy,cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=1,sd=1)
+cc <- rnorm(n,mean=1.5,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -40,9 +40,9 @@ y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 
 # calculate the conditional posterior
 numpoints <- 100
-beta.seq <- seq(beta0-1,beta0+1,length.out = numpoints)
-gamma.seq <- seq(gamma0-1,gamma0+1,length.out = numpoints)
-sig2.seq <- seq(sig20-1,sig20+1,length.out = numpoints)
+beta.seq <- seq(beta0-.5,beta0+.5,length.out = numpoints)
+gamma.seq <- seq(gamma0-.5,gamma0+.5,length.out = numpoints)
+sig2.seq <- seq(sig20-.5,sig20+.5,length.out = numpoints)
 # Note: need to keep the sig2.seq range > 0 mostly
 logel.seq <- matrix(rep(NA,3*numpoints),3,numpoints)
 for (ii in 1:numpoints) {
@@ -163,7 +163,7 @@ eps <- gen_eps(n, dist = "norm", df = NULL)
 yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 plot(X[,2],yy,cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=2.5,sd=1)
+cc <- rnorm(n,mean=4,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -172,7 +172,7 @@ y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 # for plotting conditional curves
 numpoints <- 100
 
-beta.seq1 <- seq(-1+beta0[1],1+beta0[1],length.out = numpoints)
+beta.seq1 <- seq(-.5+beta0[1],.5+beta0[1],length.out = numpoints)
 logel.seq1 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- mrls.evalG(y,X,Z,c(beta.seq1[ii],beta0[2]),0.5*gamma0,sig20)
@@ -182,7 +182,7 @@ for (ii in 1:numpoints) {
 }
 logelmode1 <- plotEL(beta.seq1, logel.seq1, beta0[1], NA, expression(beta[0]))
 
-beta.seq2 <- seq(-1+beta0[2],1+beta0[2],length.out = numpoints)
+beta.seq2 <- seq(-.5+beta0[2],.5+beta0[2],length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- mrls.evalG(y,X,Z,c(beta0[1],beta.seq2[ii]),0.5*gamma0,sig20)
@@ -192,7 +192,7 @@ for (ii in 1:numpoints) {
 }
 logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
 
-gamma.seq1 <- seq(-1+gamma0[1],1+gamma0[1],length.out = numpoints)
+gamma.seq1 <- seq(-.5+gamma0[1],.5+gamma0[1],length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- mrls.evalG(y,X,Z,beta0,0.5*c(gamma.seq1[ii],gamma0[2]),sig20)

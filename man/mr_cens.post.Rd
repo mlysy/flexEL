@@ -4,7 +4,7 @@
 \alias{mr_cens.post}
 \title{Posterior sampler for mean regression with censoring (location model)}
 \usage{
-mr_cens.post(y, X, deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc,
+mr_cens.post(y, X, deltas, nsamples, nburn, BetaInit, Sigs, RvDoMcmc, DoAdapt,
   max_iter = 100, rel_tol = 1e-07)
 }
 \arguments{

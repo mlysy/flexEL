@@ -171,7 +171,7 @@ Rcpp::List MeanRegCens_post(Eigen::VectorXd omegasInit,
                             Eigen::VectorXd deltas,
                             int nsamples, int nburn,
                             Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
-                            Eigen::VectorXd rvDoMcmc,
+                            Eigen::VectorXd rvDoMcmc,  Eigen::VectorXd doAdapt,
                             int maxIter = 100, double relTol = 1e-7) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,deltas,NULL);
@@ -193,24 +193,24 @@ Rcpp::List MeanRegCens_post_adapt(Eigen::VectorXd omegasInit,
                                   Eigen::VectorXd deltas,
                                   int nsamples, int nburn,
                                   Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
-                                  Eigen::VectorXd rvDoMcmc,
+                                  Eigen::VectorXd rvDoMcmc, Eigen::VectorXd doAdapt,
                                   int maxIter = 100, double relTol = 1e-7) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,deltas,NULL);
   MRC.setTol(maxIter, relTol);
   int nTheta = betaInit.size();
   Eigen::VectorXd paccept(nTheta);
-  bool *rvdomcmc = new bool[nTheta];
-  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  bool *doadapt = new bool[nTheta];
+  dVec_to_bArr(doAdapt, doadapt);
   MRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::MatrixXd beta_chain = MRC.postSampleAdapt(nsamples, nburn,
                                                    betaInit, mwgSd.data(),
-                                                   rvdomcmc, paccept);
+                                                   rvDoMcmc, doadapt, paccept);
   // MatrixXd beta_chain = MatrixXd::Zero(1,1);
   // std::cout << "betaInit = " << betaInit.transpose() << std::endl;
   // std::cout << "mwgSd = " << mwgSd.transpose() << std::endl;
   // std::cout << "rvDoMcmc = " << rvDoMcmc.transpose() << std::endl;
-  delete[] rvdomcmc;
+  delete[] doadapt;
   Rcpp::List retlst;
   retlst["beta_chain"] = beta_chain;
   retlst["paccept"] = paccept;
@@ -224,8 +224,8 @@ Rcpp::List MeanRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
                                     Eigen::MatrixXd Z, Eigen::VectorXd deltas, 
                                     int nsamples, int nburn,
                                     Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, 
-                                    Eigen::VectorXd sig2Init,
-                                    Eigen::VectorXd mwgSd, Eigen::VectorXd rvDoMcmc,
+                                    Eigen::VectorXd sig2Init, Eigen::VectorXd mwgSd, 
+                                    Eigen::VectorXd rvDoMcmc, Eigen::VectorXd doAdapt,
                                     int maxIter = 100, double relTol = 1e-7) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,Z,deltas,NULL);
@@ -240,13 +240,13 @@ Rcpp::List MeanRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
   thetaInit.tail(1) = sig2Init;
   
   int nTheta = thetaInit.size();
-  bool *rvdomcmc = new bool[nTheta];
-  dVec_to_bArr(rvDoMcmc, rvdomcmc);
+  bool *doadapt = new bool[nTheta];
+  dVec_to_bArr(doAdapt, doadapt);
   Eigen::MatrixXd theta_chain = MRC.postSampleAdapt(nsamples, nburn,
                                                     thetaInit, mwgSd.data(),
-                                                    rvdomcmc, paccept);
+                                                    rvDoMcmc, doadapt, paccept);
   // Eigen::MatrixXd theta_chain = Eigen::MatrixXd::Zero(1,1);
-  delete[] rvdomcmc;
+  delete[] doadapt;
   Rcpp::List retlst;
   retlst["theta_chain"] = theta_chain;
   retlst["paccept"] = paccept;

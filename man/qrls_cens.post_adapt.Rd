@@ -5,7 +5,7 @@
 \title{Adaptive posterior sampler for qunatile regression (location-scale model)}
 \usage{
 qrls_cens.post_adapt(y, X, Z, deltas, alpha, nsamples, nburn, betaInit,
-  gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, max_iter = 100,
+  gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, max_iter = 100,
   rel_tol = 1e-07)
 }
 \arguments{
