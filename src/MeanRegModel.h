@@ -8,7 +8,6 @@ class MeanRegModel {
 private:
   RowVectorXd yXb;
   RowVectorXd eZg;
-  // RowVectorXd eZg2;
   RowVectorXd yXbeZg;
   RowVectorXd yXbeZg2; 
   MatrixXd tG;
@@ -16,7 +15,7 @@ protected:
   VectorXd y;
   MatrixXd X;
   MatrixXd Z;
-  int nObs, nEqs, nBet, nGam;
+  int nObs, nEqs, nBet, nGam, nQts; // TODO: nQts is not used in mean reg
   MatrixXd G;
 public:
   // MeanRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
@@ -34,7 +33,7 @@ public:
   // for location-scale linear regression models
   void evalG(const Ref<const VectorXd>& beta, 
              const Ref<const VectorXd>& gamma, 
-             const Ref<const VectorXd>& sig2,
+             const double& sig2,
              const Ref<const VectorXd>& dummy);
   void setG(const Ref<const MatrixXd>& _G); 
   MatrixXd getG();
@@ -88,7 +87,6 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
   G = MatrixXd::Zero(nEqs,nObs);
   tG = MatrixXd::Zero(nObs, nEqs);
   eZg = RowVectorXd::Zero(nObs);
-  // eZg2 = RowVectorXd::Zero(nObs);
   yXbeZg = RowVectorXd::Zero(nObs);
   yXbeZg2 = RowVectorXd::Zero(nObs);
 }
@@ -100,17 +98,12 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
   tG = X.transpose();
   tG.array().colwise() *= yXb.transpose().array();
   G = tG.transpose();
-    // Note: rowwise is slower in general 
-    // yXb.noalias() = y.transpose() - beta.transpose() * X;
-    // G = X;
-    // G.array().rowwise() *= yXb.array();
-    // std::cout << "G = " << G << std::endl;
 }
 
 // form the G matrix for location-scale linear regression model 
-/*
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
                                 const Ref<const VectorXd>& gamma,
+                                const double &sig2,
                                 const Ref<const VectorXd>& dummy) {
   eZg.array() = (-gamma.transpose()*Z).array().exp();
   yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
@@ -119,22 +112,7 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
   tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
   tG.block(0,nBet,nObs,nGam) = Z.transpose();
   tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
-  tG.rightCols(1).array() = yXbeZg2.transpose().array()-1;
-  G = tG.transpose();
-}
-*/
-inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
-                                const Ref<const VectorXd>& gamma,
-                                const Ref<const VectorXd>& sig2,
-                                const Ref<const VectorXd>& dummy) {
-  eZg.array() = (-gamma.transpose()*Z).array().exp();
-  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
-  yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
-  tG.block(0,0,nObs,nBet) = X.transpose();
-  tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
-  tG.block(0,nBet,nObs,nGam) = Z.transpose();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
-  tG.rightCols(1).array() = 1/sig2(0)*yXbeZg2.transpose().array()-1;
+  tG.rightCols(1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
   G = tG.transpose();
 }
 
