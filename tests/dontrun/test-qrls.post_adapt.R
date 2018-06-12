@@ -107,7 +107,7 @@ theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2]/2
 sig2Init <- exp(theta.hat$gamma[1])
-eps_new <- c((y - X %*% theta.hat$beta)*exp(-0.5*Z %*% theta.hat$gamma[2])/sqrt(sig2Init))
+eps_new <- c((y - X %*% theta.hat$beta)*exp(-Z %*% theta.hat$gamma[2])/sqrt(sig2Init))
 nuInit <- quantile(eps_new,alpha)
 mwgSds <- c(0.2,0.2,0.2,0.2)
 RvDoMcmc <- c(1,1,1,1)

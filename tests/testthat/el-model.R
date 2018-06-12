@@ -246,7 +246,7 @@ post_R <- function(Gfun, nThe, nBet, nGam,
               paccept = paccept))
 }
 
-mwgStep_R <- function(Gfun, nThe, nBet, nGam, y, X, Z, deltas, omegas,
+mwgStep_R <- function(Gfun, nThe, nBet, nGam, y, X, Z, deltas, alpha, omegas,
                       thetaCur, logelCur, idx, mwgsd, adjust = FALSE,
                       max_iter = 100, rel_tol = 1e-07) {
   accept <- FALSE
@@ -269,7 +269,7 @@ mwgStep_R <- function(Gfun, nThe, nBet, nGam, y, X, Z, deltas, omegas,
                 thetaProp[nBet+nGam+1])
     }
     else {
-      G <- Gfun(y,X,Z,thetaProp[1:nBet],
+      G <- Gfun(y,X,Z,alpha,thetaProp[1:nBet],
                 thetaProp[(nBet+1):(nBet+nGam)],
                 thetaProp[nBet+nGam+1],
                 thetaProp[nBet+nGam+2])
@@ -278,8 +278,11 @@ mwgStep_R <- function(Gfun, nThe, nBet, nGam, y, X, Z, deltas, omegas,
                                  thetaProp[(nBet+1):(nBet+nGam)],
                                  thetaProp[nGam+1])
   }
-  if (adjust) G <- adjG_R(G)
-  weights <- evalWeights_R(c(deltas,0), omegas, c(epsilons,0))
+  if (adjust) {
+    G <- adjG_R(G)
+    weights <- evalWeights_R(c(deltas,0), omegas, c(epsilons,0))
+  }
+  weights <- evalWeights_R(deltas, omegas, epsilons)
   lout <- lambdaNRC_R(G,weights,max_iter,rel_tol)
   if (!lout$convergence) {
     out <- list(accept=accept, thetaCur=thetaCur, logelCur=logelCur)
@@ -301,7 +304,7 @@ mwgStep_R <- function(Gfun, nThe, nBet, nGam, y, X, Z, deltas, omegas,
 }
 
 postCens_R <- function(Gfun, nThe, nBet, nGam,
-                       y, X, Z, deltas, nsamples, nburn, 
+                       y, X, Z, deltas, alpha, nsamples, nburn, 
                        thetaInit, mwgSds, rvDoMcmc, adjust = FALSE,
                        max_iter = 100, rel_tol = 1e-07) {
   # nThe <- length(thetaInit)
@@ -325,7 +328,7 @@ postCens_R <- function(Gfun, nThe, nBet, nGam,
                 thetaCur[nBet+nGam+1])
     }
     else {
-      G <- Gfun(y,X,Z,thetaCur[1:nBet], thetaCur[(nBet+1):(nBet+nGam)], 
+      G <- Gfun(y,X,Z,alpha,thetaCur[1:nBet], thetaCur[(nBet+1):(nBet+nGam)], 
                 thetaCur[nBet+nGam+1], thetaCur[nBet+nGam+2])
     }
     epsilons <- evalEpsilonsLS_R(y,X,Z,
@@ -352,7 +355,7 @@ postCens_R <- function(Gfun, nThe, nBet, nGam,
         }
         else {
           stepout <- mwgStep_R(Gfun,nThe,nBet,nGam,y=y,X=X,Z=Z,deltas=deltas,
-                               omegas=omegas,
+                               alpha=alpha, omegas=omegas,
                                thetaCur=thetaCur,logelCur=logelCur,idx=jj,
                                mwgsd=mwgSds[jj],adjust=adjust,
                                max_iter=max_iter,rel_tol=rel_tol)

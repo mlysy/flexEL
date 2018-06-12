@@ -53,7 +53,7 @@ qrls_cens.post_adapt <- function(y, X, Z, deltas, alpha, nsamples, nburn,
     stop("Z and gamma have inconsistent dimensions.")
   }
   # obtain initial value for first EM from uncensored case
-  G <- .QuantRegLS_evalG(y,t(X),t(Z),betaInit,gammaInit,sig2Init)
+  G <- .QuantRegLS_evalG(y,t(X),t(Z),c(1,alpha),betaInit,gammaInit,sig2Init,nuInit)
   lambda <- .lambdaNR(G, maxIter = max_iter, relTol = rel_tol, verbose = FALSE)
   omegasInit <- .omega.hat(G,lambda)
   if (anyNA(omegasInit)) {

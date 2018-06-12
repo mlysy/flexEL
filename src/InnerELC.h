@@ -831,6 +831,21 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
       theta_chain.col(ii) = thetaCur;
     }
     tuneMCMC.adapt(mwgSd, isAccepted);
+    // TODO: temp to check if the chain is converging..
+    if (ii > 0 && ii % 1000 == 0) {
+      int noconv = 0;
+      VectorXd pacctemp = paccept.array() / (nburn+ii);
+      std::cout << "pactemp = "; 
+      for (int kk=0; kk<nTheta; kk++) {
+        std::cout << pacctemp(kk) << ' ';
+        if (pacctemp(kk) < 0.4) noconv += 1;
+      }
+      std::cout << std::endl;
+      if (noconv == nTheta) {
+        theta_chain.fill(0.0);
+        break;
+      }
+    }
   }
   paccept /= (nsamples+nburn);
   delete[] isAccepted; // deallocate memory
