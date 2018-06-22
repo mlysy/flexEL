@@ -341,7 +341,7 @@ abline(v=mean(theta_chain[6,]),col='blue')
 
 # ---- coverage prob ----
 # dimensions
-n <- 300 # number of observations
+n <- 200 # number of observations
 p <- 2
 q <- 1
 X <- cbind(rep(1,n),rnorm(n))
@@ -351,10 +351,13 @@ Z <- matrix(rnorm(q*n),n,q)
 
 # parameters
 beta0 <- rnorm(p)
+# beta0 <- c(1,0.5)
 beta0 
 gamma0 <- rnorm(q)
+# gamma0 <- -0.5
 gamma0
 sig20 <- abs(rnorm(1,mean=1))
+# sig20 <- 1
 sig20
 
 # quantile level
@@ -369,7 +372,7 @@ nu0 <- genout$nu0
 yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 plot(yy~X[,2], cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=1,sd=1)
+cc <- rnorm(n,mean=2,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -426,11 +429,11 @@ for (ii in 1:numpoints) {
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq5[ii] <- logEL(omegas,epsilons,deltas)
 }
-logelmode5 <- plotEL(nu.seq, logel.seq6, nu0, NA, expression(nu))
+logelmode5 <- plotEL(nu.seq, logel.seq5, nu0, NA, expression(nu))
 
 # mcmc
-nsamples <- 2000
-nburn <- 1000
+nsamples <- 5000
+nburn <- 2000
 # solve by hlm
 theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z))
 betaInit <- theta.hat$beta
@@ -452,7 +455,9 @@ theta_accept <- postout$paccept
 theta_accept
 
 # mixing of the chains
-plot(theta_chain[1,],type = 'l')
+plot(theta_chain[5,],type = 'l')
+# plot(theta_chain[3,],theta_chain[5,],cex=.3)
+pairs(t(theta_chain),cex=.3)
 
 # histograms and conditional loglikelihood overlays
 hist(theta_chain[1,],breaks=50,freq=FALSE,
