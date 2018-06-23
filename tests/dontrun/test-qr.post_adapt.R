@@ -19,7 +19,8 @@ mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- qr.evalG(y,X,alpha,mu.seq[ii])
-  logel.seq[ii] <- logEL(G = G)
+  omegas <- omega.hat(G)
+  logel.seq[ii] <- logEL(omegas)
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, quantile(y,alpha), expression(mu))
 logelmode

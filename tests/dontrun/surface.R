@@ -295,3 +295,7 @@ logel.est <- logEL(omegas,epsilons,deltas)
 plot3d(seq.x=theta1.seq, seq.y=theta2.seq, seq.z=t(logel.mat),
        m1=beta0, logel.m1=logel.true,
        m2=qrcoef, logel.m2=logel.est)
+
+# ---- smoothed qr ----
+
+
