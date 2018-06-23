@@ -4,6 +4,7 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
+source("mode-functions.R")
 library(plotly)
 
 # ---- helper function ----
@@ -297,5 +298,48 @@ plot3d(seq.x=theta1.seq, seq.y=theta2.seq, seq.z=t(logel.mat),
        m2=qrcoef, logel.m2=logel.est)
 
 # ---- smoothed qr ----
+# 2-d problem
+n <- 200
+p <- 2
+X0 <- matrix(rep(1,n),n,1)
+X1 <- matrix(rnorm(n),n,1)
+X <- cbind(X0,X1)
+tau <- 0.75
+genout <- gen_eps(n, dist = "norm", df = NULL, tau = tau)
+eps <- genout$eps
+nu0 <- genout$nu0
+beta_intercept <- 0.5
+beta_slope <- 1
+y <- 1 + c(X1 %*% beta_slope) + eps 
+beta0 <- c(beta_intercept+nu0, beta_slope)
 
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+logel.mat <- apply(Beta.seq, 1, function(bb) {
+  G <- qr.evalG.smooth_R(y,X,tau,bb,s=10)
+  omegas <- omega.hat(G)
+  logEL(omegas)
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat[is.infinite(logel.mat)] <- NaN
+anyNA(logel.mat)
+
+# quantile regression
+library(quantreg)
+qrcoef <- coef(rq(y~X1,tau=alpha))
+
+# plot 3d surface
+G <- qr.evalG.smooth_R(y,X,tau,beta0,s=10)
+omegas <- omega.hat(G)
+logel.true <- logEL(omegas)
+G <- qr.evalG.smooth_R(y,X,tau,qrcoef,s=10)
+omegas <- omega.hat(G)
+logel.est <- logEL(omegas)
+plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+       m1=beta0, logel.m1=logel.true,
+       m2=qrcoef, logel.m2=logel.est)
