@@ -378,18 +378,20 @@ qrls_cens.boot_R <- function(y,X,Z,delta,
   colnames(gamma.boot) <- names(gamma.hat)
   sig2.boot <- rep(NA,nboot)
   nu.boot <- rep(NA,nboot)
-  y.hat <- c(X %*% beta.hat + sqrt(sig2.hat)*exp(Z %*% gamma.hat))
-  eps.hat <- y - y.hat
   ii <- 0
   while (ii < nboot) {
     ii <- ii+1
-    if (ii %% 20 == 0) message("ii = ", ii)
-    eps.boot <- sample(eps.hat,size=n,replace=TRUE)
-    y.boot <- y.hat + eps.boot
-    hlmout <- hlm(y.boot,delta,X,cbind(1,Z),max_iter,rel_tol,multi_cycle=multi_cycle)
+    if (ii %% 100 == 0) message("ii = ", ii)
+    inds.boot <- sample(n,n,replace=TRUE)
+    y.boot <- y[inds.boot]
+    X.boot <- X[inds.boot,]
+    Z.boot <- Z[inds.boot,]
+    delta.boot <- deltas[inds.boot]
+    hlmout <- hlm(y.boot, delta.boot, X.boot, cbind(1,Z.boot),
+                  max_iter,rel_tol,multi_cycle=multi_cycle)
     if(hlmout$conv) {
       beta.boot[ii,] <- hlmout$coef$beta
-      gamma.boot[ii,] <- hlmout$coef$gamma[2:(q+1)]
+      gamma.boot[ii,] <- hlmout$coef$gamma[2:(q+1)]*0.5
       sig2.boot[ii] <- exp(hlmout$coef$gamma[1])
       nu.boot[ii] <- quantile((y-X %*% beta.boot[ii,])*exp(-Z %*% gamma.boot[ii,])/sqrt(sig2.boot[ii]),tau)
     }
@@ -404,10 +406,49 @@ qrls_cens.boot_R <- function(y,X,Z,delta,
               nu.boot=nu.boot))
 }
 
+# qrls_cens.boot_R <- function(y,X,Z,delta,
+#                              tau,beta.hat,gamma.hat,sig2.hat,nu.hat,
+#                              nboot=1000, max_iter=500, rel_tol=1e-6,
+#                              multi_cycle=FALSE) {
+#   p <- length(beta.hat)
+#   q <- length(gamma.hat)
+#   n <- length(y)
+#   beta.boot <- matrix(NA,nboot,p)
+#   colnames(beta.boot) <- names(beta.hat)
+#   gamma.boot <- matrix(NA,nboot,q)
+#   colnames(gamma.boot) <- names(gamma.hat)
+#   sig2.boot <- rep(NA,nboot)
+#   nu.boot <- rep(NA,nboot)
+#   y.hat <- c(X %*% beta.hat + sqrt(sig2.hat)*exp(Z %*% gamma.hat))
+#   eps.hat <- y - y.hat
+#   ii <- 0
+#   while (ii < nboot) {
+#     ii <- ii+1
+#     if (ii %% 20 == 0) message("ii = ", ii)
+#     eps.boot <- sample(eps.hat,size=n,replace=TRUE)
+#     y.boot <- y.hat + eps.boot
+#     hlmout <- hlm(y.boot,delta,X,cbind(1,Z),max_iter,rel_tol,multi_cycle=multi_cycle)
+#     if(hlmout$conv) {
+#       beta.boot[ii,] <- hlmout$coef$beta
+#       gamma.boot[ii,] <- hlmout$coef$gamma[2:(q+1)]*0.5
+#       sig2.boot[ii] <- exp(hlmout$coef$gamma[1])
+#       nu.boot[ii] <- quantile((y-X %*% beta.boot[ii,])*exp(-Z %*% gamma.boot[ii,])/sqrt(sig2.boot[ii]),tau)
+#     }
+#     else {
+#       ii <- ii-1
+#       next
+#     }
+#   }
+#   return(list(beta.boot=beta.boot,
+#               gamma.boot=gamma.boot,
+#               sig2.boot=sig2.boot,
+#               nu.boot=nu.boot))
+# }
+
 qrls_cens.bootCI_R <- function(theta.hat,theta.boot,conf=.95) {
   conf <- 1-conf
   conf <- c(conf/2, 1-conf/2)
-  quantile(theta.hat - theta.boot, probs = conf) + theta.hat
+  quantile(theta.boot - theta.hat, probs = conf) + theta.hat
   # beta.ci <- quantile(theta.hat$beta.hat - theta.boot$beta.boot, probs = conf) + theta.hat$beta.hat
   # gamma.ci <- quantile(theta.hat$gamma.hat - theta.boot$gamma.boot, probs = conf) + theta.hat$gamma.hat
   # sig2.ci <- quantile(theta.hat$sig2.hat - theta.boot$sig2.boot, probs = conf) + theta.hat$sig2.hat

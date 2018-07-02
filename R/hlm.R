@@ -79,16 +79,21 @@ hlm <- function(y, delta, X, W,
   U <- y^2
   ## if(debug) browser()
   # initialize the model parameters
-  betat <- coef(lm.fit(x = X, y = y))
+  # (removed)
+  # betat <- coef(lm.fit(x = X, y = y))
+  # (added)
+  glm_conv <- TRUE
+  betat <- tryCatch(expr = coef(lm.fit(x = X, y = y)),
+                    warning = function(w) {glm_conv <<- FALSE; coef(lm.fit(x = X, y = y))},
+                    error = function(e) {rep(NA,px)})
   # (removed)
   # gammat <- coef(glm.fit(x = W, y = (y-X%*%betat)^2,
   #                        family = Gamma(link = "log")))
   # (added)
-  glm_conv <- TRUE
   gammat <- tryCatch(expr = coef(glm.fit(x = W, 
                                          y = (y-X%*%betat)^2, 
                                          family = Gamma(link = "log"))),
-                     warning = function(w) {glm_conv <<- FALSE;coef(glm.fit(x = W, 
+                     warning = function(w) {glm_conv <<- FALSE; coef(glm.fit(x = W, 
                                                                             y = (y-X%*%betat)^2, 
                                                                             family = Gamma(link = "log")))},
                      error = function(e) {rep(NA,pw)})

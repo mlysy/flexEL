@@ -5,6 +5,70 @@ source("gen_eps.R")
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
+source("mode-functions.R")
+source("em_acceleration.R")
+
+# ---- mr: modeEL v.s. bayesEL ----
+# dimension
+n <- 200
+p <- 2
+X1 <- rnorm(n)
+X <- cbind(1,X1)
+
+# parameters
+beta0 <- c(1,0.5)
+beta0
+
+# dist is one of "norm","t","chisq","lnorm"
+eps <- gen_eps(n, dist = "chisq", df = 5)
+
+# response
+y <- c(X %*% beta0) + eps
+plot(y~X1, cex=.3)
+
+# fit lm
+lmcoeff <- coef(lm(y~X1))
+lmcoeff
+abline(a=lmcoeff[1],b=lmcoeff[2])
+
+# by mode finding 
+nlmout <- nlm(mr.neglogEL_R,lmcoeff,y=y,X=X,hessian=TRUE)
+nlmout$estimate
+
+# by full Bayesian
+nsample <- 10000
+nburn <- 2000
+belout <- mr.post_adapt(y,X,nsample,nburn,lmcoeff,c(0.1,0.1))
+cbind(mean(belout$beta_chain[1,]),mean(belout$beta_chain[2,]))
+
+# compare MSE of estimates: mode finding is better 
+# but it seems alwyas coincide with lm result
+nrep <- 200
+mod.ms <- c(0,0)
+bel.ms <- c(0,0)
+for (ii in 1:nrep) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  X1 <- rnorm(n)
+  X <- cbind(1,X1)
+  eps <- gen_eps(n, dist = "lnorm", df = NULL)
+  y <- c(X %*% beta0) + eps
+  # fit lm
+  lmcoeff <- coef(lm(y~X1))
+  # mode finding
+  nlmout <- nlm(mr.neglogEL_R,lmcoeff,y=y,X=X,hessian=TRUE)
+  mod.ms <- mod.ms + (nlmout$estimate-beta0)^2
+  # full bayesian
+  belout <- mr.post_adapt(y,X,nsample,nburn,lmcoeff,c(0.1,0.1))
+  bel.ms <- bel.ms + (c(mean(belout$beta_chain[1,]),mean(belout$beta_chain[2,]))-beta0)^2
+}
+mod.ms/nrep # n=100: 0.009226374 0.009351438; n=200: 0.005084070 0.005386566
+bel.ms/nrep # n=100: 0.01780397 0.01808397; n=200: 0.008233900 0.008418917
+
+# ---- mrls ----
+
+# check MSE 
+
+# ---- qr cens ls ---- 
 
 # dimension
 n <- 200
@@ -49,7 +113,6 @@ abline(a=beta0[1],b=beta0[2],col='red')
 abline(a=mean(theta_chain[1,]),b=mean(theta_chain[2,]),col='blue')
 abline(a=beta.hlm[1],b=beta.hlm[2],col='green')
 
-# --------------------------------------------------------------------------- 
 # plot conditional likelihood
 numpoints <- 100
 deltas <- delta
@@ -246,21 +309,81 @@ legend('topright',legend=c(expression('true param'),
 n <- 10
 p <- 2
 max_iter <- 100
-rel_tol <- 1e-8
+rel_tol <- 1e-5
 G <- matrix(rnorm(n*p), n, p)
 deltas <- rep(1,n)
 numcens <- sample(round(n/2),1)
 censinds <- sample(n,numcens)
 deltas[censinds] <- 0
 epsilons <- rnorm(n)
-omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE, 
-                        max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
+# omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE, 
+#                         max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
 omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
                            max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE, dbg= TRUE)
 
+# fit the EM sequence with a curve dbg=TRUE above
+idx <- 1/(1:length(omegahat$logels))
+pred <- predict(lm(omegahat$logels ~ idx + I(idx^2)))
+plot(pred, ylim=range(omegahat$logels,pred))
+points(omegahat$logels, col='red')
+
+# fit first 5 points and predict the rest
+nfit <- 9
+idx <- 1/(1:length(omegahat$logels))
+idx_fit <- idx[1:nfit]
+idx_pre <- idx[(nfit+1):length(idx)]
+fit <- lm(omegahat$logels[1:nfit] ~ idx_fit + I(idx_fit^2))
+pred <- predict(fit, newdata = data.frame(idx_fit=idx))
+plot(pred, ylim=range(omegahat$logels,pred))
+points(omegahat$logels, col='red')
+
+# check EM convergence rate
+nrep <- 100
+n <- 100
+p <- 2
+max_iter <- 100
+rel_tol <- 1e-5
+niter <- rep(NA,nrep)
+cens <- rep(NA,nrep)
+count <- 0
+nnotconv <- 0
+while (count < nrep) {
+  count <- count+1
+  if (count %% 10 == 0) message("count = ", count)
+  G <- matrix(rnorm(n*p), n, p)
+  deltas <- rep(1,n)
+  numcens <- sample(n,1)
+  if (numcens/n < 0.89 || numcens/n > 0.91) {
+    count <- count-1
+    next
+  }
+  else message("censored pct: ", numcens/n)
+  censinds <- sample(n,numcens)
+  deltas[censinds] <- 0
+  epsilons <- rnorm(n)
+  omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
+                             max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE, dbg = TRUE)
+  # message("omegahat$nIter = ", omegahat$nIter)
+  if (!omegahat$conv) {
+    nnotconv <- nnotconv + 1
+    count <- count-1
+    next
+  }
+  cens[count] <- numcens/n
+  niter[count] <- omegahat$nIter
+}
+mean(cens) # 0.1006, 0.1995, 0.2997, 0.4001, 0.4986, 0.6, 0.7, 0.7999, 0.8982
+mean(niter) # 5.75, 8.94, 12.91, 17.24, 23.73, 32.78, 44.55, 83.57
+nnotconv
+# plot them
+censvec <- c(0, 0.1006, 0.1995, 0.2997, 0.4001, 0.4986, 0.6, 0.7, 0.7999, 0.8982)
+nitervec <- c(1, 5.75, 8.94, 12.91, 17.24, 23.73, 32.78, 44.55, 64.2, 83.57)
+plot(censvec,nitervec, xlab="censored %", ylab="nIter", cex=.5, 
+     main = "rel_tol=1e-5, n=100, p=2, rand G; nrep=100")
+
 # with qrls data
 # dimensions
-n <- 300 # number of observations
+n <- 200 # number of observations
 p <- 1
 q <- 1
 
@@ -290,7 +413,7 @@ nu0 <- genout$nu0
 yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 plot(yy,cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=2,sd=1)
+cc <- rnorm(n,mean=1,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -301,10 +424,18 @@ G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0,sig20,nu0)
 
 max_iter <- 100
 rel_tol <- 1e-5
-omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE, 
-                               max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
-omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE, dbg = TRUE)
+# omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE, 
+#                                max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
+# compare the normal way and the acc way
+system.time(
+  print(logEL_EMAC_R(G,epsilons,deltas))
+)
+
+system.time({
+  omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
+                             max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE, dbg = TRUE)
+  print(logEL_R(omegahat$omegas,epsilons,deltas))
+})
 
 # ---- compare the coverage prob of the two methods ----
 # repeat the experiment and calculate coverage probilities
@@ -315,40 +446,46 @@ sink(con, append=TRUE, type="message")
 ns <- c(100,200,300)
 alpha <- 0.75
 beta0 <- c(1,0.5)
-gamma0 <- -0.5
+gamma0 <- -.5
 sig20 <- 1
-nu0 <- gen_eps(100,tau=alpha)$nu0
-theta0 <- c(beta0,gamma0,sig20,nu0)
 
 nsamples <- 10000
-nburn <- 2000
+nburn <- 5000
 mwgSds <- rep(0.1,5)
-reptimes <- 500
+reptimes <- 200
 coverProbs.el <- matrix(rep(0,5*length(ns)),5,length(ns))
 coverProbs.hlm <- matrix(rep(0,5*length(ns)),5,length(ns))
 lengthCI.el <- matrix(rep(0,5*length(ns)),5,length(ns))
 lengthCI.hlm <- matrix(rep(0,5*length(ns)),5,length(ns))
+
+# change this according to the eps in the loop
+nu0 <- gen_eps(100, dist = "chisq", df = 5, tau = alpha)$nu0
+theta0 <- c(beta0,gamma0,sig20,nu0)
+
 # system.time(
 for (ii in 1:length(ns)) {
   system.time({
     n <- ns[ii]
     message("---- n = ", n, " ----")
-    covers.el <- rep(0,5)
-    lengths.el <- rep(0,5)
-    covers.hlm <- rep(0,5)
-    lengths.hlm <- rep(0,5)
-    # covers <- c(101, 94, 90, 96, 104)
-    # lengths <- c(23.96676, 24.00932, 39.95447, 35.39038, 23.68906)
-    reptimes <- 500
-    for (jj in 1:reptimes) {
+    # covers.el <- rep(0,5)
+    # lengths.el <- rep(0,5)
+    # covers.hlm <- rep(0,5)
+    # lengths.hlm <- rep(0,5)
+    covers.el <- c(45, 42, 32, 27, 45)
+    covers.hlm <- c(46, 42, 48, 24, 50)
+    lengths.el <- c(14.84395, 14.83234, 16.27844, 22.78626, 28.60688)
+    lenghts.hlm <- c(15.07314, 15.07314, 17.47164, 23.02124, 24.67563)
+    
+    reptimes <- 527
+    for (jj in 78:reptimes) {
       message("** jj = ", jj, " **")
       # cat ("Press [enter] to continue\n")
       # line <- readline()
       if (jj %% 50 == 0) message("jj = ", jj)
       X <- cbind(rep(1,n),rnorm(n))
       Z <- matrix(rnorm(1*n),n,1)
-      eps <- gen_eps(n, dist = "norm", df = NULL, tau = alpha)$eps
-      yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
+      eps <- gen_eps(n, dist = "chisq", df = 5, tau = alpha)$eps
+      yy <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
       # plot(yy~X[,2], cex=0.3)
       # random censoring
       cc <- rnorm(n,mean=2.5,sd=1)
@@ -368,36 +505,13 @@ for (ii in 1:length(ns)) {
       }
       
       beta.hlm <- hlmout$coef$beta
-      gamma.hlm <- hlmout$coef$gamma[2]
+      gamma.hlm <- hlmout$coef$gamma[2]*0.5
       sig2.hlm <- exp(hlmout$coef$gamma[1])
       nu.hlm <- quantile((y-X %*% beta.hlm)*exp(-Z %*% gamma.hlm)/sqrt(sig2.hlm),alpha)
       
-      ## hlm method
-      theta.boot <- qrls_cens.boot_R(y,X,Z,deltas,
-                                     alpha,beta.hlm,gamma.hlm,sig2.hlm,nu.hlm,
-                                     nboot=1000)
-      CI.beta <- sapply(1:length(beta.hlm), function(ii) {
-        qrls_cens.bootCI_R(theta.hat = beta.hlm[ii], theta.boot = theta.boot$beta.boot[,ii])
-      })
-      CI.gamma <- sapply(1:length(gamma.hlm), function(ii) {
-        qrls_cens.bootCI_R(theta.hat = gamma.hlm[ii], theta.boot = theta.boot$gamma.boot[,ii])
-      })
-      CI.sig2 <- qrls_cens.bootCI_R(theta.hat = sig2.hlm, theta.boot = theta.boot$sig2.boot)
-      CI.nu <- qrls_cens.bootCI_R(theta.hat = nu.hlm, theta.boot = theta.boot$nu.boot)
-      for (mm in 1:2) {
-        if (theta0[mm] >= CI.beta[1] && theta0[mm] <= CI.beta[2]) covers.hlm[mm] <- covers.hlm[mm] + 1
-        lengths.hlm[mm] <- lengths.hlm[mm] + CI.beta[2]-CI.beta[1]
-      }
-      if (theta0[3] >= CI.sig2[1] && theta0[3] <= CI.sig2[2]) covers.hlm[3] <- covers.hlm[3] + 1
-      lengths.hlm[3] <- lengths.hlm[3] + CI.gamma[2]-CI.gamma[1]
-      if (theta0[4] >= CI.sig2[1] && theta0[4] <= CI.sig2[2]) covers.hlm[4] <- covers.hlm[4] + 1
-      lengths.hlm[4] <- lengths.hlm[4] + CI.sig2[2]-CI.sig2[1]
-      if (theta0[5] >= CI.nu[1] && theta0[5] <= CI.nu[2]) covers.hlm[5] <- covers.hlm[5] + 1
-      lengths.hlm[5] <- lengths.hlm[5] + CI.nu[2]-CI.nu[1]
-      
       ## el method
       betaInit <- beta.hlm
-      gammaInit <- 0.5*gamma.hlm
+      gammaInit <- gamma.hlm
       sig2Init <- sig2.hlm
       nuInit <- nu.hlm
       # run adaptive MCMC here
@@ -419,10 +533,34 @@ for (ii in 1:length(ns)) {
       for (kk in 1:5) {
         qts <- quantile(theta_chain[kk,],c(0.025,0.975))
         # gamma range need to time 2 since the estimate for gamma/2
-        if (kk == 3) qts <- 2*qts
+        # if (kk == 3) qts <- 2*qts
         if (theta0[kk] >= qts[1] && theta0[kk] <= qts[2]) covers.el[kk] <- covers.el[kk] + 1
         lengths.el[kk] <- lengths.el[kk] + (qts[2]-qts[1])
       }
+      
+      ## hlm method
+      theta.boot <- qrls_cens.boot_R(y,X,Z,deltas,
+                                     alpha,beta.hlm,gamma.hlm,sig2.hlm,nu.hlm,
+                                     nboot=1000)
+      CI.beta <- sapply(1:length(beta.hlm), function(ii) {
+        qrls_cens.bootCI_R(theta.hat = beta.hlm[ii], theta.boot = theta.boot$beta.boot[,ii])
+      })
+      CI.gamma <- sapply(1:length(gamma.hlm), function(ii) {
+        qrls_cens.bootCI_R(theta.hat = gamma.hlm[ii], theta.boot = theta.boot$gamma.boot[,ii])
+      })
+      CI.sig2 <- qrls_cens.bootCI_R(theta.hat = sig2.hlm, theta.boot = theta.boot$sig2.boot)
+      CI.nu <- qrls_cens.bootCI_R(theta.hat = nu.hlm, theta.boot = theta.boot$nu.boot)
+      for (mm in 1:2) {
+        if (theta0[mm] >= CI.beta[1,mm] && theta0[mm] <= CI.beta[2,mm]) covers.hlm[mm] <- covers.hlm[mm] + 1
+        lengths.hlm[mm] <- lengths.hlm[mm] + CI.beta[2]-CI.beta[1]
+      }
+      if (theta0[3] >= CI.gamma[1] && theta0[3] <= CI.gamma[2]) covers.hlm[3] <- covers.hlm[3] + 1
+      lengths.hlm[3] <- lengths.hlm[3] + CI.gamma[2]-CI.gamma[1]
+      if (theta0[4] >= CI.sig2[1] && theta0[4] <= CI.sig2[2]) covers.hlm[4] <- covers.hlm[4] + 1
+      lengths.hlm[4] <- lengths.hlm[4] + CI.sig2[2]-CI.sig2[1]
+      if (theta0[5] >= CI.nu[1] && theta0[5] <= CI.nu[2]) covers.hlm[5] <- covers.hlm[5] + 1
+      lengths.hlm[5] <- lengths.hlm[5] + CI.nu[2]-CI.nu[1]
+      
       message("reptimes = ", reptimes)
       cat("covers = ", covers.el, "\n")
       cat("lengths = ", lengths.el, "\n")
@@ -439,4 +577,82 @@ for (ii in 1:length(ns)) {
 # Restore output to console
 sink() 
 sink(type="message")
+
+# ---- EL + censoring: how does the support change when % changes ----
+# mr.cens 
+n <- 100
+p <- 2
+X1 <- matrix(rnorm(n),n,1)
+# X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
+X <- cbind(1,X1)
+# eps <- rnorm(n) # N(0,1) error term
+
+# dist is one of "norm","t","chisq","lnorm"
+eps <- gen_eps(n, dist = "norm", df = NULL)
+
+beta_I <- 0.5
+beta_S <- 1
+# beta_I <- rnorm(1)
+# beta_S <- rnorm(1)
+yy <- beta_I + c(X1 %*% beta_S) + eps 
+beta0 <- c(beta_I, beta_S)
+# plot(X1,y,cex=0.3)
+
+# random censoring
+cc <- rnorm(n,mean=0,sd=1)
+deltas <- yy<=cc
+sum(1-deltas)/n
+deltas.save <- deltas
+
+# select a subset of cc so that the censored values keep the same
+deltas <- deltas.save
+deltas[deltas==0][41:50] <- TRUE
+
+y <- yy
+y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+adjust <- FALSE
+logel.mat <- apply(Beta.seq, 1, function(bb) {
+  G <- mr.evalG(y,X,c(bb[1],bb[2]))
+  if (adjust) G <- adjG_R(G)
+  epsilons <- y - c(X %*% c(bb[1],bb[2]))
+  if (adjust) {
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust)
+    logEL_R(omegas,epsilons,deltas,adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logEL(omegas,epsilons,deltas)
+  }
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat[is.infinite(logel.mat)] <- NaN
+anyNA(logel.mat)
+# el.mat <- exp(logel.mat - max(logel.mat))
+
+# linear regression 
+lmcoef <- coef(lm(y ~ X1))
+
+# plot 3d surface
+G <- mr.evalG(y,X,beta0)
+epsilons <- y - c(X %*% beta0)
+omegas <- omega.hat(G,deltas,epsilons)
+logel.true <- logEL(omegas,epsilons,deltas)
+G <- mr.evalG(y,X,lmcoef)
+epsilons <- y - c(X %*% lmcoef)
+omegas <- omega.hat(G,deltas,epsilons)
+logel.est <- logEL(omegas,epsilons,deltas)
+plot3d(type="surface", seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+       m1=beta0, logel.m1=logel.true,
+       m2=lmcoef, logel.m2=logel.est)
+plot3d(type="contour", seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+       title="mr, n=100, 50% censored")
+
 

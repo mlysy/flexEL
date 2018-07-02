@@ -258,13 +258,14 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
-  # lambdaOld <- rep(0,m)
+  # lambdaNew <- rep(0,m)
   nIter <- 0
   # initialize omegas with uncensored solution 
   omegas <- omega.hat.NC_R(G, adjust, max_iter, rel_tol, verbose=FALSE)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
-    return(rep(NaN,length(deltas)))
+    # return(rep(NaN,length(deltas)))
+    return(list(conv=FALSE, omegas=rep(NaN,length(deltas))))
   }
   # if (adjust) omegas <- omegas[1:(n-1)]
   if (adjust) {
@@ -275,7 +276,11 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   logelOld <- logEL_R(omegas,epsilons,deltas)
   
   # for debug
-  if (dbg) logels <- c(logelOld)
+  if (dbg) {
+    omegamMat <- matrix(NA,nrow=n,ncol=max_iter+1)
+    omegamMat[,1] <- omegas
+    logels <- c(logelOld)
+  }
   
   for (ii in 1:max_iter) {
     nIter <- ii
@@ -302,7 +307,10 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     logel <- logEL_R(omegas,epsilons,deltas)
     
     # for debug
-    if (dbg) logels <- c(logels,logel)
+    if (dbg) {
+      omegamMat[,ii+1] <- omegas
+      logels <- c(logels,logel)
+    }
     
     err <- MaxRelErr(logel,logelOld)
     # if (verbose && nIter %% 20 == 0) {
@@ -315,15 +323,22 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   }
   notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
   if (notconv) {
-    omegas = rep(NaN,n)
+    # omegas = rep(NaN,n)
+    return(list(conv=FALSE,omegas = rep(NaN,n)))
   }
   
   # for debug
   if (dbg) {
-    return(list(omegas=omegas,
-                logels=logels))
+    return(list(conv=TRUE,
+                nIter=nIter,
+                omegas=omegas,
+                logels=logels,
+                omegamMat=omegamMat))
   }
-  else return(omegas)
+  # else return(omegas)
+  else {
+    return(list(conv=TRUE, omegas=omegas, lambda=lambdaNew, weights=weights))
+  }
 }
 
 # accelerate EM wang-et-al08

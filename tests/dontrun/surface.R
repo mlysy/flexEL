@@ -7,34 +7,6 @@ source("gen_eps.R")
 source("mode-functions.R")
 library(plotly)
 
-# ---- helper function ----
-# to set labels: https://plot.ly/r/figure-labels/
-plot3d <- function(seq.x, seq.y, seq.z, 
-                   xlab="intercept", ylab="slope", zlab="logEL",
-                   m1, logel.m1, lab.m1="true val",
-                   m2, logel.m2, lab.m2="est val") {
-  p <- plot_ly(x=seq.x, y=seq.y, z=seq.z,
-            type="surface") %>% 
-      layout(scene = list(
-        xaxis = list(title = xlab),
-        yaxis = list(title = ylab),
-        zaxis = list(title = zlab)
-      ))
-  if (!missing(m1) && !missing(m2)) {
-    p %>% add_trace(x=m1[1], y=m1[2], z=logel.m1,
-                    name = "true val",
-                    type = "scatter3d",
-                    mode = "markers",
-                    marker = list(color = "red")) %>% 
-      add_trace(x=m2[1], y=m2[2], z=logel.m2,
-                name = "est val",
-                type = "scatter3d",
-                mode = "markers",
-                marker = list(color = "blue"))
-  }
-  else p
-}
-
 # check how the coordinate works with plot_ly
 # plot_ly(x=c(-1,0,1),y=c(2,3,4),z=matrix(c(-4,-3,-2,-1,0,1,2,3,4),3,3), type="surface")
 
@@ -81,9 +53,7 @@ c(theta1.seq[modept[1]],theta2.seq[modept[2]])
 lmcoef <- coef(lm(y ~ v))
 
 # 3d surface plot
-plot3d(seq.x=theta1.seq, seq.y=theta2.seq, seq.z=t(logel.mat),
-      m1=theta, logel.m1=hmc.logEL(y,v,theta),
-      m2=lmcoef, logel.m2=hmc.logEL(y,v,lmcoef))
+plot3d(seq.x=theta1.seq, seq.y=theta2.seq, seq.z=t(logel.mat))
 
 # ---- mr ----
 n <- 50
@@ -105,12 +75,13 @@ logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 logel.mat <- apply(Beta.seq, 1, function(bb) {
+  # attributes(-mr.neglogEL_R(y,X,bb))$gradient[2]
   G <- mr.evalG(y,X,c(bb[1],bb[2]))
   omegas <- omega.hat(G)
   logEL(omegas)
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
-# logel.mat[is.infinite(logel.mat)] <- NaN
+logel.mat[is.infinite(logel.mat)] <- NaN
 anyNA(logel.mat)
 # el.mat <- exp(logel.mat - max(logel.mat))
 
@@ -127,6 +98,7 @@ logel.est <- logEL(omegas)
 plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m1=beta0, logel.m1=logel.true,
        m2=lmcoef, logel.m2=logel.est)
+# plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat))
 
 # ---- mr.cens ----
 n <- 100
@@ -266,6 +238,12 @@ deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
 y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+# theta.seq <- cbind(theta1.seq,theta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 logel.mat <- apply(Beta.seq, 1, function(bb) {

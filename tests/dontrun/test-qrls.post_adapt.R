@@ -1,4 +1,5 @@
 require(bayesEL)
+library(numDeriv)
 source("hlm-functions.R")
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")

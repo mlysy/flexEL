@@ -4,6 +4,7 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
+source("em_acceleration.R")
 
 # ---- 1-d problem ----
 n <- 300
@@ -54,6 +55,15 @@ for (ii in 1:numpoints) {
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 
+# Acceleration with fitted lm
+logel_acc.seq <- rep(NA,numpoints) 
+for (ii in 1:numpoints) {
+  G <- mr.evalG(y,X,mu.seq[ii])
+  epsilons <- y - c(X * mu.seq[ii])
+  logel_acc.seq[ii] <- logEL_EMAC_R(G,epsilons,deltas)
+}
+logelmode_acc <- plotEL(mu.seq, logel_acc.seq, mu0, mean(y), expression(mu))
+
 nsamples <- 10000
 nburn <- 2000
 betaInit <- c(lm(y ~ X-1)$coefficients) 
@@ -87,8 +97,8 @@ legend('topright',legend=c(expression('true value'),
 # ---- 2-d problem (1 intercept, 1 slope) ----
 n <- 200
 p <- 2
-# X1 <- matrix(rnorm(n),n,1)
-X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
+X1 <- matrix(rnorm(n),n,1)
+# X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
 X <- cbind(1,X1)
 # eps <- rnorm(n) # N(0,1) error term
 
@@ -104,7 +114,7 @@ beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=15,sd=1)
+cc <- rnorm(n,mean=1,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -116,7 +126,7 @@ beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
-adjust <- TRUE
+adjust <- FALSE
 for (ii in 1:numpoints) {
   message("ii = ", ii)
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
@@ -127,13 +137,32 @@ for (ii in 1:numpoints) {
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
   if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
-  # omegas <- omega.hat(G,deltas,epsilons)
-  # logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
-  omegas <- omega.hat_R(G,deltas,epsilons,adjust = adjust)
-  logel.seq[2,ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
+  if (adjust) {
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust = adjust)
+    logel.seq[2,ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
+  }
 }
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+
+# check the fitted acc
+logel_acc.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+for (ii in 1:numpoints) {
+  message("ii = ", ii)
+  G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
+  epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
+  logel_acc.seq[1,ii] <- logEL_EMAC_R(G,epsilons,deltas)
+  
+  G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
+  epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
+  logel_acc.seq[2,ii] <- logEL_EMAC_R(G,epsilons,deltas)
+}
+logelmode1_acc <- plotEL(beta1.seq, logel_acc.seq[1,], beta0[1], NA, expression(beta[0]))
+logelmode2_acc <- plotEL(beta2.seq, logel_acc.seq[2,], beta0[2], NA, expression(beta[1]))
 
 # calculate marginal posterior
 # Note: this may take a while to calculate
