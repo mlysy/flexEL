@@ -13,6 +13,26 @@ logELgrad_R <- function(omegas, lambda, gradlist) {
   return(c(-grad %*% omegas))
 }
 
+#'
+#'@param lambda is length-\cote{p} vector
+#'@param omegas is length-\code{nObs} vector
+#'@param gradmat is \code{nObs x p} matrix returned by gradMat
+#'@return value of the gradient of the logEL evaluated at theta
+logELCensgrad_R <- function(omegas, deltas, epsilons, lambda, gradlist, weights) {
+  epsOrd <- order(epsilons) # ascending order of epsilons
+  n <- length(omegas)
+  psos <- rep(0,n)
+  for (ii in 1:n) {
+    psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+  }
+  # numerical stability: watch out for extremely small negative values
+  omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
+  # omegas_ <- deltas*log(omegas)+(1-deltas)*log(psos)
+  grad <- sapply(gradlist, function(x) lambda %*% x)
+  # return(c(-grad %*% omegas_))
+  return(c(-grad %*% (weights*omegas)))
+}
+
 # ---- mr functions ----
 
 #'
@@ -46,8 +66,8 @@ mr.neglogEL_R <- function(y, X, beta) {
   }
   else {
     # TODO: if not converged, what should be the gradient...??
-    res <- Inf
-    attr(res, "gradient") <- Inf
+    res <- rep(Inf,length(beta))
+    attr(res, "gradient") <- rep(Inf,length(beta))
   }
   return(res)
 }
@@ -135,6 +155,28 @@ qr.neglogEL_R <- function(y, X, tau, beta, s=100) {
   else {
     # TODO: if not converged, what should be the gradient...??
     message("qr.neglogEL_R: lambdaNR not coverged.")
+    res <- rep(Inf,length(beta))
+    attr(res, "gradient") <- rep(Inf,length(beta))
+  }
+  return(res)
+}
+
+# ---- mr.cens functions ----
+mr_cens.neglogEL_R <- function(y, X, deltas, beta) {
+  G <- mr.evalG_R(y, X, beta)
+  epsilons <- evalEpsilons_R(y,X,beta)
+  oout <- omega.hat.EM_R(G,deltas,epsilons)
+  if (oout$conv) {
+    lambda <- oout$lambda
+    omegas <- oout$omegas
+    weights <- oout$weights
+    res <- -logEL_R(omegas,epsilons,deltas)
+    gradlist <- mr.deltaG_R(y, X, beta)
+    grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
+    attr(res, "gradient") <- grad
+  }
+  else {
+    # TODO: if not converged, what should be the gradient...??
     res <- Inf
     attr(res, "gradient") <- Inf
   }
