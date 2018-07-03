@@ -86,6 +86,13 @@ hlm <- function(y, delta, X, W,
   betat <- tryCatch(expr = coef(lm.fit(x = X, y = y)),
                     warning = function(w) {glm_conv <<- FALSE; coef(lm.fit(x = X, y = y))},
                     error = function(e) {rep(NA,px)})
+  # (added)
+  if (anyNA(betat)) {
+    out <- list(conv = FALSE,
+                coef = list(beta = betat, gamma = rep(NA,pw)),
+                niter = 0)
+    return(out)
+  }
   # (removed)
   # gammat <- coef(glm.fit(x = W, y = (y-X%*%betat)^2,
   #                        family = Gamma(link = "log")))
@@ -117,7 +124,15 @@ hlm <- function(y, delta, X, W,
     T[!delta] <- sft + mut
     U[!delta] <- sigmat^2 * g(zt) + 2*mut * sft + mut^2
     # M-step: beta
-    beta <- coef(lm.wfit(x = X, y = T, w = exp(-Wg)))
+    # (removed)
+    # beta <- coef(lm.wfit(x = X, y = T, w = exp(-Wg)))
+    # (added)
+    glm_conv <- TRUE
+    beta <- tryCatch(expr = coef(lm.wfit(x = X, y = T, w = exp(-Wg))),
+                     warning = function(w) {glm_conv <<- FALSE;  coef(lm.wfit(x = X, y = T, w = exp(-Wg)))},
+                     error = function(e) {rep(NA,px)})
+    # (added: stop when the above lm returns an error)
+    if (anyNA(beta)) break
     if(multi_cycle) {
       # recompute E-step
       mut <- c(Xc %*% beta)
@@ -132,7 +147,6 @@ hlm <- function(y, delta, X, W,
     # (removed)
     # gamma <- coef(glm.fit(x = W, y = R, family = Gamma(link = "log")))
     # (added: tryCatch)
-    glm_conv <- TRUE
     gamma <- tryCatch(expr = coef(glm.fit(x = W, y = R, family = Gamma(link = "log"))),
                       warning = function(w) {glm_conv <<- FALSE; coef(glm.fit(x = W, y = R, family = Gamma(link = "log")))},
                       error = function(e) {rep(NA,pw)})
