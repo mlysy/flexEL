@@ -1,6 +1,7 @@
 # source("../../R/hlm.R")
 library(bayesEL)
 library(numDeriv)
+source("hlm-functions.R")
 source("gen_eps.R")
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
@@ -306,7 +307,7 @@ legend('topright',legend=c(expression('true param'),
 # --- test the accelerated EM ---
 
 # with random data
-n <- 10
+n <- 100
 p <- 2
 max_iter <- 100
 rel_tol <- 1e-5
@@ -315,29 +316,40 @@ deltas <- rep(1,n)
 numcens <- sample(round(n/2),1)
 censinds <- sample(n,numcens)
 deltas[censinds] <- 0
+1-sum(deltas)/n
 epsilons <- rnorm(n)
-# omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE, 
+# omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE,
 #                         max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
 omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
                            max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE, dbg= TRUE)
 
-# fit the EM sequence with a curve dbg=TRUE above
-idx <- 1/(1:length(omegahat$logels))
-pred <- predict(lm(omegahat$logels ~ idx + I(idx^2)))
-plot(pred, ylim=range(omegahat$logels,pred))
-points(omegahat$logels, col='red')
-
-# fit first 5 points and predict the rest
-nfit <- 9
-idx <- 1/(1:length(omegahat$logels))
-idx_fit <- idx[1:nfit]
-idx_pre <- idx[(nfit+1):length(idx)]
-fit <- lm(omegahat$logels[1:nfit] ~ idx_fit + I(idx_fit^2))
-pred <- predict(fit, newdata = data.frame(idx_fit=idx))
-plot(pred, ylim=range(omegahat$logels,pred))
-points(omegahat$logels, col='red')
+# # fit the EM sequence with a curve dbg=TRUE above
+# idx <- 1/(1:length(omegahat$logels))
+# pred <- predict(lm(omegahat$logels ~ idx + I(idx^2)))
+# plot(pred, ylim=range(omegahat$logels,pred))
+# points(omegahat$logels, col='red')
+# 
+# # fit first 5 points and predict the rest
+# nfit <- 9
+# idx <- 1/(1:length(omegahat$logels))
+# idx_fit <- idx[1:nfit]
+# idx_pre <- idx[(nfit+1):length(idx)]
+# fit <- lm(omegahat$logels[1:nfit] ~ idx_fit + I(idx_fit^2))
+# pred <- predict(fit, newdata = data.frame(idx_fit=idx))
+# plot(pred, ylim=range(omegahat$logels,pred))
+# points(omegahat$logels, col='red')
 
 # check EM convergence rate
+plot(omegahat$logels)
+len <- length(omegahat$logels)
+idx <- which(diff(omegahat$logels) < 1e-6)[1]
+els <- omegahat$logels[1:idx]
+plot(els)
+optval <- omegahat$logels[len]
+plot(exp(diff(log(abs(els-optval))))) # coverge to a const => linear convergence 
+# (in fact, converges to 1 => converge sublinearly)
+
+# check EM steps v.s. cens pct
 nrep <- 100
 n <- 100
 p <- 2
@@ -381,6 +393,30 @@ nitervec <- c(1, 5.75, 8.94, 12.91, 17.24, 23.73, 32.78, 44.55, 64.2, 83.57)
 plot(censvec,nitervec, xlab="censored %", ylab="nIter", cex=.5, 
      main = "rel_tol=1e-5, n=100, p=2, rand G; nrep=100")
 
+# Aitken acceleration: with rand G matrix see if Aitken takes fewer steps
+n <- 100
+p <- 2
+max_iter <- 100
+G <- matrix(rnorm(n*p), n, p)
+deltas <- rep(1,n)
+numcens <- 30
+numcens/n
+censinds <- sample(n,numcens)
+deltas[censinds] <- 0
+epsilons <- rnorm(n)
+omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
+                           max_iter = max_iter, rel_tol = 1e-3, verbose = TRUE, dbg = TRUE)
+
+lout <- logEL_EMAC_R(G,epsilons,deltas,rel_tol=1e-3,verbose = TRUE,dbg=TRUE)
+logEL_R(omegahat$omegas,epsilons,deltas)
+lout$logel
+plot(omegahat$logels, 
+     xlim = range(1,length(lout$logels)+3), ylim = range(lout$logels))
+points(4:(length(lout$logels)+3),lout$logels,col='red')
+
+# TODO: check average number of steps of EM
+# write up the script and run on server..
+
 # with qrls data
 # dimensions
 n <- 200 # number of observations
@@ -413,7 +449,7 @@ nu0 <- genout$nu0
 yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
 plot(yy,cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=1,sd=1)
+cc <- rnorm(n,mean=2,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -423,12 +459,12 @@ epsilons <- evalEpsilonsLS_R(y,X,Z,beta0,gamma0,sig20)
 G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0,sig20,nu0)
 
 max_iter <- 100
-rel_tol <- 1e-5
+rel_tol <- 1e-3
 # omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE, 
 #                                max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
 # compare the normal way and the acc way
 system.time(
-  print(logEL_EMAC_R(G,epsilons,deltas))
+  print(logEL_EMAC_R(G,epsilons,deltas,rel_tol=rel_tol,verbose = TRUE))
 )
 
 system.time({
@@ -471,13 +507,13 @@ for (ii in 1:length(ns)) {
     # lengths.el <- rep(0,5)
     # covers.hlm <- rep(0,5)
     # lengths.hlm <- rep(0,5)
-    covers.el <- c(45, 42, 32, 27, 45)
-    covers.hlm <- c(46, 42, 48, 24, 50)
-    lengths.el <- c(14.84395, 14.83234, 16.27844, 22.78626, 28.60688)
-    lenghts.hlm <- c(15.07314, 15.07314, 17.47164, 23.02124, 24.67563)
+    covers.el <- c(186, 170, 141, 115, 187)
+    covers.hlm <- c(183, 183, 184, 102, 193)
+    lengths.el <- c(59.98408, 62.85317, 132.4312, 94.66416, 117.89)
+    lengths.hlm <- c(59.47112, 59.47112, 69.78532, 94.48906, 96.29155)
     
-    reptimes <- 527
-    for (jj in 78:reptimes) {
+    reptimes <- 588
+    for (jj in 288:reptimes) {
       message("** jj = ", jj, " **")
       # cat ("Press [enter] to continue\n")
       # line <- readline()
@@ -566,6 +602,118 @@ for (ii in 1:length(ns)) {
       cat("lengths = ", lengths.el, "\n")
       cat("covers = ", covers.hlm, "\n")
       cat("lengths = ", lengths.hlm, "\n")
+    }
+    for (ll in 1:5) {
+      coverProbs.el[ll,ii] <- covers[ll]/500
+      lengthCI.el[ll,ii] <- lengths[ll]/500
+    }
+  })
+}
+
+# Restore output to console
+sink() 
+sink(type="message")
+
+# ---- see how mrls performs ---- 
+con <- file("covprob.log")
+sink(con, append=TRUE)
+sink(con, append=TRUE, type="message")
+
+ns <- c(100,200,300)
+beta0 <- c(1,0.5)
+gamma0 <- -.5
+sig20 <- 1
+theta0 <- c(beta0,gamma0,sig20)
+
+nsamples <- 10000
+nburn <- 5000
+mwgSds <- rep(0.1,4)
+reptimes <- 200
+coverProbs.el <- matrix(rep(0,5*length(ns)),5,length(ns))
+# coverProbs.hlm <- matrix(rep(0,5*length(ns)),5,length(ns))
+lengthCI.el <- matrix(rep(0,5*length(ns)),5,length(ns))
+# lengthCI.hlm <- matrix(rep(0,5*length(ns)),5,length(ns))
+
+# system.time(
+for (ii in 1:length(ns)) {
+  system.time({
+    n <- ns[ii]
+    message("---- n = ", n, " ----")
+    covers.el <- rep(0,4)
+    lengths.el <- rep(0,4)
+    # covers.hlm <- rep(0,5)
+    # lengths.hlm <- rep(0,5)
+    # covers.el <- c(46, 44, 43, 42)
+    # lengths.el <- c(15.30124, 15.62939, 18.31466, 39.49926)
+    
+    reptimes <- 500
+    for (jj in 1:reptimes) {
+      message("** jj = ", jj, " **")
+      # cat ("Press [enter] to continue\n")
+      # line <- readline()
+      if (jj %% 50 == 0) message("jj = ", jj)
+      X <- cbind(rep(1,n),rnorm(n))
+      Z <- matrix(rnorm(1*n),n,1)
+      eps <- gen_eps(n, dist = "chisq", df = 5)
+      yy <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
+      # plot(yy~X[,2], cex=0.3)
+      # random censoring
+      # cc <- rnorm(n,mean=2.5,sd=1)
+      # deltas <- yy<=cc
+      y <- yy
+      # message("censored pct = ", sum(1-deltas)/n)
+      # if (sum(1-deltas)/n > 0.2 || sum(1-deltas)/n < 0.1) {
+      #   reptimes <- reptimes+1
+      #   next
+      # }
+      # y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+      hlmout <- hlm.fit(y = y, X = X, W = cbind(1,Z))
+      # message("hlm conv = ", hlmout$conv)
+      # if (!hlmout$conv) {
+      #   reptimes <- reptimes+1
+      #   next
+      # }
+      
+      beta.hlm <- hlmout$beta
+      gamma.hlm <- hlmout$gamma[2]*0.5
+      sig2.hlm <- exp(hlmout$gamma[1])
+
+      ## el method
+      betaInit <- beta.hlm
+      gammaInit <- gamma.hlm
+      sig2Init <- sig2.hlm
+      # run adaptive MCMC here
+      # postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,
+      #                                 betaInit,gammaInit,sig2Init,
+      #                                 mwgSd = mwgSds)
+      postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,
+                                      betaInit,gammaInit,sig2Init,
+                                      mwgSd = mwgSds, RvDoMcmc=rep(1,4))
+      theta_chain <- postout$theta_chain
+      if (all(theta_chain == 0.0)) {
+        message("MCMC not converged.")
+        reptimes <- reptimes+1
+        next
+      }
+      cat("paccept = ", postout$paccept, "\n")
+      if (any(postout$paccept < 0.4) || any(postout$paccept > 0.45) ) {
+        reptimes <- reptimes+1
+        next
+      }
+      qts <- rep(NA,4)
+      for (kk in 1:4) {
+        qts <- quantile(theta_chain[kk,],c(0.025,0.975))
+        # gamma range need to time 2 since the estimate for gamma/2
+        # if (kk == 3) qts <- 2*qts
+        if (theta0[kk] >= qts[1] && theta0[kk] <= qts[2]) covers.el[kk] <- covers.el[kk] + 1
+        lengths.el[kk] <- lengths.el[kk] + (qts[2]-qts[1])
+      }
+      
+      message("reptimes = ", reptimes)
+      cat("covers = ", covers.el, "\n")
+      cat("lengths = ", lengths.el, "\n")
+      # cat("covers = ", covers.hlm, "\n")
+      # cat("lengths = ", lengths.hlm, "\n")
     }
     for (ll in 1:5) {
       coverProbs.el[ll,ii] <- covers[ll]/500

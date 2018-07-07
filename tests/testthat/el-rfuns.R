@@ -253,7 +253,7 @@ evalEpsilonsLS_R <- function(y,X,Z,beta,gamma,sig2) {
 
 # G is nObs x nEqs matrix 
 omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = 100, rel_tol = 1e-7, verbose=FALSE,
+                           max_iter = 100, rel_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
@@ -289,7 +289,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     # if (adjust) weights <- c(weights,0)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
-    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose)
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")
@@ -312,11 +312,13 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
       logels <- c(logels,logel)
     }
     
-    err <- MaxRelErr(logel,logelOld)
+    # err <- MaxRelErr(logel,logelOld)
+    err <- abs(logel-logelOld)
     # if (verbose && nIter %% 20 == 0) {
     if (verbose) {
       message("nIter = ", nIter)
-      message("err = ", err)
+      # message("err = ", err)
+      message("abs err = ", abs(logel-logelOld))
     }
     if (err < rel_tol) break
     logelOld <- logel

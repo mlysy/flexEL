@@ -161,7 +161,7 @@ hlm <- function(y, delta, X, W,
   }
   niter <- ii # (added)
   # (added: to handle glm error or warning)
-  if((!glm_conv) || anyNA(gamma) || (ii == max_iter && max(theta_rel) > rel_tol)) {
+  if((!glm_conv) || anyNA(beta) || anyNA(gamma) || (ii == max_iter && max(theta_rel) > rel_tol)) {
   # (removed)
   # if(ii == max_iter && max(theta_rel) > rel_tol) {
     # (removed: for the ease of optimCheck)

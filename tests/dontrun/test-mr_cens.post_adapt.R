@@ -114,7 +114,7 @@ beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=1,sd=1)
+cc <- rnorm(n,mean=2,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -123,6 +123,7 @@ y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
+# beta2.seq <- seq(-.975,-.97,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
@@ -132,6 +133,7 @@ for (ii in 1:numpoints) {
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
   omegas <- omega.hat(G,deltas,epsilons)
+  # omegas <- omega.hat.EM_R(G,deltas,epsilons,rel_tol = 1e-3,verbose = TRUE)$omegas
   logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
   
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
@@ -143,6 +145,7 @@ for (ii in 1:numpoints) {
   }
   else {
     omegas <- omega.hat(G,deltas,epsilons)
+    # omegas <- omega.hat.EM_R(G,deltas,epsilons,rel_tol = 1e-3)$omegas
     logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
   }
 }

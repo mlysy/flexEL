@@ -7,7 +7,7 @@ source("gen_eps.R")
 
 #---- mean reg: X and Z both dim 1----
 # dimensions
-n <- 300 # number of observations
+n <- 200 # number of observations
 p <- 1
 q <- 1
 
@@ -18,21 +18,21 @@ X <- matrix(rep(1,n),n,p)
 Z <- matrix(rnorm(n),n,q)
 
 # parameters
-beta0 <- rnorm(p)
-beta0
-gamma0 <- rnorm(q)
-gamma0
-sig20 <- abs(rnorm(1,mean=1)) # NEW: scale param
-sig20
+# beta0 <- rnorm(p)
+beta0 <- 1
+# gamma0 <- rnorm(q)
+gamma0 <- -.5
+# sig20 <- abs(rnorm(1,mean=1)) # NEW: scale param
+sig20 <- 1
 
 # dist is one of "norm","t","chisq","lnorm"
 eps <- gen_eps(n, dist = "norm", df = NULL)
 
 # resposes
-yy <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
+yy <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 plot(yy,cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=1.5,sd=1)
+cc <- rnorm(n,mean=2,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -46,24 +46,24 @@ sig2.seq <- seq(sig20-.5,sig20+.5,length.out = numpoints)
 # Note: need to keep the sig2.seq range > 0 mostly
 logel.seq <- matrix(rep(NA,3*numpoints),3,numpoints)
 for (ii in 1:numpoints) {
-  message("ii = ", ii)
-  G <- mrls.evalG(y,X,Z,beta.seq[ii],gamma0/2,sig20)
-  epsilons <- evalEpsilonsLS(y,X,Z,beta.seq[ii],0.5*gamma0,sig20)
+  if (ii %% 10 == 0) message("ii = ", ii)
+  G <- mrls.evalG(y,X,Z,beta.seq[ii],gamma0,sig20)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta.seq[ii],gamma0,sig20)
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
 
-  G <- mrls.evalG(y,X,Z,beta0,gamma.seq[ii]/2,sig20)
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,0.5*gamma.seq[ii],sig20)
+  G <- mrls.evalG(y,X,Z,beta0,gamma.seq[ii],sig20)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
     
-  G <- mrls.evalG(y,X,Z,beta0,gamma0/2,sig2.seq[ii])
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,0.5*gamma0,sig2.seq[ii])
+  G <- mrls.evalG(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig2.seq[ii])
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq[3,ii] <- logEL(omegas,epsilons,deltas)
 }
 logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
-logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0/2, NA, expression(gamma))
+logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))
 logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
 
 # mcmc
@@ -78,17 +78,17 @@ betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2]/2 # Note: divided by 2 since the models differ by this factor
 sig2Init <- exp(theta.hat$gamma[1])
 mwgSd <- c(0.1,0.1,0.1)
-RvDoMcmc <- c(1,0,0)
+RvDoMcmc <- c(1,1,1)
 system.time(
-  # postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
-  postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,betaInit,gamma0/2,sig20,mwgSd,RvDoMcmc)
+  postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd,RvDoMcmc)
+  # postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,betaInit,gamma0/2,sig20,mwgSd,RvDoMcmc)
 )
 theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 
 # mixing of the chain
-plot(theta_chain[1,],type = 'l')
+plot(theta_chain[3,],type = 'l')
 
 # overlay marginal / conditional gird plot to histogram
 hist(theta_chain[1,],breaks=50,freq=FALSE,
@@ -111,7 +111,7 @@ hist(theta_chain[2,],breaks=50,freq=FALSE,
 lines(gamma.seq, norm_pdf(logel.marg2, gamma.seq),
       cex=0.1, col = 'red', type='l')
 # conditional line
-lines(gamma.seq/2, norm_pdf(logel.seq[2,], gamma.seq/2),
+lines(gamma.seq, norm_pdf(logel.seq[2,], gamma.seq),
       cex=0.1, col = 'blue', type='l')
 abline(v=gamma0/2,col='red') # Note: divided by 2 since the models differ by this factor
 abline(v=mean(theta_chain[2,]),col='blue')

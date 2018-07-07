@@ -7,7 +7,7 @@ source("gen_eps.R")
 
 #---- mean reg: X and Z both dim 1----
 # dimensions
-n <- 500 # number of observations
+n <- 100 # number of observations
 p <- 1
 q <- 1
 
@@ -18,12 +18,12 @@ X <- matrix(rep(1,n),n,p)
 Z <- matrix(rnorm(n),n,q)
 
 # parameters
-beta0 <- rnorm(p)
-beta0
-gamma0 <- rnorm(q)
-gamma0
+# beta0 <- rnorm(p)
+beta0 <- .5
+# gamma0 <- rnorm(q)
+gamma0 <- -.5
 sig20 <- abs(rnorm(1)) # NEW: scale param
-sig20
+sig20 <- 1
 
 # normal(0,1) error
 eps <- rnorm(n)
@@ -48,7 +48,7 @@ eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
 
 # response
 # Note: the 0.5 is consistent with hlm.fit but not the LS model in MCMC
-y <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 plot(y,cex=0.3)
 # plot(X,y,cex=0.3)
 
@@ -88,22 +88,25 @@ logel.marg3 <- log(apply(el.mat, MARGIN=3, sum))
 
 # calculate the conditional posterior
 numpoints <- 100
-beta.seq <- seq(beta0-1,beta0+1,length.out = numpoints)
-gamma.seq <- seq(gamma0/2-1,gamma0/2+1,length.out = numpoints)
+beta.seq <- seq(beta0-.5,beta0+.5,length.out = numpoints)
+gamma.seq <- seq(gamma0-.5,gamma0+.5,length.out = numpoints)
 sig2.seq <- seq(sig20-0.5,sig20+0.5,length.out = numpoints)
 # Note: need to keep the sig2.seq range > 0 mostly
 logel.seq <- matrix(rep(NA,3*numpoints),3,numpoints)
 for (ii in 1:numpoints) {
-  G <- mrls.evalG(y,X,Z,beta.seq[ii],gamma0/2,sig20)
-  logel.seq[1,ii] <- logEL(G)
+  G <- mrls.evalG(y,X,Z,beta.seq[ii],gamma0,sig20)
+  omegas <- omega.hat(G)
+  logel.seq[1,ii] <- logEL(omegas)
   G <- mrls.evalG(y,X,Z,beta0,gamma.seq[ii],sig20)
-  logel.seq[2,ii] <- logEL(G)
-  G <- mrls.evalG(y,X,Z,beta0,gamma0/2,sig2.seq[ii])
-  logel.seq[3,ii] <- logEL(G)
+  omegas <- omega.hat(G)
+  logel.seq[2,ii] <- logEL(omegas)
+  G <- mrls.evalG(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  omegas <- omega.hat(G)
+  logel.seq[3,ii] <- logEL(omegas)
 }
 logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
 logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0/2, NA, expression(gamma))
-logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(nu))
+logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
 
 # mcmc
 nsamples <- 20000
@@ -176,7 +179,7 @@ legend('topright',legend=c(expression('true param'),
 
 #---- mean reg: X and Z both dim 2 ----
 # dimensions
-n <- 500 # number of observations
+n <- 100 # number of observations
 p <- 2
 q <- 2
 

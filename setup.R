@@ -34,6 +34,8 @@ devtools::document() # create documentation
 # create a tests folder and do things informally.
 # we'll do it more formally later. 
 
+# to create tarball
+# devtools::build()
 
 #--- next steps: ---------------------------------------------------------------
 
