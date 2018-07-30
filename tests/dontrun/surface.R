@@ -127,7 +127,7 @@ y <- yy
 sum(1-deltas)/n
 y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 
-numpoints <- 40
+numpoints <- 100
 beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
@@ -145,13 +145,43 @@ logel.mat <- apply(Beta.seq, 1, function(bb) {
     logEL(omegas,epsilons,deltas,adjust)
   }
   else {
-    omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas # smoothed version
+    omegas <- omega.hat(G,deltas,epsilons)
+    # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas # smoothed version
     logEL(omegas,epsilons,deltas)
   }
-})logel.mat <- matrix(logel.mat, numpoints, numpoints)
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
 logel.mat[is.infinite(logel.mat)] <- NaN
 anyNA(logel.mat)
 # el.mat <- exp(logel.mat - max(logel.mat))
+
+# smoothed version
+numpoints <- 10
+beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+
+# TODO: try using the accelerated logEL with adjusted G
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+adjust <- FALSE
+logel.mat <- apply(Beta.seq, 1, function(bb) {
+  G <- mr.evalG(y,X,c(bb[1],bb[2]))
+  epsilons <- y - c(X %*% c(bb[1],bb[2]))
+  if (adjust) {
+    G <- adjG_R(G)
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust)$omegas
+    logEL(omegas,epsilons,deltas,adjust)
+  }
+  else {
+    # omegas <- omega.hat(G,deltas,epsilons)
+    omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas # smoothed version
+    logEL(omegas,epsilons,deltas)
+  }
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat[is.infinite(logel.mat)] <- NaN
+anyNA(logel.mat)
 
 # linear regression 
 lmcoef <- coef(lm(y ~ X1))

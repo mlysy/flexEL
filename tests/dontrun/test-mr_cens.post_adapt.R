@@ -18,13 +18,20 @@ X <- matrix(rep(1,n), n, 1)
 # dist is one of "norm","t","chisq","lnorm"
 eps <- gen_eps(n, dist = "norm", df = NULL)
 
-yy <- c(X * mu0) + eps
+# yy <- c(X * mu0) + eps
+# # random censoring
+# cc <- rnorm(n,mean=1,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
 # random censoring
-cc <- rnorm(n,mean=1,sd=1)
-deltas <- yy<=cc
-y <- yy
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- c(X * mu0) + eps
 
 # fix censoring time
 # pct <- 0.75
@@ -111,16 +118,24 @@ beta_I <- 1
 beta_S <- 1.5
 # beta_I <- rnorm(1)
 # beta_S <- rnorm(1)
-yy <- beta_I + c(X1 %*% beta_S) + eps 
 beta0 <- c(beta_I, beta_S)
-plot(X1,yy,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=3,sd=1)
-deltas <- yy<=cc
-y <- yy
+# yy <- beta_I + c(X1 %*% beta_S) + eps 
+# cc <- rnorm(n,mean=3,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+# plot(X1,yy,cex=0.3)
+
+# random censoring
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- beta_I + c(X1 %*% beta_S) + eps 
+plot(X1,y,cex=0.3)
 
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
 numpoints <- 100
@@ -155,7 +170,7 @@ logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0])
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
 
 # smoothed censored logEL (very slow now since nested loop in R)
-numpoints <- 100
+numpoints <- 50
 beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
 # beta2.seq <- seq(1.26,1.28,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)

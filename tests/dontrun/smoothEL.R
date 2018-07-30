@@ -5,15 +5,22 @@ ind.smooth_R <- function(x, s=10) {
   return(1/(1+exp(s*x)))
 }
 
-# smoothed partial sum of omegas
+# smoothed partial sum of omegas (for loop)
+# evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10) {
+#   # ei <- epsilons[ii]
+#   n <- length(omegas)
+#   psos <- 0
+#   for (jj in 1:n) {
+#     # ej <- epsilons[jj]
+#     psos <- psos + ind.smooth_R(epsilons[ii]-epsilons[jj],s)*omegas[jj]
+#   }
+#   return(psos)
+# }
+
+# smoothed partial sum of omegas (vectorized version)
 evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10) {
-  # ei <- epsilons[ii]
   n <- length(omegas)
-  psos <- 0
-  for (jj in 1:n) {
-    # ej <- epsilons[jj]
-    psos <- psos + ind.smooth_R(epsilons[ii]-epsilons[jj],s)*omegas[jj]
-  }
+  psos <- sum(ind.smooth_R(epsilons[ii]-epsilons,s)*omegas)
   return(psos)
 }
 
@@ -30,18 +37,34 @@ logEL.smooth_R <- function(omegas,epsilons,deltas,s=10) {
   return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
 }
 
-# smoothed evalWeight function with sigmoid function
+# smoothed evalWeight function with sigmoid function (double for-loop)
+# evalWeights.smooth_R <- function(deltas, omegas, epsilons, s=10) {
+#   nObs <- length(omegas)
+#   epsOrd <- order(epsilons)
+#   psots <- rep(0,nObs)
+#   for (ii in 1:nObs) {
+#     for (jj in 1:nObs) {
+#       psots[ii] <- psots[ii] + (1-deltas[jj])*ind.smooth_R(epsilons[jj]-epsilons[ii],s)*
+#                                       omegas[ii]/evalPsos.smooth_R(jj,omegas,epsilons,s)
+#     }
+#   }
+#   # the weights have the order as the original sample
+#   weights <- deltas + psots
+#   return(weights)
+# }
+
+# smoothed evalWeight function with sigmoid function (more vectorized version)
 evalWeights.smooth_R <- function(deltas, omegas, epsilons, s=10) {
   nObs <- length(omegas)
   epsOrd <- order(epsilons)
   psots <- rep(0,nObs)
-  for (ii in 1:nObs) {
-    for (jj in 1:nObs) {
-      psots[ii] <- psots[ii] + (1-deltas[jj])*ind.smooth_R(epsilons[jj]-epsilons[ii],s)*
-                                      omegas[ii]/evalPsos.smooth_R(jj,omegas,epsilons,s)
-    }
+  psoss <- rep(NA,nObs)
+  for (jj in 1:nObs) {
+    psoss[jj] <- evalPsos.smooth_R(jj,omegas,epsilons,s)
   }
-  # the weights have the order as the original sample 
+  for (ii in 1:nObs) {
+    psots[ii] <- sum((1-deltas)*ind.smooth_R(epsilons-epsilons[ii],s)*omegas[ii]/psoss)
+  }
   weights <- deltas + psots
   return(weights)
 }

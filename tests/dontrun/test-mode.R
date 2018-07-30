@@ -178,14 +178,19 @@ n <- 200
 mu0 <- 1
 X <- matrix(rep(1,n), n, 1) # each row of X is one observation
 eps <- rnorm(n) # N(0,1) error term
-yy <- c(X * mu0) + eps
 
 # random censoring
-cc <- rnorm(n,mean=2.5,sd=1)
-deltas <- yy<=cc
-y <- yy
+# yy <- c(X * mu0) + eps
+# cc <- rnorm(n,mean=2.5,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- c(X * mu0) + eps
 
 numpoints <- 30
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
@@ -201,7 +206,7 @@ logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 # plot(grad.seq,type='l')
 # abline(h=0,col='blue')
 
-mr_cens.neglogEL_R(y,X,deltas,1.045277)
+mr_cens.neglogEL_R(y,X,deltas,1.045277,hessian=TRUE)
 
 nlm(mr_cens.neglogEL_R,mean(y),y=y,X=X,deltas=deltas)
 
