@@ -4,10 +4,11 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
-source("em_acceleration.R")
+source("logEL_EMAC_R.R")
+source("smoothEL.R")
 
 # ---- 1-d problem ----
-n <- 300
+n <- 200
 mu0 <- rnorm(1,0,1)
 # X <- matrix(rnorm(n,0,1),n,1) # each row of X is one observation
 X <- matrix(rep(1,n), n, 1)
@@ -58,6 +59,7 @@ logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 # Acceleration with fitted lm
 logel_acc.seq <- rep(NA,numpoints) 
 for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
   G <- mr.evalG(y,X,mu.seq[ii])
   epsilons <- y - c(X * mu.seq[ii])
   logel_acc.seq[ii] <- logEL_EMAC_R(G,epsilons,deltas)
@@ -95,7 +97,7 @@ legend('topright',legend=c(expression('true value'),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
 # ---- 2-d problem (1 intercept, 1 slope) ----
-n <- 200
+n <- 100
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
 # X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
@@ -105,16 +107,16 @@ X <- cbind(1,X1)
 # dist is one of "norm","t","chisq","lnorm"
 eps <- gen_eps(n, dist = "norm", df = NULL)
 
-# beta_I <- 1
-# beta_S <- 1.5
-beta_I <- rnorm(1)
-beta_S <- rnorm(1)
+beta_I <- 1
+beta_S <- 1.5
+# beta_I <- rnorm(1)
+# beta_S <- rnorm(1)
 yy <- beta_I + c(X1 %*% beta_S) + eps 
 beta0 <- c(beta_I, beta_S)
-# plot(X1,y,cex=0.3)
+plot(X1,yy,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=2,sd=1)
+cc <- rnorm(n,mean=3,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
@@ -123,13 +125,13 @@ y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
-# beta2.seq <- seq(-.975,-.97,length.out = numpoints)
+# beta2.seq <- seq(1.26,1.3,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 adjust <- FALSE
 for (ii in 1:numpoints) {
-  message("ii = ", ii)
+  if (ii %% 10 == 0) message("ii = ", ii)
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
   omegas <- omega.hat(G,deltas,epsilons)
@@ -137,9 +139,9 @@ for (ii in 1:numpoints) {
   logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
   
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
-  if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
   if (adjust) {
+    G <- adjG_R(G)
     omegas <- omega.hat_R(G,deltas,epsilons,adjust = adjust)
     logel.seq[2,ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
   }
@@ -151,6 +153,28 @@ for (ii in 1:numpoints) {
 }
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+
+# smoothed censored logEL (very slow now since nested loop in R)
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
+# beta2.seq <- seq(1.26,1.28,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+for (ii in 1:numpoints) {
+  if (ii %% 1 == 0) message("ii = ", ii)
+  # G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
+  # epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas
+  # logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas)
+  
+  G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
+  epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=80)$omegas
+  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=80)
+}
+logelmode1.smooth <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
+logelmode2.smooth <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
 
 # check the fitted acc
 logel_acc.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
@@ -170,22 +194,28 @@ logelmode2_acc <- plotEL(beta2.seq, logel_acc.seq[2,], beta0[2], NA, expression(
 # calculate marginal posterior
 # Note: this may take a while to calculate
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
-adjust <- TRUE
+adjust <- FALSE
 logel.mat <- apply(Beta.seq, 1, function(bb) {
   G <- mr.evalG(y,X,c(bb[1],bb[2]))
   if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(bb[1],bb[2]))
   # omegas <- omega.hat(G,deltas,epsilons)
   # logEL(omegas,epsilons,deltas)
-  omegas <- omega.hat_R(G,deltas,epsilons,adjust)
-  logEL_R(omegas,epsilons,deltas,adjust)
+  if (adjust) {
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust)
+    logEL_R(omegas,epsilons,deltas,adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logEL(omegas,epsilons,deltas)
+  }
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))
 logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
 
-nsamples <- 300
-nburn <- 100
+nsamples <- 10000 # 20000 worked
+nburn <- 5000
 betaInit <- c(lm(y ~ X1)$coefficients)
 betaInit
 sigs <- c(0.1,0.02)
@@ -195,13 +225,13 @@ RvDoMcmc <- c(1,1)
 k <- which(as.logical(RvDoMcmc))
 betaInit[-k] <- beta0[-k] # fix other params at their true values
 system.time(
-  mrout <- postCens_R(Gfun=mr.evalG_R,nThe=2,nBet=2,nGam=0,
-                        y=y,X=X,deltas=deltas,thetaInit=betaInit,
-                        nsamples=nsamples,nburn=nburn,
-                        mwgSds=sigs,adjust = TRUE)
-  # mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
+  # mrout <- postCens_R(Gfun=mr.evalG_R,nThe=2,nBet=2,nGam=0,
+  #                       y=y,X=X,deltas=deltas,thetaInit=betaInit,
+  #                       nsamples=nsamples,nburn=nburn,
+  #                       mwgSds=sigs,adjust = TRUE)
+  mrout <- mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, sigs, RvDoMcmc)
 )
-beta_chain <- mrout$theta_chain
+beta_chain <- mrout$beta_chain
 beta_paccept <- mrout$paccept
 beta_paccept
 plot(beta_chain[1,], xlab = expression(beta[0]), ylab = 'EL', type='l')

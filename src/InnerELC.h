@@ -793,14 +793,15 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
     evalEpsilons(thetaCur);
   }
   else {
-    // std::cout << "location-scale model." << std::endl;
     if (nTheta == nBet + nGam + 1) {
+      std::cout << "location-scale model for mean regression." << std::endl;
       ELModel::evalG(thetaCur.head(nBet),
                      thetaCur.segment(nBet,nGam),
                      thetaCur.tail(1)(0),
                      VectorXd::Zero(0));
     }
     else {
+      std::cout << "location-scale model for quantile regression." << std::endl;
       ELModel::evalG(thetaCur.head(nBet),
                      thetaCur.segment(nBet,nGam),
                      thetaCur.segment(nBet+nGam,1)(0),
@@ -817,6 +818,20 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
   for(int ii=-nburn; ii<nsamples; ii++) {
     if (ii % 200 == 0) {
       std::cout << "ii = " << ii << std::endl;
+      
+      // DEBUG begins
+      std::cout << "mwgSd = ";
+      for (int ll=0; ll<nTheta; ll++) {
+        std::cout << mwgSd[ll] << ' ';
+      }
+      std::cout << std::endl;
+
+      std::cout << "isAccepted = ";
+      for (int ll=0; ll<nTheta; ll++) {
+        std::cout << isAccepted[ll] << ' ';
+      }
+      std::cout << std::endl;
+      // DEBUG ends
     }
     for(int jj=0; jj<nTheta; jj++) {
       if(rvDoMcmc[jj]) {

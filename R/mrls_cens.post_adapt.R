@@ -34,6 +34,9 @@ mrls_cens.post_adapt <- function(y, X, Z, deltas, nsamples, nburn,
   }
   if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
   if (missing(doAdapt)) doAdapt <- rep(1,length(betaInit))
+  # cat("mwgSd = ", mwgSd)
+  # cat("rvDoMcmc = ", rvDoMcmc)
+  # cat("doAdapt = ", doAdapt)
   .MeanRegCensLS_post_adapt(omegasInit, y, t(X), t(Z), deltas, nsamples, nburn, 
                             betaInit, gammaInit, sig2Init,
                             mwgSd, rvDoMcmc, doAdapt, 

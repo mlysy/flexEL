@@ -85,6 +85,10 @@ inline void MwgAdapt::adapt(double *mwgSd, bool *accept) {
       nAccept[ii] += (int) accept[ii];
       acc = (double) nAccept[ii] / (double) nIter;
       delta = pow((double) nIter, -adaptRate[ii]);
+      // // DEBUG BEGINS
+      // // std::cout << "nIter = " << nIter << std::endl;
+      // if (nIter % 200 == 0) std::cout << "delta = " << delta << std::endl;
+      // // DEBUG ENDS
       if(delta > adaptMax[ii]) delta = adaptMax[ii];
       lsig = log(mwgSd[ii]);
       lsig += acc < targAcc ? -delta : delta;
@@ -173,6 +177,19 @@ inline MwgAdapt::MwgAdapt(int nrv, double *amax, double *arate,
 // inline void MwgAdapt::MwgAdapt(int nrv, bool *adapt) {
 inline MwgAdapt::MwgAdapt(int nrv, bool *adapt) {
   initialize(nrv);
+  // // DEBUG BEGINS
+  // std::cout << "adaptMax = ";
+  // for (int jj=0; jj<nRV; jj++) {
+  //   std::cout << adaptMax[jj] << ' ';
+  // }
+  // std::cout << std::endl;
+  // 
+  // std::cout << "adaptRate = ";
+  // for (int jj=0; jj<nRV; jj++) {
+  //   std::cout << adaptRate[jj] << ' ';
+  // }
+  // std::cout << std::endl;
+  // // DEBUG ENDS
   for(int ii=0; ii<nRV; ii++) {
     doAdapt[ii] = adapt[ii];
   }

@@ -101,18 +101,12 @@ eps <- genout$eps
 nu0 <- genout$nu0
 
 # responses and censorings
-yy <- c(X %*% beta0) + sqrt(sig20)*exp(0.5*X1*gamma0)*eps
-cc <- rnorm(n, mean=3)
+yy <- c(X %*% beta0) + sqrt(sig20)*exp(X1*gamma0)*eps
+cc <- rnorm(n, mean=2.5)
 delta <- yy <= cc
 sum(1-delta)/length(delta)
 y <- yy
 y[!delta] <- cc[!delta]
-
-# ---- plot the lines ----
-plot(y=y,x=X1,cex=.3)
-abline(a=beta0[1],b=beta0[2],col='red')
-abline(a=mean(theta_chain[1,]),b=mean(theta_chain[2,]),col='blue')
-abline(a=beta.hlm[1],b=beta.hlm[2],col='green')
 
 # plot conditional likelihood
 numpoints <- 100
@@ -123,9 +117,9 @@ beta.seq1 <- seq(-.5+beta0[1],.5+beta0[1],length.out = numpoints)
 logel.seq1 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   message("ii = ", ii)
-  G <- qrls.evalG(y,X,Z,tau,c(beta.seq1[ii],beta0[2]),0.5*gamma0,sig20,nu0)
+  G <- qrls.evalG(y,X,Z,tau,c(beta.seq1[ii],beta0[2]),gamma0,sig20,nu0)
   if (adjust) G <- adjG_R(G)
-  epsilons <- evalEpsilonsLS(y,X,Z,c(beta.seq1[ii],beta0[2]),0.5*gamma0,sig20)
+  epsilons <- evalEpsilonsLS(y,X,Z,c(beta.seq1[ii],beta0[2]),gamma0,sig20)
   if (adjust) {
     omegas <- omega.hat_R(G,deltas,epsilons,adjust)
     logel.seq1[ii] <- logEL_R(omegas,epsilons,deltas,adjust)
@@ -141,9 +135,9 @@ beta.seq2 <- seq(-.5+beta0[2],.5+beta0[2],length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   message("ii = ", ii)
-  G <- qrls.evalG(y,X,Z,tau,c(beta0[1],beta.seq2[ii]),0.5*gamma0,sig20,nu0)
+  G <- qrls.evalG(y,X,Z,tau,c(beta0[1],beta.seq2[ii]),gamma0,sig20,nu0)
   if (adjust) G <- adjG_R(G)
-  epsilons <- evalEpsilonsLS(y,X,Z,c(beta0[1],beta.seq2[ii]),0.5*gamma0,sig20)
+  epsilons <- evalEpsilonsLS(y,X,Z,c(beta0[1],beta.seq2[ii]),gamma0,sig20)
   if (adjust) {
     omegas <- omega.hat_R(G,deltas,epsilons,adjust)
     logel.seq2[ii] <- logEL_R(omegas,epsilons,deltas,adjust)
@@ -155,7 +149,7 @@ for (ii in 1:numpoints) {
 }
 logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
 
-gamma.seq <- seq(-.5+gamma0/2,.5+gamma0/2,length.out = numpoints)
+gamma.seq <- seq(-.5+gamma0,.5+gamma0,length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   message("ii = ", ii)
@@ -164,14 +158,14 @@ for (ii in 1:numpoints) {
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq3[ii] <- logEL(omegas,epsilons,deltas)
 }
-logelmode3 <- plotEL(gamma.seq, logel.seq3, 0.5*gamma0, NA, expression(gamma[1]))
+logelmode3 <- plotEL(gamma.seq, logel.seq3, gamma0, NA, expression(gamma[1]))
 
 sig2.seq <- seq(-.5+sig20,.5+sig20,length.out = numpoints)
 logel.seq4 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   message("ii = ", ii)
-  G <- qrls.evalG(y,X,Z,tau,beta0,0.5*gamma0,sig2.seq[ii],nu0)
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,0.5*gamma0,sig2.seq[ii])
+  G <- qrls.evalG(y,X,Z,tau,beta0,gamma0,sig2.seq[ii],nu0)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig2.seq[ii])
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq4[ii] <- logEL(omegas,epsilons,deltas)
 }
@@ -181,14 +175,14 @@ nu.seq <- seq(-.5+nu0,.5+nu0,length.out = numpoints)
 logel.seq5 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   message("ii = ", ii)
-  G <- qrls.evalG(y,X,Z,tau,beta0,0.5*gamma0,sig20,nu.seq[ii])
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,0.5*gamma0,sig20)
+  G <- qrls.evalG(y,X,Z,tau,beta0,gamma0,sig20,nu.seq[ii])
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig20)
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq5[ii] <- logEL(omegas,epsilons,deltas)
 }
 logelmode5 <- plotEL(nu.seq, logel.seq5, nu0, NA, expression(nu))
 
-# ---- use hlm ----
+# use hlm
 hlmout <- hlm(y,delta,X,cbind(1,Z),rel_tol = 1e-5)
 hlmout$conv
 beta.hlm <- hlmout$coef$beta
@@ -197,7 +191,7 @@ sig2.hlm <- exp(hlmout$coef$gamma[1])
 nu.hlm <- quantile((y-X %*% beta.hlm)*exp(-Z %*% gamma.hlm)/sqrt(sig2.hlm),tau)
 # quick check 
 rbind(true = beta0, est = beta.hlm) # beta
-rbind(true = gamma0/2, est = gamma.hlm) # gamma
+rbind(true = gamma0, est = gamma.hlm) # gamma
 rbind(true = sig20, est = sig2.hlm) # beta
 rbind(true = nu0, est = nu.hlm) # beta
 
@@ -218,13 +212,7 @@ CI.sig2
 CI.nu <- qrls_cens.bootCI_R(theta.hat = nu.hlm, theta.boot = theta.boot$nu.boot)
 CI.nu
 
-# theta.ci <- qrls_cens.bootCI_R(list(beta.hat=beta.hlm,
-#                                     gamma.hat=gamma.hlm,
-#                                     sig2.hat=sig2.hlm,
-#                                     nu.hat=nu.hlm),
-#                                theta.boot)
-
-# ---- use bayesEL ----
+# use bayesEL
 nsamples <- 5000
 nburn <- 1000
 betaInit <- beta.hlm
@@ -276,9 +264,9 @@ legend('topright',legend=c(expression('true param'),
 
 hist(theta_chain[3,],breaks=50,freq=FALSE,
      xlab = expression(gamma[1]), main='')
-abline(v=gamma0[1]/2,col='red')
+abline(v=gamma0[1],col='red')
 abline(v=mean(theta_chain[3,]),col='blue')
-abline(v=hlmout$coef$gamma[2]/2,col='green')
+abline(v=hlmout$coef$gamma[2]*.5,col='green')
 legend('topright',legend=c(expression('true param'),
                            expression('sample mean'),
                            expression('hlm sol')),
@@ -304,24 +292,14 @@ legend('topright',legend=c(expression('true param'),
                            expression('hlm sol')),
        lty = c(1,1), col = c('red','blue','green'), cex = 0.6)
 
-# --- test the accelerated EM ---
+# plot the lines
+plot(y=y,x=X1,cex=.3)
+abline(a=beta0[1],b=beta0[2],col='red')
+abline(a=mean(theta_chain[1,]),b=mean(theta_chain[2,]),col='blue')
+abline(a=beta.hlm[1],b=beta.hlm[2],col='green')
 
-# with random data
-n <- 100
-p <- 2
-max_iter <- 100
-rel_tol <- 1e-5
-G <- matrix(rnorm(n*p), n, p)
-deltas <- rep(1,n)
-numcens <- sample(round(n/2),1)
-censinds <- sample(n,numcens)
-deltas[censinds] <- 0
-1-sum(deltas)/n
-epsilons <- rnorm(n)
-# omegahat <- omega.hat.EM_Acc_R(G, deltas, epsilons, adjust = FALSE,
-#                         max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE)
-omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = max_iter, rel_tol = rel_tol, verbose = TRUE, dbg= TRUE)
+
+# --- test the accelerated EM ---
 
 # # fit the EM sequence with a curve dbg=TRUE above
 # idx <- 1/(1:length(omegahat$logels))
@@ -339,23 +317,14 @@ omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE,
 # plot(pred, ylim=range(omegahat$logels,pred))
 # points(omegahat$logels, col='red')
 
-# check EM convergence rate
-plot(omegahat$logels)
-len <- length(omegahat$logels)
-idx <- which(diff(omegahat$logels) < 1e-6)[1]
-els <- omegahat$logels[1:idx]
-plot(els)
-optval <- omegahat$logels[len]
-plot(exp(diff(log(abs(els-optval))))) # coverge to a const => linear convergence 
-# (in fact, converges to 1 => converge sublinearly)
-
 # check EM steps v.s. cens pct
 nrep <- 100
 n <- 100
 p <- 2
 max_iter <- 100
-rel_tol <- 1e-5
+rel_tol <- 1e-3
 niter <- rep(NA,nrep)
+niter.acc <- rep(NA,nrep)
 cens <- rep(NA,nrep)
 count <- 0
 nnotconv <- 0
@@ -365,7 +334,7 @@ while (count < nrep) {
   G <- matrix(rnorm(n*p), n, p)
   deltas <- rep(1,n)
   numcens <- sample(n,1)
-  if (numcens/n < 0.89 || numcens/n > 0.91) {
+  if (numcens/n < 0.79 || numcens/n > 0.81) {
     count <- count-1
     next
   }
@@ -375,6 +344,7 @@ while (count < nrep) {
   epsilons <- rnorm(n)
   omegahat <- omega.hat.EM_R(G, deltas, epsilons, adjust = FALSE, 
                              max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE, dbg = TRUE)
+  lout <- logEL_EMAC_R(G,epsilons,deltas,max_iter = max_iter, rel_tol = rel_tol, verbose=FALSE, dbg=TRUE)
   # message("omegahat$nIter = ", omegahat$nIter)
   if (!omegahat$conv) {
     nnotconv <- nnotconv + 1
@@ -383,15 +353,24 @@ while (count < nrep) {
   }
   cens[count] <- numcens/n
   niter[count] <- omegahat$nIter
+  niter.acc[count] <- length(lout$logels)+2
 }
-mean(cens) # 0.1006, 0.1995, 0.2997, 0.4001, 0.4986, 0.6, 0.7, 0.7999, 0.8982
-mean(niter) # 5.75, 8.94, 12.91, 17.24, 23.73, 32.78, 44.55, 83.57
+mean(cens) # 0.101, 0.1996, 0.3005, 0.3994, 0.4989, 0.6, 0.6995, 0.8009
+mean(niter) # 8.75, 14, 20.62, 26.6, 37.1, 47.12, 56.82, 68.79
+mean(niter.acc) # 6.63, 10, 14.12, 18.14, 25.05, 31.43, 38.15, 46.94
 nnotconv
 # plot them
-censvec <- c(0, 0.1006, 0.1995, 0.2997, 0.4001, 0.4986, 0.6, 0.7, 0.7999, 0.8982)
-nitervec <- c(1, 5.75, 8.94, 12.91, 17.24, 23.73, 32.78, 44.55, 64.2, 83.57)
+# censvec <- c(0, 0.1006, 0.1995, 0.2997, 0.4001, 0.4986, 0.6, 0.7, 0.7999, 0.8982)
+# nitervec <- c(1, 5.75, 8.94, 12.91, 17.24, 23.73, 32.78, 44.55, 64.2, 83.57)
+censvec <- c(0.101, 0.1996, 0.3005, 0.3994, 0.4989, 0.6, 0.6995, 0.8009)
+nitervec <- c(8.75, 14, 20.62, 26.6, 37.1, 47.12, 56.82, 68.79)
+niteraccvec <- c(6.63, 10, 14.12, 18.14, 25.05, 31.43, 38.15, 46.94)
 plot(censvec,nitervec, xlab="censored %", ylab="nIter", cex=.5, 
-     main = "rel_tol=1e-5, n=100, p=2, rand G; nrep=100")
+     ylim=range(c(nitervec,niteraccvec)),
+     main = "abs_tol=1e-3, n=100, p=2, rand G; nrep=100")
+points(censvec,niteraccvec, col='red', cex=.5)
+legend("topleft", legend = c("no acc", "aitken acc"),
+       fill=c("black", "red"), cex=.5)
 
 # Aitken acceleration: with rand G matrix see if Aitken takes fewer steps
 n <- 100
@@ -413,9 +392,6 @@ lout$logel
 plot(omegahat$logels, 
      xlim = range(1,length(lout$logels)+3), ylim = range(lout$logels))
 points(4:(length(lout$logels)+3),lout$logels,col='red')
-
-# TODO: check average number of steps of EM
-# write up the script and run on server..
 
 # with qrls data
 # dimensions
@@ -677,7 +653,7 @@ for (ii in 1:length(ns)) {
       beta.hlm <- hlmout$beta
       gamma.hlm <- hlmout$gamma[2]*0.5
       sig2.hlm <- exp(hlmout$gamma[1])
-
+      
       ## el method
       betaInit <- beta.hlm
       gammaInit <- gamma.hlm
@@ -687,8 +663,8 @@ for (ii in 1:length(ns)) {
       #                                 betaInit,gammaInit,sig2Init,
       #                                 mwgSd = mwgSds)
       postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,
-                                      betaInit,gammaInit,sig2Init,
-                                      mwgSd = mwgSds, RvDoMcmc=rep(1,4))
+                                 betaInit,gammaInit,sig2Init,
+                                 mwgSd = mwgSds, RvDoMcmc=rep(1,4))
       theta_chain <- postout$theta_chain
       if (all(theta_chain == 0.0)) {
         message("MCMC not converged.")
@@ -725,82 +701,4 @@ for (ii in 1:length(ns)) {
 # Restore output to console
 sink() 
 sink(type="message")
-
-# ---- EL + censoring: how does the support change when % changes ----
-# mr.cens 
-n <- 100
-p <- 2
-X1 <- matrix(rnorm(n),n,1)
-# X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
-X <- cbind(1,X1)
-# eps <- rnorm(n) # N(0,1) error term
-
-# dist is one of "norm","t","chisq","lnorm"
-eps <- gen_eps(n, dist = "norm", df = NULL)
-
-beta_I <- 0.5
-beta_S <- 1
-# beta_I <- rnorm(1)
-# beta_S <- rnorm(1)
-yy <- beta_I + c(X1 %*% beta_S) + eps 
-beta0 <- c(beta_I, beta_S)
-# plot(X1,y,cex=0.3)
-
-# random censoring
-cc <- rnorm(n,mean=0,sd=1)
-deltas <- yy<=cc
-sum(1-deltas)/n
-deltas.save <- deltas
-
-# select a subset of cc so that the censored values keep the same
-deltas <- deltas.save
-deltas[deltas==0][41:50] <- TRUE
-
-y <- yy
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
-
-numpoints <- 100
-beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
-beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
-beta.seq <- cbind(beta1.seq,beta2.seq)
-logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
-
-Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
-adjust <- FALSE
-logel.mat <- apply(Beta.seq, 1, function(bb) {
-  G <- mr.evalG(y,X,c(bb[1],bb[2]))
-  if (adjust) G <- adjG_R(G)
-  epsilons <- y - c(X %*% c(bb[1],bb[2]))
-  if (adjust) {
-    omegas <- omega.hat_R(G,deltas,epsilons,adjust)
-    logEL_R(omegas,epsilons,deltas,adjust)
-  }
-  else {
-    omegas <- omega.hat(G,deltas,epsilons)
-    logEL(omegas,epsilons,deltas)
-  }
-})
-logel.mat <- matrix(logel.mat, numpoints, numpoints)
-logel.mat[is.infinite(logel.mat)] <- NaN
-anyNA(logel.mat)
-# el.mat <- exp(logel.mat - max(logel.mat))
-
-# linear regression 
-lmcoef <- coef(lm(y ~ X1))
-
-# plot 3d surface
-G <- mr.evalG(y,X,beta0)
-epsilons <- y - c(X %*% beta0)
-omegas <- omega.hat(G,deltas,epsilons)
-logel.true <- logEL(omegas,epsilons,deltas)
-G <- mr.evalG(y,X,lmcoef)
-epsilons <- y - c(X %*% lmcoef)
-omegas <- omega.hat(G,deltas,epsilons)
-logel.est <- logEL(omegas,epsilons,deltas)
-plot3d(type="surface", seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
-       m1=beta0, logel.m1=logel.true,
-       m2=lmcoef, logel.m2=logel.est)
-plot3d(type="contour", seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
-       title="mr, n=100, 50% censored")
-
 

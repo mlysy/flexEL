@@ -26,25 +26,7 @@ sig20 <- abs(rnorm(1)) # NEW: scale param
 sig20 <- 1
 
 # normal(0,1) error
-eps <- rnorm(n)
-
-# t error with mean 0 var 1
-df <- 5
-v <- df/(df-2)
-eps <- rt(n, df=df)/sqrt(v)
-
-# chi-sqr with mean 0 var 1
-df <- 3
-v <- 2*df
-m <- df
-eps <- (rchisq(n, df=df)-m)/sqrt(v)
-
-# log-normal with mean 0 var 1
-mn <- 0
-sn <- 1
-m <- exp(mn+sn^2/2)
-v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
-eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
+eps <- gen_eps(n, dist="norm")
 
 # response
 # Note: the 0.5 is consistent with hlm.fit but not the LS model in MCMC
@@ -109,7 +91,7 @@ logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0/2, NA, expression(gamma))
 logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
 
 # mcmc
-nsamples <- 20000
+nsamples <- 10000
 nburn <- 3000
 theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm
 # quick check 
@@ -120,10 +102,10 @@ betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2]/2 # Note: divided by 2 since the models differ by this factor
 sig2Init <- exp(theta.hat$gamma[1])
 mwgSd <- c(0.1,0.1,0.1)
-RvDoMcmc <- c(0,0,1)
+RvDoMcmc <- c(1,1,1)
 system.time(
-  # postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
-  postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,beta0,gamma0/2,sig2Init,mwgSd,RvDoMcmc)
+  postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd,RvDoMcmc)
+  # postout <- mrls.post_adapt(y,X,Z,nsamples,nburn,beta0,gamma0,sig2Init,mwgSd,RvDoMcmc)
   # postout <- mrls.post(y,X,Z,nsamples,nburn,beta0,gamma0,sig20,mwgSd)
 )
 theta_chain <- postout$theta_chain
@@ -131,7 +113,7 @@ theta_accept <- postout$paccept
 theta_accept
 
 # mixing of the chain
-plot(theta_chain[3,],type = 'l')
+plot(theta_chain[1,],type = 'l')
 
 # overlay marginal / conditional gird plot to histogram
 hist(theta_chain[1,],breaks=50,freq=FALSE,
@@ -198,7 +180,7 @@ Z <- matrix(rnorm(q*n),n,q)
 # sig20
 beta0 <- c(0.5,1.5)
 gamma0 <- c(-0.5,0.5)
-sig20 <- 0.5
+sig20 <- 1
 
 # normal(0,1) error
 eps <- rnorm(n)
@@ -222,7 +204,7 @@ v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
 eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
 
 # response
-y <- c(X %*% beta0 + sqrt(sig20)*exp(0.5 * Z %*% gamma0)*eps)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 plot(X[,2],y,cex=0.3)
 
 # for plotting conditional curves
@@ -232,7 +214,8 @@ beta.seq1 <- seq(-.5+beta0[1],.5+beta0[1],length.out = numpoints)
 logel.seq1 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- mrls.evalG(y,X,Z,c(beta.seq1[ii],beta0[2]),gamma0/2,sig20)
-  logel.seq1[ii] <- logEL(G = G)
+  omegas <- omega.hat(G)
+  logel.seq1[ii] <- logEL(omegas)
 }
 logelmode1 <- plotEL(beta.seq1, logel.seq1, beta0[1], NA, expression(beta[0]))
 
@@ -240,31 +223,35 @@ beta.seq2 <- seq(-.5+beta0[2],.5+beta0[2],length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- mrls.evalG(y,X,Z,c(beta0[1],beta.seq2[ii]),gamma0/2,sig20)
-  logel.seq2[ii] <- logEL(G = G)
+  omegas <- omega.hat(G)
+  logel.seq2[ii] <- logEL(omegas)
 }
 logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
 
-gamma.seq1 <- seq(-.5+gamma0[1]/2,.5+gamma0[1]/2,length.out = numpoints)
+gamma.seq1 <- seq(-.5+gamma0[1],.5+gamma0[1],length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- mrls.evalG(y,X,Z,beta0,c(gamma.seq1[ii],gamma0[2]/2),sig20)
-  logel.seq3[ii] <- logEL(G = G)
+  G <- mrls.evalG(y,X,Z,beta0,c(gamma.seq1[ii],gamma0[2]),sig20)
+  omegas <- omega.hat(G)
+  logel.seq3[ii] <- logEL(omegas)
 }
-logelmode3 <- plotEL(gamma.seq1, logel.seq3, gamma0[1]/2, NA, expression(gamma[1]))
+logelmode3 <- plotEL(gamma.seq1, logel.seq3, gamma0[1], NA, expression(gamma[1]))
 
-gamma.seq2 <- seq(-.5+gamma0[2]/2,.5+gamma0[2]/2,length.out = numpoints)
+gamma.seq2 <- seq(-.5+gamma0[2],.5+gamma0[2],length.out = numpoints)
 logel.seq4 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- mrls.evalG(y,X,Z,beta0,c(gamma0[1]/2,gamma.seq2[ii]),sig20)
-  logel.seq4[ii] <- logEL(G = G)
+  G <- mrls.evalG(y,X,Z,beta0,c(gamma0[1],gamma.seq2[ii]),sig20)
+  omegas <- omega.hat(G)
+  logel.seq4[ii] <- logEL(omegas)
 }
 logelmode4 <- plotEL(gamma.seq2, logel.seq4, gamma0[2]/2, NA, expression(gamma[2]))
 
 sig2.seq <- seq(-.5+sig20,.5+sig20,length.out = numpoints)
 logel.seq5 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- mrls.evalG(y,X,Z,beta0,gamma0/2,sig2.seq[ii])
-  logel.seq5[ii] <- logEL(G = G)
+  G <- mrls.evalG(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  omegas <- omega.hat(G)
+  logel.seq5[ii] <- logEL(omegas)
 }
 logelmode5 <- plotEL(sig2.seq, logel.seq5, sig20, NA, expression(sigma^2))
 

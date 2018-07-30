@@ -5,6 +5,7 @@ source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
 source("mode-functions.R")
+source("smoothEL.R")
 library(plotly)
 
 # check how the coordinate works with plot_ly
@@ -100,7 +101,7 @@ plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m2=lmcoef, logel.m2=logel.est)
 # plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat))
 
-# ---- mr.cens ----
+# ---- mr.cens (smoothed) ----
 n <- 100
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
@@ -126,28 +127,28 @@ y <- yy
 sum(1-deltas)/n
 y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 
-numpoints <- 100
+numpoints <- 40
 beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 
+# TODO: try using the accelerated logEL with adjusted G
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 adjust <- FALSE
 logel.mat <- apply(Beta.seq, 1, function(bb) {
   G <- mr.evalG(y,X,c(bb[1],bb[2]))
-  if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(bb[1],bb[2]))
   if (adjust) {
-    omegas <- omega.hat_R(G,deltas,epsilons,adjust)
-    logEL_R(omegas,epsilons,deltas,adjust)
+    G <- adjG_R(G)
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust)$omegas
+    logEL(omegas,epsilons,deltas,adjust)
   }
   else {
-    omegas <- omega.hat(G,deltas,epsilons)
+    omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas # smoothed version
     logEL(omegas,epsilons,deltas)
   }
-})
-logel.mat <- matrix(logel.mat, numpoints, numpoints)
+})logel.mat <- matrix(logel.mat, numpoints, numpoints)
 logel.mat[is.infinite(logel.mat)] <- NaN
 anyNA(logel.mat)
 # el.mat <- exp(logel.mat - max(logel.mat))
@@ -321,3 +322,82 @@ logel.est <- logEL(omegas)
 plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m1=beta0, logel.m1=logel.true,
        m2=qrcoef, logel.m2=logel.est)
+
+# ---- EL + censoring: how does the support change when % changes ----
+# mr.cens 
+n <- 100
+p <- 2
+X1 <- matrix(rnorm(n),n,1)
+# X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
+X <- cbind(1,X1)
+# eps <- rnorm(n) # N(0,1) error term
+
+# dist is one of "norm","t","chisq","lnorm"
+eps <- gen_eps(n, dist = "norm", df = NULL)
+
+beta_I <- 0.5
+beta_S <- 1
+# beta_I <- rnorm(1)
+# beta_S <- rnorm(1)
+yy <- beta_I + c(X1 %*% beta_S) + eps 
+beta0 <- c(beta_I, beta_S)
+# plot(X1,y,cex=0.3)
+
+# random censoring
+cc <- rnorm(n,mean=0,sd=1)
+deltas <- yy<=cc
+sum(1-deltas)/n
+deltas.save <- deltas
+
+# select a subset of cc so that the censored values keep the same
+deltas <- deltas.save
+deltas[deltas==0][41:50] <- TRUE
+
+y <- yy
+y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+adjust <- FALSE
+logel.mat <- apply(Beta.seq, 1, function(bb) {
+  G <- mr.evalG(y,X,c(bb[1],bb[2]))
+  if (adjust) G <- adjG_R(G)
+  epsilons <- y - c(X %*% c(bb[1],bb[2]))
+  if (adjust) {
+    omegas <- omega.hat_R(G,deltas,epsilons,adjust)
+    logEL_R(omegas,epsilons,deltas,adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logEL(omegas,epsilons,deltas)
+  }
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat[is.infinite(logel.mat)] <- NaN
+anyNA(logel.mat)
+# el.mat <- exp(logel.mat - max(logel.mat))
+
+# linear regression 
+lmcoef <- coef(lm(y ~ X1))
+
+# plot 3d surface
+G <- mr.evalG(y,X,beta0)
+epsilons <- y - c(X %*% beta0)
+omegas <- omega.hat(G,deltas,epsilons)
+logel.true <- logEL(omegas,epsilons,deltas)
+G <- mr.evalG(y,X,lmcoef)
+epsilons <- y - c(X %*% lmcoef)
+omegas <- omega.hat(G,deltas,epsilons)
+logel.est <- logEL(omegas,epsilons,deltas)
+plot3d(type="surface", seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+       m1=beta0, logel.m1=logel.true,
+       m2=lmcoef, logel.m2=logel.est)
+plot3d(type="contour", seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+       title="mr, n=100, 50% censored")
+
+

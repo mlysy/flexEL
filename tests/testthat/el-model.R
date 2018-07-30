@@ -281,7 +281,7 @@ mwgStep_R <- function(Gfun, nThe, nBet, nGam, y, X, Z, deltas, alpha, omegas,
   }
   
   omegas <- omega.hat_R(G,deltas,epsilons,adjust,max_iter,rel_tol)
-  logelProp <- logEL_R(omegas,epsilons,deltas,adjust)
+  logelProp <- logEL_R(omegas,epsilons,deltas)
   u <- runif(1)
   ratio <- exp(logelProp-logelCur)
   a <- min(1.0,ratio)
@@ -329,7 +329,7 @@ postCens_R <- function(Gfun, nThe, nBet, nGam,
   }
   if (adjust) G <- adjG_R(G)
   omegas <- omega.hat_R(G,deltas,epsilons,adjust,max_iter,rel_tol)
-  logelCur <- logEL_R(omegas,epsilons,deltas,adjust)
+  logelCur <- logEL_R(omegas,epsilons,deltas)
   
   for (ii in (-nburn+1):nsamples) {
     # if (ii %% 10 == 0) {

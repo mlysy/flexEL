@@ -162,18 +162,18 @@ qr.neglogEL_R <- function(y, X, tau, beta, s=100) {
 }
 
 # ---- mr.cens functions ----
-mr_cens.neglogEL_R <- function(y, X, deltas, beta) {
+mr_cens.neglogEL_R <- function(y, X, deltas, beta, s=10) {
   G <- mr.evalG_R(y, X, beta)
   epsilons <- evalEpsilons_R(y,X,beta)
-  oout <- omega.hat.EM_R(G,deltas,epsilons)
+  oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)
   if (oout$conv) {
     lambda <- oout$lambda
     omegas <- oout$omegas
     weights <- oout$weights
-    res <- -logEL_R(omegas,epsilons,deltas)
-    gradlist <- mr.deltaG_R(y, X, beta)
-    grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
-    attr(res, "gradient") <- grad
+    res <- -logEL(omegas,epsilons,deltas)
+    # gradlist <- mr.deltaG_R(y, X, beta)
+    # grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
+    # attr(res, "gradient") <- grad
   }
   else {
     # TODO: if not converged, what should be the gradient...??

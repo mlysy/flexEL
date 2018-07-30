@@ -28,20 +28,63 @@ hlm.fit <- function(y, X, W, niter = 100, tol = 1e-5) {
     abs(theta1-theta2)/abs((theta1+theta2)/2)
   }
   # initialize the algorithm
-  beta0 <- coef(lm(y ~ X - 1))
+  # (removed)
+  # beta0 <- coef(lm(y ~ X - 1))
+  # (added)
+  conv <- TRUE
+  beta0 <- tryCatch(expr=coef(lm(y ~ X - 1)),
+                    warning=function(w){conv <<- FALSE; coef(lm(y ~ X - 1))},
+                    error=function(e){conv <<- FALSE; rep(NA,px)})
+  if (!conv) {
+    return(list(conv=conv,
+                beta=rep(NA,px),
+                gamma=rep(NA,pw)))
+  }
+  
   z <- (y - X %*% beta0)^2 # z ~ Gamma(1/2, 2 * exp(W %*% gamma))
-  Mg <- glm(z ~ W - 1, family = Gamma(link = "log"))
+  # (removed)
+  # Mg <- glm(z ~ W - 1, family = Gamma(link = "log"))
+  # (added)
+  Mg <- tryCatch(expr=glm(z ~ W - 1, family = Gamma(link = "log")),
+                     warning=function(w){conv <<- FALSE; glm(z ~ W - 1, family = Gamma(link = "log"))},
+                     error=function(e){conv <<- FALSE; NULL})
+  if (!conv) {
+    return(list(conv=conv,
+                beta=rep(NA,px),
+                gamma=rep(NA,pw)))
+  }
+  
   gamma0 <- coef(Mg)
   for(ii in 1:niter) {
     # update beta
     Wg <- predict(Mg, type = "link") # W %*% gamma
     # weighted regression: yi ~ N( xi' beta, s^2 / wi)
-    Mb <- lm(y ~ X - 1, weights = exp(-Wg)) # y ~ N(X %*% beta, exp(Wg))
+    # (removed)
+    # Mb <- lm(y ~ X - 1, weights = exp(-Wg)) # y ~ N(X %*% beta, exp(Wg))
+    # (added)
+    Mb <- tryCatch(expr=lm(y ~ X - 1, weights = exp(-Wg)),
+                   warnig=function(w){conv <<- FALSE; lm(y ~ X - 1, weights = exp(-Wg))},
+                   error=function(e){conv <<- FALSE; NULL})
+    if (!conv) {
+      return(list(conv=conv,
+                  beta=rep(NA,px),
+                  gamma=rep(NA,pw)))
+    }
     beta1 <- coef(Mb)
     # update gamma
     z <- (y - predict(Mb))^2 # (y - X %*% beta)^2
     # gamma regression: zi ~ Gamma(1, exp(wi' gamma))
-    Mg <- glm(z ~ W - 1, family = Gamma("log"))
+    # (removed)
+    # Mg <- glm(z ~ W - 1, family = Gamma("log"))
+    # (added)
+    Mg <- tryCatch(expr=glm(z ~ W - 1, family = Gamma(link = "log")),
+                   warning=function(w){conv <<- FALSE; glm(z ~ W - 1, family = Gamma(link = "log"))},
+                   error=function(e){conv <<- FALSE; NULL})
+    if (!conv) {
+      return(list(conv=conv,
+                  beta=rep(NA,px),
+                  gamma=rep(NA,pw)))
+    }
     gamma1 <- coef(Mg)
     # old values: beta0, gamma0
     # new values: beta1, gamma1
@@ -60,7 +103,10 @@ hlm.fit <- function(y, X, W, niter = 100, tol = 1e-5) {
     warning("Did not converge.  Try increasing number of iterations.")
   }
   # output
-  list(beta = beta0, gamma = gamma0, iter = ii, re = max(re))
+  # (removed)
+  # list(beta = beta0, gamma = gamma0, iter = ii, re = max(re))
+  # (added)
+  list(conv = conv, beta = beta0, gamma = gamma0, iter = ii, re = max(re))
 }
 
 #' Loglikelihood of the heteroscedastic linear model.

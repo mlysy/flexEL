@@ -1,20 +1,22 @@
 # ---- experiments with adjusted G matrix ----
 library(bayesEL)
+library(optimCheck)
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
 
-# ---- mr model 1-d case ----
-for (ii in 1:1000) {
+# ---- rand G ----
+adjust <- TRUE
+for (ii in 1:100) {
+  if (ii %% 10 == 0) message("ii = ", ii)
   n <- 20
   p <- 10
   max_iter <- 500
   rel_tol <- 1e-7
-  adjust <- TRUE
   G <- matrix(rnorm(n*p), n, p)
-  omegahat.R <- omega.hat.NC_R(G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-  omegahat.R
+  # omegahat.R <- omega.hat.NC_R(G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+  
   if (adjust) G <- adjG_R(G)
   deltas <- rep(1,n)
   numcens <- sample(round(n/2),1)
@@ -22,27 +24,68 @@ for (ii in 1:1000) {
   deltas[censinds] <- 0
   sum(1-deltas)/n
   epsilons <- rnorm(n)
-
   omegahat.R <- omega.hat.EM_R(G, deltas, epsilons, adjust = adjust,
-                               max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+                               max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
   if (anyNA(omegahat.R)) break
 }
 
-if (adjust) {
-  n <- n+1
-  epsilons <- c(epsilons,0)
-  deltas <- c(deltas,0)
+# ---- use random G matrix to check if the logEL are close enough, number of steps to take 
+dif <- c()
+Gs <- list()
+del <- list()
+eps <- list()
+count <- 0
+for (ii in 1:100) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  n <- sample(20:100,1)
+  p <- sample(floor(n/2),1)
+  max_iter <- 500
+  rel_tol <- 1e-5
+  G <- matrix(rnorm(n*p), n, p)
+  deltas <- rep(1,n)
+  numcens <- sample(round(n/2),1)
+  censinds <- sample(n,numcens)
+  deltas[censinds] <- 0
+  sum(1-deltas)/n
+  epsilons <- rnorm(n)
+  omegas <- omega.hat(G,deltas,epsilons)
+  logel <- logEL(omegas,epsilons,deltas)
+  
+  G <- adjG_R(G)
+  omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust = TRUE,
+                           max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
+  logel.adj <- logEL_R(omegas,epsilons,deltas,adjust=TRUE)
+  
+  if(!is.infinite(logel)) {
+    count <- count+1
+    Gs[[count]] <- G
+    del[[count]] <- deltas
+    eps[[count]] <- epsilons
+    dif <- c(dif, logel-logel.adj)
+  }
 }
-idx0 <- (abs(omegahat.R) < 1e-3 & !deltas)
-ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
-                     xrng = 0.02,
-                     npts = 201, 
-                     fun = function(x) {omega.pcheck(x, omegahat.R, G, deltas, epsilons, idx0, rel_tol)},
-                     plot = TRUE)
 
+count
+plot(dif,cex=.3)
+which(abs(dif) > 1e-3)
 
-# generate data, compare the log likelihood with and without the adjusted point
-n <- 200
+idx <- 7
+deltas <- del[[idx]]
+epsilons <- eps[[idx]]
+G <- Gs[[idx]][1:length(deltas),]
+
+omegas <- omega.hat(G,deltas,epsilons)
+logel <- logEL(omegas,epsilons,deltas)
+
+G <- adjG_R(G)
+omegas.adj <- omega.hat.EM_R(G, deltas, epsilons, adjust = TRUE,
+                         max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
+logel.adj <- logEL_R(omegas.adj,epsilons,deltas,adjust=TRUE)
+
+# if the artificial point got a large weight, then the likelihood is affected
+
+# ---- mr model: 1-d case ----
+n <- 100
 mu0 <- rnorm(1,0,1)
 # X <- matrix(rnorm(n,0,1),n,1) # each row of X is one observation
 X <- matrix(rep(1,n), n, 1)
@@ -62,76 +105,92 @@ adjust <- TRUE
 numpoints <- 100
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
-# if (adjust) deltas <- c(deltas,0)
 for (ii in 1:numpoints) {
   if (ii %% 10 == 0) message("ii = ", ii)
   G <- mr.evalG(y,X,mu.seq[ii])
-  if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X * mu.seq[ii])
-  # if (adjust) epsilons <- c(epsilons,0)
-  omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust = adjust)
-  logel.seq[ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
+  if (adjust) {
+    G <- adjG_R(G)
+    omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust = adjust)$omegas
+    logel.seq[ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
+  }
+  else {
+    omegas <- omega.hat(G, deltas, epsilons)
+    logel.seq[ii] <- logEL(omegas, epsilons, deltas)
+  }
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
-
-adjust <- FALSE
-for (ii in 1:numpoints) {
-  if (ii %% 10 == 0) message("ii = ", ii)
-  G <- mr.evalG(y,X,mu.seq[ii])
-  if (adjust) G <- adjG_R(G)
-  epsilons <- y - c(X * mu.seq[ii])
-  # if (adjust) epsilons <- c(epsilons,0)
-  omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust = adjust)
-  logel.seq[ii] <- logEL_R(omegas,epsilons,deltas,adjust = adjust)
-}
-logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
+# logel.seq.adj <- logel.seq
 
 # ---- mr model: 2-d case ----
-
-n <- 200
+n <- 20
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
 X <- cbind(1,X1)
-# eps <- rnorm(n) # N(0,1) error term
 
 # dist is one of "norm","t","chisq","lnorm"
-eps <- gen_eps(n, dist = "norm", df = NULL)
+eps <- gen_eps(n, dist = "lnorm", df = 5)
 
-# beta_I <- 1
-# beta_S <- 1.5
-beta_I <- rnorm(1)
-beta_S <- rnorm(1)
+beta_I <- 1
+beta_S <- 1.5
+# beta_I <- rnorm(1)
+# beta_S <- rnorm(1)
 yy <- beta_I + c(X1 %*% beta_S) + eps 
 beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=2.5*beta_I,sd=1)
+cc <- rnorm(n,mean=1.5*beta_I,sd=1)
 deltas <- yy<=cc
 y <- yy
 sum(1-deltas)/n
 y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
-adjust <- FALSE
+adjust <- TRUE
 numpoints <- 100
-beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
-beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
+beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
   if (ii %% 10 == 0) message("ii = ", ii)
+  
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
-  if(adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
-  omegas <- omega.hat.EM_R(G,deltas,epsilons,adjust)
-  logel.seq[1,ii] <- logEL_R(omegas,epsilons,deltas,adjust)
+  if(adjust) {
+    G <- adjG_R(G)
+    # logel.seq[1,ii] <- logEL_EMAC_R(G,c(epsilons,-Inf),c(deltas,0))
+    omegas <- omega.hat.EM_R(G,deltas,epsilons,adjust,dbg = TRUE,verbose = FALSE)$omegas
+    logel.seq[1,ii] <- logEL_R(omegas,epsilons,deltas,adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
+  }
   
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
-  if(adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
-  omegas <- omega.hat.EM_R(G,deltas,epsilons,adjust)
-  logel.seq[2,ii] <- logEL_R(omegas,epsilons,deltas,adjust)
+  if(adjust) {
+    G <- adjG_R(G)
+    # logel.seq[2,ii] <- logEL_EMAC_R(G,c(epsilons,-Inf),c(deltas,0))
+    omegas <- omega.hat.EM_R(G,deltas,epsilons,adjust)$omegas
+    logel.seq[2,ii] <- logEL_R(omegas,epsilons,deltas,adjust)
+  }
+  else {
+    omegas <- omega.hat(G,deltas,epsilons)
+    logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
+  }
 }
-logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
-logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+
+if (!adjust) {
+  logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
+  logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+}
+if (adjust) {
+  logelmode1_adj <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
+  logelmode2_adj <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+}
+
+any(is.infinite(logel.seq[2,]))
+

@@ -65,7 +65,6 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
   nObs <- ncol(G)
   nEqs <- nrow(G)
   if (is.null(lambdaOld)) {
-    # lambdaOld <- rnorm(nEqs) # TODO: initialize to random value?
     lambdaOld <- rep(0,nEqs)
   }
   lambdaNew <- lambdaOld
@@ -84,7 +83,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
     lambdaNew <- lambdaOld - solve(Q2,Q1) # TODO: step size?
     maxErr <- MaxRelErr(lambdaNew, lambdaOld)
     # if (verbose && (nIter %% 5 == 0)){
-    if (verbose){
+    if (verbose) {
       message("nIter = ", nIter)
       message("err = ", maxErr)
     }
@@ -93,7 +92,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
   }
   notconv <- (ii == max_iter && maxErr > rel_tol)
   if(notconv) lambdaNew <- rep(NaN, nEqs)
-  # c(lambdaNew) to make sure lambda is a vector
+  # Note: c(lambdaNew) to make sure lambda is a vector
   output <- list(lambda=c(lambdaNew), convergence=!notconv)
   return(output)
 }
@@ -102,9 +101,6 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
 omega.hat.NC_R <- function(G, adjust = FALSE, 
                            max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
   lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
-  # nIter <- lambdaout$nIter
-  # maxErr <- lambdaout$maxErr
-  # notconv <- nIter == max_iter && maxErr > rel_tol # 1 if not converged
   conv <- lambdaOut$convergence # 1 if converged
   if (!conv) {
     nObs <- nrow(G)
@@ -116,7 +112,6 @@ omega.hat.NC_R <- function(G, adjust = FALSE,
   }
   # returns a vector of omegahat
   return(omegahat)
-  # return(list(omegas=omegahat, convergence=conv))
 }
 
 #---- censoring EL ----
@@ -161,7 +156,7 @@ QfunCens <- function(lambda, G, weights) {
 
 # R implementation of lambdaNRC
 # G is nObs x nEqs matrix 
-# lambdaOld passed in is for the EM algorithm `omega.hat.EM_R` to work properly
+# lambdaOld passed in is for the EM algorithm `_R` to work properly
 lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
   G <- t(G)
@@ -211,6 +206,7 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
   return(output)
 }
 
+# evaluate Partial Sum of OmegaS
 evalPsos_R <- function(ii, epsOrd, omegas) {
   nObs <- length(omegas)
   psos <- 0
@@ -241,19 +237,22 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
   return(weights)
 }
 
+# evaluate epsilons for location model
 evalEpsilons_R <- function(y,X,beta) {
   eps <- y - X %*% beta
   return(eps)
 }
 
+# evaluate epsilons for location-scale model
 evalEpsilonsLS_R <- function(y,X,Z,beta,gamma,sig2) {
   eps <- (y - X %*% beta)*exp(-Z %*% gamma)/sqrt(sig2)
   return(eps)
 }
 
 # G is nObs x nEqs matrix 
+# TODO: rel_tol should be called abs_tol now -- using absolute error for diff in logEL
 omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = 100, rel_tol = 1e-3, verbose=FALSE,
+                           max_iter = 200, rel_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
@@ -267,9 +266,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     # return(rep(NaN,length(deltas)))
     return(list(conv=FALSE, omegas=rep(NaN,length(deltas))))
   }
-  # if (adjust) omegas <- omegas[1:(n-1)]
   if (adjust) {
-    epsilons <- c(epsilons,Inf)
+    epsilons <- c(epsilons,-Inf)
     deltas <- c(deltas,0)
   }
   # omegasOld <- omegas
@@ -280,36 +278,41 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     omegamMat <- matrix(NA,nrow=n,ncol=max_iter+1)
     omegamMat[,1] <- omegas
     logels <- c(logelOld)
+    artome <- c()
   }
   
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
-    # if (adjust) weights <- c(weights,0)
     # M step:
-    # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose, lambdaOld)
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")
-      return(rep(NaN,n))
+      if (dbg) {
+        return(list(conv=FALSE, omegas=rep(NaN,n), logels=logels, artome=artome))
+      }
+      else {
+        return(list(conv=FALSE, omegas=rep(NaN,n)))
+      }
     }
     lambdaNew <- lambdaOut$lambda
     qlg <- c(sum(weights) + lambdaNew %*% t(G))
     omegas <- weights/qlg
-    omegas <- omegas/sum(omegas)
+    # omegas <- omegas/sum(omegas)
     if (any(omegas < -rel_tol)) message("omega.hat.EM_R: negative omegas.")
     omegas <- abs(omegas)
+    omegas <- omegas/sum(omegas)
     # err <- MaxRelErr(lambdaNew,lambdaOld)
     # err <- MaxRelErr(omegas,omegasOld)
-    # if (adjust) omegas <- omegas[1:(n-1)]
     logel <- logEL_R(omegas,epsilons,deltas)
     
     # for debug
     if (dbg) {
       omegamMat[,ii+1] <- omegas
       logels <- c(logels,logel)
+      artome <- c(artome,weights[n])
     }
     
     # err <- MaxRelErr(logel,logelOld)
@@ -326,7 +329,12 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
   if (notconv) {
     # omegas = rep(NaN,n)
-    return(list(conv=FALSE,omegas = rep(NaN,n)))
+    if (dbg) {
+      return(list(conv=FALSE,omegas = rep(NaN,n),logels=logels,artome=artome))
+    }
+    else {
+      return(list(conv=FALSE,omegas = rep(NaN,n)))
+    }
   }
   
   # for debug
@@ -335,7 +343,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
                 nIter=nIter,
                 omegas=omegas,
                 logels=logels,
-                omegamMat=omegamMat))
+                omegamMat=omegamMat,
+                artome=artome))
   }
   # else return(omegas)
   else {
@@ -343,11 +352,13 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   }
 }
 
-# accelerate EM wang-et-al08
+## accelerate EM wang-et-al08
+# inverse of a vector
 vecinv_R <- function(x) {
   return(x/sum(x*x))
 }
 
+# eps-acc for EM
 omega.hat.EM_Acc_R <- function(G, deltas, epsilons, adjust = FALSE, 
                            max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
   n <- nrow(G)
@@ -362,7 +373,7 @@ omega.hat.EM_Acc_R <- function(G, deltas, epsilons, adjust = FALSE,
   }
   # for adjusted G matrix
   if (adjust) {
-    epsilons <- c(epsilons,Inf)
+    epsilons <- c(epsilons,-Inf)
     deltas <- c(deltas,0)
   }
   logelOld <- logEL_R(omegas,epsilons,deltas)
@@ -440,7 +451,7 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
   }
   else {
     if (adjust) {
-      epsilons <- c(epsilons,Inf)
+      epsilons <- c(epsilons,-Inf)
       deltas <- c(deltas,0)
     }
     # if (adjust) omegas <- omegas[1:length(epsilons)]

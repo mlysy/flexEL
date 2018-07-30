@@ -55,11 +55,11 @@ plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = "param") {
     abline(v = mu.seq[which.max(logel.seq)], lty=2) # mode of EL
     if (!is.na(obs)) {
         abline(v = obs, col='blue', lty=2) # observed mean / quantile
-        legend('topleft',legend=c('true param', 'logEL mode', 'observed'),
+        legend('topright',legend=c('true param', 'logEL mode', 'observed'),
                lty = c(2,2,2), col = c('red','black','blue'), cex = 0.6)
     }
     else{
-        legend('topleft',legend=c('true param', 'logEL mode'),
+        legend('topright',legend=c('true param', 'logEL mode'),
                lty = c(2,2), col = c('red','black'), cex = 0.6)
     }
     return(mu.seq[which.max(logel.seq)]) # return the mode

@@ -7,7 +7,7 @@ source("gen_eps.R")
 
 #---- mean reg: X and Z both dim 1----
 # dimensions
-n <- 200 # number of observations
+n <- 100 # number of observations
 p <- 1
 q <- 1
 
@@ -38,6 +38,28 @@ y <- yy
 sum(1-deltas)/n
 y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 
+# calculate the marginal posterior distribution
+# Note: this might take some time to calculate
+numpoints <- 30
+beta.seq <- seq(-1+beta0, 1+beta0, length.out = numpoints)
+gamma.seq <- seq(-1+gamma0, 1+gamma0, length.out = numpoints)
+sig2.seq <- seq(-1+sig20, 1+sig20, length.out = numpoints)
+
+Theta.seq <- as.matrix(expand.grid(beta.seq, gamma.seq, sig2.seq))
+system.time(
+  logel.mat <- apply(Theta.seq, 1, function(bb) {
+    G <- mrls.evalG(y,X,Z,bb[1],bb[2],bb[3])
+    epsilons <- evalEpsilonsLS(y,X,Z,bb[1],bb[2],bb[3])
+    omegas <- omega.hat(G,deltas,epsilons)
+    logEL(omegas,epsilons,deltas)
+  })
+)
+logel.mat <- array(logel.mat, c(numpoints, numpoints,numpoints))
+el.mat <- exp(logel.mat - max(logel.mat))
+logel.marg1 <- log(apply(el.mat, MARGIN=1, sum))
+logel.marg2 <- log(apply(el.mat, MARGIN=2, sum))
+logel.marg3 <- log(apply(el.mat, MARGIN=3, sum))
+
 # calculate the conditional posterior
 numpoints <- 100
 beta.seq <- seq(beta0-.5,beta0+.5,length.out = numpoints)
@@ -67,20 +89,25 @@ logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))
 logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
 
 # mcmc
-nsamples <- 3000
-nburn <- 2000
+nsamples <- 12000
+nburn <- 5000
 theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm
 # quick check 
 rbind(true = beta0, est = theta.hat$beta) # beta
-rbind(true = c(log(sig20),gamma0), est = theta.hat$gamma) # gamma
+rbind(true = c(sig20,gamma0), est = c(exp(theta.hat$gamma[1]),0.5*theta.hat$gamma[2])) # gamma
 
 betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2]/2 # Note: divided by 2 since the models differ by this factor
 sig2Init <- exp(theta.hat$gamma[1])
-mwgSd <- c(0.1,0.1,0.1)
+mwgSd <- c(0.15,0.15,0.2)
 RvDoMcmc <- c(1,1,1)
+doAdapt <- c(0,0,0) 
+# TODO: OK, seems the adaptation has a problem to fix .. without adapt it works for long chain
+# check why the mwgSd sometimes blows up for long chains..
 system.time(
-  postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd,RvDoMcmc)
+  postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,
+                                  betaInit,gammaInit,sig2Init,
+                                  mwgSd,RvDoMcmc,doAdapt)
   # postout <- mrls_cens.post_adapt(y,X,Z,deltas,nsamples,nburn,betaInit,gamma0/2,sig20,mwgSd,RvDoMcmc)
 )
 theta_chain <- postout$theta_chain
@@ -88,7 +115,7 @@ theta_accept <- postout$paccept
 theta_accept
 
 # mixing of the chain
-plot(theta_chain[3,],type = 'l')
+plot(theta_chain[1,],type = 'l')
 
 # overlay marginal / conditional gird plot to histogram
 hist(theta_chain[1,],breaks=50,freq=FALSE,

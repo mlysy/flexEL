@@ -93,7 +93,104 @@ logEL_EMAC_R <- function(G, epsilons, deltas,
 }
 
 
-# fitted acceleration
+# Fitted acceletartion
+logEL_EMAC2_R <- function(G, epsilons, deltas,
+                         max_iter = 100, rel_tol = 1e-5, fit_iter = 5,
+                         dbg = FALSE, verbose = FALSE) {
+  n <- nrow(G)
+  m <- ncol(G)
+  # initialize omegas with uncensored solution
+  omegas <- omega.hat.NC_R(G, adjust, max_iter, rel_tol, verbose=FALSE)
+  if (any(is.nan(omegas))) {
+    message("Initial omegas are nans.")
+    return(-Inf)
+  }
+  logelOld <- logEL_R(omegas,epsilons,deltas)
+  
+  # allocate space
+  err <- Inf
+  nIter <- 0
+  logels <- c()
+  logelOld.acc <- NULL
+  logels.acc <- c()
+  ccs <- c()
+  
+  for (ii in 1:max_iter) {
+    nIter <- ii
+    # E step: calculating weights
+    weights <- evalWeights_R(deltas, omegas, epsilons)
+    # M step:
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
+    # TODO: what if not converged ?? use a random weights and continue ?
+    if (!lambdaOut$convergence) {
+      return(-Inf)
+    }
+    lambdaNew <- lambdaOut$lambda
+    qlg <- c(sum(weights) + lambdaNew %*% t(G))
+    omegas <- weights/qlg
+    # omegas <- omegas/sum(omegas)
+    if (any(omegas < -rel_tol)) message("omega.hat.EM_R: negative omegas.")
+    omegas <- abs(omegas)
+    omegas <- omegas/sum(omegas)
+    logel <- logEL_R(omegas,epsilons,deltas)
+    
+    # for debug
+    if (dbg) {
+      logels <- c(logels,logel)
+    }
+
+    err <- abs(logel-logelOld)
+    # if (verbose && nIter %% 20 == 0) {
+    if (verbose) {
+      message("nIter = ", nIter)
+      message("abs err = ", abs(logel-logelOld))
+    }
+    # if (err < rel_tol) {
+    #   epsOrd <- order(epsilons) # ascending order of epsilons
+    #   n <- length(omegas)
+    #   psos <- rep(0,n)
+    #   for (kk in 1:n) {
+    #     psos[kk] <- evalPsos_R(kk, epsOrd, omegas)
+    #   }
+    #   # numerical stability: watch out for extremely small negative values
+    #   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
+    #   message("Not accelerated.")
+    #   # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+    # }        
+    logelOld <- logel
+    
+    # if (ii >= fit_iter) {
+    #   if (dbg) browser()
+    #   idx <- 3:(ii-1)
+    #   lls <- log(diff(logels[3:ii])) - log(logels[2]-logels[1])
+    #   fit <- lm(lls ~ idx - 1) # TODO: maybe add a weight here if it does a better job
+    #   cc <- exp(coef(fit))
+    #   ccs <- c(ccs,cc)
+    #   logel.pred <- logels[1] + 1/(1-cc)*(logels[2]-logels[1])
+    #   # if (ii == fit_iter) {
+    #   #   logelOld.acc <- logel.pred
+    #   #   err.acc <- Inf
+    #   # }
+    #   # logels.acc[ii-fit_iter+1] <- logel.pred
+    #   if (ii > fit_iter) {
+    #     err.acc <- abs(logel.pred-logelOld.acc)
+    #     # message("err.acc = ", err.acc)
+    #   }
+    #   logels.acc <- c(logels.acc, logel.pred)
+    #   logelOld.acc <- logel.pred
+    #   # if (err.acc < rel_tol) {
+    #   #   message("fit_iter = ", ii)
+    #   #   return(unname(coef(fit)[1]))
+    #   # }
+    # }
+    # if (err < rel_tol) {
+    #   
+    # }
+  }
+  return(list(logels=logels, logels.acc=logels.acc, ccs=ccs))
+}
+
+# fitted acceleration (old)
 # logEL_EMAC_R <- function(G, epsilons, deltas, 
 #                          max_iter = 100, rel_tol = 1e-5, fit_iter = 7, verbose=FALSE) {
 #   n <- nrow(G)

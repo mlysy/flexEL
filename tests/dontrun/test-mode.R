@@ -187,7 +187,7 @@ y <- yy
 sum(1-deltas)/n
 y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 
-numpoints <- 100
+numpoints <- 30
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
 grad.seq <- rep(NA,numpoints)
@@ -195,11 +195,11 @@ for (ii in 1:numpoints) {
   message("ii = ", ii)
   temp <- -mr_cens.neglogEL_R(y,X,deltas,mu.seq[ii])
   logel.seq[ii] <- temp
-  grad.seq[ii] <- attributes(temp)$gradient
+  # grad.seq[ii] <- attributes(temp)$gradient
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
-plot(grad.seq,type='l')
-abline(h=0,col='blue')
+# plot(grad.seq,type='l')
+# abline(h=0,col='blue')
 
 mr_cens.neglogEL_R(y,X,deltas,1.045277)
 
