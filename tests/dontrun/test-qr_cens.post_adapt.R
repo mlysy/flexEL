@@ -4,6 +4,8 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
+source("smoothEL.R")
+source("mode-functions.R")
 
 # ---- 1-d problem ----
 n <- 300
@@ -16,20 +18,26 @@ eps <- genout$eps
 nu0 <- genout$nu0
 
 quantile(eps, alpha)
-yy <- c(X * mu) + eps
 # mu0 <- mu + qnorm(alpha, lower.tail = TRUE) # true param assuming alpha-tail of eps is 0
 mu0 <- mu+nu0
 mu0
 
 # random censoring
-cc <- rnorm(n,mean=2,sd=1)
-deltas <- yy<=cc
-y <- yy
+# cc <- rnorm(n,mean=2,sd=1)
+# yy <- c(X * mu) + eps
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+cc <- rnorm(n,mean=1.5,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+deltas <-eps<=cc
+eps[!deltas] <- cc[!deltas]
+y <- c(X * mu) + eps
 
-plot(yy,cex=.3,ylim = range(c(yy,y)))
-points(y,cex=.3,col='red')
+# plot(yy,cex=.3,ylim = range(c(yy,y)))
+# points(y,cex=.3,col='red')
 
 # fix censoring time
 # pct <- 0.75
@@ -51,6 +59,20 @@ for (ii in 1:numpoints) {
   epsilons <- y - c(X * mu.seq[ii])
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq[ii] <- logEL(omegas,epsilons,deltas)
+}
+logelmode <- plotEL(mu.seq, logel.seq, mu0, quantile(y,alpha), expression(mu))
+
+# smoothed version
+numpoints <- 100
+mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
+# mu.seq <- seq(-1+quantile(yy,alpha),1+quantile(yy,alpha),length.out = numpoints)
+logel.seq <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  G <- qr.evalG.smooth_R(y,X,alpha,mu.seq[ii],s=10)
+  epsilons <- y - c(X * mu.seq[ii])
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+  logel.seq[ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=10)
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, quantile(y,alpha), expression(mu))
 
@@ -185,7 +207,7 @@ legend('topright',legend=c(expression('true value'),
 #        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
 # ---- 2-d problem (1 intercept, 1 slope) ----
-n <- 300
+n <- 200
 p <- 2
 alpha <- 0.5
 X0 <- matrix(rep(1,n),n,1)
@@ -198,19 +220,27 @@ genout <- gen_eps(n, dist = "norm", df = NULL, tau = alpha)
 eps <- genout$eps
 nu0 <- genout$nu0
 
-beta_I <- rnorm(1)
-beta_S <- rnorm(1)
-yy <- c(X1 %*% beta_S) + eps 
-plot(X1,yy,cex=0.3)
+# beta_I <- rnorm(1)
+# beta_S <- rnorm(1)
+beta_I  <- 0.5
+beta_S <- 1
 beta0 <- c(beta_I, beta_S)
-beta0
+# yy <- c(X1 %*% beta_S) + eps 
+# plot(X1,yy,cex=0.3)
+# beta0 <- c(beta_I, beta_S)
+# beta0
 
 # random censoring
-cc <- rnorm(n,mean=1.5,sd=1)
-deltas <- yy<=cc
-y <- yy
+# cc <- rnorm(n,mean=1.5,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[!deltas] <- cc[!deltas]
+y <- beta0 + c(X1 %*% beta1) + eps 
 
 # grid plot (conditionals: beta1|beta2 and beta2|beta1)
 numpoints <- 100
@@ -231,6 +261,26 @@ for (ii in 1:numpoints) {
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
 
+# smoothed version
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  G <- qr.evalG.smooth_R(y,X,alpha,c(beta1.seq[ii],beta0[2]),s=10)
+  epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+  logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=10)
+  
+  G <- qr.evalG.smooth_R(y,X,alpha,c(beta0[1],beta2.seq[ii]),s=10)
+  epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=10)
+}
+logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
+logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+
 # calculate marginal posterior
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 logel.mat <- apply(Beta.seq, 1, function(bb) {
@@ -238,6 +288,21 @@ logel.mat <- apply(Beta.seq, 1, function(bb) {
   epsilons <- y - c(X %*% matrix(c(bb[1],bb[2]),2,1))
   omegas <- omega.hat(G,deltas,epsilons)
   logEL(omegas,epsilons,deltas)
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+el.mat <- exp(logel.mat - max(logel.mat))
+logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
+
+# smoothed version
+counter <- 0
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+logel.mat <- apply(Beta.seq, 1, function(bb) {
+  counter <<- counter + 1
+  if (counter %% 10 == 0) message("ii = ", counter)
+  G <- qr.evalG.smooth_R(y,X,alpha,c(bb[1],bb[2]),s=10)
+  epsilons <- y - c(X %*% matrix(c(bb[1],bb[2]),2,1))
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+  logEL.smooth_R(omegas,epsilons,deltas,s=10)
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))

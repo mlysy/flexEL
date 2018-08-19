@@ -75,40 +75,35 @@ mr.neglogEL_R <- function(y, X, beta) {
 # ---- qr functions ----
 
 # smoothed indicator function 1(x <= 0)
-ind.smooth_R <- function(x, s=100) {
+ind.smooth_R <- function(x, s=10) {
   return(1/(1+exp(s*x)))
 }
 
 # 1st derivative of ind.smooth
-ind1.smooth_R <- function(x, s=100) {
+ind1.smooth_R <- function(x, s=10) {
   return(-s*exp(s*x)/(1+exp(s*x))^2)
 }
 
 # 2nd derivative of ind.smooth
-ind2.smooth_R <- function(x, s=100) {
+ind2.smooth_R <- function(x, s=10) {
   return((-s*s*exp(s*x)*(1+exp(s*x))+2*s*s*exp(2*s*x))/(1+exp(s*x))^3)
 }
 
 # smoothed check function
-rho.smooth_R <- function(x, tau, s=100) {
+rho.smooth_R <- function(x, tau, s=10) {
   return(x*(tau-ind.smooth_R(x, s)))
 }
 
 # 1st derivate of rho_smooth
-rho1.smooth_R <- function(x, tau, s=100) {
+rho1.smooth_R <- function(x, tau, s=10) {
   return(tau-ind.smooth_R(x,s)-x*ind1.smooth_R(x,s))
 }
 
 # 2nd derivative of rho_smooth
-rho2.smooth_R <- function(x, tau, s=100) {
+rho2.smooth_R <- function(x, tau, s=10) {
   retval <- -2 * ind1.smooth_R(x,s) - x*ind2.smooth_R(x,s)
   return(retval)
 }
-
-# # generlized Huber function
-# huber_gen <- function(x,delta) {
-#   
-# }
 
 #'
 #'@param X is \code{nObs x p} matrix
@@ -117,7 +112,7 @@ rho2.smooth_R <- function(x, tau, s=100) {
 #'@param beta is length-\cote{p} vector
 #'@details ...
 #'@return a list of gradient values of length \code{nObs}
-qr.deltaG_R <- function(y, X, tau, beta, s=100) {
+qr.deltaG_R <- function(y, X, tau, beta, s=10) {
   lx <- split(X, row(X))
   dg <- mapply(function(x,y) {
     eps <- y - x %*% beta
@@ -127,7 +122,7 @@ qr.deltaG_R <- function(y, X, tau, beta, s=100) {
 }
 
 # smoothed version of qr.evalG
-qr.evalG.smooth_R <- function(y,X,tau,beta,s) {
+qr.evalG.smooth_R <- function(y,X,tau,beta,s=10) {
   tX <- t(X)
   yXb <- y - c(beta %*% tX)
   pyXb <- rho1.smooth_R(yXb,tau,s)
@@ -141,7 +136,7 @@ qr.evalG.smooth_R <- function(y,X,tau,beta,s) {
 #'@param beta is length-\cote{p} vector
 #'@details ...
 #'@return
-qr.neglogEL_R <- function(y, X, tau, beta, s=100) {
+qr.neglogEL_R <- function(y, X, tau, beta, s=10) {
   G <- qr.evalG.smooth_R(y, X, tau, beta, s)
   lout <- lambdaNR_R(G)
   if (lout$conv) {
@@ -162,7 +157,7 @@ qr.neglogEL_R <- function(y, X, tau, beta, s=100) {
 }
 
 # ---- mr.cens functions ----
-mr_cens.neglogEL_R <- function(y, X, deltas, beta, s=10) {
+mr_cens.neglogEL.smooth_R <- function(y, X, deltas, beta, s=10) {
   G <- mr.evalG_R(y, X, beta)
   epsilons <- evalEpsilons_R(y,X,beta)
   oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)
@@ -170,10 +165,59 @@ mr_cens.neglogEL_R <- function(y, X, deltas, beta, s=10) {
     lambda <- oout$lambda
     omegas <- oout$omegas
     weights <- oout$weights
-    res <- -logEL(omegas,epsilons,deltas)
+    res <- -logEL.smooth_R(omegas,epsilons,deltas)
     # gradlist <- mr.deltaG_R(y, X, beta)
     # grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
     # attr(res, "gradient") <- grad
+    # attr(res, "gradient") <- grad(-logEL.smooth_R,)
+  }
+  else {
+    # TODO: if not converged, what should be the gradient...??
+    res <- Inf
+    attr(res, "gradient") <- Inf
+  }
+  return(res)
+}
+
+# ---- mrls.cens functions ---- 
+
+# ---- qrls.cens functions ----
+qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
+  nObs <- nrow(X)
+  nBeta <- length(beta)
+  nGamma <- length(gamma)
+  G <- matrix(NaN, nObs, nBeta + nGamma + 2)
+  eZg <- c(exp(-Z %*% gamma)) # e^{-z'gamma}
+  yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
+  yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
+  G[,1:nBeta] <- yXbeZg * eZg * X
+  G[,nBeta+1:nGamma] <- yXbeZg2 * Z
+  G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
+  G[,nBeta+nGamma+2] <- rho1.smooth_R(yXbeZg/sqrt(sig2)-nu, tau, s)
+  return(G)
+}
+
+qrls_cens.neglogEL.smooth_R <- function(y, X, Z, deltas, tau, theta, s=10) {
+  nBet <- ncol(X)
+  nGam <- ncol(Z)
+  beta <- theta[1:nBet]
+  gamma <- theta[(nBet+1):(nBet+nGam)]
+  sig2 <- theta[nBet+nGam+1]
+  if (sig2 < 0) return(Inf)
+  nu <- theta[nBet+nGam+2]
+  G <- qrls.evalG.smooth_R(y, X, Z, tau, beta, gamma, sig2, nu, s)
+  if (anyNA(G)) return(Inf)
+  epsilons <- evalEpsilonsLS_R(y,X,Z,beta,gamma,sig2)
+  oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)
+  if (oout$conv) {
+    lambda <- oout$lambda
+    omegas <- oout$omegas
+    weights <- oout$weights
+    res <- -logEL.smooth_R(omegas,epsilons,deltas)
+    # gradlist <- mr.deltaG_R(y, X, beta)
+    # grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
+    # attr(res, "gradient") <- grad
+    # attr(res, "gradient") <- grad(-logEL.smooth_R,)
   }
   else {
     # TODO: if not converged, what should be the gradient...??

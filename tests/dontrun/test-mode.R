@@ -192,12 +192,12 @@ sum(1-deltas)/n
 eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
 y <- c(X * mu0) + eps
 
-numpoints <- 30
+numpoints <- 100
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
 grad.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  message("ii = ", ii)
+  if (ii %% 10 == 0) message("ii = ", ii)
   temp <- -mr_cens.neglogEL_R(y,X,deltas,mu.seq[ii])
   logel.seq[ii] <- temp
   # grad.seq[ii] <- attributes(temp)$gradient
@@ -206,12 +206,12 @@ logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 # plot(grad.seq,type='l')
 # abline(h=0,col='blue')
 
-mr_cens.neglogEL_R(y,X,deltas,1.045277,hessian=TRUE)
+mr_cens.neglogEL_R(y,X,deltas,1.045277)
 
-nlm(mr_cens.neglogEL_R,mean(y),y=y,X=X,deltas=deltas)
+nlm(mr_cens.neglogEL_R,mean(y),y=y,X=X,deltas=deltas,hessian=TRUE)
 
 # 2-d problem 
-n <- 100
+n <- 200
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
 # X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
@@ -223,22 +223,28 @@ eps <- gen_eps(n, dist = "norm", df = NULL)
 
 beta_I <- 0.5
 beta_S <- 1
-# beta_I <- rnorm(1)
-# beta_S <- rnorm(1)
-yy <- beta_I + c(X1 %*% beta_S) + eps 
 beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=2,sd=1)
-deltas <- yy<=cc
-y <- yy
+# yy <- beta_I + c(X1 %*% beta_S) + eps 
+# cc <- rnorm(n,mean=2,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
+# random censoring
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- beta_I + c(X1 %*% beta_S) + eps 
+plot(X1,y,cex=0.3)
 
 mr_cens.neglogEL_R(y,X,deltas,beta0)
 
-nlm(mr_cens.neglogEL_R,beta0*1.0,y=y,X=X,deltas=deltas)
+nlm(mr_cens.neglogEL_R,c(0.35,1.2),y=y,X=X,deltas=deltas,hessian = TRUE)
 
 # ---- try nlm ----
 negnorm <- function(x) {

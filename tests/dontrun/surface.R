@@ -101,7 +101,7 @@ plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m2=lmcoef, logel.m2=logel.est)
 # plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat))
 
-# ---- mr.cens (smoothed) ----
+# ---- mr.cens ----
 n <- 100
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
@@ -121,11 +121,19 @@ beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=2,sd=1)
-deltas <- yy<=cc
-y <- yy
+# cc <- rnorm(n,mean=2,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
+# random censoring
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- beta_I + c(X1 %*% beta_S) + eps 
+plot(X1,y,cex=0.3)
 
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
@@ -136,19 +144,23 @@ logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 # TODO: try using the accelerated logEL with adjusted G
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 adjust <- FALSE
-logel.mat <- apply(Beta.seq, 1, function(bb) {
-  G <- mr.evalG(y,X,c(bb[1],bb[2]))
-  epsilons <- y - c(X %*% c(bb[1],bb[2]))
-  if (adjust) {
-    G <- adjG_R(G)
-    omegas <- omega.hat_R(G,deltas,epsilons,adjust)$omegas
-    logEL(omegas,epsilons,deltas,adjust)
-  }
-  else {
-    omegas <- omega.hat(G,deltas,epsilons)
-    # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas # smoothed version
-    logEL(omegas,epsilons,deltas)
-  }
+counter <- 0
+system.time({
+  logel.mat <- apply(Beta.seq, 1, function(bb) {
+    counter <<- counter+1
+    if (counter %% 200 == 0) message("counter = ", counter)
+    G <- mr.evalG(y,X,c(bb[1],bb[2]))
+    epsilons <- y - c(X %*% c(bb[1],bb[2]))
+    if (adjust) {
+      G <- adjG_R(G)
+      omegas <- omega.hat_R(G,deltas,epsilons,adjust)$omegas
+      logEL(omegas,epsilons,deltas,adjust)
+    }
+    else {
+      omegas <- omega.hat(G,deltas,epsilons)
+      logEL(omegas,epsilons,deltas)
+    }
+  })
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 logel.mat[is.infinite(logel.mat)] <- NaN
@@ -156,7 +168,7 @@ anyNA(logel.mat)
 # el.mat <- exp(logel.mat - max(logel.mat))
 
 # smoothed version
-numpoints <- 10
+numpoints <- 100
 beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
@@ -165,19 +177,23 @@ logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 # TODO: try using the accelerated logEL with adjusted G
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 adjust <- FALSE
-logel.mat <- apply(Beta.seq, 1, function(bb) {
-  G <- mr.evalG(y,X,c(bb[1],bb[2]))
-  epsilons <- y - c(X %*% c(bb[1],bb[2]))
-  if (adjust) {
-    G <- adjG_R(G)
-    omegas <- omega.hat_R(G,deltas,epsilons,adjust)$omegas
-    logEL(omegas,epsilons,deltas,adjust)
-  }
-  else {
-    # omegas <- omega.hat(G,deltas,epsilons)
-    omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas # smoothed version
-    logEL(omegas,epsilons,deltas)
-  }
+counter <- 0
+system.time({
+  logel.mat <- apply(Beta.seq, 1, function(bb) {
+    counter <<- counter+1
+    if (counter %% 5 == 0) message("counter = ", counter)
+    G <- mr.evalG(y,X,c(bb[1],bb[2]))
+    epsilons <- y - c(X %*% c(bb[1],bb[2]))
+    if (adjust) {
+      G <- adjG_R(G)
+      omegas <- omega.hat_R(G,deltas,epsilons,adjust)$omegas
+      logEL(omegas,epsilons,deltas,adjust)
+    }
+    else {
+      omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas # smoothed version
+      logEL.smooth_R(omegas,epsilons,deltas,s=10)
+    }
+  })
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 logel.mat[is.infinite(logel.mat)] <- NaN

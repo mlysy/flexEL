@@ -7,7 +7,7 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("mode-functions.R")
-source("em_acceleration.R")
+# source("em_acceleration.R")
 
 # ---- mr: modeEL v.s. bayesEL ----
 # dimension
@@ -77,8 +77,8 @@ p <- 2
 q <- 1
 
 # covaraites
-# X1 <- rnorm(n)
-X1 <- sample(-2:2,n,replace = TRUE)
+X1 <- rnorm(n)
+# X1 <- sample(-2:2,n,replace = TRUE)
 # X2 <- rbinom(n,1,0.3)
 # X <- cbind(X1,X2)
 X <- cbind(1,X1)
@@ -101,16 +101,21 @@ eps <- genout$eps
 nu0 <- genout$nu0
 
 # responses and censorings
-yy <- c(X %*% beta0) + sqrt(sig20)*exp(X1*gamma0)*eps
-cc <- rnorm(n, mean=2.5)
-delta <- yy <= cc
+# yy <- c(X %*% beta0) + sqrt(sig20)*exp(X1*gamma0)*eps
+# cc <- rnorm(n, mean=2.5)
+# delta <- yy <= cc
+# sum(1-delta)/length(delta)
+# y <- yy
+# y[!delta] <- cc[!delta]
+
+cc <- rnorm(n, mean=1.35)
 sum(1-delta)/length(delta)
-y <- yy
-y[!delta] <- cc[!delta]
+deltas <- eps <= cc
+eps[!delta] <- cc[!delta]
+y <- c(X %*% beta0) + sqrt(sig20)*exp(X1*gamma0)*eps
 
 # plot conditional likelihood
 numpoints <- 100
-deltas <- delta
 adjust <- FALSE
 
 beta.seq1 <- seq(-.5+beta0[1],.5+beta0[1],length.out = numpoints)

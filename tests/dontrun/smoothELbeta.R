@@ -11,7 +11,6 @@ evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10) {
   n <- length(omegas)
   psos <- 0
   for (jj in 1:n) {
-    # ej <- epsilons[jj]
     psos <- psos + ind.smooth_R(epsilons[ii]-epsilons[jj], s)*omegas[jj]
   }
   return(psos)

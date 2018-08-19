@@ -1,8 +1,17 @@
 # see if this smoothes out the censored log likelihood 
 
+ind <- function(x) {
+  return(as.numeric(x <= 0))
+}
+
 # smoothed indicator function 1(x <= 0)
 ind.smooth_R <- function(x, s=10) {
   return(1/(1+exp(s*x)))
+}
+
+# 1st derivative of smoothed indicator function 1(x <= 0)
+ind1.smooth_R <- function(x, s=10) {
+  return(-s*exp(s*x)/(1+exp(s*x))^2)
 }
 
 # smoothed partial sum of omegas (for loop)
@@ -19,7 +28,6 @@ ind.smooth_R <- function(x, s=10) {
 
 # smoothed partial sum of omegas (vectorized version)
 evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10) {
-  n <- length(omegas)
   psos <- sum(ind.smooth_R(epsilons[ii]-epsilons,s)*omegas)
   return(psos)
 }
@@ -30,7 +38,7 @@ logEL.smooth_R <- function(omegas,epsilons,deltas,s=10) {
   n <- length(omegas)
   psos <- rep(0,n)
   for (ii in 1:n) {
-    psos[ii] <- evalPsos.smooth_R(ii, omegas, epsilons) 
+    psos[ii] <- evalPsos.smooth_R(ii, omegas, epsilons,s) 
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
@@ -88,8 +96,6 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     epsilons <- c(epsilons,-Inf)
     deltas <- c(deltas,0)
   }
-  # omegasOld <- omegas
-  # logelOld <- logEL_R(omegas,epsilons,deltas)
   logelOld <- logEL.smooth_R(omegas,epsilons,deltas,s)
   
   # for debug
@@ -105,7 +111,8 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     # E step: calculating weights
     weights <- evalWeights.smooth_R(deltas, omegas, epsilons, s)
     # M step:
-    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
+    # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, 1e-5, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")
@@ -123,9 +130,6 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     if (any(omegas < -rel_tol)) message("omega.hat.EM_R: negative omegas.")
     omegas <- abs(omegas)
     omegas <- omegas/sum(omegas)
-    # err <- MaxRelErr(lambdaNew,lambdaOld)
-    # err <- MaxRelErr(omegas,omegasOld)
-    # logel <- logEL_R(omegas,epsilons,deltas)
     logel <- logEL.smooth_R(omegas,epsilons,deltas,s)
     
     # for debug
@@ -134,13 +138,10 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
       logels <- c(logels,logel)
       artome <- c(artome,weights[n])
     }
-    
-    # err <- MaxRelErr(logel,logelOld)
     err <- abs(logel-logelOld)
     # if (verbose && nIter %% 20 == 0) {
     if (verbose) {
       message("nIter = ", nIter)
-      # message("err = ", err)
       message("abs err = ", abs(logel-logelOld))
     }
     if (err < rel_tol) break
@@ -171,3 +172,56 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     return(list(conv=TRUE, omegas=omegas, lambda=lambdaNew, weights=weights))
   }
 }
+
+# curve(ind.smooth_R(x,s=10),from=-5,to=5,col='red')
+# curve(ind.smooth_R(x,s=100),from=-5,to=5,col='blue',add=TRUE)
+# curve(ind(x),from=-5,to=5,col='black',add=TRUE)
+# legend('topright', legend=c("indicator","smoothed s=10", "smoothed s = 100"), lty=c(1,1,1), col=c("black","red","blue"),cex=.8)
+
+library(MASS) # for use of Null
+# wrapper of omega.hat_R for optimCheck
+# if omegas is optimal, then x == rep(1,n-p) should be optimal
+omega.smooth.check <- function(x, omegas, G, deltas, epsilons, s=10) {
+  NG <- Null(G)
+  xNG <- c(NG %*% x) - rowSums(NG) + omegas # x == 1s, xNG == omegas 
+  # might have to use a small negative value to aviod rounding errors
+  if (any(xNG < -1e-5)) return(-Inf)
+  xNG <- abs(xNG) # try replace the extreme small value to positive
+  xNG <- xNG / sum(xNG) # normalize it
+  return(logEL.smooth_R(xNG,epsilons,deltas,s))
+}
+
+# sandwich estimator for convariance matrix
+library(numDeriv)
+# ss is s here, just s seems to be a param in grad so changed the name
+mr_cens.logELii.smooth_R <- function(theta, y, X, deltas, ii, ss=10) {
+  nObs <- nrow(X)
+  nEqs <- ncol(X)
+  G <- mr.evalG(y,X,theta)
+  epsilons <- evalEpsilons_R(y,X,theta)
+  oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,ss)
+  qs <- oout$weights
+  lambda <- oout$lambda
+  if (deltas[ii]) {
+    return(log(qs[ii]/(n+G[ii,] %*% lambda)))
+  }
+  else {
+    denom <- c(n + G %*% lambda)
+    return(sum(ind.smooth_R(epsilons[ii]-epsilons,ss)*qs/(denom)))
+  }
+}
+
+mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, s=10) {
+  nObs <- nrow(X)
+  nEqs <- ncol(X)
+  A <- hessian(function(b) {-mr_cens.neglogEL.smooth_R(y, X, deltas, b, s)}, x=beta.hat)
+  B <- matrix(0,nrow=nEqs,ncol=nEqs)
+  for (ii in 1:nObs) {
+    gii <- grad(mr_cens.logELii.smooth_R, x=beta.hat, y=y, X=X, deltas=deltas, ii=ii, ss=s)
+    B <- B + tcrossprod(gii,gii)
+  }
+  Ainv <- solve(A)
+  return(Ainv %*% B %*% Ainv)
+}
+
+

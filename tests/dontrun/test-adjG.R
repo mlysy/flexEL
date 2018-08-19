@@ -22,8 +22,8 @@ for (ii in 1:100) {
   numcens <- sample(round(n/2),1)
   censinds <- sample(n,numcens)
   deltas[censinds] <- 0
-  sum(1-deltas)/n
-  epsilons <- rnorm(n)
+  
+  epsilons <- gen_eps(n)
   omegahat.R <- omega.hat.EM_R(G, deltas, epsilons, adjust = adjust,
                                max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
   if (anyNA(omegahat.R)) break
@@ -34,34 +34,39 @@ dif <- c()
 Gs <- list()
 del <- list()
 eps <- list()
+nrep <- 100
 count <- 0
-for (ii in 1:100) {
-  if (ii %% 10 == 0) message("ii = ", ii)
-  n <- sample(20:100,1)
-  p <- sample(floor(n/2),1)
-  max_iter <- 500
-  rel_tol <- 1e-5
+while(TRUE) {
+  count <- count + 1
+  if (count == nrep+1) break
+  message("count = ", count)
+  n <- 100
+  p <- 3
+  max_iter <- 200
+  rel_tol <- 1e-3
   G <- matrix(rnorm(n*p), n, p)
   deltas <- rep(1,n)
-  numcens <- sample(round(n/2),1)
+  numcens <- 15
   censinds <- sample(n,numcens)
   deltas[censinds] <- 0
-  sum(1-deltas)/n
-  epsilons <- rnorm(n)
-  omegas <- omega.hat(G,deltas,epsilons)
+  # if (sum(1-deltas)/n < 0.15 || sum(1-deltas)/n > 0.20) next
+  epsilons <- gen_eps(n)
+  omegas <- omega.hat.EM_R(G,deltas,epsilons)$omegas
   logel <- logEL(omegas,epsilons,deltas)
-  
   G <- adjG_R(G)
   omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust = TRUE,
                            max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
   logel.adj <- logEL_R(omegas,epsilons,deltas,adjust=TRUE)
   
   if(!is.infinite(logel)) {
-    count <- count+1
     Gs[[count]] <- G
     del[[count]] <- deltas
     eps[[count]] <- epsilons
     dif <- c(dif, logel-logel.adj)
+  }
+  else {
+    count <- count-1
+    next
   }
 }
 
@@ -69,7 +74,7 @@ count
 plot(dif,cex=.3)
 which(abs(dif) > 1e-3)
 
-idx <- 7
+idx <- 47
 deltas <- del[[idx]]
 epsilons <- eps[[idx]]
 G <- Gs[[idx]][1:length(deltas),]
@@ -123,31 +128,40 @@ logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
 # logel.seq.adj <- logel.seq
 
 # ---- mr model: 2-d case ----
-n <- 20
+n <- 100
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
 X <- cbind(1,X1)
 
 # dist is one of "norm","t","chisq","lnorm"
-eps <- gen_eps(n, dist = "lnorm", df = 5)
+# eps <- gen_eps(n, dist = "lnorm", df = 5)
+eps <- gen_eps(n)
 
 beta_I <- 1
 beta_S <- 1.5
 # beta_I <- rnorm(1)
 # beta_S <- rnorm(1)
-yy <- beta_I + c(X1 %*% beta_S) + eps 
 beta0 <- c(beta_I, beta_S)
 # plot(X1,y,cex=0.3)
 
 # random censoring
-cc <- rnorm(n,mean=1.5*beta_I,sd=1)
-deltas <- yy<=cc
-y <- yy
+# yy <- beta_I + c(X1 %*% beta_S) + eps 
+# cc <- rnorm(n,mean=1.5*beta_I,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+
+# random censoring
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- beta_I + c(X1 %*% beta_S) + eps 
+plot(X1,y,cex=0.3)
 
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
-adjust <- TRUE
+adjust <- FALSE
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
@@ -155,7 +169,6 @@ beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
   if (ii %% 10 == 0) message("ii = ", ii)
-  
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
   if(adjust) {

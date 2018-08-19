@@ -365,6 +365,7 @@ postCens_R <- function(Gfun, nThe, nBet, nGam,
 }
 
 # ---- bootstrap methods with hlm ---- 
+library(survival)
 qrls_cens.boot_R <- function(y,X,Z,delta,
                              tau,beta.hat,gamma.hat,sig2.hat,nu.hat,
                              nboot=1000, max_iter=500, rel_tol=1e-6,
@@ -393,7 +394,11 @@ qrls_cens.boot_R <- function(y,X,Z,delta,
       beta.boot[ii,] <- hlmout$coef$beta
       gamma.boot[ii,] <- hlmout$coef$gamma[2:(q+1)]*0.5
       sig2.boot[ii] <- exp(hlmout$coef$gamma[1])
-      nu.boot[ii] <- quantile((y-X %*% beta.boot[ii,])*exp(-Z %*% gamma.boot[ii,])/sqrt(sig2.boot[ii]),tau)
+      km <- survfit(Surv(time=evalEpsilonsLS(y.boot,X.boot,Z.boot,
+                                             beta.boot[ii,],gamma.boot[ii,],sig2.boot[ii]),
+                         event=deltas,type="right")~1)
+      nu.boot[ii] <- quantile(km,probs=tau,conf.int = FALSE)
+      # nu.boot[ii] <- quantile((y-X %*% beta.boot[ii,])*exp(-Z %*% gamma.boot[ii,])/sqrt(sig2.boot[ii]),tau)
     }
     else {
       ii <- ii-1

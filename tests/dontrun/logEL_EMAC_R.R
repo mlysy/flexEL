@@ -93,6 +93,99 @@ logEL_EMAC_R <- function(G, epsilons, deltas,
 }
 
 
+# Aitken acceleration with smoothing
+logEL_EMAC.smooth_R <- function(G, epsilons, deltas, s = 10, 
+                                max_iter = 100, rel_tol = 1e-3, verbose=FALSE, dbg=FALSE) {
+  n <- nrow(G)
+  m <- ncol(G)
+  err <- Inf
+  nIter <- 0
+  # initialize omegas with uncensored solution 
+  omegas <- omega.hat.NC_R(G, adjust, max_iter, rel_tol, verbose=FALSE)
+  if (any(is.nan(omegas))) {
+    message("Initial omegas are nans.")
+    return(-Inf)
+  }
+  
+  logelOld <- logEL.smooth_R(omegas,epsilons,deltas,s)
+  logeltuple <- rep(0.0,3)
+  
+  for (ii in 1:max_iter) {
+    nIter <- ii
+    # E step: calculating weights
+    weights <- evalWeights.smooth_R(deltas, omegas, epsilons,s)
+    # M step:
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
+    # TODO: what if not converged ?
+    if (!lambdaOut$convergence) {
+      message("lambdaNRC did not converge in EM")
+      return(-Inf)
+    }
+    lambdaNew <- lambdaOut$lambda
+    qlg <- c(sum(weights) + lambdaNew %*% t(G))
+    omegas <- weights/qlg
+    omegas <- omegas/sum(omegas)
+    if (any(omegas < -rel_tol)) message("omega.hat.EM_R: negative omegas.")
+    omegas <- abs(omegas)
+    
+    logel <- logEL.smooth_R(omegas,epsilons,deltas,s)
+    logeltuple[1:2] <- logeltuple[2:3]
+    logeltuple[3] <- logel
+    
+    # TODO: use absolute error instead of relative error
+    if (ii <= 3) {
+      # err <- MaxRelErr(logel,logelOld)
+      err <- abs(logel-logelOld)
+      if (err < rel_tol) {
+        epsOrd <- order(epsilons) # ascending order of epsilons
+        n <- length(omegas)
+        psos <- rep(0,n)
+        for (ii in 1:n) {
+          psos[ii] <- evalPsos.smooth_R(ii, epsOrd, omegas,s) 
+        }
+        # numerical stability: watch out for extremely small negative values
+        omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
+        message("Not accelerated.")
+        if (verbose) {
+          message("nIter = ", ii)
+          message("err = ", err)
+        }
+        return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+      }
+      else {
+        logelOld <- logel
+        if (ii == 3) {
+          logelOld.ac <- logelOld
+          if (dbg) logels <- c(logelOld.ac)
+        }
+      }
+    }
+    else {
+      dif <- diff(logeltuple)
+      c <- dif[2]/dif[1]
+      # message("c = ", c)
+      logel.ac  <- logeltuple[1]+1/(1-c)*dif[1]
+      if (dbg) logels <- c(logels,logel.ac)
+      # err <- MaxRelErr(logel.ac,logelOld.ac)
+      err <- abs(logel.ac-logelOld.ac)
+      if (verbose) {
+        message("nIter = ", ii)
+        # message("err = ", err)
+        message("abs err = ", abs(logelOld.ac-logel.ac))
+      }
+      if (err < rel_tol) {
+        if (dbg) return(list(logel=logel.ac, logels=logels))
+        else return(logel.ac)
+      }
+      else {
+        logelOld.ac <- logel.ac
+      }
+    }
+    # if (verbose && nIter %% 20 == 0) {
+  }
+  if (ii == max_iter) return(-Inf)
+}
+
 # Fitted acceletartion
 logEL_EMAC2_R <- function(G, epsilons, deltas,
                          max_iter = 100, rel_tol = 1e-5, fit_iter = 5,

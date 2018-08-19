@@ -286,7 +286,8 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
     # M step:
-    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
+    # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, 1e-5, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")

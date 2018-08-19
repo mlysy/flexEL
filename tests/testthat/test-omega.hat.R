@@ -4,6 +4,7 @@ library(optimCheck)
 source("el-utils.R")
 source("el-rfuns.R")
 source("el-model.R")
+source("../dontrun/smoothEL.R")
 
 # library(testthat) # not loaded automatically
 context("omega.hat")
@@ -42,7 +43,7 @@ test_that("no censoring: omegahat.cpp is optimal", {
       ocheck <- optim_proj(xsol = rep(1,n-p),
                            xrng = 0.05,
                            fun = function(x) {omega.check(x, omegahat.cpp, G)},
-                           plot = FALSE)
+                           plot = TRUE)
       expect_lt(max.xdiff(ocheck),0.01)
     }
   }
@@ -144,6 +145,28 @@ test_that("under censoring: omegahat.cpp is optimal", {
   }
 })
 
+# smoothed censored EL
+# checking optimality of the solution (TODO: the following is in R)
+n <- 20
+p <- 5
+max_iter <- 200
+rel_tol <- 1e-4
+G <- matrix(rnorm(n*p), n, p)
+deltas <- rep(1,n)
+numcens <- sample(round(n/3),1)
+censinds <- sample(n,numcens)
+deltas[censinds] <- 0
+1-sum(deltas)/n
+epsilons <- rnorm(n)
+oout <- omega.hat.EM.smooth_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+oout$conv
+omegahat <- oout$omegas
+ocheck <- optim_proj(xsol = rep(1,n-p),
+                     xrng = 0.001,
+                     npts = 201,
+                     fun = function(x) {omega.smooth.check(x, omegahat, G, deltas, epsilons)},
+                     plot = TRUE)
+expect_lt(max.xdiff(ocheck),0.01)
 
 ## omega.hat <- function(G, deltas, lambda) {
 ## }

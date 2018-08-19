@@ -4,11 +4,13 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
+source("smoothEL.R")
+source("mode-functions.R")
 library(numDeriv)
 
 # ---- quant reg: X and Z both dim 1 ----
 # dimensions
-n <- 100 # number of observations
+n <- 200 # number of observations
 p <- 1
 q <- 1
 
@@ -21,9 +23,9 @@ Z <- matrix(rnorm(n),n,q)
 # parameters
 beta0 <- 1
 beta0
-gamma0 <- -.5
+gamma0 <- -1
 gamma0
-sig20 <- 1
+sig20 <- 1.5
 sig20
 
 # quantile level
@@ -35,14 +37,19 @@ eps <- genout$eps
 nu0 <- genout$nu0
 
 # resposes
-yy <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
-plot(yy,cex=0.3)
-# random censoring
-cc <- rnorm(n,mean=2,sd=1)
-deltas <- yy<=cc
-y <- yy
+# yy <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
+# plot(yy,cex=0.3)
+# # random censoring
+# cc <- rnorm(n,mean=2,sd=1)
+# deltas <- yy<=cc
+# y <- yy
+# sum(1-deltas)/n
+# y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[!deltas] <- cc[!deltas]
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 
 # calculate the conditional posterior
 numpoints <- 100
@@ -58,7 +65,7 @@ for (ii in 1:numpoints) {
   epsilons <- evalEpsilonsLS(y,X,Z,beta.seq[ii],gamma0,sig20)
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
-  
+
   G <- qrls.evalG_R(y,X,Z,alpha,beta0,gamma.seq[ii],sig20,nu0)
   epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
   omegas <- omega.hat(G,deltas,epsilons)
@@ -79,9 +86,83 @@ logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))
 logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
 logelmode4 <- plotEL(nu.seq, logel.seq[4,], nu0, NA, expression(nu))
 
+# smoothed version
+numpoints <- 100
+beta.seq <- seq(beta0-1,beta0+1,length.out = numpoints)
+gamma.seq <- seq(gamma0-1,gamma0+1,length.out = numpoints)
+sig2.seq <- seq(sig20-1,sig20+1,length.out = numpoints)
+nu.seq <- seq(nu0-1,nu0+1,length.out = numpoints)
+# Note: need to keep the sig2.seq range > 0 mostly
+logel.seq <- matrix(rep(NA,4*numpoints),4,numpoints)
+s <- 10
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  # logel.seq[1,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta.seq[ii],gamma0,sig20,nu0),s)
+  # logel.seq[2,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma.seq[ii],sig20,nu0),s)
+  # logel.seq[3,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma0,sig2.seq[ii],nu0),s)
+  # logel.seq[4,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma0,sig20,nu.seq[ii]),s)
+  
+  # G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta.seq[ii],gamma0,sig20,nu0,s)
+  # epsilons <- evalEpsilonsLS(y,X,Z,beta.seq[ii],gamma0,sig20)
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  # logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+  # 
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma.seq[ii],sig20,nu0,s)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig2.seq[ii],nu0,s)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  logel.seq[3,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig20,nu.seq[ii],s)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig20)
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  logel.seq[4,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+}
+logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
+logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))
+logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
+logelmode4 <- plotEL(nu.seq, logel.seq[4,], nu0, NA, expression(nu))
+
+# accelerated smoothed version
+numpoints <- 200
+beta.seq <- seq(beta0-1,beta0+1,length.out = numpoints)
+gamma.seq <- seq(gamma0-1,gamma0+1,length.out = numpoints)
+sig2.seq <- seq(sig20-1,sig20+1,length.out = numpoints)
+# sig2.seq <- seq(1.4,1.6,length.out = numpoints)
+nu.seq <- seq(nu0-1,nu0+1,length.out = numpoints)
+# nu.seq <- seq(0.45,0.6,length.out = numpoints)
+# Note: need to keep the sig2.seq range > 0 mostly
+logel.seq <- matrix(rep(NA,4*numpoints),4,numpoints)
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta.seq[ii],gamma0,sig20,nu0,s=10)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta.seq[ii],gamma0,sig20)
+  logel.seq[1,ii] <- logEL_EMAC.smooth_R(G,epsilons,deltas,s=10)
+
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma.seq[ii],sig20,nu0,s=10)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
+  logel.seq[2,ii] <- logEL_EMAC.smooth_R(G,epsilons,deltas,s=10)
+
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig2.seq[ii],nu0,s=10)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  logel.seq[3,ii] <- logEL_EMAC.smooth_R(G,epsilons,deltas,s=10)
+  
+  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig20,nu.seq[ii],s=10)
+  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig20)
+  logel.seq[4,ii] <- logEL_EMAC.smooth_R(G,epsilons,deltas,s=10)
+}
+logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
+logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))
+logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
+logelmode4 <- plotEL(nu.seq, logel.seq[4,], nu0, NA, expression(nu))
+
 # mcmc
-nsamples <- 100
-nburn <- 0
+nsamples <- 10000
+nburn <- 2000
 theta.hat <- hlm.fit(y = y, X = X, W = cbind(1,Z)) # solve by hlm
 # quick check 
 rbind(true = beta0, est = theta.hat$beta) # beta
@@ -173,7 +254,7 @@ legend('topright',legend=c(expression('true param'),
 # ---- X dim 2 Z dim 1 ----
 n <- 100
 alpha <- 0.75
-beta0 <- c(1,0.5)
+beta0 <- c(0.5,1)
 gamma0 <- -0.5
 sig20 <- 1
 
@@ -183,14 +264,13 @@ genout <- gen_eps(n, dist = "chisq", df = 5, tau = alpha)
 eps <- genout$eps
 nu0 <- genout$nu0
 theta0 <- c(beta0,gamma0,sig20,nu0)
-yy <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 plot(yy~X[,2], cex=0.3)
 # random censoring
-cc <- rnorm(n,mean=2.5,sd=1)
-deltas <- yy<=cc
-y <- yy
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[!deltas] <- cc[!deltas]
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
 hlmout <- hlm(y, deltas, X, cbind(1,Z))
 hlmout$conv
 
@@ -213,6 +293,15 @@ for (ii in 1:numpoints) {
 }
 logelmode1 <- plotEL(beta.seq1, logel.seq1, beta0[1], NA, expression(beta[0]))
 
+# smoothed version
+beta.seq1 <- seq(-1+beta0[1],1+beta0[1],length.out = numpoints)
+logel.seq1 <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  logel.seq1[ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,tau,
+                                                 c(beta.seq1[ii],beta0[2],gamma0,sig20,nu0),s)
+}
+logelmode1 <- plotEL(beta.seq1, logel.seq1, beta0[1], NA, expression(beta[0]))
+
 beta.seq2 <- seq(-1+beta0[2],1+beta0[2],length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
@@ -223,6 +312,15 @@ for (ii in 1:numpoints) {
 }
 logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
 
+# smoothed version
+beta.seq2 <- seq(-1+beta0[2],1+beta0[2],length.out = numpoints)
+logel.seq2 <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  logel.seq2[ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,tau,
+                                                 c(beta0[1],beta.seq2[ii],gamma0,sig20,nu0),s)
+}
+logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
+
 gamma.seq <- seq(-1+gamma0[1],1+gamma0[1],length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
@@ -230,6 +328,15 @@ for (ii in 1:numpoints) {
   epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
   omegas <- omega.hat(G,deltas,epsilons)
   logel.seq3[ii] <- logEL(omegas,epsilons,deltas)
+}
+logelmode3 <- plotEL(gamma.seq, logel.seq3, gamma0[1], NA, expression(gamma[0]))
+
+# smoothed version
+gamma.seq <- seq(-1+gamma0[1],1+gamma0[1],length.out = numpoints)
+logel.seq3 <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  logel.seq3[ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,tau,
+                                                 c(beta0,gamma.seq[ii],sig20,nu0),s)
 }
 logelmode3 <- plotEL(gamma.seq, logel.seq3, gamma0[1], NA, expression(gamma[0]))
 

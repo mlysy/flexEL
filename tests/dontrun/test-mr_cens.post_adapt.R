@@ -140,7 +140,7 @@ plot(X1,y,cex=0.3)
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
-# beta2.seq <- seq(1.26,1.3,length.out = numpoints)
+# beta1.seq <- seq(1.1,1.15,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
@@ -152,7 +152,7 @@ for (ii in 1:numpoints) {
   omegas <- omega.hat(G,deltas,epsilons)
   # omegas <- omega.hat.EM_R(G,deltas,epsilons,rel_tol = 1e-3,verbose = TRUE)$omegas
   logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
-  
+
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
   if (adjust) {
@@ -169,24 +169,24 @@ for (ii in 1:numpoints) {
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
 
-# smoothed censored logEL (very slow now since nested loop in R)
-numpoints <- 50
-beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
-# beta2.seq <- seq(1.26,1.28,length.out = numpoints)
-beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
+# smoothed censored logEL
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
+# beta2.seq <- seq(1.65,1.75,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
   if (ii %% 1 == 0) message("ii = ", ii)
-  # G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
-  # epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
-  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas
-  # logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas)
+  G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
+  epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas
+  logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas)
   
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
-  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=80)$omegas
-  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=80)
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=10)
 }
 logelmode1.smooth <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2.smooth <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
@@ -210,7 +210,10 @@ logelmode2_acc <- plotEL(beta2.seq, logel_acc.seq[2,], beta0[2], NA, expression(
 # Note: this may take a while to calculate
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 adjust <- FALSE
+counter <- 0
 logel.mat <- apply(Beta.seq, 1, function(bb) {
+  counter <<- counter+1
+  if (counter %% 10 == 0) message("counter = ", counter)
   G <- mr.evalG(y,X,c(bb[1],bb[2]))
   if (adjust) G <- adjG_R(G)
   epsilons <- y - c(X %*% c(bb[1],bb[2]))
@@ -221,13 +224,16 @@ logel.mat <- apply(Beta.seq, 1, function(bb) {
     logEL_R(omegas,epsilons,deltas,adjust)
   }
   else {
-    omegas <- omega.hat(G,deltas,epsilons)
-    logEL(omegas,epsilons,deltas)
+    # omegas <- omega.hat(G,deltas,epsilons)
+    # logEL(omegas,epsilons,deltas)
+    omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+    logEL.smooth_R(omegas,epsilons,deltas,s=10)
   }
 })
 logel.mat <- matrix(logel.mat, numpoints, numpoints)
 el.mat <- exp(logel.mat - max(logel.mat))
 logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
+plot(beta2.seq,logel.marg[,2],type='l')
 
 nsamples <- 10000 # 20000 worked
 nburn <- 5000
