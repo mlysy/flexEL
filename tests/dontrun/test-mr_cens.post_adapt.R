@@ -172,21 +172,26 @@ logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1])
 # smoothed censored logEL
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
-# beta2.seq <- seq(1.65,1.75,length.out = numpoints)
+# beta2.seq <- seq(1.45,1.54,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
 beta.seq <- cbind(beta1.seq,beta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+s <- 10
 for (ii in 1:numpoints) {
   if (ii %% 1 == 0) message("ii = ", ii)
-  G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
-  epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
-  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas
-  logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas)
   
-  G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
-  epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
-  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
-  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=10)
+  logel.seq[1,ii] <- -mr_cens.neglogEL.smooth_R(y,X,deltas,c(beta1.seq[ii],beta0[2]),s)
+  logel.seq[2,ii] <- -mr_cens.neglogEL.smooth_R(y,X,deltas,c(beta0[1],beta2.seq[ii]),s)
+  
+  # G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
+  # epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas
+  # logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas)
+  # 
+  # G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
+  # epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s=10)$omegas
+  # logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s=10)
 }
 logelmode1.smooth <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2.smooth <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))

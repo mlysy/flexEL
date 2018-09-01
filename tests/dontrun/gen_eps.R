@@ -41,7 +41,7 @@ gen_eps <- function(n, dist = "norm", df = NULL, tau) {
     v <- (exp(sn^2)-1)*exp(2*mn+sn^2)
     eps <- (rlnorm(n,mn,sn)-m)/sqrt(v)
     if (!missing(tau)) {
-      nu0 <- (qlnorm(alpha,mn,sn)-m)/sqrt(v)
+      nu0 <- (qlnorm(tau,mn,sn)-m)/sqrt(v)
       return(list(eps = eps, nu0 = nu0))
     }
     else return(eps)

@@ -21,6 +21,26 @@
     .Call(`_bayesEL_logELC`, omegas, epsilons, deltas)
 }
 
+.ind.smooth <- function(x, s) {
+    .Call(`_bayesEL_indSmooth`, x, s)
+}
+
+.evalPsos.Smooth <- function(ii, omegas, epsilons, s) {
+    .Call(`_bayesEL_evalPsosSmooth`, ii, omegas, epsilons, s)
+}
+
+.logEL.smooth <- function(omegas, epsilons, deltas, s) {
+    .Call(`_bayesEL_logELSmooth`, omegas, epsilons, deltas, s)
+}
+
+.evalWeights.smooth <- function(deltas, omegas, epsilons, s) {
+    .Call(`_bayesEL_evalWeightsSmooth`, deltas, omegas, epsilons, s)
+}
+
+.omega.hat.EM.smooth <- function(omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose) {
+    .Call(`_bayesEL_omegaHatEMSmooth`, omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose)
+}
+
 .lambdaNR <- function(G, maxIter, relTol, verbose) {
     .Call(`_bayesEL_lambdaNR`, G, maxIter, relTol, verbose)
 }

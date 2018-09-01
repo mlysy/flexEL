@@ -90,6 +90,7 @@ logelmode4 <- plotEL(nu.seq, logel.seq[4,], nu0, NA, expression(nu))
 numpoints <- 100
 beta.seq <- seq(beta0-1,beta0+1,length.out = numpoints)
 gamma.seq <- seq(gamma0-1,gamma0+1,length.out = numpoints)
+gamma.seq <- seq(-1.25,-1.05, length.out = numpoints)
 sig2.seq <- seq(sig20-1,sig20+1,length.out = numpoints)
 nu.seq <- seq(nu0-1,nu0+1,length.out = numpoints)
 # Note: need to keep the sig2.seq range > 0 mostly
@@ -98,29 +99,29 @@ s <- 10
 for (ii in 1:numpoints) {
   if (ii %% 10 == 0) message("ii = ", ii)
   # logel.seq[1,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta.seq[ii],gamma0,sig20,nu0),s)
-  # logel.seq[2,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma.seq[ii],sig20,nu0),s)
+  logel.seq[2,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma.seq[ii],sig20,nu0),s)
   # logel.seq[3,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma0,sig2.seq[ii],nu0),s)
   # logel.seq[4,ii] <- -qrls_cens.neglogEL.smooth_R(y,X,Z,deltas,alpha,theta = c(beta0,gamma0,sig20,nu.seq[ii]),s)
-  
+
   # G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta.seq[ii],gamma0,sig20,nu0,s)
   # epsilons <- evalEpsilonsLS(y,X,Z,beta.seq[ii],gamma0,sig20)
   # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
   # logel.seq[1,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
   # 
-  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma.seq[ii],sig20,nu0,s)
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
-  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
-  logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
-
-  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig2.seq[ii],nu0,s)
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig2.seq[ii])
-  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
-  logel.seq[3,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
-
-  G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig20,nu.seq[ii],s)
-  epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig20)
-  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
-  logel.seq[4,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+  # G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma.seq[ii],sig20,nu0,s)
+  # epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma.seq[ii],sig20)
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  # logel.seq[2,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+  # 
+  # G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig2.seq[ii],nu0,s)
+  # epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig2.seq[ii])
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  # logel.seq[3,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
+  # 
+  # G <- qrls.evalG.smooth_R(y,X,Z,alpha,beta0,gamma0,sig20,nu.seq[ii],s)
+  # epsilons <- evalEpsilonsLS(y,X,Z,beta0,gamma0,sig20)
+  # omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)$omegas
+  # logel.seq[4,ii] <- logEL.smooth_R(omegas,epsilons,deltas,s)
 }
 logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
 logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0, NA, expression(gamma))

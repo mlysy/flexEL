@@ -80,6 +80,79 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// indSmooth
+Eigen::VectorXd indSmooth(Eigen::VectorXd x, Eigen::VectorXd s);
+RcppExport SEXP _bayesEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(indSmooth(x, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// evalPsosSmooth
+double evalPsosSmooth(int ii, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, double s);
+RcppExport SEXP _bayesEL_evalPsosSmooth(SEXP iiSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type ii(iiSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(evalPsosSmooth(ii, omegas, epsilons, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logELSmooth
+double logELSmooth(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, double s);
+RcppExport SEXP _bayesEL_logELSmooth(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(logELSmooth(omegas, epsilons, deltas, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// evalWeightsSmooth
+Eigen::VectorXd evalWeightsSmooth(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, double s);
+RcppExport SEXP _bayesEL_evalWeightsSmooth(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(evalWeightsSmooth(deltas, omegas, epsilons, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// omegaHatEMSmooth
+Eigen::VectorXd omegaHatEMSmooth(Eigen::VectorXd omegasInit, Eigen::MatrixXd G, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, double s, int maxIter, double relTol, double absTol, bool verbose);
+RcppExport SEXP _bayesEL_omegaHatEMSmooth(SEXP omegasInitSEXP, SEXP GSEXP, SEXP deltasSEXP, SEXP epsilonsSEXP, SEXP sSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP absTolSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegasInit(omegasInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type relTol(relTolSEXP);
+    Rcpp::traits::input_parameter< double >::type absTol(absTolSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(omegaHatEMSmooth(omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lambdaNR
 Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose);
 RcppExport SEXP _bayesEL_lambdaNR(SEXP GSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
@@ -496,6 +569,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_omegaHatEM", (DL_FUNC) &_bayesEL_omegaHatEM, 7},
     {"_bayesEL_logELC", (DL_FUNC) &_bayesEL_logELC, 3},
+    {"_bayesEL_indSmooth", (DL_FUNC) &_bayesEL_indSmooth, 2},
+    {"_bayesEL_evalPsosSmooth", (DL_FUNC) &_bayesEL_evalPsosSmooth, 4},
+    {"_bayesEL_logELSmooth", (DL_FUNC) &_bayesEL_logELSmooth, 4},
+    {"_bayesEL_evalWeightsSmooth", (DL_FUNC) &_bayesEL_evalWeightsSmooth, 4},
+    {"_bayesEL_omegaHatEMSmooth", (DL_FUNC) &_bayesEL_omegaHatEMSmooth, 9},
     {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
     {"_bayesEL_omegaHat", (DL_FUNC) &_bayesEL_omegaHat, 2},
     {"_bayesEL_logEL", (DL_FUNC) &_bayesEL_logEL, 1},

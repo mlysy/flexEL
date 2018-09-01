@@ -117,7 +117,7 @@ test_that("under censoring: omegahat.cpp is optimal", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat.cpp <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
     if (!any(is.nan(omegahat.cpp))) {
       # ocheck <- optim_proj(xsol = rep(1,n-p),
       #                      xrng = 0.05,
@@ -137,7 +137,7 @@ test_that("under censoring: omegahat.cpp is optimal", {
                              xrng = 0.02,
                              npts = 201, 
                              fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, rel_tol)},
-                             plot = FALSE)
+                             plot = TRUE)
         # print(ocheck)
         expect_lt(max.xdiff(ocheck), 0.01)
       }
@@ -147,10 +147,10 @@ test_that("under censoring: omegahat.cpp is optimal", {
 
 # smoothed censored EL
 # checking optimality of the solution (TODO: the following is in R)
-n <- 20
+n <- 25
 p <- 5
 max_iter <- 200
-rel_tol <- 1e-4
+rel_tol <- 1e-5
 G <- matrix(rnorm(n*p), n, p)
 deltas <- rep(1,n)
 numcens <- sample(round(n/3),1)
@@ -162,11 +162,82 @@ oout <- omega.hat.EM.smooth_R(G, deltas, epsilons, max_iter = max_iter, rel_tol 
 oout$conv
 omegahat <- oout$omegas
 ocheck <- optim_proj(xsol = rep(1,n-p),
-                     xrng = 0.001,
+                     xrng = 0.0001,
                      npts = 201,
                      fun = function(x) {omega.smooth.check(x, omegahat, G, deltas, epsilons)},
                      plot = TRUE)
 expect_lt(max.xdiff(ocheck),0.01)
+
+# Censored case + smooth:
+test_that("under censoring: omegahatCS.R == omegahatCS.cpp", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    # max_iter <- sample(c(2, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    G <- matrix(rnorm(n*p), n, p)
+    deltas <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    deltas[censinds] <- 0
+    epsilons <- rnorm(n)
+    s <- sample(1:100,1)
+    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, max_iter = max_iter, abs_tol = rel_tol, verbose = FALSE)
+    omegahat.R <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
+    if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
+      message("R version did not converge but C++ does.")
+    }
+    else {
+      expect_equal(omegahat.cpp, omegahat.R)
+    }
+  }
+})
+
+# checking optimality of the solution from C++
+test_that("under censoring: omegahat.cpp is optimal", {
+  for(ii in 1:ntest) {
+    n <- sample(10:30,1)
+    p <- sample(1:(n-2), 1)
+    # max_iter <- sample(c(2, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
+    # max_iter <- 200
+    rel_tol <- runif(1, 1e-8, 1e-6)
+    # rel_tol <- 1e-7
+    G <- matrix(rnorm(n*p), n, p)
+    deltas <- rep(1,n)
+    numcens <- sample(round(n/4),1)
+    censinds <- sample(n,numcens)
+    deltas[censinds] <- 0
+    1-sum(deltas)/n
+    epsilons <- rnorm(n)
+    s <- sample(1:100,1)
+    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, max_iter = max_iter, 
+                                          rel_tol = 1e-5, abs_tol = 1e-3, verbose = FALSE)
+    # omegahat.cpp <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter, 
+    #                                       rel_tol = 1e-5, verbose = FALSE)$omegas
+    if (!any(is.nan(omegahat.cpp))) {
+      # idx0 <- (abs(omegahat.cpp) < 1e-5 & !deltas)
+      # idx0 <- !deltas
+      if (n-p-sum(idx0) > 0) {
+        # ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
+        #                      xrng = 0.001,
+        #                      npts = 201, 
+        #                      fun = function(x) {omega.smooth.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, s)},
+        #                      plot = TRUE)
+        ocheck <- optim_proj(xsol = rep(1,n-p),
+                             xrng = 0.01,
+                             npts = 201, 
+                             fun = function(x) {omega.smooth.check(x, omegahat.cpp, G, deltas, epsilons, s)},
+                             plot = FALSE)
+        # print(ocheck)
+        expect_lt(max.xdiff(ocheck), 0.01)
+      }
+    }
+  }
+})
+
+# --------------------------------------------------------------------------- 
 
 ## omega.hat <- function(G, deltas, lambda) {
 ## }

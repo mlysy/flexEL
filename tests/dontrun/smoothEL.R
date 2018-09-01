@@ -14,6 +14,10 @@ ind1.smooth_R <- function(x, s=10) {
   return(-s*exp(s*x)/(1+exp(s*x))^2)
 }
 
+# sfun <- function(x,s) {
+#   ind1.smooth_R(x=s,s=x)
+# }
+
 # smoothed partial sum of omegas (for loop)
 # evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10) {
 #   # ei <- epsilons[ii]
@@ -38,7 +42,7 @@ logEL.smooth_R <- function(omegas,epsilons,deltas,s=10) {
   n <- length(omegas)
   psos <- rep(0,n)
   for (ii in 1:n) {
-    psos[ii] <- evalPsos.smooth_R(ii, omegas, epsilons,s) 
+    psos[ii] <- evalPsos.smooth_R(ii,omegas,epsilons,s) 
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
@@ -185,10 +189,38 @@ omega.smooth.check <- function(x, omegas, G, deltas, epsilons, s=10) {
   NG <- Null(G)
   xNG <- c(NG %*% x) - rowSums(NG) + omegas # x == 1s, xNG == omegas 
   # might have to use a small negative value to aviod rounding errors
-  if (any(xNG < -1e-5)) return(-Inf)
+  if (any(xNG < -1e-7)) return(-Inf)
   xNG <- abs(xNG) # try replace the extreme small value to positive
   xNG <- xNG / sum(xNG) # normalize it
   return(logEL.smooth_R(xNG,epsilons,deltas,s))
+}
+
+omega.smooth.pcheck <- function(x, omegas, G, deltas, epsilons,idx0, s=10) {
+  p <- ncol(G)
+  n <- nrow(G)
+  G <- G[!idx0,]
+  NG <- Null(G)
+  xNG <- c(NG %*% x) - rowSums(NG) + omegas[!idx0] # x == 1s, xNG == omegas 
+  if (any(xNG < -1e-10)) return(-Inf)
+  xNG <- abs(xNG) # try replace the extreme small value to positive
+  xNG <- xNG / sum(xNG) # normalize it
+  if (missing(deltas) && missing(epsilons)) { # actually this should not be needed
+    return(sum(log(xNG)))
+  }
+  else {
+    xNGfull <- rep(0,n)
+    xNGfull[!idx0] <- xNG
+    return(logEL.smooth_R(xNGfull,epsilons,deltas,s))
+    # epsOrd <- order(epsilons) # ascending order of epsilons
+    # psos <- rep(0,n)
+    # for (ii in 1:n) {
+    #   psos[ii] <- evalPsos.smooth_R(ii,omegas,epsilons,s)
+    # }
+    # logel <- rep(NA,n)
+    # logel[deltas==1] <- log(xNGfull[deltas==1])
+    # logel[deltas==0] <- log(psos[deltas==0])
+    # return(sum(logel))
+  }
 }
 
 # sandwich estimator for convariance matrix
