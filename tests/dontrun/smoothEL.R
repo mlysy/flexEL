@@ -83,8 +83,8 @@ evalWeights.smooth_R <- function(deltas, omegas, epsilons, s=10) {
 
 # using smoothed objective function in EM
 omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE, 
-                                  max_iter = 200, rel_tol = 1e-3, verbose=FALSE,
-                                  dbg = FALSE) {
+                                  max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, 
+                                  verbose=FALSE, dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
@@ -116,7 +116,7 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     weights <- evalWeights.smooth_R(deltas, omegas, epsilons, s)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
-    lambdaOut <- lambdaNRC_R(G, weights, max_iter, 1e-5, verbose=FALSE)
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")
@@ -148,10 +148,10 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
       message("nIter = ", nIter)
       message("abs err = ", abs(logel-logelOld))
     }
-    if (err < rel_tol) break
+    if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
   if (notconv) {
     # omegas = rep(NaN,n)
     if (dbg) {
@@ -210,16 +210,17 @@ omega.smooth.pcheck <- function(x, omegas, G, deltas, epsilons,idx0, s=10) {
   else {
     xNGfull <- rep(0,n)
     xNGfull[!idx0] <- xNG
-    return(logEL.smooth_R(xNGfull,epsilons,deltas,s))
+    # xNGfull[idx0] <- omegas[idx0]
+    # return(logEL.smooth_R(xNGfull,epsilons,deltas,s))
     # epsOrd <- order(epsilons) # ascending order of epsilons
-    # psos <- rep(0,n)
-    # for (ii in 1:n) {
-    #   psos[ii] <- evalPsos.smooth_R(ii,omegas,epsilons,s)
-    # }
-    # logel <- rep(NA,n)
-    # logel[deltas==1] <- log(xNGfull[deltas==1])
-    # logel[deltas==0] <- log(psos[deltas==0])
-    # return(sum(logel))
+    psos <- rep(0,n)
+    for (ii in 1:n) {
+      psos[ii] <- evalPsos.smooth_R(ii,xNGfull,epsilons,s)
+    }
+    logel <- rep(NA,n)
+    logel[deltas==1] <- log(xNGfull[deltas==1])
+    logel[deltas==0] <- log(psos[deltas==0])
+    return(sum(logel))
   }
 }
 

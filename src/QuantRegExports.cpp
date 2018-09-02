@@ -161,10 +161,10 @@ Rcpp::List QuantRegCens_post(Eigen::VectorXd omegasInit,
                              int nsamples, int nburn,
                              Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
                              Eigen::VectorXd rvDoMcmc,
-                             int maxIter = 100, double relTol = 1e-7) {
+                             int maxIter = 100, double relTol = 1e-7, double absTol = 1e-3) {
   InnerELC<QuantRegModel> QRC;
   QRC.setData(y,X,deltas,alphaArr.data());
-  QRC.setTol(maxIter, relTol);
+  QRC.setTol(maxIter, relTol, absTol);
   Eigen::VectorXd paccept;
   QRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::MatrixXd beta_chain = QRC.postSample(nsamples, nburn,
@@ -183,10 +183,10 @@ Rcpp::List QuantRegCens_post_adapt(Eigen::VectorXd omegasInit,
                                    int nsamples, int nburn,
                                    Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
                                    Eigen::VectorXd rvDoMcmc, Eigen::VectorXd doAdapt,
-                                   int maxIter = 100, double relTol = 1e-7) {
+                                   int maxIter = 100, double relTol = 1e-7, double absTol = 1e-3) {
   InnerELC<QuantRegModel> QRC;
   QRC.setData(y,X,deltas,alphaArr.data());
-  QRC.setTol(maxIter, relTol);
+  QRC.setTol(maxIter, relTol, absTol);
   int nTheta = betaInit.size();
   Eigen::VectorXd paccept(nTheta);
   bool *doadapt = new bool[nTheta];
@@ -214,10 +214,10 @@ Rcpp::List QuantRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
                                      double sig2Init,
                                      Eigen::VectorXd nuInit, Eigen::VectorXd mwgSd, 
                                      Eigen::VectorXd rvDoMcmc, Eigen::VectorXd doAdapt, 
-                                     int maxIter = 100, double relTol = 1e-7) {
+                                     int maxIter = 100, double relTol = 1e-7, double absTol = 1e-3) {
   InnerELC<QuantRegModel> QRC;
   QRC.setData(y,X,Z,deltas,alphaArr.data());
-  QRC.setTol(maxIter, relTol);
+  QRC.setTol(maxIter, relTol, absTol);
   QRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::VectorXd paccept;
   

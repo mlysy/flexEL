@@ -20,7 +20,7 @@
 qrls_cens.post_adapt <- function(y, X, Z, deltas, alpha, nsamples, nburn, 
                                  betaInit, gammaInit, sig2Init, nuInit, 
                                  mwgSd, rvDoMcmc, doAdapt,
-                                 max_iter = 100, rel_tol = 1e-7) {
+                                 max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3) {
   # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   # if (is.vector(GammaInit)) GammaInit <- matrix(GammaInit,length(GammaInit),1)
@@ -64,5 +64,5 @@ qrls_cens.post_adapt <- function(y, X, Z, deltas, alpha, nsamples, nburn,
                              nsamples, nburn, 
                              betaInit, gammaInit,sig2Init, nuInit,
                              mwgSd, rvDoMcmc, doAdapt,
-                             maxIter = max_iter, relTol = rel_tol)
+                             maxIter = max_iter, relTol = rel_tol, absTol = abs_tol)
 }

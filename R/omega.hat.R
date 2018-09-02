@@ -9,7 +9,8 @@
 #' @return Length-\code{nEq} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/nObs if did not converge.
 #' @details The inner-loop optimization of EL is ...
 #' @export
-omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
+omega.hat <- function(G, deltas, epsilons, max_iter = 100, 
+                      rel_tol = 1e-7, abs_tol = 1e-3, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
     lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
     omegahat <- .omega.hat(t(G), lambda = lambda)
@@ -23,7 +24,7 @@ omega.hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, verbo
       return(rep(NaN,length(deltas)))
     }
     omegahat <- .omega.hat.EM(omegasInit, t(G), deltas, epsilons,
-                              max_iter, rel_tol, verbose)
+                              max_iter, rel_tol, absTol = abs_tol, verbose)
   }
   return(omegahat)
 }

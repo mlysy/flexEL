@@ -485,15 +485,16 @@ inline void InnerELC<ELModel>::evalOmegas() {
     // std::cout << "In evalOmegas: omegas = " << omegas.transpose() << std::endl;
     // maxErr = maxRelErr(omegas, omegasOld); 
     logel = logEL();
-    maxErr = maxRelErr(logel, logelOld);
+    // maxErr = maxRelErr(logel, logelOld);
+    maxErr = abs(logel-logelOld);
     // std::cout << "In evalOmegas: maxErr = " << maxErr << std::endl;
-    if (maxErr < relTol) break;
+    if (maxErr < absTol) break;
     // omegasOld = omegas;
     logelOld = logel;
   }
   nIter = ii; 
   // std::cout << "nIter = " << nIter << std::endl;
-  if (nIter == maxIter && maxErr > relTol) {
+  if (nIter == maxIter && maxErr > absTol) {
     // std::cout << "evalOmegas not converged. maxErr = " << maxErr << std::endl;
     // std::cout << "the omegas now = " << omegas.transpose() << std::endl;
     // TODO: maybe should assign nan elsewhere 

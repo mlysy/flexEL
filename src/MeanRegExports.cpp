@@ -149,10 +149,10 @@ Rcpp::List MeanRegCens_post(Eigen::VectorXd omegasInit,
                             int nsamples, int nburn,
                             Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
                             Eigen::VectorXd rvDoMcmc,  Eigen::VectorXd doAdapt,
-                            int maxIter = 100, double relTol = 1e-7) {
+                            int maxIter = 100, double relTol = 1e-7, double absTol = 1e-3) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,deltas,NULL);
-  MRC.setTol(maxIter, relTol);
+  MRC.setTol(maxIter, relTol, absTol);
   Eigen::VectorXd paccept(betaInit.size());
   MRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::MatrixXd beta_chain = MRC.postSample(nsamples, nburn,
@@ -171,10 +171,10 @@ Rcpp::List MeanRegCens_post_adapt(Eigen::VectorXd omegasInit,
                                   int nsamples, int nburn,
                                   Eigen::VectorXd betaInit, Eigen::VectorXd mwgSd,
                                   Eigen::VectorXd rvDoMcmc, Eigen::VectorXd doAdapt,
-                                  int maxIter = 100, double relTol = 1e-7) {
+                                  int maxIter = 100, double relTol = 1e-7, double absTol = 1e-3) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,deltas,NULL);
-  MRC.setTol(maxIter, relTol);
+  MRC.setTol(maxIter, relTol, absTol);
   int nTheta = betaInit.size();
   Eigen::VectorXd paccept(nTheta);
   bool *doadapt = new bool[nTheta];
@@ -203,10 +203,10 @@ Rcpp::List MeanRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
                                     Eigen::VectorXd betaInit, Eigen::VectorXd gammaInit, 
                                     double sig2Init, Eigen::VectorXd mwgSd, 
                                     Eigen::VectorXd rvDoMcmc, Eigen::VectorXd doAdapt,
-                                    int maxIter = 100, double relTol = 1e-7) {
+                                    int maxIter = 100, double relTol = 1e-7, double absTol = 1e-3) {
   InnerELC<MeanRegModel> MRC;
   MRC.setData(y,X,Z,deltas,NULL);
-  MRC.setTol(maxIter, relTol);
+  MRC.setTol(maxIter, relTol, absTol);
   MRC.setOmegas(omegasInit); // set initial value for first EM
   Eigen::VectorXd paccept;
   

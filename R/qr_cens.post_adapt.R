@@ -16,7 +16,7 @@
 #' @export qr_cens.post_adapt
 qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit, 
                                Sigs, RvDoMcmc, DoAdapt,
-                               max_iter = 100, rel_tol = 1e-7) {
+                               max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3) {
   # # input conversion
   if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
@@ -49,5 +49,5 @@ qr_cens.post_adapt <- function(y, X, deltas, alpha, nsamples, nburn, BetaInit,
   # if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(BetaInit))
   .QuantRegCens_post_adapt(omegasInit, y, t(X), deltas, c(1,alpha), nsamples, nburn, 
                            BetaInit, Sigs, RvDoMcmc, DoAdapt, 
-                           maxIter = max_iter, relTol = rel_tol)
+                           maxIter = max_iter, relTol = rel_tol, absTol = abs_tol)
 }

@@ -6,7 +6,7 @@
 \usage{
 qrls_cens.post_adapt(y, X, Z, deltas, alpha, nsamples, nburn, betaInit,
   gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, max_iter = 100,
-  rel_tol = 1e-07)
+  rel_tol = 1e-07, abs_tol = 0.001)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}

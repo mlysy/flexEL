@@ -15,7 +15,7 @@
 #' @export mr_cens.post
 mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit, 
                          Sigs, RvDoMcmc, DoAdapt, 
-                         max_iter = 100, rel_tol = 1e-7) {
+                         max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3) {
   # # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   # if (is.vector(Sigs)) Sigs <- matrix(Sigs,length(Sigs),1)
@@ -43,5 +43,5 @@ mr_cens.post <- function(y, X, deltas, nsamples, nburn, BetaInit,
   omegasInit <- .omega.hat(G, lambda)
   .MeanRegCens_post(omegasInit, y, t(X), deltas, nsamples, nburn, BetaInit, 
                     Sigs, RvDoMcmc, DoAdapt, 
-                    maxIter = max_iter, relTol = rel_tol)
+                    maxIter = max_iter, relTol = rel_tol, absTol = abs_tol)
 }

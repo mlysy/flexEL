@@ -99,7 +99,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
 
 # G is nObs x nEqs matrix
 omega.hat.NC_R <- function(G, adjust = FALSE, 
-                           max_iter = 100, rel_tol = 1e-07, verbose = FALSE) {
+                           max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
   conv <- lambdaOut$convergence # 1 if converged
   if (!conv) {
@@ -252,7 +252,7 @@ evalEpsilonsLS_R <- function(y,X,Z,beta,gamma,sig2) {
 # G is nObs x nEqs matrix 
 # TODO: rel_tol should be called abs_tol now -- using absolute error for diff in logEL
 omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = 200, rel_tol = 1e-3, verbose=FALSE,
+                           max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
@@ -287,7 +287,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     weights <- evalWeights_R(deltas, omegas, epsilons)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
-    lambdaOut <- lambdaNRC_R(G, weights, max_iter, 1e-5, verbose=FALSE)
+    lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
       # message("lambdaNRC did not converge in EM")
@@ -324,10 +324,10 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
       # message("err = ", err)
       message("abs err = ", abs(logel-logelOld))
     }
-    if (err < rel_tol) break
+    if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
   if (notconv) {
     # omegas = rep(NaN,n)
     if (dbg) {
@@ -361,7 +361,7 @@ vecinv_R <- function(x) {
 
 # eps-acc for EM
 omega.hat.EM_Acc_R <- function(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = 100, rel_tol = 1e-7, verbose=FALSE) {
+                           max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3,  verbose=FALSE) {
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
@@ -419,10 +419,10 @@ omega.hat.EM_Acc_R <- function(G, deltas, epsilons, adjust = FALSE,
       message("nIter = ", nIter)
       message("err = ", err)
     }
-    if (err < rel_tol) break
+    if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > rel_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
   if (notconv) {
     omegas = rep(NaN,n)
   }
@@ -433,13 +433,14 @@ omega.hat.EM_Acc_R <- function(G, deltas, epsilons, adjust = FALSE,
 
 # wrapper function for censor and non-censor omega.hat
 omega.hat_R <- function(G, deltas, epsilons, adjust=FALSE,
-                        max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
+                        max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
-    omegas <- omega.hat.NC_R(G, adjust, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
+    omegas <- omega.hat.NC_R(G, adjust, 
+                             max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   else {
     omegas <- omega.hat.EM_R(G, deltas, epsilons, adjust, 
-                             max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
+                             max_iter=max_iter, rel_tol=rel_tol, abs_tol = abs_tol, verbose=verbose)
   }
   return(c(omegas))
 }

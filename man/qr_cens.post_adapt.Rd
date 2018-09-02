@@ -5,7 +5,7 @@
 \title{Posterior sampler for quantile regression with censoring (location model)}
 \usage{
 qr_cens.post_adapt(y, X, deltas, alpha, nsamples, nburn, BetaInit, Sigs,
-  RvDoMcmc, DoAdapt, max_iter = 100, rel_tol = 1e-07)
+  RvDoMcmc, DoAdapt, max_iter = 100, rel_tol = 1e-07, abs_tol = 0.001)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}

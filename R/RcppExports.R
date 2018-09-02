@@ -13,8 +13,8 @@
     .Call(`_bayesEL_lambdaNRC`, G, weights, maxIter, relTol, verbose)
 }
 
-.omega.hat.EM <- function(omegasInit, G, deltas, epsilons, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_omegaHatEM`, omegasInit, G, deltas, epsilons, maxIter, relTol, verbose)
+.omega.hat.EM <- function(omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, verbose) {
+    .Call(`_bayesEL_omegaHatEM`, omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, verbose)
 }
 
 .logELC <- function(omegas, epsilons, deltas) {
@@ -77,16 +77,16 @@
     .Call(`_bayesEL_MeanRegLS_post_adapt`, y, X, Z, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, maxIter, relTol)
 }
 
-.MeanRegCens_post <- function(omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanRegCens_post`, omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol)
+.MeanRegCens_post <- function(omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
+    .Call(`_bayesEL_MeanRegCens_post`, omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol, absTol)
 }
 
-.MeanRegCens_post_adapt <- function(omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanRegCens_post_adapt`, omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol)
+.MeanRegCens_post_adapt <- function(omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
+    .Call(`_bayesEL_MeanRegCens_post_adapt`, omegasInit, y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol, absTol)
 }
 
-.MeanRegCensLS_post_adapt <- function(omegasInit, y, X, Z, deltas, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_MeanRegCensLS_post_adapt`, omegasInit, y, X, Z, deltas, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol)
+.MeanRegCensLS_post_adapt <- function(omegasInit, y, X, Z, deltas, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
+    .Call(`_bayesEL_MeanRegCensLS_post_adapt`, omegasInit, y, X, Z, deltas, nsamples, nburn, betaInit, gammaInit, sig2Init, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol, absTol)
 }
 
 .QuantReg_evalG <- function(y, X, alphaArr, beta) {
@@ -113,15 +113,15 @@
     .Call(`_bayesEL_QuantRegLS_post_adapt`, y, X, Z, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, maxIter, relTol)
 }
 
-.QuantRegCens_post <- function(omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_QuantRegCens_post`, omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol)
+.QuantRegCens_post <- function(omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
+    .Call(`_bayesEL_QuantRegCens_post`, omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, maxIter, relTol, absTol)
 }
 
-.QuantRegCens_post_adapt <- function(omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_QuantRegCens_post_adapt`, omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol)
+.QuantRegCens_post_adapt <- function(omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
+    .Call(`_bayesEL_QuantRegCens_post_adapt`, omegasInit, y, X, deltas, alphaArr, nsamples, nburn, betaInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol, absTol)
 }
 
-.QuantRegCensLS_post_adapt <- function(omegasInit, y, X, Z, deltas, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7) {
-    .Call(`_bayesEL_QuantRegCensLS_post_adapt`, omegasInit, y, X, Z, deltas, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol)
+.QuantRegCensLS_post_adapt <- function(omegasInit, y, X, Z, deltas, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
+    .Call(`_bayesEL_QuantRegCensLS_post_adapt`, omegasInit, y, X, Z, deltas, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol, absTol)
 }
 

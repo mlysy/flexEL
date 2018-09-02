@@ -5,7 +5,8 @@
 \title{Posterior sampler for mean regression (location-scale model)}
 \usage{
 mrls_cens.post_adapt(y, X, Z, deltas, nsamples, nburn, betaInit, gammaInit,
-  sig2Init, mwgSd, rvDoMcmc, doAdapt, max_iter = 100, rel_tol = 1e-07)
+  sig2Init, mwgSd, rvDoMcmc, doAdapt, max_iter = 100, rel_tol = 1e-07,
+  abs_tol = 0.001)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of response values.}

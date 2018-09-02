@@ -125,7 +125,7 @@ Rcpp::List lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
 Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit, 
                            Eigen::MatrixXd G, Eigen::VectorXd deltas,
                            Eigen::VectorXd epsilons, 
-                           int maxIter, double relTol, bool verbose) {
+                           int maxIter, double relTol, double absTol, bool verbose) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
     int nEqs = G.rows();
@@ -136,7 +136,7 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
     ILC.setData(y,X,deltas,NULL); 
     ILC.setG(G); // assign a given G
     ILC.setEpsilons(epsilons); 
-    ILC.setTol(maxIter, relTol, 0.0); // TODO: change this
+    ILC.setTol(maxIter, relTol, absTol); // TODO: change this
     // Note: set initial omegas from uncensored omega.hat
     ILC.setOmegas(omegasInit);
     // std::cout << "omegasInit = " << omegasInit.transpose() << std::endl;

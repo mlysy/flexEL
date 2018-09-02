@@ -15,7 +15,7 @@
 #' @export mr_cens.post_adapt
 mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit, 
                                mwgSd, rvDoMcmc, DoAdapt, 
-                               max_iter = 100, rel_tol = 1e-7) {
+                               max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3) {
   # # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
   # if (is.vector(mwgSd)) mwgSd <- matrix(mwgSd,length(mwgSd),1)
@@ -40,5 +40,5 @@ mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit,
   if (missing(DoAdapt)) DoAdapt <- rep(1,length(betaInit))
   .MeanRegCens_post_adapt(omegasInit, y, t(X), deltas, nsamples, nburn, betaInit, 
                           mwgSd, rvDoMcmc, DoAdapt, 
-                          maxIter = max_iter, relTol = rel_tol)
+                          maxIter = max_iter, relTol = rel_tol, absTol = abs_tol)
 }
