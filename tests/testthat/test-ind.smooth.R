@@ -20,3 +20,14 @@ test_that("ind.smooth.R == ind.smooth.cpp", {
     expect_equal(val.R, val.cpp)
   }
 })
+
+test_that("ind1.smooth.R == ind1.smooth.cpp", {
+  for(ii in 1:ntest) {
+    n <- sample(1:20,1)
+    x <- rnorm(n)
+    s <- sample(1:100,n)
+    val.R <- ind1.smooth_R(x,s)
+    val.cpp <- ind1.smooth(x,s)
+    expect_equal(val.R, val.cpp)
+  }
+})

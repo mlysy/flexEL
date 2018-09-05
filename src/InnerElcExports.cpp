@@ -160,11 +160,11 @@ double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
   return logel; 
 }
 
-// [[Rcpp::export(".ind.smooth")]]
-Eigen::VectorXd indSmooth(Eigen::VectorXd x, Eigen::VectorXd s) {
-  InnerELC<MeanRegModel> ILC;
-  return ILC.indSmooth(x,s);
-}
+// // [[Rcpp::export(".ind.smooth")]]
+// Eigen::VectorXd indSmooth(Eigen::VectorXd x, Eigen::VectorXd s) {
+//   InnerELC<MeanRegModel> ILC;
+//   return ILC.indSmooth(x,s);
+// }
 
 // [[Rcpp::export(".evalPsos.Smooth")]]
 double evalPsosSmooth(int ii, Eigen::VectorXd omegas, 

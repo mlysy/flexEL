@@ -18,20 +18,20 @@ logELgrad_R <- function(omegas, lambda, gradlist) {
 #'@param omegas is length-\code{nObs} vector
 #'@param gradmat is \code{nObs x p} matrix returned by gradMat
 #'@return value of the gradient of the logEL evaluated at theta
-logELCensgrad_R <- function(omegas, deltas, epsilons, lambda, gradlist, weights) {
-  epsOrd <- order(epsilons) # ascending order of epsilons
-  n <- length(omegas)
-  psos <- rep(0,n)
-  for (ii in 1:n) {
-    psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
-  }
-  # numerical stability: watch out for extremely small negative values
-  omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-  # omegas_ <- deltas*log(omegas)+(1-deltas)*log(psos)
-  grad <- sapply(gradlist, function(x) lambda %*% x)
-  # return(c(-grad %*% omegas_))
-  return(c(-grad %*% (weights*omegas)))
-}
+# logELCensgrad_R <- function(omegas, deltas, epsilons, lambda, gradlist, weights) {
+#   epsOrd <- order(epsilons) # ascending order of epsilons
+#   n <- length(omegas)
+#   psos <- rep(0,n)
+#   for (ii in 1:n) {
+#     psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+#   }
+#   # numerical stability: watch out for extremely small negative values
+#   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
+#   # omegas_ <- deltas*log(omegas)+(1-deltas)*log(psos)
+#   grad <- sapply(gradlist, function(x) lambda %*% x)
+#   # return(c(-grad %*% omegas_))
+#   return(c(-grad %*% (weights*omegas)))
+# }
 
 # ---- mr functions ----
 

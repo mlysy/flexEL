@@ -14,6 +14,7 @@ using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
 #include "MwgAdapt.h" // for adaptive mcmc
+#include "IndSmooth.h" // for smoothed indicator function
 // [[Rcpp::depends(RcppEigen)]]
 
 // main class begins here
@@ -124,7 +125,7 @@ public:
                            double *mwgSd, VectorXd &rvDoMcmc, bool *doAdapt, 
                            VectorXd &paccept);
   // smooth functions
-  VectorXd indSmooth(VectorXd x, VectorXd s);
+  // VectorXd indSmooth(VectorXd x, VectorXd s);
   double evalPsosSmooth(const int ii, const double s); // any way to test while set as private?
   double logELSmooth(const double s);
   void evalWeightsSmooth(const double s);
@@ -882,10 +883,10 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
 // smoothed indicator function 
 // Note: length of x and s must be the same, and s must be nonnegative to be consistent with
 // the original indicator function x <= 0.
-template<typename ELModel>
-inline VectorXd InnerELC<ELModel>::indSmooth(VectorXd x, VectorXd s) {
-  return(1.0/(1.0+(x.array()*s.array()).exp()));
-}
+// template<typename ELModel>
+// inline VectorXd InnerELC<ELModel>::indSmooth(VectorXd x, VectorXd s) {
+//   return(1.0/(1.0+(x.array()*s.array()).exp()));
+// }
 
 // returns partial sum of omegas according to the epsilons(jj) that are larger  
 //   than epsilons(ii)
@@ -895,7 +896,7 @@ template<typename ELModel>
 inline double InnerELC<ELModel>::evalPsosSmooth(const int ii, const double s) {
   // psos <- sum(ind.smooth_R(epsilons[ii]-epsilons,s)*omegas)
   VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-  return (indSmooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
+  return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
 }
 
 template<typename ELModel>
@@ -927,7 +928,7 @@ inline void InnerELC<ELModel>::evalWeightsSmooth(const double s) {
   }
   for (int jj=0; jj<nObs; jj++) {
     VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-    psots(jj) = ((1-deltas.array())*indSmooth(epsilons.array()-epsilons(jj),ss).array()*omegas(jj)/psoss.array()).sum();
+    psots(jj) = ((1-deltas.array())*ind_smooth(epsilons.array()-epsilons(jj),ss).array()*omegas(jj)/psoss.array()).sum();
   }
   weights = deltas.array()+psots.array();
 }

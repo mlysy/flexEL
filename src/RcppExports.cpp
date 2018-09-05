@@ -6,6 +6,30 @@
 
 using namespace Rcpp;
 
+// indSmooth
+Eigen::VectorXd indSmooth(Eigen::VectorXd x, Eigen::VectorXd s);
+RcppExport SEXP _bayesEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(indSmooth(x, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ind1Smooth
+Eigen::VectorXd ind1Smooth(Eigen::VectorXd x, Eigen::VectorXd s);
+RcppExport SEXP _bayesEL_ind1Smooth(SEXP xSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(ind1Smooth(x, s));
+    return rcpp_result_gen;
+END_RCPP
+}
 // evalEpsilonsLS
 Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
 RcppExport SEXP _bayesEL_evalEpsilonsLS(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
@@ -78,18 +102,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
     rcpp_result_gen = Rcpp::wrap(logELC(omegas, epsilons, deltas));
-    return rcpp_result_gen;
-END_RCPP
-}
-// indSmooth
-Eigen::VectorXd indSmooth(Eigen::VectorXd x, Eigen::VectorXd s);
-RcppExport SEXP _bayesEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(indSmooth(x, s));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -571,12 +583,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_bayesEL_indSmooth", (DL_FUNC) &_bayesEL_indSmooth, 2},
+    {"_bayesEL_ind1Smooth", (DL_FUNC) &_bayesEL_ind1Smooth, 2},
     {"_bayesEL_evalEpsilonsLS", (DL_FUNC) &_bayesEL_evalEpsilonsLS, 6},
     {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_omegaHatEM", (DL_FUNC) &_bayesEL_omegaHatEM, 8},
     {"_bayesEL_logELC", (DL_FUNC) &_bayesEL_logELC, 3},
-    {"_bayesEL_indSmooth", (DL_FUNC) &_bayesEL_indSmooth, 2},
     {"_bayesEL_evalPsosSmooth", (DL_FUNC) &_bayesEL_evalPsosSmooth, 4},
     {"_bayesEL_logELSmooth", (DL_FUNC) &_bayesEL_logELSmooth, 4},
     {"_bayesEL_evalWeightsSmooth", (DL_FUNC) &_bayesEL_evalWeightsSmooth, 4},
