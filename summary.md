@@ -24,11 +24,15 @@ Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`.
 
 ### Function Argument / Local Variable Names
 
-1. Names of data inputs are in English letters, if it is a matrix, its name is a single upper case letter, otherwise, it is a single lower case letter. E.g., `X`, `Z`, `y`. Exception: the vector of censoring indicators is currently called `deltas`.
+1. Names of data inputs are in English letters, if it is a matrix, its name is a single upper case letter, otherwise, it is a single lower case letter. E.g., `X`, `Z`, `y`, `G`. Exception: the vector of censoring indicators is currently called `deltas`, the residual vector is called `epsilons`. [TODO: call them `delta` and `eps`?]
 
-2. Names of model parameters are in greek letters, if it is a vector, currently it has an "s" at the end. E.g., `omegas`. [TODO: plan to change this to without "s"]
+2. Names of model parameters are in greek letters, if it is a vector, currently it has an "s" at the end. E.g., `omegas`. [TODO: call it `omega`?]
 
-3. Other local variable names are normally in lower case only, but if it is composed of multiple words, the name is in lower Camel Case. E.g., `thetaInit`, `relTol`.
+3. Names of dimension inputs are in lower case only. E.g., `nsamples`, `nburn`. [TODO: call it `nsamp`?]
+
+4. Names of precision control are in lower case with underscore. E.g., `max_iter`, `rel_tol`, and `abs_tol`. [TODO: in C++ code they are called `maxIter`, `relTol`, and `absTol`, make them the same?]
+
+5. Other local variable names are normally in lower case only, but if it is composed of multiple words, the name is in lower Camel Case. E.g., `thetaInit`, `relTol`, `mwgSd`, `rvDoMCMC`, `doAdapt`.
 
 ### List of Exported R Functions and Purposes
 
@@ -40,7 +44,7 @@ Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`.
 * evalEpsilons.R: a wraper function for evaluating the residuals (location model, location-scale model). [TODO: currently it is only for location-scale model.]
 * omega.hat.R: a wraper function to calculate the probability vector omega in a empirical likelihood setting (uncensored, censored). With censoring, an EM algorithm is used. 
 * omega.hat.EM.smooth.R: to calculate the probability vector omega using the smoothed version of censored empirical likelihood.
-* [mr,qr,mrls,qrls,mr_cens,qr_cens].post.R: regular MWG posterior samplers. [TODO: combine these into the post_adapt samplers with `doAdapt` argument set to false.]
+* [mr,qr,mrls,qrls,mr_cens,qr_cens].post.R: regular MWG posterior samplers. [TODO: combine these into the post_adapt samplers with `doAdapt` argument set to false.] [TODO: these qr models are able to take multiple quantile levels at the moment, remove this feature?]
 * [mr,qr,mrls,qrls,mr_cens,qr_cens,mrls_cens,qrls_cens].post_adapt.R: adaptive MWG posterior samplers.
 * [mr_cens,qrls_cens].neglogEL.smooth.R: smoothed censored empirical likeihood which can be directly used for optimization routine in R, such as `nlm` and `optim`. [TODO: other regression models.]
 * hlm.R: the HLM estimator by wang-et-al15 which works for censored data. 
