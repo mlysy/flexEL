@@ -28,13 +28,13 @@ Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`, `In
 
 1. Names of data inputs are in English letters, if it is a matrix, its name is a single upper case letter, otherwise, it is a single lower case letter. E.g., `X`, `Z`, `y`, `G`. Exception: the vector of censoring indicators is currently called `deltas`, the residual vector is called `epsilons`. [TODO: call them `delta` and `eps`?]
 
-2. Names of model parameters are in greek letters, if it is a vector, currently it has an "s" at the end. E.g., `omegas`. [TODO: call it `omega`?]
+2. Names of model parameters are in greek letters and lower Camel Case, if it is a vector, currently it has an "s" at the end. E.g., `betaInit`, `gammaInit`, `sig2Init`, `nuInit`, `alpha` and `omegas`. [TODO: rename `alpha` to `tau`?] [TODO: call it `omega`?] [TODO: qr.post takes multiple quantile values are in upper Camel Case, E.g., `BetaInit`]
 
 3. Names of dimension inputs are in lower case only. E.g., `nsamples`, `nburn`. [TODO: call it `nsamp`?]
 
 4. Names of precision control are in lower case with underscore. E.g., `max_iter`, `rel_tol`, and `abs_tol`. [TODO: in C++ code they are called `maxIter`, `relTol`, and `absTol`, make them the same?]
 
-5. Other local variable names are normally in lower case only, but if it is composed of multiple words, the name is in lower Camel Case. E.g., `thetaInit`, `relTol`, `mwgSd`, `rvDoMCMC`, `doAdapt`.
+5. Other local variable names are normally in lower case only, but if it is composed of multiple words, the name is in lower Camel Case. E.g., `thetaInit`, `relTol`, `mwgSd`, `rvDoMCMC`, `doAdapt`. [TODO: qr.post has argument `Sigs` which should be renamed to `mwgSd`.]
 
 ### List of Exported R Functions and Purposes
 
