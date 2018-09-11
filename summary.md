@@ -12,17 +12,19 @@ The template classes inherit from a base class, and the main functionalities inc
 
 ## Naming Conventions
 
-### Class Names
+### C++ Class Names
 
-Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`.
+Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`, `InnerELC`, `MeanRegModel`, and `QuantRegModel`.
 
-### Function Names
+### C++ Class Methods and Member Variable Names
 
-1. Functions as methods in a class are all in lower Camel Case. E.g., `evalG`.
+1. Functions in C++ as methods in a class are in lower Camel Case. E.g., `evalG`, `logEL`.
 
-2. Helper functions in separate header files are named with underscore joining words in lower case only. E.g., `ind_smooth`.
+2. Helper functions in C++ which are in separate header files are named with underscore joining words in lower case only. E.g., `ind_smooth`, `sort_inds`. [TODO: `logstar`, `logsharp` and related methods are not following this convention right now.]
 
-### Function Argument / Local Variable Names
+3. Member variables are in lower case or lower Camel Case if composed of multiple words. E.g., `weights`, `psots`, `nObs`, `nEqs`.
+
+### R Function Argument / Local Variable Names
 
 1. Names of data inputs are in English letters, if it is a matrix, its name is a single upper case letter, otherwise, it is a single lower case letter. E.g., `X`, `Z`, `y`, `G`. Exception: the vector of censoring indicators is currently called `deltas`, the residual vector is called `epsilons`. [TODO: call them `delta` and `eps`?]
 
