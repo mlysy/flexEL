@@ -29,7 +29,7 @@
     .Call(`_bayesEL_logELC`, omegas, epsilons, deltas)
 }
 
-.evalPsos.Smooth <- function(ii, omegas, epsilons, s) {
+.evalPsos.smooth <- function(ii, omegas, epsilons, s) {
     .Call(`_bayesEL_evalPsosSmooth`, ii, omegas, epsilons, s)
 }
 
@@ -101,6 +101,10 @@
     .Call(`_bayesEL_QuantRegLS_evalG`, y, X, Z, alphaArr, beta, gamma, sig2, Nu)
 }
 
+.QuantRegLS_evalGSmooth <- function(y, X, Z, alphaArr, beta, gamma, sig2, Nu, s) {
+    .Call(`_bayesEL_QuantRegLS_evalGSmooth`, y, X, Z, alphaArr, beta, gamma, sig2, Nu, s)
+}
+
 .QuantReg_post <- function(y, X, alphaArr, nsamples, nburn, BetaInit, MwgSds, RvDoMcmc, maxIter = 100L, relTol = 1e-7) {
     .Call(`_bayesEL_QuantReg_post`, y, X, alphaArr, nsamples, nburn, BetaInit, MwgSds, RvDoMcmc, maxIter, relTol)
 }
@@ -127,5 +131,9 @@
 
 .QuantRegCensLS_post_adapt <- function(omegasInit, y, X, Z, deltas, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, maxIter = 100L, relTol = 1e-7, absTol = 1e-3) {
     .Call(`_bayesEL_QuantRegCensLS_post_adapt`, omegasInit, y, X, Z, deltas, alphaArr, nsamples, nburn, betaInit, gammaInit, sig2Init, nuInit, mwgSd, rvDoMcmc, doAdapt, maxIter, relTol, absTol)
+}
+
+.rho1.smooth <- function(u, alpha, s) {
+    .Call(`_bayesEL_rho1Smooth`, u, alpha, s)
 }
 

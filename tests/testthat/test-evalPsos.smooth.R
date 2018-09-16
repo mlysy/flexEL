@@ -15,7 +15,7 @@ test_that("evalPsos.R == evalPsos.cpp", {
     omegas <- omegas/sum(omegas)
     epsilons <- rnorm(n)
     ii <- sample(1:n,1)
-    val.cpp <- evalPsos.smooth(ii,omegas,epsilons,s)
+    val.cpp <- .evalPsos.smooth(ii,omegas,epsilons,s)
     val.R <- evalPsos.smooth_R(ii,omegas,epsilons,s)
     expect_equal(val.R, val.cpp)
   }

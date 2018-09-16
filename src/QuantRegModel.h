@@ -36,13 +36,16 @@ public:
              const Ref<const VectorXd>& gamma,
              const double& sig2, // sig2 should be a scalar
              const Ref<const VectorXd>& Nu);
-  // void evalGSmooth(const Ref<const VectorXd>& beta,
-  //                  const Ref<const VectorXd>& gamma,
-  //                  const double& sig2, // sig2 should be a scalar
-  //                  const Ref<const VectorXd>& Nu,
-  //                  const double s);
+  void evalGSmooth(const Ref<const VectorXd>& beta,
+                   const Ref<const VectorXd>& gamma,
+                   const double& sig2, // sig2 should be a scalar
+                   const Ref<const VectorXd>& Nu,
+                   const double s);
   void setG(const Ref<const MatrixXd>& _G); 
   MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
+  // smooth functions
+  // double rho_alpha_smooth(double u, double alpha);
+  double phi_alpha_smooth(double u, double alpha, double s); 
 };
 
 /*
@@ -120,6 +123,11 @@ inline double QuantRegModel::phi_alpha(double u, double alpha) {
     return((u <= 0) - alpha);
 }
 
+// 1st derivative of rho_alpha_smooth
+inline double QuantRegModel::phi_alpha_smooth(double u, double alpha, double s) {
+  return(alpha-ind_smooth(u,s)-u*ind1_smooth(u,s));
+}
+
 /*
 // single quantile case (location model)
 inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
@@ -169,49 +177,38 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta,
   G = tG.transpose();
 }
 
-// qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
-//   nObs <- nrow(X)
-//   nBeta <- length(beta)
-//   nGamma <- length(gamma)
-//   G <- matrix(NaN, nObs, nBeta + nGamma + 2)
-//   eZg <- c(exp(-Z %*% gamma)) # e^{-z'gamma}
-//   yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
-// yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
-// G[,1:nBeta] <- yXbeZg * eZg * X
-// G[,nBeta+1:nGamma] <- yXbeZg2 * Z
-// G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
-// G[,nBeta+nGamma+2] <- rho1.smooth_R(yXbeZg/sqrt(sig2)-nu, tau, s)
-//   return(G)
-// }
 
-// inline void QuantRegModel::evalGSmooth(const Ref<const VectorXd>& beta,
-//                                        const Ref<const VectorXd>& gamma,
-//                                        const double& sig2,
-//                                        const Ref<const VectorXd>& Nu,
-//                                        const double s) {
-//   // std::cout << "nQts = " << nQts << std::endl;
-//   // TODO: warning if negative sig2?
-//   if (sig2 < 0) std::cout << "qrls.evalG: negative variance." << std::endl;
-//   eZg.array() = (-gamma.transpose()*Z).array().exp();
-//   yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
-//   yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
-//   // 1st deriv w.r.t beta
-//   tG.block(0,0,nObs,nBet) = X.transpose();
-//   tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
-//   // 1st deriv w.r.t gamma
-//   tG.block(0,nBet,nObs,nGam) = Z.transpose();
-//   tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
-//   // variance param
-//   tG.block(0,nBet+nGam,nObs,1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
-//   // std::cout << "tG = \n" << tG << std::endl;
-//   // quantile param(s)
-//   for (int ii=0; ii<nObs; ii++) {
-//     for (int jj=0; jj<nQts; jj++) {
-//       tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_alpha(yXbeZg(ii)/sqrt(sig2)-Nu(jj), alpha[jj]);
-//     }
-//   }
-//   G = tG.transpose();
-// }
+inline void QuantRegModel::evalGSmooth(const Ref<const VectorXd>& beta,
+                                       const Ref<const VectorXd>& gamma,
+                                       const double& sig2,
+                                       const Ref<const VectorXd>& Nu,
+                                       const double s) {
+  // std::cout << "nBet = " << nBet << std::endl;
+  // std::cout << "nGam = " << nGam << std::endl;
+  // std::cout << "nrow = " << G.rows() << std::endl;
+  // std::cout << "ncol = " << G.cols() << std::endl;
+  // TODO: warning if negative sig2?
+  if (sig2 < 0) std::cout << "qrls.evalG: negative variance." << std::endl;
+  eZg.array() = (-gamma.transpose()*Z).array().exp();
+  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
+  yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
+  // 1st deriv w.r.t beta
+  tG.block(0,0,nObs,nBet) = X.transpose();
+  tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
+  // 1st deriv w.r.t gamma
+  tG.block(0,nBet,nObs,nGam) = Z.transpose();
+  tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  // variance param
+  tG.block(0,nBet+nGam,nObs,1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
+  // std::cout << "tG = \n" << tG << std::endl;
+  // quantile param(s)
+  for (int ii=0; ii<nObs; ii++) {
+    for (int jj=0; jj<nQts; jj++) {
+      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_alpha_smooth(yXbeZg(ii)/sqrt(sig2)-Nu(jj),alpha[jj],s);
+    }
+  }
+  G = tG.transpose();
+}
 
 
 // set function for G matrix

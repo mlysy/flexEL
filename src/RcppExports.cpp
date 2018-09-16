@@ -7,25 +7,25 @@
 using namespace Rcpp;
 
 // indSmooth
-Eigen::VectorXd indSmooth(Eigen::VectorXd x, Eigen::VectorXd s);
+double indSmooth(double x, double s);
 RcppExport SEXP _bayesEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
     rcpp_result_gen = Rcpp::wrap(indSmooth(x, s));
     return rcpp_result_gen;
 END_RCPP
 }
 // ind1Smooth
-Eigen::VectorXd ind1Smooth(Eigen::VectorXd x, Eigen::VectorXd s);
+double ind1Smooth(double x, double s);
 RcppExport SEXP _bayesEL_ind1Smooth(SEXP xSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
     rcpp_result_gen = Rcpp::wrap(ind1Smooth(x, s));
     return rcpp_result_gen;
 END_RCPP
@@ -418,6 +418,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// QuantRegLS_evalGSmooth
+Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd alphaArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s);
+RcppExport SEXP _bayesEL_QuantRegLS_evalGSmooth(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP alphaArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type alphaArr(alphaArrSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type Nu(NuSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalGSmooth(y, X, Z, alphaArr, beta, gamma, sig2, Nu, s));
+    return rcpp_result_gen;
+END_RCPP
+}
 // QuantReg_post
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd alphaArr, int nsamples, int nburn, Eigen::MatrixXd BetaInit, Eigen::MatrixXd MwgSds, Eigen::MatrixXd RvDoMcmc, int maxIter, double relTol);
 RcppExport SEXP _bayesEL_QuantReg_post(SEXP ySEXP, SEXP XSEXP, SEXP alphaArrSEXP, SEXP nsamplesSEXP, SEXP nburnSEXP, SEXP BetaInitSEXP, SEXP MwgSdsSEXP, SEXP RvDoMcmcSEXP, SEXP maxIterSEXP, SEXP relTolSEXP) {
@@ -581,6 +600,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rho1Smooth
+double rho1Smooth(double u, double alpha, double s);
+RcppExport SEXP _bayesEL_rho1Smooth(SEXP uSEXP, SEXP alphaSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type u(uSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(rho1Smooth(u, alpha, s));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_indSmooth", (DL_FUNC) &_bayesEL_indSmooth, 2},
@@ -608,6 +640,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_MeanRegCensLS_post_adapt", (DL_FUNC) &_bayesEL_MeanRegCensLS_post_adapt, 16},
     {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},
     {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 8},
+    {"_bayesEL_QuantRegLS_evalGSmooth", (DL_FUNC) &_bayesEL_QuantRegLS_evalGSmooth, 9},
     {"_bayesEL_QuantReg_post", (DL_FUNC) &_bayesEL_QuantReg_post, 10},
     {"_bayesEL_QuantReg_post_adapt", (DL_FUNC) &_bayesEL_QuantReg_post_adapt, 10},
     {"_bayesEL_QuantRegLS_post", (DL_FUNC) &_bayesEL_QuantRegLS_post, 14},
@@ -615,6 +648,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_QuantRegCens_post", (DL_FUNC) &_bayesEL_QuantRegCens_post, 13},
     {"_bayesEL_QuantRegCens_post_adapt", (DL_FUNC) &_bayesEL_QuantRegCens_post_adapt, 14},
     {"_bayesEL_QuantRegCensLS_post_adapt", (DL_FUNC) &_bayesEL_QuantRegCensLS_post_adapt, 18},
+    {"_bayesEL_rho1Smooth", (DL_FUNC) &_bayesEL_rho1Smooth, 3},
     {NULL, NULL, 0}
 };
 

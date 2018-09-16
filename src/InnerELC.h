@@ -895,8 +895,13 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
 template<typename ELModel>
 inline double InnerELC<ELModel>::evalPsosSmooth(const int ii, const double s) {
   // psos <- sum(ind.smooth_R(epsilons[ii]-epsilons,s)*omegas)
-  VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-  return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
+  double psos_smooth = 0;
+  for (int jj=0; jj<nObs; jj++) {
+    psos_smooth += ind_smooth(epsilons(ii)-epsilons(jj),s)*omegas(jj);
+  }
+  return(psos_smooth);
+  // VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
+  // return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
 }
 
 template<typename ELModel>
@@ -926,9 +931,14 @@ inline void InnerELC<ELModel>::evalWeightsSmooth(const double s) {
   for (int ii=0; ii<nObs; ii++) {
     psoss(ii) = evalPsosSmooth(ii,s);
   }
+  // for (int jj=0; jj<nObs; jj++) {
+  //   VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
+  //   psots(jj) = ((1-deltas.array())*ind_smooth(epsilons.array()-epsilons(jj),ss).array()*omegas(jj)/psoss.array()).sum();
+  // }
   for (int jj=0; jj<nObs; jj++) {
-    VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-    psots(jj) = ((1-deltas.array())*ind_smooth(epsilons.array()-epsilons(jj),ss).array()*omegas(jj)/psoss.array()).sum();
+    for (int kk=0; kk<nObs; kk++) {
+      psots(jj) += (1-deltas(kk))*ind_smooth(epsilons(kk)-epsilons(jj),s)*omegas(jj)/psoss(kk);
+    }
   }
   weights = deltas.array()+psots.array();
 }

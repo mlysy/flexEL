@@ -12,22 +12,20 @@ ntest <- 50
 
 test_that("ind.smooth.R == ind.smooth.cpp", {
   for(ii in 1:ntest) {
-    n <- sample(1:20,1)
-    x <- rnorm(n)
-    s <- sample(1:100,n)
+    x <- rnorm(1)
+    s <- sample(1:100,1)
     val.R <- ind.smooth_R(x,s)
-    val.cpp <- ind.smooth(x,s)
+    val.cpp <- .ind.smooth(x,s)
     expect_equal(val.R, val.cpp)
   }
 })
 
 test_that("ind1.smooth.R == ind1.smooth.cpp", {
   for(ii in 1:ntest) {
-    n <- sample(1:20,1)
-    x <- rnorm(n)
-    s <- sample(1:100,n)
+    x <- rnorm(1)
+    s <- sample(1:100,1)
     val.R <- ind1.smooth_R(x,s)
-    val.cpp <- ind1.smooth(x,s)
+    val.cpp <- .ind1.smooth(x,s)
     expect_equal(val.R, val.cpp)
   }
 })

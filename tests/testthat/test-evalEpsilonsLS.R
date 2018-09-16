@@ -5,7 +5,7 @@ source("el-rfuns.R")
 source("el-model.R")
 
 # library(testthat) # not loaded automatically
-context("evalEpsilons")
+context("evalEpsilonsLS")
 
 ntest <- 50
 test_that("epsilons.R == epsilons.cpp", {
@@ -19,7 +19,8 @@ test_that("epsilons.R == epsilons.cpp", {
     X <- matrix(rnorm(nObs*nBet),nObs,nBet)
     Z <- matrix(rnorm(nObs*nGam),nObs,nGam)
     y <- rnorm(nObs)
-    epsilons.cpp <- evalEpsilonsLS(y,X,Z,beta,gamma,sig2)
+    epsilons.cpp <- .evalEpsilonsLS(y,t(X),t(Z),beta,gamma,sig2)
     epsilons.R <- c(evalEpsilonsLS_R(y,X,Z,beta,gamma,sig2))
+    expect_equal(epsilons.cpp, epsilons.R)
   }
 })

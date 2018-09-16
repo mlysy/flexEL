@@ -226,6 +226,7 @@ omega.smooth.pcheck <- function(x, omegas, G, deltas, epsilons,idx0, s=10) {
 
 # sandwich estimator for convariance matrix
 library(numDeriv)
+# f_{ii} for mr_cens
 # ss is s here, just s seems to be a param in grad so changed the name
 mr_cens.logELii.smooth_R <- function(theta, y, X, deltas, ii, ss=10) {
   nObs <- nrow(X)

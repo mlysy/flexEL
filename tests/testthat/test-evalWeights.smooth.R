@@ -17,7 +17,7 @@ test_that("evalPsos.R == evalPsos.cpp", {
     deltas <- rep(1,n)
     numcens <- sample(1:round(n/2),1)
     deltas[sample(1:n,numcens)] <- 0
-    val.cpp <- evalWeights.smooth(deltas,omegas,epsilons,s)
+    val.cpp <- .evalWeights.smooth(deltas,omegas,epsilons,s)
     val.R <- evalWeights.smooth_R(deltas,omegas,epsilons,s)
     expect_equal(val.R, val.cpp)
   }
