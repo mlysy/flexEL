@@ -9,7 +9,7 @@
 #' @return Length-\code{nEq} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/nObs if did not converge.
 #' @details The inner-loop optimization of EL is ...
 #' @export omega.hat.EM.smooth
-omega.hat.EM.smooth <- function(G, deltas, epsilons, s=10, max_iter = 100, 
+omega.hat.EM.smooth <- function(G, deltas, epsilons, sp=10, max_iter = 100, 
                                 rel_tol = 1e-5, abs_tol = 1e-3, verbose = FALSE) {
   # Note: inital omegas obtained from non-censored optimization
   lambda <- .lambdaNR(t(G), maxIter = 100, relTol = rel_tol, verbose = verbose)
@@ -19,6 +19,6 @@ omega.hat.EM.smooth <- function(G, deltas, epsilons, s=10, max_iter = 100,
     return(rep(NaN,length(deltas)))
   }
   omegahat <- .omega.hat.EM.smooth(omegasInit, t(G), deltas, epsilons,
-                                   s, max_iter, rel_tol, abs_tol, verbose)
+                                   sp, max_iter, rel_tol, abs_tol, verbose)
   return(omegahat)
 }

@@ -4,7 +4,7 @@
 \alias{omega.hat.EM.smooth}
 \title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.}
 \usage{
-omega.hat.EM.smooth(G, deltas, epsilons, s = 10, max_iter = 100,
+omega.hat.EM.smooth(G, deltas, epsilons, sp = 10, max_iter = 100,
   rel_tol = 1e-05, abs_tol = 0.001, verbose = FALSE)
 }
 \arguments{

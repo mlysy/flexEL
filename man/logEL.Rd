@@ -4,14 +4,14 @@
 \alias{logEL}
 \title{log empirical likelihood}
 \usage{
-logEL(omegas, epsilons, deltas)
+logEL(omega, eps, delta)
 }
 \arguments{
-\item{omegas}{\code{nObs} vector of empirical distribution.}
+\item{omega}{Length-\code{nObs} probability vector.}
 
-\item{epsilons}{\code{nObs} vector of residuals.}
+\item{eps}{Length-\code{nObs} vector of residuals.}
 
-\item{deltas}{\code{nObs} vector of censoring indicators.}
+\item{delta}{Length-\code{nObs} vector of censoring indicators.}
 }
 \value{
 Log empirical likelihood of the input beta

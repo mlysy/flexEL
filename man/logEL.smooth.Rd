@@ -4,15 +4,17 @@
 \alias{logEL.smooth}
 \title{Calculate the smoothed log empirical likelihood under censoring}
 \usage{
-logEL.smooth(omegas, epsilons, deltas, s = 10)
+logEL.smooth(omega, eps, deltas, sp = 10)
 }
 \arguments{
-\item{omegas}{Vector of probability weights}
+\item{omega}{Length-\code{nObs} probability vector.}
 
-\item{epsilons}{Vector of residuals.}
+\item{eps}{Length-\code{nObs} vector of residuals.}
+
+\item{sp}{Positive scalar as smoothing parameter.}
 }
 \value{
-A scalar of log empirical likelihood
+Smoothed log empirical likelihood (a scalar).
 }
 \description{
 Calculate the smoothed log empirical likelihood under censoring

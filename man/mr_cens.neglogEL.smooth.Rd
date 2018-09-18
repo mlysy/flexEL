@@ -4,17 +4,21 @@
 \alias{mr_cens.neglogEL.smooth}
 \title{Calculate the negative log EL with smoothing for mean regression under censoring}
 \usage{
-mr_cens.neglogEL.smooth(y, X, deltas, beta, s = 10)
+mr_cens.neglogEL.smooth(y, X, delta, beta, sp = 10)
 }
 \arguments{
-\item{omegas}{Vector of probability weights}
+\item{y}{Length-\code{nObs} vector of responses.}
 
-\item{epsilons}{Vector of residuals.}
+\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
 
-\item{ii}{An integer indicator between 1 and the length of omegas/epsilons.}
+\item{delta}{Length-\code{nObs} vector of censoring indicators.}
+
+\item{beta}{Length-\code{nBet} vector of coefficients in mean regression model.}
+
+\item{sp}{Positive scalar as smoothing parameter.}
 }
 \value{
-Partial sum of omegas according to residuals that are no larger than the ii-th residual.
+Scalar of negative smoothed log EL.
 }
 \description{
 Calculate the negative log EL with smoothing for mean regression under censoring

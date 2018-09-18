@@ -6,7 +6,7 @@
 #' @return Partial sum of omegas according to residuals that are no larger than the ii-th residual.
 #' @details ...
 #' @export qrls_cens.neglogEL.smooth
-qrls_cens.neglogEL.smooth <- function(y, X, Z, deltas, tau, theta, s=10) {
+qrls_cens.neglogEL.smooth <- function(y, X, Z, deltas, tau, theta, sp=10) {
   nBet <- ncol(X)
   nGam <- ncol(Z)
   beta <- theta[1:nBet]
@@ -14,10 +14,10 @@ qrls_cens.neglogEL.smooth <- function(y, X, Z, deltas, tau, theta, s=10) {
   sig2 <- theta[nBet+nGam+1]
   if (sig2 < 0) return(Inf)
   nu <- theta[nBet+nGam+2]
-  G <- qrls.evalG.smooth(y, X, Z, tau, beta, gamma, sig2, nu, s)
+  G <- qrls.evalG.smooth(y, X, Z, tau, beta, gamma, sig2, nu, sp)
   if (anyNA(G)) return(Inf)
   epsilons <- evalEpsilonsLS(y,X,Z,beta,gamma,sig2)
-  omegas <- omega.hat.EM.smooth(G,deltas,epsilons,s)
+  omegas <- omega.hat.EM.smooth(G,deltas,epsilons,sp)
   if (!anyNA(omegas)) {
     res <- -logEL.smooth(omegas,epsilons,deltas)
     # gradlist <- mr.deltaG_R(y, X, beta)

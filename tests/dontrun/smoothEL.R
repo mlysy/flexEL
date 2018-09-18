@@ -224,36 +224,51 @@ omega.smooth.pcheck <- function(x, omegas, G, deltas, epsilons,idx0, s=10) {
   }
 }
 
-# sandwich estimator for convariance matrix
-library(numDeriv)
-# f_{ii} for mr_cens
-# ss is s here, just s seems to be a param in grad so changed the name
-mr_cens.logELii.smooth_R <- function(theta, y, X, deltas, ii, ss=10) {
-  nObs <- nrow(X)
-  nEqs <- ncol(X)
-  G <- mr.evalG(y,X,theta)
-  epsilons <- evalEpsilons_R(y,X,theta)
-  oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,ss)
-  qs <- oout$weights
-  lambda <- oout$lambda
-  if (deltas[ii]) {
-    return(log(qs[ii]/(n+G[ii,] %*% lambda)))
-  }
-  else {
-    denom <- c(n + G %*% lambda)
-    return(sum(ind.smooth_R(epsilons[ii]-epsilons,ss)*qs/(denom)))
-  }
-}
+# # sandwich estimator for convariance matrix
+# library(numDeriv)
+# # f_{ii} for mr_cens
+# # ss is s here, just s seems to be a param in grad so changed the name
+# mr_cens.logELii.smooth_R <- function(theta, y, X, deltas, ii, ss=10) {
+#   nObs <- nrow(X)
+#   nEqs <- ncol(X)
+#   G <- mr.evalG(y,X,theta)
+#   epsilons <- evalEpsilons_R(y,X,theta)
+#   oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,ss)
+#   qs <- oout$weights
+#   lambda <- oout$lambda
+#   if (deltas[ii]) {
+#     return(log(qs[ii]/(n+G[ii,] %*% lambda)))
+#   }
+#   else {
+#     denom <- c(n + G %*% lambda)
+#     return(sum(ind.smooth_R(epsilons[ii]-epsilons,ss)*qs/(denom)))
+#   }
+# }
+# 
+# mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, s=10) {
+#   nObs <- nrow(X)
+#   nEqs <- ncol(X)
+#   A <- hessian(function(b) {-mr_cens.neglogEL.smooth_R(y, X, deltas, b, s)}, x=beta.hat)
+#   B <- matrix(0,nrow=nEqs,ncol=nEqs)
+#   for (ii in 1:nObs) {
+#     gii <- grad(mr_cens.logELii.smooth_R, x=beta.hat, y=y, X=X, deltas=deltas, ii=ii, ss=s)
+#     B <- B + tcrossprod(gii,gii)
+#   }
+#   Ainv <- solve(A)
+#   return(Ainv %*% B %*% Ainv)
+# }
 
 mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, s=10) {
   nObs <- nrow(X)
   nEqs <- ncol(X)
-  A <- hessian(function(b) {-mr_cens.neglogEL.smooth_R(y, X, deltas, b, s)}, x=beta.hat)
-  B <- matrix(0,nrow=nEqs,ncol=nEqs)
-  for (ii in 1:nObs) {
-    gii <- grad(mr_cens.logELii.smooth_R, x=beta.hat, y=y, X=X, deltas=deltas, ii=ii, ss=s)
-    B <- B + tcrossprod(gii,gii)
-  }
+  A <- hessian(function(b) {-mr_cens.neglogEL.smooth(y, X, deltas, b, s)}, x=beta.hat)
+  # TODO: resample data for A as well or only for B?
+  inds <- sample(nObs,replace = TRUE)
+  X <- X[inds,]
+  y <- y[inds]
+  deltas <- deltas[inds]
+  B <- grad(mr_cens.neglogEL.smooth, x=beta.hat, y=y, X=X, delta=deltas, sp=s)
+  B <- tcrossprod(B,B)
   Ainv <- solve(A)
   return(Ainv %*% B %*% Ainv)
 }

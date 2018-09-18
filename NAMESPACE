@@ -3,6 +3,7 @@
 export(hlm)
 export(hlm_loglik)
 export(lambdaNR)
+export(lambdaNR_cens)
 export(logEL)
 export(logEL.smooth)
 export(mr.evalG)

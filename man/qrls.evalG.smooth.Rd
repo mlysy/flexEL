@@ -4,7 +4,7 @@
 \alias{qrls.evalG.smooth}
 \title{Evaluate the G matrix for smoothed quantile regression location-scale model}
 \usage{
-qrls.evalG.smooth(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, s)
+qrls.evalG.smooth(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}

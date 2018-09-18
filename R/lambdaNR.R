@@ -1,20 +1,14 @@
-#' Solve the inner loop optimization of an EL function.
+#' Solve the inner loop optimization of an EL function
 #'
-#' @param G \code{nObs x nEqns} matrix of constraints.
-#' @param weights Optional length-\code{nObs} vector of weights for weighted Newton-Raphson algorithm.
-#' @param max_iter Maximum number of Newton-Raphson steps.
-#' @param rel_tol Relative tolerance of Newton-Raphson convergence.
-#' @param verbose Display number of steps and tolerance criterion when algorithm terminates.
+#' @template args-G
+#' @template args-max_iter
+#' @template args-rel_tol
+#' @template args-verbose
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
-#' @export
-lambdaNR <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
-  if (missing(weights)) {
-    lambda <- .lambdaNR(G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
-  }
-  else {
-    lambda <- .lambdaNRC(G = t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = verbose)
-  }
+#' @export lambdaNR
+lambdaNR <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
+  lambda <- .lambdaNR(G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
   return(lambda)
 }
 

@@ -4,32 +4,32 @@
 \alias{mr_cens.post_adapt}
 \title{Posterior sampler for mean regression (location model)}
 \usage{
-mr_cens.post_adapt(y, X, deltas, nsamples, nburn, betaInit, mwgSd, rvDoMcmc,
-  DoAdapt, max_iter = 100, rel_tol = 1e-07, abs_tol = 0.001)
+mr_cens.post_adapt(y, X, delta, nsamp, nburn, betaInit, mwgSd, doMcmc, DoAdapt,
+  max_iter = 100, rel_tol = 1e-07, abs_tol = 0.001)
 }
 \arguments{
-\item{y}{Length-\code{nObs} vector of response values.}
+\item{y}{Length-\code{nObs} vector of responses.}
 
-\item{X}{\code{nObs x nEqs} matrix of constraints.}
+\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
 
-\item{deltas}{Length-\code{nObs} vector of censoring indicators.}
+\item{delta}{Length-\code{nObs} vector of censoring indicators.}
 
-\item{nsamples}{Number of samples to obtain.}
+\item{nsamp}{Positive integer of number of samples to obtain.}
 
-\item{nburn}{number of samples to discard before saving the chain.}
+\item{nburn}{Number of iterations to discard before saving the samples.}
 
-\item{betaInit}{\code{nEqs} vector of initial value for the chain.}
+\item{betaInit}{Length-\code{nEqs} vector of initial values for beta.}
 
-\item{mwgSd}{Length-\code{nObs} vector of tuning parameters.}
+\item{mwgSd}{Length-\code{nEqs} vector of tuning parameters for the Metropolis-Within-Gibbs sampler.}
 
-\item{rvDoMcmc}{Length-\code{nEqs} vector of 1 and 0s, where 1 indicates to update the corresponding entry of beta.}
+\item{doMcmc}{Length-\code{nEqs} vector of 1 and 0s, where 1 indicates to update the corresponding entry of beta.}
 
-\item{max_iter}{Maximum number of Newton-Raphson steps.}
+\item{max_iter}{Integer scalar for maximum number of Newton-Raphson steps.}
 
-\item{rel_tol}{Relative tolerance of Newton-Raphson convergence.}
+\item{rel_tol}{Positive scalar for relative tolerance of Newton-Raphson steps.}
 }
 \value{
-\code{nEqs x nsamples} matrix of Markov Chain.
+\code{nEqs x nsamp} matrix of posterior samples.
 }
 \description{
 Posterior sampler for mean regression (location model)

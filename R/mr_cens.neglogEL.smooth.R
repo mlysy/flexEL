@@ -1,17 +1,19 @@
 #' Calculate the negative log EL with smoothing for mean regression under censoring
 #'
-#' @param omegas Vector of probability weights
-#' @param epsilons Vector of residuals.
-#' @param ii An integer indicator between 1 and the length of omegas/epsilons.
-#' @return Partial sum of omegas according to residuals that are no larger than the ii-th residual.
+#' @template args-y
+#' @template args-X
+#' @template args-delta
+#' @param beta Length-\code{nBet} vector of coefficients in mean regression model.
+#' @template args-sp
+#' @return Scalar of negative smoothed log EL.
 #' @details ...
 #' @export mr_cens.neglogEL.smooth
-mr_cens.neglogEL.smooth <- function(y, X, deltas, beta, s=10) {
+mr_cens.neglogEL.smooth <- function(y, X, delta, beta, sp=10) {
   G <- mr.evalG(y, X, beta)
-  epsilons <- evalEpsilons(y,X,beta)
-  omegas <- omega.hat.EM.smooth(G,deltas,epsilons,s)
+  eps <- c(y-X%*%beta)
+  omegas <- omega.hat.EM.smooth(G,delta,eps,sp)
   if (!anyNA(omegas)) {
-    res <- -logEL.smooth(omegas,epsilons,deltas)
+    res <- -logEL.smooth(omegas,eps,delta)
     # gradlist <- mr.deltaG_R(y, X, beta)
     # grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
     # attr(res, "gradient") <- grad

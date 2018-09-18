@@ -1,17 +1,17 @@
 #' log empirical likelihood
 #'
-#' @param omegas \code{nObs} vector of empirical distribution.
-#' @param epsilons \code{nObs} vector of residuals. 
-#' @param deltas \code{nObs} vector of censoring indicators. 
+#' @template args-omega
+#' @template args-eps
+#' @template args-delta
 #' @return Log empirical likelihood of the input beta
 #' @details ...
-#' @export
-logEL <- function(omegas, epsilons, deltas) {
-  if (missing(epsilons) && missing(deltas)) {
-    logel <- .logEL(omegas)
+#' @export logEL
+logEL <- function(omega, eps, delta) {
+  if (missing(eps) && missing(delta)) {
+    logel <- .logEL(omega)
   }
   else {
-    logel <- .logELC(omegas,epsilons,deltas)
+    logel <- .logELC(omega,eps,delta)
   }
   return(logel)
 }

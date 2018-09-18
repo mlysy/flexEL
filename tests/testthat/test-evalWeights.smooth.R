@@ -1,6 +1,7 @@
 # ---- testing R and C++ implementations of evalWeights.smooth are equal ----
 
 source("../dontrun/smoothEL.R")
+source("../dontrun/mode-functions.R")
 
 # library(testthat) # not loaded automatically
 context("evalWeights.smooth")

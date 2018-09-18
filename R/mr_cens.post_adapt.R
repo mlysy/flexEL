@@ -1,20 +1,20 @@
 #' Posterior sampler for mean regression (location model)
 #' 
-#' @param y Length-\code{nObs} vector of response values.
-#' @param X \code{nObs x nEqs} matrix of constraints.
-#' @param deltas Length-\code{nObs} vector of censoring indicators.
-#' @param nsamples Number of samples to obtain.
-#' @param nburn number of samples to discard before saving the chain.
-#' @param betaInit \code{nEqs} vector of initial value for the chain.
-#' @param mwgSd Length-\code{nObs} vector of tuning parameters. 
-#' @param rvDoMcmc Length-\code{nEqs} vector of 1 and 0s, where 1 indicates to update the corresponding entry of beta.
-#' @param max_iter Maximum number of Newton-Raphson steps.
-#' @param rel_tol Relative tolerance of Newton-Raphson convergence.
-#' @return \code{nEqs x nsamples} matrix of Markov Chain.
+#' @template args-y
+#' @template args-X
+#' @template args-delta
+#' @template args-nsamp
+#' @template args-nburn
+#' @template args-betaInit
+#' @template args-mwgSd
+#' @template args-doMcmc
+#' @template args-max_iter
+#' @template args-rel_tol
+#' @return \code{nEqs x nsamp} matrix of posterior samples.
 #' @details ...
 #' @export mr_cens.post_adapt
-mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit, 
-                               mwgSd, rvDoMcmc, DoAdapt, 
+mr_cens.post_adapt <- function(y, X, delta, nsamp, nburn, betaInit, 
+                               mwgSd, doMcmc, DoAdapt, 
                                max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3) {
   # # input conversion
   # if (is.vector(BetaInit)) BetaInit <- matrix(BetaInit,length(BetaInit),1)
@@ -36,9 +36,9 @@ mr_cens.post_adapt <- function(y, X, deltas, nsamples, nburn, betaInit,
   if (anyNA(omegasInit)) {
     stop("Initial omegas are nans.")
   }
-  if (missing(rvDoMcmc)) rvDoMcmc <- rep(1,length(betaInit))
+  if (missing(doMcmc)) doMcmc <- rep(1,length(betaInit))
   if (missing(DoAdapt)) DoAdapt <- rep(1,length(betaInit))
-  .MeanRegCens_post_adapt(omegasInit, y, t(X), deltas, nsamples, nburn, betaInit, 
-                          mwgSd, rvDoMcmc, DoAdapt, 
+  .MeanRegCens_post_adapt(omegasInit, y, t(X), delta, nsamp, nburn, betaInit, 
+                          mwgSd, doMcmc, DoAdapt, 
                           maxIter = max_iter, relTol = rel_tol, absTol = abs_tol)
 }

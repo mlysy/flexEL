@@ -4,7 +4,7 @@
 \alias{qrls_cens.neglogEL.smooth}
 \title{Calculate the negative log EL with smoothing for quantile regression location-scale model under censoring}
 \usage{
-qrls_cens.neglogEL.smooth(y, X, Z, deltas, tau, theta, s = 10)
+qrls_cens.neglogEL.smooth(y, X, Z, deltas, tau, theta, sp = 10)
 }
 \arguments{
 \item{omegas}{Vector of probability weights}
