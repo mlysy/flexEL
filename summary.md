@@ -8,13 +8,13 @@ The base classes correspond to the specific regression models, currently include
 
 ### Template Classes
 
-The template classes inherit from a base class, and the main functionalities include a Newton-Raphson solver, evaluating log empirical likeihood, and posterior samplers. Currently the template classes include one for uncensored data (`InnerEL`) and one for censored data (`InnerELC`).
+The template classes are derived classes inherited from a base class. The main functionalities include Newton-Raphson solvers for inner optimization problem in the empirical likelihood (EL) framework, log EL evaluations, and posterior samplers. Currently the template classes include one for uncensored data (`InnerEL`) and one for censored data (`InnerELC`).
 
 ## Naming Conventions
 
 ### C++ Class Names
 
-Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`, `InnerELC`, `MeanRegModel`, and `QuantRegModel`.
+Class names are in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`, `InnerELC`, `MeanRegModel`, and `QuantRegModel`.
 
 ### C++ Class Methods and Member Variable Names
 
@@ -26,7 +26,7 @@ Class names are all in upper Camel Case (a.k.a PascalCase). E.g., `InnerEL`, `In
 
 ### R Function Argument / Local Variable Names
 
-1. Names of data inputs are in English letters, if it is a matrix, its name is a single upper case letter, otherwise, it is a single lower case letter. E.g., `X`, `Z`, `y`, `G`. Exception: the vector of censoring indicators is currently called `deltas`, the residual vector is called `epsilons`. [TODO: R version is using `delta` an `eps` now, change the names in C++ version too.]
+1. Names of data inputs are in English letters, if it is a matrix, its name is a single upper case letter, otherwise, it is a single lower case letter. E.g., `X`, `Z`, `y`, `G`. [TODO: R version is using `delta` and `eps` rather than `deltas` and `epsilons` now, change the names in C++ version too.]
 
 2. Names of model parameters are in greek letters and lower Camel Case, if it is a vector, currently it has an "s" at the end. E.g., `beta` in `mr.evalG`, `betaInit` in `mr.post`, `alpha` in `qr.evalG` and `omegas` in `logEL`. [TODO: rename `alpha` to `tau`?] [TODO: call it `omega`?] [TODO: qr.post takes multiple quantile values are in upper Camel Case, E.g., `BetaInit`]
 
