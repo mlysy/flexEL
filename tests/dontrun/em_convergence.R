@@ -6,7 +6,7 @@ source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("mode-functions.R")
-source("em_acceleration.R")
+source("logEL_EMAC_R.R")
 
 # with random data
 n <- 200

@@ -7,6 +7,7 @@ using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
 #include "MwgAdapt.h" // for adaptive mcmc
+#include "BlockOuter.h"
 // [[Rcpp::depends(RcppEigen)]]
 
 template <typename ELModel>
@@ -36,7 +37,7 @@ private:
     int maxIter;
     double relTol;
     // columnwise outer product (see below)
-    void blockOuter(void);
+    // void blockOuter(void);
     // maximum relative error in lambda: same for cens / non-cens
     double maxRelErr(const Ref<const VectorXd>& lambdaNew,
                      const Ref<const VectorXd>& lambdaOld);
@@ -203,16 +204,16 @@ inline double InnerEL<ELModel>::logstar2(double x) {
   }
 }
 
-// for an (m x N) matrix G = [g1 ... gN], returns the (m x mN) matrix
-// GGt = [g1 g1' ... gN gN']
-template<typename ELModel>
-inline void InnerEL<ELModel>::blockOuter(void) {
-  // for each row of G, compute outer product and store as block
-  for(int ii=0; ii<nObs; ii++) {
-    GGt.block(0,ii*nEqs,nEqs,nEqs).noalias() = G.col(ii) * G.col(ii).transpose();
-  }
-  return;
-}
+// // for an (m x N) matrix G = [g1 ... gN], returns the (m x mN) matrix
+// // GGt = [g1 g1' ... gN gN']
+// template<typename ELModel>
+// inline void InnerEL<ELModel>::blockOuter(void) {
+//   // for each row of G, compute outer product and store as block
+//   for(int ii=0; ii<nObs; ii++) {
+//     GGt.block(0,ii*nEqs,nEqs,nEqs).noalias() = G.col(ii) * G.col(ii).transpose();
+//   }
+//   return;
+// }
 
 // maximum relative error in lambda
 template<typename ELModel>
@@ -239,7 +240,8 @@ inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
   lambdaOld.fill(0.0);
   lambdaNew.fill(0.0);
   int ii, jj;
-  blockOuter(); // initialize GGt
+  // blockOuter(); // initialize GGt
+  block_outer(GGt,G);
   // newton-raphson loop
   for(ii=0; ii<maxIter; ii++) {
     // Q1 and Q2

@@ -261,8 +261,13 @@ omega.smooth.pcheck <- function(x, omegas, G, deltas, epsilons,idx0, s=10) {
 mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, s=10) {
   nObs <- nrow(X)
   nEqs <- ncol(X)
+  # TODO: resample data for A as well or only for B? 
+  # How many resamples should be done to get a stable result?
+  # inds <- sample(nObs,replace = TRUE)
+  # X <- X[inds,]
+  # y <- y[inds]
+  # deltas <- deltas[inds]
   A <- hessian(function(b) {-mr_cens.neglogEL.smooth(y, X, deltas, b, s)}, x=beta.hat)
-  # TODO: resample data for A as well or only for B?
   inds <- sample(nObs,replace = TRUE)
   X <- X[inds,]
   y <- y[inds]

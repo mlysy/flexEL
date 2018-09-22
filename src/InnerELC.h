@@ -15,6 +15,7 @@ using namespace Rcpp;
 using namespace Eigen;
 #include "MwgAdapt.h" // for adaptive mcmc
 #include "IndSmooth.h" // for smoothed indicator function
+#include "BlockOuter.h"
 // [[Rcpp::depends(RcppEigen)]]
 
 // main class begins here
@@ -60,7 +61,7 @@ private:
   VectorXi epsOrd; // vector of indicies of ordered epsilons
   VectorXd psots; // partial sum of omegatildas
   // columnwise outer product (see below)
-  void blockOuter(void);
+  // void blockOuter(void);
   // maximum relative error in lambda: same for cens / non-cens
   double maxRelErr(const Ref<const VectorXd>& lambdaNew,
                    const Ref<const VectorXd>& lambdaOld);
@@ -262,16 +263,16 @@ inline double InnerELC<ELModel>::logsharp2(double x, double q) {
     }
 }
 
-// for an (m x N) matrix G = [g1 ... gN], returns the (m x mN) matrix
-// GGt = [g1 g1' ... gN gN']
-template<typename ELModel>
-inline void InnerELC<ELModel>::blockOuter(void) {
-  // for each row of G, compute outer product and store as block
-    for(int ii=0; ii<nObs; ii++) {
-        GGt.block(0,ii*nEqs,nEqs,nEqs).noalias() = G.col(ii) * G.col(ii).transpose();
-    }
-    return;
-}
+// // for an (m x N) matrix G = [g1 ... gN], returns the (m x mN) matrix
+// // GGt = [g1 g1' ... gN gN']
+// template<typename ELModel>
+// inline void InnerELC<ELModel>::blockOuter(void) {
+//   // for each row of G, compute outer product and store as block
+//     for(int ii=0; ii<nObs; ii++) {
+//         GGt.block(0,ii*nEqs,nEqs,nEqs).noalias() = G.col(ii) * G.col(ii).transpose();
+//     }
+//     return;
+// }
 
 // maximum relative error in lambda
 template<typename ELModel>
@@ -306,7 +307,8 @@ inline void InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr) {
   // prevent bad starting values
   lambdaNew.fill(0.0);
   lambdaOld.fill(0.0);
-  blockOuter(); // initialize GGt according to epsilons order (epsOrd)
+  // blockOuter(); // initialize GGt according to epsilons order (epsOrd)
+  block_outer(GGt,G);
   int ii;
   
   // TODO: to avoid numerical problem
