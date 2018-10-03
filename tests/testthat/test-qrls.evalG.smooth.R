@@ -4,13 +4,14 @@
 source("el-utils.R")
 source("el-rfuns.R")
 source("el-model.R")
+source("../dontrun/mode-functions.R")
 # library(testthat)
 
-context("qrls.evalG")
+context("mrls.evalG")
 
 ntest <- 50
 
-test_that("qrls.evalG.R == qrls.evalG.cpp", {
+test_that("qrls.evalG.smooth.R == qrls.evalG.smooth.cpp", {
   for(ii in 1:ntest) {
     # Location-scale model + quantile regression
     n <- sample(10:20,1)
@@ -26,8 +27,9 @@ test_that("qrls.evalG.R == qrls.evalG.cpp", {
     # sig2 <- 1
     y <- c(X %*% beta + sqrt(sig2)*exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
     # checking G matrix from cpp and R
-    G.cpp <- qrls.evalG(y,X,Z,alpha,beta,gamma,sig2,nu)
-    G.R <- qrls.evalG_R(y,X,Z,alpha,beta,gamma,sig2,nu)
+    sp <- sample(100,1)
+    G.cpp <- qrls.evalG.smooth(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
+    G.R <- qrls.evalG.smooth_R(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
     expect_equal(G.cpp, G.R)
   }
 })

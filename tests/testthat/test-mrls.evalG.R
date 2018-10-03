@@ -30,3 +30,4 @@ test_that("mrls.evalG.R == mrls.evalG.cpp", {
     expect_equal(G.R, G.cpp)
   }
 })
+

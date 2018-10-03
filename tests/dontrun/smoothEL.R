@@ -258,7 +258,7 @@ omega.smooth.pcheck <- function(x, omegas, G, deltas, epsilons,idx0, s=10) {
 #   return(Ainv %*% B %*% Ainv)
 # }
 
-mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, s=10) {
+mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, nres = 100, s=10) {
   nObs <- nrow(X)
   nEqs <- ncol(X)
   # TODO: resample data for A as well or only for B? 
@@ -268,12 +268,28 @@ mr_cens.sandCov.smooth_R <- function(y, X, deltas, beta.hat, s=10) {
   # y <- y[inds]
   # deltas <- deltas[inds]
   A <- hessian(function(b) {-mr_cens.neglogEL.smooth(y, X, deltas, b, s)}, x=beta.hat)
-  inds <- sample(nObs,replace = TRUE)
-  X <- X[inds,]
-  y <- y[inds]
-  deltas <- deltas[inds]
-  B <- grad(mr_cens.neglogEL.smooth, x=beta.hat, y=y, X=X, delta=deltas, sp=s)
-  B <- tcrossprod(B,B)
+  B <- matrix(0,nrow=nEqs,ncol=nEqs)
+  count <- 0
+  while (TRUE) {
+    count <- count + 1
+    # message("count = ", count)
+    inds <- sample(nObs,replace = TRUE)
+    X.hat <- X[inds,]
+    y.hat <- y[inds]
+    delta.hat <- deltas[inds]
+    succ <- TRUE
+    newgrad <- tryCatch(expr=grad(mr_cens.neglogEL.smooth, x=beta.hat, y=y.hat, X=X.hat, delta=delta.hat, sp=s),
+                        error=function(e){succ <<- FALSE; rep(NA,nEqs)})
+    if (!succ) {
+      count <- count - 1
+      message("not succ")
+      next
+    }
+    B <- B + tcrossprod(newgrad,newgrad)
+    # B <- B + grad(mr_cens.neglogEL.smooth, x=beta.hat, y=y, X=X, delta=deltas, sp=s)
+    if (count == nres) break
+  }
+  B <- B/(nres-1)
   Ainv <- solve(A)
   return(Ainv %*% B %*% Ainv)
 }

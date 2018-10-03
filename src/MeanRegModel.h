@@ -111,7 +111,8 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
   tG.block(0,0,nObs,nBet) = X.transpose();
   tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
   tG.block(0,nBet,nObs,nGam) = Z.transpose();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  // tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
   tG.rightCols(1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
   G = tG.transpose();
 }

@@ -164,7 +164,8 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta,
   tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
   // 1st deriv w.r.t gamma
   tG.block(0,nBet,nObs,nGam) = Z.transpose();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  // tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
   // variance param
   tG.block(0,nBet+nGam,nObs,1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
   // std::cout << "tG = \n" << tG << std::endl;
@@ -197,7 +198,8 @@ inline void QuantRegModel::evalGSmooth(const Ref<const VectorXd>& beta,
   tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
   // 1st deriv w.r.t gamma
   tG.block(0,nBet,nObs,nGam) = Z.transpose();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  // tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
+  tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
   // variance param
   tG.block(0,nBet+nGam,nObs,1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
   // std::cout << "tG = \n" << tG << std::endl;

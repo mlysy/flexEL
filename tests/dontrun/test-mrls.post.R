@@ -7,7 +7,7 @@ source("gen_eps.R")
 
 #---- mean reg: X and Z both dim 1----
 # dimensions
-n <- 500 # number of observations
+n <- 300 # number of observations
 p <- 1
 q <- 1
 
@@ -16,11 +16,16 @@ X <- matrix(rep(1,n),n,p)
 # X <- matrix(rnorm(n),n,p)
 # Z <- matrix(rep(1,n),n,q) # Z should not contain an intercept
 Z <- matrix(rnorm(n),n,q)
+# Z <- matrix(runif(n,min=1,max=5),n,q)
+# Z <- matrix(rchisq(n,df=5),n,q)
 
 # parameters
-beta0 <- rnorm(p)
-gamma0 <- rnorm(q)
-sig20 <- abs(rnorm(1)) # NEW: scale param
+# beta0 <- rnorm(p)
+# gamma0 <- rnorm(q)
+# sig20 <- abs(rnorm(1)) # NEW: scale param
+beta0 <- 1
+gamma0 <- -0.5
+sig20 <- 1
 
 # dist is one of "norm","t","chisq","lnorm"
 eps <- gen_eps(n, dist = "t", df = 5)
@@ -86,7 +91,8 @@ for (ii in 1:numpoints) {
 }
 logelmode1 <- plotEL(beta.seq, logel.seq[1,], beta0, NA, expression(beta))
 logelmode2 <- plotEL(gamma.seq, logel.seq[2,], gamma0/2, NA, expression(gamma))
-logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(nu))
+logelmode3 <- plotEL(sig2.seq, logel.seq[3,], sig20, NA, expression(sigma^2))
+cbind(logelmode1,logelmode2,logelmode3)
 
 # mcmc
 nsamples <- 20000
@@ -100,17 +106,18 @@ betaInit <- theta.hat$beta
 gammaInit <- theta.hat$gamma[2]/2 # Note: divided by 2 since the models differ by this factor
 sig2Init <- exp(theta.hat$gamma[1])
 mwgSd <- c(0.1,0.15,0.2)
-RvDoMcmc <- c(0,0,1)
+# RvDoMcmc <- c(0,0,1)
+RvDoMcmc <- c(1,0,0)
 system.time(
   # postout <- mrls.post(y,X,Z,nsamples,nburn,betaInit,gammaInit,sig2Init,mwgSd)
-  postout <- mrls.post(y,X,Z,nsamples,nburn,beta0,gamma0/2,sig2Init,mwgSd,RvDoMcmc)
-  # postout <- mrls.post(y,X,Z,nsamples,nburn,beta0,gamma0,sig20,mwgSd)
+  # postout <- mrls.post(y,X,Z,nsamples,nburn,beta0,gamma0/2,sig2Init,mwgSd,RvDoMcmc)
+  postout <- mrls.post(y,X,Z,nsamples,nburn,beta0,gamma0,sig20,mwgSd,RvDoMcmc)
 )
-theta_chain <- postout$Theta_chain
+theta_chain <- postout$theta_chain
 theta_accept <- postout$paccept
 theta_accept
 
-plot(theta_chain[3,],type='l')
+plot(theta_chain[1,],type='l')
 
 # overlay marginal / conditional gird plot to histogram
 hist(theta_chain[1,],breaks=50,freq=FALSE,

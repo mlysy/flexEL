@@ -1,6 +1,6 @@
 # ---- generate error terms with (0,1) ----
 
-gen_eps <- function(n, dist = "norm", df = NULL, tau) {
+gen_eps <- function(n, dist = "norm", df = NULL, ncp = NULL, tau) {
   
   # TODO: input check here
   
@@ -23,6 +23,18 @@ gen_eps <- function(n, dist = "norm", df = NULL, tau) {
     else return(eps)
   }
   
+  else if (dist == "nct") {
+    if (df <= 2) stop("variance do not exist for df <= 2.")
+    m <- ncp*sqrt(df/2)*gamma((df-1)/2)/gamma(df/2)
+    v <- df*(1+ncp^2)/(df-2)-ncp^2*df/2*(gamma((df-1)/2)/gamma(df/2))^2
+    eps <- (rt(n, df = df, ncp = ncp)-m)/sqrt(v)
+    if (!missing(tau)) {
+      nu0 <- (qt(tau,df=df,ncp=ncp)-m)/sqrt(v)
+      return(list(eps = eps, nu0 = nu0))
+    }
+    else return(eps)
+  }
+ 
   else if (dist == "chisq") {
     m <- df
     v <- 2*df
