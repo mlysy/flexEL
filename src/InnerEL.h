@@ -1,3 +1,8 @@
+/**
+* @file InnerEL.h
+* @brief Inner optimization routine for empirial likelihood problems and MCMC posterior samplers.
+*/
+
 #ifndef INNEREL_h
 #define INNEREL_h
 
@@ -25,24 +30,33 @@ private:
     VectorXd lambdaNew;
     VectorXd omegas; // store the empirical distribution 
     // temporary storage for Newton-Raphson
-    MatrixXd GGt;
-    VectorXd Glambda;
+    MatrixXd GGt; /**< G times G transpose */
+    VectorXd Glambda; /**< G times lambda */
     ArrayXd Gl11;
     VectorXd Q1;
     MatrixXd Q2;
     LDLT<MatrixXd> Q2ldlt;
     VectorXd rho;
-    VectorXd relErr;
+    VectorXd relErr; /**< relative error */
     // tolerance for Newton-Raphson lambdaNR (New)
-    int maxIter;
-    double relTol;
+    int maxIter; /**< maximum number of iterations */
+    double relTol; /**< relative tolerance */
     // maximum relative error in lambda: same for cens / non-cens
+    /**
+     * @brief      Calculating the maximum relative error between \p lambdaNew and \p lambdaOld.
+     *
+     * @return     maximum relative error.
+     */
     double maxRelErr(const Ref<const VectorXd>& lambdaNew,
                      const Ref<const VectorXd>& lambdaOld);
 public:
     // constructor for regression-like problems: old 
     // InnerEL(const Ref<const VectorXd>& y, const Ref<const MatrixXd>& X, 
     //       void* params);
+    /**
+     * @brief A constructor.
+     * A more elaborate description of the constructor (TODO).
+     */
     InnerEL(); // default ctor
     void setData(const Ref<const VectorXd>& _y, 
                  const Ref<const MatrixXd>& _X, 

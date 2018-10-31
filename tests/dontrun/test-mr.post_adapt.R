@@ -65,15 +65,24 @@ beta0
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-.5,beta0[1]+.5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
+# beta2.seq <- seq(1.45,1.55,length.out = numpoints)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
   G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
-  logel.seq[1,ii] <- logEL(G)
+  omega <- omega.hat(G)
+  logel.seq[1,ii] <- logEL(omega)
   G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
-  logel.seq[2,ii] <- logEL(G)
+  omega <- omega.hat(G)
+  logel.seq[2,ii] <- logEL(omega)
 }
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+
+# check if nlm gives the correct mode here
+beta.hat <- coef(lm(y~X-1))
+xsol <- nlm(mr.neglogEL_R,beta.hat,y=y,X=X)$estimate
+# xsol <- optim(beta.hat,mr_cens.neglogEL.infl_R,y=y,X=X,delta=delta)$par
+optim_proj(xsol, fun = function(beta){-mr.neglogEL_R(y,X,beta)}, xrng = 1)
 
 # calculate marginal posterior
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
