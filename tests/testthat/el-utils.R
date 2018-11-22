@@ -48,7 +48,7 @@ plot3d <- function(type="surface", seq.x, seq.y, seq.z,
 }
 
 # EL curve plot
-plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = "param") {
+plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = 'param', legend.loc = 'topright') {
     plot(mu.seq, exp(logel.seq-max(logel.seq)),
          cex=0.2, xlab = mu.name, ylab = 'log EL', type = 'l')
     abline(v = trueval, col = 'red', lty=2) # true param
@@ -59,7 +59,7 @@ plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = "param") {
                lty = c(2,2,2), col = c('red','black','blue'), cex = 0.6)
     }
     else{
-        legend('topright',legend=c('true param', 'logEL mode'),
+        legend(legend.loc,legend=c('true param', 'logEL mode'),
                lty = c(2,2), col = c('red','black'), cex = 0.6)
     }
     return(mu.seq[which.max(logel.seq)]) # return the mode

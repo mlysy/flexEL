@@ -8,29 +8,36 @@ using namespace Eigen;
 #include "InnerEL.h"
 #include "MeanRegModel.h"
 
-// Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
-// G: nEqs x nObs matrix
+/**
+ * @brief      simulate one draw x ~ p(x | theta)
+ *
+ * @param[in]  G        A matrix of dimension \code{nEqs} x \code{nObs}
+ * @param[in]  maxIter  Maximum number of iterations allowed
+ * @param[in]  relTol   Relative tolerance for convergence
+ * @param[in]  verbose  Whether to print number of iteration and maximum error of the return value
+ */
 // [[Rcpp::export(".lambdaNR")]]
-Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, 
-                        int maxIter, double relTol, bool verbose) {
+Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
-  VectorXd y = VectorXd::Zero(nObs);
-  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-  // Here init with an MeanRegModel, but it is the same using QuantRegModel
+  // // Note: y, X are not actually needed here but instantiating an InnerEL object needs them
+  // VectorXd y = VectorXd::Zero(nObs);
+  // MatrixXd X = MatrixXd::Zero(nEqs, nObs);
   // InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-  InnerEL<MeanRegModel> IL;
-  IL.setData(y, X, NULL);
+  // InnerEL<MeanRegModel> IL; // Here init with an MeanRegModel, but it is the same using QuantRegModel
+  // IL.setData(y, X, NULL);
+  InnerEL<MeanRegModel> IL(nObs,nEqs);
   IL.setG(G); // assign the given G
   // initialize variables for output here 
   int nIter;
   double maxErr;
-  VectorXd lambda;
+  // VectorXd lambda;
   bool not_conv;
   IL.setTol(maxIter, relTol); // New
   IL.lambdaNR(nIter, maxErr);
   // IL.lambdaNR(nIter, maxErr, maxIter, relTol);
-  lambda = IL.getLambda(); // output (could be not converged)
+  // lambda = IL.getLambda(); // output (could be not converged)
+  VectorXd lambda = IL.getLambda(); // output (could be not converged)
   // check convergence
   not_conv = (nIter == maxIter) && (maxErr > relTol);
   if(verbose) {
@@ -82,12 +89,13 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda) {
   // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
   int nObs = G.cols();
   int nEqs = G.rows();
-  VectorXd y = VectorXd::Zero(nObs);
-  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+  // VectorXd y = VectorXd::Zero(nObs);
+  // MatrixXd X = MatrixXd::Zero(nEqs, nObs);
   // Here init with an MeanRegModel, but it is the same using QuantRegModel
   // InnerEL<MeanRegModel> IL(y, X, NULL); // instantiate
-  InnerEL<MeanRegModel> IL;
-  IL.setData(y,X,NULL);
+  // InnerEL<MeanRegModel> IL;
+  // IL.setData(y,X,NULL);
+  InnerEL<MeanRegModel> IL(nObs,nEqs);
   IL.setG(G); // assign the given G
   IL.setLambda(lambda); 
   IL.evalOmegas(); // calculate omegas
@@ -95,8 +103,7 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda) {
   return omegasnew;
 }
 
-// This version finds the maximized loglikelihood, 
-//      or -Inf if no feasible omegas satisfies constraints.
+// Calculate logEL given omegas
 // [[Rcpp::export(".logEL")]]
 double logEL(Eigen::VectorXd omegas) {
   InnerEL<MeanRegModel> IL;

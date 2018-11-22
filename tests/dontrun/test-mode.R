@@ -32,20 +32,51 @@ abline(h=0,col='blue')
 nlm(mr.neglogEL_R,1.2,y=y,X=X)
 
 # 2-d problem
-n <- 200
+n <- 500
 p <- 2
 X0 <- matrix(rep(1,n),n,1)
 X1 <- matrix(rnorm(n),n,1)
 X <- cbind(X0,X1)
-eps <- rnorm(n) # N(0,1) error term
+# eps <- rnorm(n) # N(0,1) error term
+eps <- gen_eps(n,dist="nct",df=3,ncp=-1)
 beta_intercept <- 1
 beta_slope <- 1.5
 y <- 1 + c(X1 %*% beta_slope) + eps 
 beta0 <- c(beta_intercept, beta_slope)
+beta.hat <- coef(lm(y~X-1))
+beta.hat
+mr.neglogEL_R(y,X,beta.hat)
+nlmout <- nlm(mr.neglogEL_R,beta0,y=y,X=X,hessian=TRUE)
+nlmout
 
-mr.neglogEL_R(y,X,beta0)
+# grid plot (conditionals: beta1|beta2 and beta2|beta1)
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
+# beta2.seq <- seq(1.45,1.55,length.out = numpoints)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+for (ii in 1:numpoints) {
+  if (ii %% 20 == 0) message("ii = ", ii)
+  logel.seq[1,ii] <- -mr.neglogEL_R(y,X,c(beta1.seq[ii],beta0[2]))
+  logel.seq[2,ii] <- -mr.neglogEL_R(y,X,c(beta0[1],beta2.seq[ii]))
+}
+logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
+logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
 
-nlmout <- nlm(mr.neglogEL_R,beta0*1.05,y=y,X=X,hessian=TRUE)
+# 3-d plot
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+counter <- 0
+system.time({
+  logel.mat <- apply(Beta.seq, 1, function(bb) {
+    counter <<- counter+1
+    if (counter %% 100 == 0) message("counter = ", counter)
+    -mr.neglogEL_R(y,X,c(bb[1],bb[2]))
+  })
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat[is.infinite(logel.mat)] <- NaN
+anyNA(logel.mat)
+plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat))
 
 # mode quadrature approximation for CI
 # library(mvtnorm)
@@ -130,28 +161,31 @@ for (ii in 1:numpoints) {
   logel.seq[ii] <- temp
   grad.seq[ii] <- attributes(temp)$gradient
 }
-logelmode <- plotEL(mu.seq, logel.seq, mu0+qnorm(tau), quantile(y,alpha), expression(mu))
+logelmode <- plotEL(mu.seq, logel.seq, mu0+qnorm(tau), quantile(y,tau), expression(mu))
 plot(grad.seq,type='l')
 abline(h=0,col='blue')
 
 nlm(qr.neglogEL_R,1,y=y,X=X,tau=tau,s=10)
 
 # 2-d problem
-n <- 200
+n <- 500
 p <- 2
 X0 <- matrix(rep(1,n),n,1)
 X1 <- matrix(rnorm(n),n,1)
 X <- cbind(X0,X1)
-eps <- rnorm(n) # N(0,1) error term
+# eps <- rnorm(n) # N(0,1) error term
+eps <- gen_eps(n,dist="nct",df=10,ncp=-1)
 beta_intercept <- 0.5
 beta_slope <- 1
 y <- 1 + c(X1 %*% beta_slope) + eps 
 beta0 <- c(beta_intercept, beta_slope)
 tau <- 0.75
-
+gen_eps(1,dist="nct",df=10,ncp=-1,tau=tau)$nu0+beta0[1]
+beta.hat <- coef(rq(y~X-1),tau)
+beta.hat
 qr.neglogEL_R(y,X,tau,beta0,s = 10)
 
-nlm(qr.neglogEL_R,beta0,y=y,X=X,tau=tau)
+nlm(qr.neglogEL_R,beta.hat,y=y,X=X,tau=tau)
 
 # 3-d problem
 n <- 200

@@ -18,12 +18,17 @@ numpoints <- 100
 mu.seq <- seq(-.5+mu0,.5+mu0,length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qr.evalG(y,X,alpha,mu.seq[ii])
+  # G <- qr.evalG(y,X,alpha,mu.seq[ii])
+  G <- qr.evalG.smooth_R(y,X,alpha,mu.seq[ii])
   omegas <- omega.hat(G)
   logel.seq[ii] <- logEL(omegas)
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0, quantile(y,alpha), expression(mu))
 logelmode
+
+# # plot two figures side by side (compare the smoothing effect)
+# par(mfrow=c(1,2))
+
 
 nsamples <- 20000
 nburn <- 5000

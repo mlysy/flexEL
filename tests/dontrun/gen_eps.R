@@ -59,9 +59,59 @@ gen_eps <- function(n, dist = "norm", df = NULL, ncp = NULL, tau) {
     else return(eps)
   }
   
+  # else if (dist == "lgam") {
+  #   ...
+  # }
+  
   else stop("dist not included yet. ")
   
 }
+
+# calculate the k-th moment of nct
+# Note: k should be an integer
+# nct.kmom_R <- function(k,df,ncp) {
+#   if (df <= k) stop("k-th moment does not exit for df <= k.")
+#   if (k == 1) {
+#     return(ncp*sqrt(df/2)*gamma((df-1)/2)/gamma(df/2))
+#   }
+#   else if (k == 2) {
+#     return(df*(1+ncp^2)/(df-2)-ncp^2*df/2*(gamma((df-1)/2)/gamma(df/2))^2)
+#   }
+#   else {
+#     val <- (df/2)^(k/2)*gamma((df-k)/2)/gamma(df/2)*exp(-ncp^2/2)
+#     encp2 <- exp(ncp^2/2)
+#     if (k == 3) {
+#       return(val*(3*ncp*encp2 + ncp^3*encp2))
+#     }
+#     else if (k == 4) {
+#       return(val*(3*encp2 + 6*ncp^2*encp2 + ncp^4*encp2))
+#     }
+#     tltmat <- matrix(0,nrow=k+1,ncol=k) # transpose of last term matrix: coef matrix for the last term in the multiplication
+#     tltmat[seq(from=2,to=k*(k+1),by=(k+2))] <- 1
+#     ltmat <- t(tltmat)
+#     ltmat[2,1] <- 1
+#     else {
+#       for (ii in 3:k) {
+#         ltmat[ii,ii-1] <- ltmat[ii-1,ii-2]+ii-1
+#       }
+#       for (ii in 4:k) {
+#         if (ii %% 2 == 0) {
+#           for (jj in 1:(ii-3)) {
+#             if (jj == 1) ltmat[ii,jj] <- ltmat[ii-1,jj+1]*jj
+#             else ltmat[ii,jj] <- ltmat[ii-1,jj-1] + ltmat[ii-1,jj+1]*jj
+#           }
+#         }
+#         else {
+#           for (jj in 2:(ii-3)) {
+#             ltmat[ii,jj] <- ltmat[ii-1,jj-1]+ltmat[ii-1,jj+1]*jj
+#           }
+#         }
+#       }
+#     }
+# 
+#     # TODO: return using ltmat
+#   }
+# }
 
 # # normal(0,1) error
 # eps <- rnorm(n)

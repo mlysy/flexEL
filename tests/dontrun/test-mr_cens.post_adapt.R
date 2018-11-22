@@ -103,8 +103,41 @@ legend('topright',legend=c(expression('true value'),
                            expression('sample mean')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
+# ---- 1-d problem with 1 slope param ----
+n <- 500
+X <- matrix(rnorm(n),n,1)
+beta_S <- 1
+# eps <- rnorm(n) # N(0,1) error term
+
+# dist is one of "norm","t","chisq","lnorm"
+eps <- gen_eps(n, dist = "norm", df = NULL)
+
+# random censoring
+cc <- rnorm(n,mean=1.35,sd=1)
+delta <- eps<=cc
+# delta <- rep(1,n)
+sum(1-delta)/n
+eps[as.logical(1-delta)] <- cc[as.logical(1-delta)]
+y <- c(X %*% beta_S) + eps 
+plot(X,y,cex=0.3)
+
+# grid plot
+numpoints <- 500
+beta.seq <- seq(beta_S-.5,beta_S+.5,length.out = numpoints)
+# beta.seq <- seq(0.98,1.07,length.out = numpoints)
+logel.seq <- matrix(rep(NA,numpoints),1,numpoints)
+
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  G <- mr.evalG(y,X,beta.seq[ii])
+  epsilons <- y - c(X %*% beta.seq[ii])
+  omegas <- omega.hat(G,delta,epsilons)
+  logel.seq[1,ii] <- logEL(omegas,epsilons,deltas)
+}
+logelmode <- plotEL(beta.seq, logel.seq[1,], beta_S, NA, expression(beta), legend.loc = 'topleft') # there is indeed jumps
+
 # ---- 2-d problem (1 intercept, 1 slope) ----
-n <- 100
+n <- 200
 p <- 2
 X1 <- matrix(rnorm(n),n,1)
 # X1 <- matrix(sample(15:25,n,replace = TRUE),n,1)
@@ -166,8 +199,10 @@ for (ii in 1:numpoints) {
     logel.seq[2,ii] <- logEL(omegas,epsilons,deltas)
   }
 }
+par(mfrow=c(1,2))
 logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
 logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+par(mfrow=c(1,1))
 
 # smoothed censored logEL
 numpoints <- 100

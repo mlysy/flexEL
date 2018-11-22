@@ -21,6 +21,7 @@ public:
   // MeanRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
   //              void* params); // old ctor 
   // MeanRegModel(); // default ctor -- it shouldn't have one actually
+  void initData(int _nObs, int _nEqs);
   void setData(const Ref<const VectorXd>& _y, 
                const Ref<const MatrixXd>& _X,
                void* params); // set data with default ctor
@@ -56,6 +57,13 @@ inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& _y,
 
 // // default ctor
 // inline MeanRegModel::MeanRegModel() {}
+
+// pre-allocate space with given dimensions
+inline void MeanRegModel::initData(int _nObs, int _nEqs) {
+  nObs = _nObs;
+  nEqs = _nEqs; // X gets passed as nBet x nObs matrix
+  G = MatrixXd::Zero(nEqs,nObs);
+}
 
 // setData location model (with default ctor)
 inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,

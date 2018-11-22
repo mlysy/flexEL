@@ -66,8 +66,8 @@ mr.neglogEL_R <- function(y, X, beta) {
   }
   else {
     # TODO: if not converged, what should be the gradient...??
-    res <- rep(Inf,length(beta))
-    attr(res, "gradient") <- rep(Inf,length(beta))
+    res <- Inf
+    attr(res, "gradient") <- rep(Inf)
   }
   return(res)
 }
@@ -112,11 +112,11 @@ rho2.smooth_R <- function(x, tau, s=10) {
 #'@param beta is length-\cote{p} vector
 #'@details ...
 #'@return a list of gradient values of length \code{nObs}
-qr.deltaG_R <- function(y, X, tau, beta, s=10) {
+qr.deltaG.smooth_R <- function(y, X, tau, beta, s=10) {
   lx <- split(X, row(X))
   dg <- mapply(function(x,y) {
     eps <- y - x %*% beta
-    tcrossprod(rho2.smooth_R(eps,tau,s)[1]*x,x)
+    tcrossprod(rho2.smooth_R(eps,tau,s)[1]*x,x) # take [1] is because rho2.smooth_R returns a 1x1 matrix
   }, lx, y, SIMPLIFY = FALSE)
   return(dg)
 }
@@ -136,25 +136,75 @@ qr.evalG.smooth_R <- function(y,X,tau,beta,s=10) {
 #'@param beta is length-\cote{p} vector
 #'@details ...
 #'@return
-qr.neglogEL_R <- function(y, X, tau, beta, s=10) {
+qr.neglogEL.smooth_R <- function(y, X, tau, beta, s=10) {
   G <- qr.evalG.smooth_R(y, X, tau, beta, s)
-  lout <- lambdaNR_R(G)
-  if (lout$conv) {
-    lambda <- lout$lambda
+  # lout <- lambdaNR_R(G)
+  lambda <- lambdaNR(G)
+  # if (lout$conv) {
+  if (!anyNA(lambda)) {
+    # lambda <- lout$lambda
     omegas <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
     res <- -sum(log(omegas)) # negative logEL
-    gradlist <- qr.deltaG_R(y, X, tau, beta, s)
+    gradlist <- qr.deltaG.smooth_R(y, X, tau, beta, s)
     grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
     attr(res, "gradient") <- grad
   }
   else {
     # TODO: if not converged, what should be the gradient...??
-    message("qr.neglogEL_R: lambdaNR not coverged.")
+    message("qr.neglogEL.smooth_R: lambdaNR not coverged.")
+    res <- Inf
+    attr(res, "gradient") <- rep(Inf,length(beta))
+  }
+  return(res)
+}
+
+# ---- qrls functions ----
+# qrls.deltaG_R <- function(y, X, Z, tau, beta, beta, gamma, sig2, nu, s=10) {
+#   # TODO: 
+#   # lx <- split(X, row(X))
+#   # dg <- mapply(function(x,y) {
+#   #   eps <- y - x %*% beta
+#   #   tcrossprod(rho2.smooth_R(eps,tau,s)[1]*x,x)
+#   # }, lx, y, SIMPLIFY = FALSE)
+#   # return(dg)
+# }
+
+qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
+  nObs <- nrow(X)
+  nBeta <- length(beta)
+  nGamma <- length(gamma)
+  G <- matrix(NaN, nObs, nBeta + nGamma + 2)
+  eZg <- c(exp(-Z %*% gamma)) # e^{-z'gamma}
+  yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
+  yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
+  G[,1:nBeta] <- yXbeZg * eZg * X
+  # G[,nBeta+1:nGamma] <- yXbeZg2 * Z
+  G[,nBeta+1:nGamma] <- (1-yXbeZg2) * Z
+  G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
+  G[,nBeta+nGamma+2] <- rho1.smooth_R(yXbeZg/sqrt(sig2)-nu, tau, s)
+  return(G)
+}
+
+qrls.neglogEL_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
+  G <- qrls.evalG.smooth_R(y, X, Z, tau, beta, gamma, sig2, nu, s)
+  lambda <- lambdaNR(G)
+  if (!anyNA(lambda)) {
+    omegas <- omega.hat(G)
+    res <- -sum(log(omegas)) # negative logEL
+    gradlist <- qrls.deltaG_R(y, X, Z, tau, beta, gamma, sig2, nu, s)
+    grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
+    attr(res, "gradient") <- grad
+  }
+  else {
+    # TODO: if not converged, what should be the gradient...??
+    message("qrls.neglogEL_R: lambdaNR not coverged.")
     res <- rep(Inf,length(beta))
     attr(res, "gradient") <- rep(Inf,length(beta))
   }
   return(res)
 }
+
+
 
 # ---- mr.cens functions ----
 mr_cens.neglogEL.smooth_R <- function(y, X, deltas, beta, s=10) {
@@ -182,22 +232,6 @@ mr_cens.neglogEL.smooth_R <- function(y, X, deltas, beta, s=10) {
 # ---- mrls.cens functions ---- 
 
 # ---- qrls.cens functions ----
-qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
-  nObs <- nrow(X)
-  nBeta <- length(beta)
-  nGamma <- length(gamma)
-  G <- matrix(NaN, nObs, nBeta + nGamma + 2)
-  eZg <- c(exp(-Z %*% gamma)) # e^{-z'gamma}
-  yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
-  yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
-  G[,1:nBeta] <- yXbeZg * eZg * X
-  # G[,nBeta+1:nGamma] <- yXbeZg2 * Z
-  G[,nBeta+1:nGamma] <- (1-yXbeZg2) * Z
-  G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
-  G[,nBeta+nGamma+2] <- rho1.smooth_R(yXbeZg/sqrt(sig2)-nu, tau, s)
-  return(G)
-}
-
 qrls_cens.neglogEL.smooth_R <- function(y, X, Z, deltas, tau, theta, s=10) {
   nBet <- ncol(X)
   nGam <- ncol(Z)

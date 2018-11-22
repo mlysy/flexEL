@@ -49,6 +49,8 @@ Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eig
   return(G); 
 }
 
+
+/*
 // [[Rcpp::export(".QuantReg_post")]]
 Rcpp::List QuantReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                          Eigen::VectorXd alphaArr, 
@@ -254,6 +256,7 @@ Rcpp::List QuantRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
   retlst["paccept"] = paccept;
   return(retlst);
 }
+*/
 
 // [[Rcpp::export(".rho1.smooth")]]
 double rho1Smooth(double u, double alpha, double s) {

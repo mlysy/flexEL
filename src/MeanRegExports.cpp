@@ -10,6 +10,8 @@ using namespace Eigen;
 #include "MeanRegModel.h"
 #include "dVecTobArr.h"
 
+/* ------ G matrix construction ------ */
+
 // [[Rcpp::export(".MeanReg_evalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
@@ -35,6 +37,8 @@ Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y,
   return(G); 
 }
 
+/* ------ posterior samplers ------ */
+/*
 // [[Rcpp::export(".MeanReg_post")]]
 Rcpp::List MeanReg_post(Eigen::VectorXd y, Eigen::MatrixXd X, 
                         int nsamples, int nburn, 
@@ -229,3 +233,4 @@ Rcpp::List MeanRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
   retlst["paccept"] = paccept;
   return(retlst);
 }
+*/

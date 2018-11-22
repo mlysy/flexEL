@@ -1,3 +1,8 @@
+/**
+ * @file InnerELC.h
+ * @brief Inner optimization routine for empirial likelihood problems under right-censoring.
+ */
+
 #ifndef INNERELC_h
 #define INNERELC_h
 
