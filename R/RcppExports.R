@@ -9,10 +9,6 @@
     .Call(`_bayesEL_ind1Smooth`, x, s)
 }
 
-.evalEpsilonsLS <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_bayesEL_evalEpsilonsLS`, y, X, Z, beta, gamma, sig2)
-}
-
 .evalWeights <- function(deltas, omegas, epsilons) {
     .Call(`_bayesEL_evalWeights`, deltas, omegas, epsilons)
 }

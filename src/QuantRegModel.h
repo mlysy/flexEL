@@ -22,8 +22,8 @@ protected:
   int nObs, nEqs, nBet, nGam, nQts; // nQts := number of quantile levels
   MatrixXd G;
 public:
-  // QuantRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
-  //               void* params); // constructor non-censor
+  QuantRegModel(); // default ctor -- it shouldn't have one actually
+  QuantRegModel(int _nObs, int _nEqs);
   void setData(const Ref<const VectorXd>& _y, 
                const Ref<const MatrixXd>& _X,
                void* params); // set data with default ctor
@@ -48,19 +48,15 @@ public:
   double phi_alpha_smooth(double u, double alpha, double s); 
 };
 
-/*
-// constructor: old 
-inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& _y,
-                                    const Ref<const MatrixXd>& _X,
-                                    void* params) {
-    y = _y;
-    X = _X;
-    alpha = *(double*)(params);
-    nObs = y.size();
-    nEqs = X.rows(); // X gets passed as p x nObs matrix
-    G = MatrixXd::Zero(nEqs,nObs);
+// default ctor 
+inline QuantRegModel::QuantRegModel(){}
+
+// ctor
+inline QuantRegModel::QuantRegModel(int _nObs, int _nEqs) {
+  nObs = _nObs;
+  nEqs = _nEqs; // X gets passed as nBet x nObs matrix
+  G = MatrixXd::Zero(nEqs,nObs);
 }
-*/
 
 // setData (with default ctor)
 inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,

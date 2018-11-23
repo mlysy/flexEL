@@ -8,46 +8,44 @@ using namespace Eigen;
 #include "InnerELC.h"
 #include "MeanRegModel.h"
 
-// [[Rcpp::export(".evalEpsilonsLS")]]
-Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
-                               Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2) {
-  InnerELC<MeanRegModel> ILC; 
-  Eigen::VectorXd deltas = VectorXd::Zero(y.size()).array()+1.0;
-  ILC.setData(y,X,Z,deltas,NULL); 
-  ILC.evalEpsilons(beta,gamma,sig2);
-  Eigen::VectorXd epsilons = ILC.getEpsilons();
-  return(epsilons);
-}
+// // Note: for testing purpose only
+// // [[Rcpp::export(".evalEpsilonsLS")]]
+// Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
+//                                Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2) {
+//   // InnerELC<MeanRegModel> ILC; 
+//   int nObs = G.cols();
+//   int nEqs = G.rows();
+//   InnerELC<MeanRegModel> ILC(nObs,nEqs);
+//   Eigen::VectorXd deltas = VectorXd::Zero(y.size()).array()+1.0;
+//   // ILC.setData(y,X,Z,deltas,NULL); 
+//   ILC.setData(y,X,Z,deltas);
+//   ILC.evalEpsilons(beta,gamma,sig2);
+//   Eigen::VectorXd epsilons = ILC.getEpsilons();
+//   return(epsilons);
+// }
 
 // TODO: getWeights does not need y X, only depends on deltas, epsilons and omegas, 
 //       remove y X and use pesudo input to init
 // returns weights for the weighted NR algorithm 
+// Note: for testing purpose only
 // [[Rcpp::export(".evalWeights")]]
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
                            Eigen::VectorXd epsilons) {
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = omegas.size();
-    VectorXd y = VectorXd::Zero(nObs);
-    MatrixXd X = MatrixXd::Zero(1,nObs);
-    // InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
-    InnerELC<MeanRegModel> ILC; 
-    ILC.setData(y,X,deltas,NULL); 
+    // VectorXd y = VectorXd::Zero(nObs);
+    // MatrixXd X = MatrixXd::Zero(1,nObs);
+    // // InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
+    // // InnerELC<MeanRegModel> ILC; 
+    // // ILC.setData(y,X,deltas,NULL); 
+    InnerELC<MeanRegModel> ILC(nObs,1);
+    ILC.setDeltas(deltas);
     ILC.setOmegas(omegas);
     ILC.setEpsilons(epsilons); 
     ILC.evalWeights(); 
     Eigen::VectorXd weights = ILC.getWeights(); 
     return(weights);
 }
-// Eigen::VectorXd evalWeights(Eigen::VectorXd y, Eigen::MatrixXd X, 
-//                            Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
-//                            Eigen::VectorXd epsilons) {
-//     InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
-//     ILC.omegas = omegas;
-//     ILC.setEpsilons(epsilons); 
-//     ILC.evalWeights(); 
-//     Eigen::VectorXd weights = ILC.weights; 
-//     return(weights);
-// }
 
 // Note: y, X are not actually needed here but instantiating an InnerEL object needs them 
 // G: m x N matrix
@@ -55,30 +53,25 @@ Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
 // [[Rcpp::export(".lambdaNRC")]]
 Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
                           int maxIter, double relTol, bool verbose) {
-  // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
   int nObs = G.cols();
   int nEqs = G.rows();
-  VectorXd y = VectorXd::Zero(nObs);
-  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
-  VectorXd deltas = VectorXd::Zero(nObs);
-  // InnerELC<MeanRegModel> ILC(y, X, delta, NULL); // instantiate
-  InnerELC<MeanRegModel> ILC; 
-  ILC.setData(y,X,deltas,NULL); 
+  InnerELC<MeanRegModel> ILC(nObs,nEqs); 
   ILC.setG(G); // assign a given G
   ILC.setWeights(weights); 
+  ILC.setTol(maxIter, relTol);
+  
   // initialize variables for output here 
   int nIter;
   double maxErr;
-  VectorXd lambda;
-  bool not_conv;
-  ILC.setTol(maxIter, relTol, 0.0);
   ILC.lambdaNR(nIter, maxErr);
-  lambda = ILC.getLambda(); // output
+  VectorXd lambda = ILC.getLambda(); // output
+  
   // check convergence
-  not_conv = (nIter == maxIter) && (maxErr > relTol);
+  bool not_conv = (nIter == maxIter) && (maxErr > relTol);
   if(verbose) {
     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
   }
+  
   // fill in NaN if not converged
   if (not_conv) {
     for (int ii=0; ii<lambda.size(); ii++) {
@@ -129,11 +122,13 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
     // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
     int nObs = G.cols();
     int nEqs = G.rows();
-    VectorXd y = VectorXd::Zero(nObs);
-    MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+    // VectorXd y = VectorXd::Zero(nObs);
+    // MatrixXd X = MatrixXd::Zero(nEqs, nObs);
     // InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
-    InnerELC<MeanRegModel> ILC; 
-    ILC.setData(y,X,deltas,NULL); 
+    // InnerELC<MeanRegModel> ILC; 
+    // ILC.setData(y,X,deltas,NULL); 
+    InnerELC<MeanRegModel> ILC(nObs,nEqs); 
+    ILC.setDeltas(deltas);
     ILC.setG(G); // assign a given G
     ILC.setEpsilons(epsilons); 
     ILC.setTol(maxIter, relTol, absTol); // TODO: change this
@@ -149,10 +144,13 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
 double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, 
               Eigen::VectorXd deltas) {
   int nObs = omegas.size();
-  VectorXd y = VectorXd::Zero(nObs);
-  MatrixXd X = MatrixXd::Zero(1, nObs);
-  InnerELC<MeanRegModel> ILC;
-  ILC.setData(y,X,deltas,NULL);
+  // VectorXd y = VectorXd::Zero(nObs);
+  // MatrixXd X = MatrixXd::Zero(1, nObs);
+  // InnerELC<MeanRegModel> ILC;
+  // ILC.setData(y,X,deltas,NULL);
+  InnerELC<MeanRegModel> ILC(nObs,1);
+  // ILC.setData(y,X,deltas);
+  ILC.setDeltas(deltas);
   ILC.setEpsilons(epsilons); 
   // set omegas which is obtained from EM algorithm 
   ILC.setOmegas(omegas);
@@ -208,11 +206,13 @@ Eigen::VectorXd omegaHatEMSmooth(Eigen::VectorXd omegasInit,
   // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
   int nObs = G.cols();
   int nEqs = G.rows();
-  VectorXd y = VectorXd::Zero(nObs);
-  MatrixXd X = MatrixXd::Zero(nEqs, nObs);
+  // VectorXd y = VectorXd::Zero(nObs);
+  // MatrixXd X = MatrixXd::Zero(nEqs, nObs);
   // InnerELC<MeanRegModel> ILC(y, X, deltas, NULL); // instantiate
-  InnerELC<MeanRegModel> ILC; 
-  ILC.setData(y,X,deltas,NULL); 
+  // InnerELC<MeanRegModel> ILC; 
+  // ILC.setData(y,X,deltas,NULL); 
+  InnerELC<MeanRegModel> ILC(nObs,nEqs); 
+  ILC.setDeltas(deltas);
   ILC.setG(G); // assign a given G
   ILC.setEpsilons(epsilons); 
   ILC.setTol(maxIter, relTol, absTol);

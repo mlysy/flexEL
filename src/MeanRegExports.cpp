@@ -17,7 +17,8 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
                               Eigen::VectorXd beta) {
     // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
     InnerEL<MeanRegModel> MR;
-    MR.setData(y,X,NULL); 
+    // MR.setData(y,X,NULL); 
+    MR.setData(y,X); 
     MR.evalG(beta);
     Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
     return(G); 
@@ -31,7 +32,8 @@ Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y,
                                 double sig2) {
   // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
   InnerEL<MeanRegModel> MR;
-  MR.setData(y,X,Z,NULL); 
+  // MR.setData(y,X,Z,NULL); 
+  MR.setData(y,X,Z); 
   MR.evalG(beta,gamma,sig2,Eigen::VectorXd::Zero(0));
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
   return(G); 

@@ -6,60 +6,85 @@
 
 class MeanRegModel {
 private:
+  
   RowVectorXd yXb;
   RowVectorXd eZg;
   RowVectorXd yXbeZg;
   RowVectorXd yXbeZg2; 
   MatrixXd tG;
+  
 protected:
+  
   VectorXd y;
   MatrixXd X;
   MatrixXd Z;
   int nObs, nEqs, nBet, nGam, nQts; // TODO: nQts is not used in mean reg
   MatrixXd G;
+  
 public:
-  // MeanRegModel(const Ref<const VectorXd>& _y, const Ref<const MatrixXd>& _X,
-  //              void* params); // old ctor 
-  // MeanRegModel(); // default ctor -- it shouldn't have one actually
-  void initData(int _nObs, int _nEqs);
+  
+  // constructors
+  /**
+  * @brief Default constructor for MeanRegModel.
+  */
+  MeanRegModel();
+  
+  /**
+   * @brief Constructor for MeanRegModel with dimensions as inputs.
+   * @param _nObs    Number of observations.
+   * @param _nEqs    Number of estimating equations.
+   */
+  MeanRegModel(int _nObs, int _nEqs);
+  
+  // set data
+  /**
+   * @brief Set data for mean regression location model.
+   * @param _y      Responses of length nObs.
+   * @param _X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   */
+  void setData(const Ref<const VectorXd>& _y, 
+               const Ref<const MatrixXd>& _X);
+               // void* params);
+  
+  /**
+   * @brief Set data for mean regression location-scale model.
+   * @param _y      Responses of length nObs.
+   * @param _X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   * @param _Z      Covariate matrix of dimension \code{nGam} x \code{nObs}.
+   */
   void setData(const Ref<const VectorXd>& _y, 
                const Ref<const MatrixXd>& _X,
-               void* params); // set data with default ctor
-  void setData(const Ref<const VectorXd>& _y, 
-               const Ref<const MatrixXd>& _X,
-               const Ref<const MatrixXd>& _Z,
-               void* params); // set data with default ctor
-  // for location linear regression models
+               const Ref<const MatrixXd>& _Z);
+               // void* params);
+            
+  // evalutate G matrix   
+  /**
+   * @brief Evaluate G matrix for mean regression location model.
+   * @param beta     Coefficient vector in linear location function.
+   */
   void evalG(const Ref<const VectorXd>& beta); 
-  // for location-scale linear regression models
+  
+  /**
+   * @brief Evaluate G matrix for mean regression location-scale model.
+   * @param beta     Coefficient vector of length \code{nBet} in linear location function.
+   * @param gamma    Coefficient vector of length \code{nGam} in exponential scale function.
+   * @param sig2     Scale parameter in scale function.
+   */
   void evalG(const Ref<const VectorXd>& beta, 
              const Ref<const VectorXd>& gamma, 
              const double& sig2,
              const Ref<const VectorXd>& dummy);
+  
+  // setter and getter for G matrix
   void setG(const Ref<const MatrixXd>& _G); 
   MatrixXd getG();
 };
 
-/*
-// constructor: old
-inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& _y,
-                                  const Ref<const MatrixXd>& _X,
-                                  void* params) {
-    y = _y;
-    X = _X;
-    nObs = y.size();
-    nBet = X.rows(); // X gets passed as p x nObs matrix
-    G = MatrixXd::Zero(nBet,nObs);
-    tG = MatrixXd::Zero(nObs, nBet);
-    yXb = RowVectorXd::Zero(nObs);
-}
-*/
+// default ctor 
+inline MeanRegModel::MeanRegModel(){}
 
-// // default ctor
-// inline MeanRegModel::MeanRegModel() {}
-
-// pre-allocate space with given dimensions
-inline void MeanRegModel::initData(int _nObs, int _nEqs) {
+// ctor
+inline MeanRegModel::MeanRegModel(int _nObs, int _nEqs) {
   nObs = _nObs;
   nEqs = _nEqs; // X gets passed as nBet x nObs matrix
   G = MatrixXd::Zero(nEqs,nObs);
@@ -67,8 +92,8 @@ inline void MeanRegModel::initData(int _nObs, int _nEqs) {
 
 // setData location model (with default ctor)
 inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
-                                  const Ref<const MatrixXd>& _X,
-                                  void* params) {
+                                  const Ref<const MatrixXd>& _X) {
+                                  // void* params) {
   y = _y;
   X = _X;
   nObs = y.size();
@@ -83,8 +108,8 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
 // setData location-scale model (with default ctor)
 inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
                                   const Ref<const MatrixXd>& _X,
-                                  const Ref<const MatrixXd>& _Z,
-                                  void* params) {
+                                  const Ref<const MatrixXd>& _Z) {
+                                  // void* params) {
   y = _y;
   X = _X;
   Z = _Z;

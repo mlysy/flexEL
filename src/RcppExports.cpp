@@ -30,22 +30,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// evalEpsilonsLS
-Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
-RcppExport SEXP _bayesEL_evalEpsilonsLS(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    rcpp_result_gen = Rcpp::wrap(evalEpsilonsLS(y, X, Z, beta, gamma, sig2));
-    return rcpp_result_gen;
-END_RCPP
-}
 // evalWeights
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons);
 RcppExport SEXP _bayesEL_evalWeights(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP) {
@@ -300,7 +284,6 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_bayesEL_indSmooth", (DL_FUNC) &_bayesEL_indSmooth, 2},
     {"_bayesEL_ind1Smooth", (DL_FUNC) &_bayesEL_ind1Smooth, 2},
-    {"_bayesEL_evalEpsilonsLS", (DL_FUNC) &_bayesEL_evalEpsilonsLS, 6},
     {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
     {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
     {"_bayesEL_omegaHatEM", (DL_FUNC) &_bayesEL_omegaHatEM, 8},

@@ -11,29 +11,26 @@
 using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
-#include "MwgAdapt.h" // for adaptive mcmc
+// #include "MwgAdapt.h" // for adaptive mcmc
 #include "BlockOuter.h" // columnwise outer product
 // [[Rcpp::depends(RcppEigen)]]
 
 template <typename ELModel>
 class InnerEL : public ELModel {
 private:
+  
   // required members in ELModel
-  using ELModel::G;
-  using ELModel::nObs;
-  using ELModel::nEqs;
-  // nBet, nGam and nQts are FOR THE MCMC SAMPELERS
-  // using ELModel::nBet;
-  // using ELModel::nGam;
-  // using ELModel::nQts;
+  using ELModel::G; /**< matrix of estimating equations */
+  using ELModel::nObs; /**< number of observations (number of columns of G) */
+  using ELModel::nEqs; /**< number of estimating equations (number of rows of G) */
   
-  // constants for logstar calculations
+  // constants for logstar
   double trunc, aa, bb, cc; /**< constants in logstar functions */
-  VectorXd lambdaOld; /**< placeholder for old lambda in Newton-Raphson iterations */
-  VectorXd lambdaNew; /**< placeholder for new lambda in Newton-Raphson iterations */
-  VectorXd omegas; // store the empirical distribution 
   
-  // temporary storage for Newton-Raphson
+  // placeholders for lambdaNR
+  VectorXd lambdaOld; /**< old lambda in Newton-Raphson iterations */
+  VectorXd lambdaNew; /**< new lambda in Newton-Raphson iterations */
+  VectorXd omegas; /**< empirical distribution */
   MatrixXd GGt; /**< G times G transpose */
   VectorXd Glambda; /**< G times lambda */
   ArrayXd Gl11; /**< values of omegas before standardization */
@@ -43,53 +40,71 @@ private:
   VectorXd rho; /**< placeholder in lambdaNR */
   VectorXd relErr; /**< relative error */
 
-  // tolerance for Newton-Raphson lambdaNR
+  // tolerance values for lambdaNR
   int maxIter; /**< maximum number of iterations */
   double relTol; /**< relative tolerance */
 
-  // maximum relative error in lambda: same for cens / non-cens
+  // maximum relative error in lambda
   /**
    * @brief      Calculating the maximum relative error between \p lambdaNew and \p lambdaOld
    * @return     maximum relative error
    */
   double maxRelErr(const Ref<const VectorXd>& lambdaNew,
-                     const Ref<const VectorXd>& lambdaOld);
+                   const Ref<const VectorXd>& lambdaOld);
 public:
-   /**
+  
+  // constructors
+  /**
     * @brief Default constructor for InnerEL.
     */
-   InnerEL(); // default ctor
+  InnerEL();
   
   /**
-   * @brief Constructor for InnerEL with dimensions as inputs.
+   * @brief Constructor for InnerEL with dimensions as inputs for memory allocation.
+   * @param _nObs    Number of observations.
+   * @param _nEqs    Number of estimating equations.
    */
-  InnerEL(int nObs, int nEqs); // default ctor
+  InnerEL(int _nObs, int _nEqs);
     
-    // /**
-    //  * @brief Set data for mean regression problems. (TODO: depends on regression model, should move this out)
-    //  * _param is a ptr for extra parameter in quantile regression.
-    //  */
-    // void setData(const Ref<const VectorXd>& _y, 
-    //              const Ref<const MatrixXd>& _X, 
-    //              void* _params);
-    // 
-    // void setData(const Ref<const VectorXd>& _y, 
-    //              const Ref<const MatrixXd>& _X, 
-    //              const Ref<const MatrixXd>& _Z, 
-    //              void* _params);
-    
-  // logstar and its derivatives for EL dual problem
+  // logstar and its derivatives for the EL dual problem
+  /**
+   * @brief A support-refined log function.
+   */
   double logstar(double x);
+  
+  /**
+   * @brief First derivative of logstar.
+   */
   double logstar1(double x);
+  
+  /**
+   * @brief Second derivative of logstar.
+   */
   double logstar2(double x);
 
   // Newton-Raphson algorithm
+  /**
+   * @brief Set tolerance values for NR.
+   */
   void setTol(const int& _maxIter, const double& _relTol);
+  
+  /**
+   * @brief Find the optimal lambda by a Newton-Raphson algorithm.
+   * @param[out] nIter    Number of iterations to achieve convergence.
+   * @param[out] maxErr   Maximum relative error among entires in lambda at the last step.
+   */
   void lambdaNR(int& nIter, double& maxErr); // Note: relTol and maxIter must be set before calling
   
   // EL evaluation
-  void evalOmegas(); // evaluate omegas based on G and lambdaNew
-  double logEL(); // calculate logEL given omegas
+  /**
+   * @brief Evaluate omegas based on G and lambdaNew.
+   */
+  void evalOmegas();
+  
+  /**
+   * @brief Calculate logEL using omegas.
+   */
+  double logEL();
   
   // set and get functions 
   void setLambda(const Ref<const VectorXd>& _lambda); // assigned to lambdaNew
@@ -97,6 +112,10 @@ public:
   VectorXd getLambda(); // get function for lambdaNew
   VectorXd getOmegas(); // returns omegas
     
+    // nBet, nGam and nQts are FOR THE MCMC SAMPELERS
+    // using ELModel::nBet;
+    // using ELModel::nGam;
+    // using ELModel::nQts;
     // // posterior samplers:
     // void mwgStep(VectorXd &thetaCur, const int &idx, const double &mwgsd,
     //              bool &accept, double &logELCur);
@@ -107,44 +126,13 @@ public:
     //                          double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
 };
 
-/*
-// constructor for mean regression: old
-template<typename ELModel>
-inline InnerEL<ELModel>::InnerEL(const Ref<const VectorXd>& y,
-				 const Ref<const MatrixXd>& X,
-				 void* params) : ELModel(y, X, params) {
-    // std::cout << nObs << std::endl;
-    // std::cout << nEqs << std::endl;
-    // logstar constants
-    omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
-    trunc = 1.0 / nObs;
-    aa = -.5 * nObs*nObs;
-    bb = 2.0 * nObs;
-    cc = -1.5 - log(nObs);
-    // Newton-Raphson initialization
-    GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-    lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-    lambdaNew = VectorXd::Zero(nEqs);
-    Q1 = VectorXd::Zero(nEqs);
-    Q2 = MatrixXd::Zero(nEqs,nEqs);
-    Glambda = VectorXd::Zero(nObs);
-    Gl11 = ArrayXd::Zero(nObs);
-    rho = VectorXd::Zero(nObs);
-    relErr = VectorXd::Zero(nEqs);
-    Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
-}
- */
-
 // default ctor 
 template<typename ELModel>
 inline InnerEL<ELModel>::InnerEL(){}
 
 // ctor with dimensions as input
 template<typename ELModel>
-inline InnerEL<ELModel>::InnerEL(int _nObs, int _nEqs){
-  // pre-allocation in ELModel
-  ELModel::initData(_nObs,_nEqs);
-  // logstar constants
+inline InnerEL<ELModel>::InnerEL(int _nObs, int _nEqs): ELModel(_nObs, _nEqs){
   omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
   trunc = 1.0 / nObs;
   aa = -.5 * nObs*nObs;
@@ -162,57 +150,6 @@ inline InnerEL<ELModel>::InnerEL(int _nObs, int _nEqs){
   relErr = VectorXd::Zero(nEqs);
   Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
 }
-
-// // set data with default ctor (location model)
-// template<typename ELModel>
-// inline void InnerEL<ELModel>::setData(const Ref<const VectorXd>& _y,
-//                                       const Ref<const MatrixXd>& _X,
-//                                       void* _params) {
-//   ELModel::setData(_y,_X,_params); // set base class data 
-//   // logstar constants
-//   omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
-//   trunc = 1.0 / nObs;
-//   aa = -.5 * nObs*nObs;
-//   bb = 2.0 * nObs;
-//   cc = -1.5 - log(nObs);
-//   // Newton-Raphson initialization
-//   GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-//   lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-//   lambdaNew = VectorXd::Zero(nEqs);
-//   Q1 = VectorXd::Zero(nEqs);
-//   Q2 = MatrixXd::Zero(nEqs,nEqs);
-//   Glambda = VectorXd::Zero(nObs);
-//   Gl11 = ArrayXd::Zero(nObs);
-//   rho = VectorXd::Zero(nObs);
-//   relErr = VectorXd::Zero(nEqs);
-//   Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
-// }
-// 
-// // set data with default ctor (location-scale model)
-// template<typename ELModel>
-// inline void InnerEL<ELModel>::setData(const Ref<const VectorXd>& _y,
-//                                       const Ref<const MatrixXd>& _X,
-//                                       const Ref<const MatrixXd>& _Z,
-//                                       void* _params) {
-//   ELModel::setData(_y,_X,_Z,_params); // set base class data 
-//   // logstar constants
-//   omegas = VectorXd::Zero(nObs).array() + 1.0/(double)nObs; // Initialize to 1/nObs
-//   trunc = 1.0 / nObs;
-//   aa = -.5 * nObs*nObs;
-//   bb = 2.0 * nObs;
-//   cc = -1.5 - log(nObs);
-//   // Newton-Raphson initialization
-//   GGt = MatrixXd::Zero(nEqs,nObs*nEqs);
-//   lambdaOld = VectorXd::Zero(nEqs); // Initialize to all 0's
-//   lambdaNew = VectorXd::Zero(nEqs);
-//   Q1 = VectorXd::Zero(nEqs);
-//   Q2 = MatrixXd::Zero(nEqs,nEqs);
-//   Glambda = VectorXd::Zero(nObs);
-//   Gl11 = ArrayXd::Zero(nObs);
-//   rho = VectorXd::Zero(nObs);
-//   relErr = VectorXd::Zero(nEqs);
-//   Q2ldlt.compute(MatrixXd::Identity(nEqs,nEqs));
-// }
 
 // logstar
 template<typename ELModel>
@@ -258,9 +195,9 @@ inline double InnerEL<ELModel>::maxRelErr(const Ref<const VectorXd>& lambdaNew,
   return(relErr.maxCoeff());
 }
 
+// set tolerance values for lambdaNR
 template<typename ELModel>
-inline void InnerEL<ELModel>::setTol(const int& _maxIter,
-                                     const double& _relTol) {
+inline void InnerEL<ELModel>::setTol(const int& _maxIter, const double& _relTol) {
   maxIter = _maxIter;
   relTol = _relTol;
 }
@@ -298,16 +235,6 @@ inline void InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
   return;
 }
 
-template<typename ELModel>
-inline void InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& _lambda) {
-  lambdaNew = _lambda;
-}
-
-template<typename ELModel>
-inline VectorXd InnerEL<ELModel>::getLambda() {
-    return(lambdaNew);
-}
-
 // Note: G and lambdaNew must have been assigned before calling
 // i.e., in InnerElExports.cpp, assign lambdaNew first 
 template<typename ELModel>
@@ -325,16 +252,6 @@ inline void InnerEL<ELModel>::evalOmegas() {
   }
 }
 
-template<typename ELModel>
-inline void InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& _omegas) {
-    omegas = _omegas; 
-}
-
-template<typename ELModel>
-inline VectorXd InnerEL<ELModel>::getOmegas() {
-    return(omegas);
-}
-
 // Note: omegas must have been assigned before calling 
 // i.e., in InnerElExports.cpp, evaluate & assign omegas first 
 template<typename ELModel>
@@ -342,6 +259,30 @@ inline double InnerEL<ELModel>::logEL() {
   // if omegas are NaN, return -Inf
   if (omegas != omegas) return -INFINITY;
   else return(omegas.array().log().sum());
+}
+
+// setter for lamba
+template<typename ELModel>
+inline void InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& _lambda) {
+  lambdaNew = _lambda;
+}
+
+// getter for lamba
+template<typename ELModel>
+inline VectorXd InnerEL<ELModel>::getLambda() {
+  return(lambdaNew);
+}
+
+// setter for omegas
+template<typename ELModel>
+inline void InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& _omegas) {
+    omegas = _omegas; 
+}
+
+// getter for omegas
+template<typename ELModel>
+inline VectorXd InnerEL<ELModel>::getOmegas() {
+    return(omegas);
 }
 
 /* TAKE OUT ALL MCMC SAMPLERS FOR NOW:
