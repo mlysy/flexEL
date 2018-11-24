@@ -6,13 +6,13 @@
 #ifndef INNEREL_h
 #define INNEREL_h
 
-// class for computing inner optimization of EL likelihood
 #include <Rcpp.h>
 using namespace Rcpp;
 #include <RcppEigen.h>
 using namespace Eigen;
-// #include "MwgAdapt.h" // for adaptive mcmc
 #include "BlockOuter.h" // columnwise outer product
+// #include "MwgAdapt.h" // for adaptive mcmc
+
 // [[Rcpp::depends(RcppEigen)]]
 
 template <typename ELModel>
@@ -60,7 +60,7 @@ public:
   InnerEL();
   
   /**
-   * @brief Constructor for InnerEL with dimensions as inputs for memory allocation.
+   * @brief Constructor for InnerEL with dimensions of G matrix as inputs for memory allocation.
    * @param _nObs    Number of observations.
    * @param _nEqs    Number of estimating equations.
    */

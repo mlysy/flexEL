@@ -11,7 +11,7 @@ private:
   RowVectorXd eZg;
   RowVectorXd yXbeZg;
   RowVectorXd yXbeZg2;
-  double rho_alpha(double u, double alpha); // TODO: not needed?
+  // double rho_alpha(double u, double alpha); // TODO: not needed?
   double phi_alpha(double u, double alpha); 
   MatrixXd tG;
 protected:
@@ -110,9 +110,9 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
 }
 
 // revised L1 loss function for quantile regression
-inline double QuantRegModel::rho_alpha(double u, double alpha) {
-    return(u * (alpha - (u <= 0)));
-}
+// inline double QuantRegModel::rho_alpha(double u, double alpha) {
+//     return(u * (alpha - (u <= 0)));
+// }
 
 // 1st derivative of rho_alpha
 inline double QuantRegModel::phi_alpha(double u, double alpha) {
