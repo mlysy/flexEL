@@ -109,8 +109,10 @@ public:
   // set and get functions 
   void setLambda(const Ref<const VectorXd>& _lambda); // assigned to lambdaNew
   void setOmegas(const Ref<const VectorXd>& _omegas); 
-  VectorXd getLambda(); // get function for lambdaNew
-  VectorXd getOmegas(); // returns omegas
+  void setG(const Ref<const MatrixXd>& _G);
+  VectorXd getLambda(); 
+  VectorXd getOmegas();
+  MatrixXd getG(); 
     
     // nBet, nGam and nQts are FOR THE MCMC SAMPELERS
     // using ELModel::nBet;
@@ -283,6 +285,18 @@ inline void InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& _omegas) {
 template<typename ELModel>
 inline VectorXd InnerEL<ELModel>::getOmegas() {
     return(omegas);
+}
+
+// set function for G matrix
+template<typename ELModel>
+inline void InnerEL<ELModel>::setG(const Ref<const MatrixXd>& _G) {
+  G = _G; 
+}
+
+// get function for G matrix
+template<typename ELModel>
+inline MatrixXd InnerEL<ELModel>::getG() {
+  return(G);
 }
 
 /* TAKE OUT ALL MCMC SAMPLERS FOR NOW:

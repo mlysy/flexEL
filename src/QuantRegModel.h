@@ -3,27 +3,48 @@
 
 // #include <math.h>
 // #include <Rmath.h>
+
 #include "IndSmooth.h"
 
 class QuantRegModel {
 private:
+  
   RowVectorXd yXb;
   RowVectorXd eZg;
   RowVectorXd yXbeZg;
   RowVectorXd yXbeZg2;
-  // double rho_alpha(double u, double alpha); // TODO: not needed?
-  double phi_alpha(double u, double alpha); 
   MatrixXd tG;
+  
+  /**
+   * @brief First derivative of the check function.
+   * @param u     Argument of check function.
+   * @param tau   Quantile level (0 < tau < 1).
+   */
+  double phi_tau(double u, double tau); 
+  
 protected:
+  
+  int nObs, nEqs, nBet, nGam, nQts; /**< nQts is the number of quantile levels */ 
   VectorXd y;
   MatrixXd X;
   MatrixXd Z;
-  double *alpha; // quantile levels
-  int nObs, nEqs, nBet, nGam, nQts; // nQts := number of quantile levels
   MatrixXd G;
+  double *tau; /**< quantile levels */ 
+  
 public:
-  QuantRegModel(); // default ctor -- it shouldn't have one actually
+  
+  /**
+   * @brief Default constructor for QuantRegModel.
+   */
+  QuantRegModel();
+  
+  /**
+   * @brief Constructor for QuantRegModel with dimensions as inputs.
+   * @param _nObs    Number of observations.
+   * @param _nEqs    Number of estimating equations.
+   */
   QuantRegModel(int _nObs, int _nEqs);
+  
   void setData(const Ref<const VectorXd>& _y, 
                const Ref<const MatrixXd>& _X,
                void* params); // set data with default ctor
@@ -31,21 +52,44 @@ public:
                const Ref<const MatrixXd>& _X,
                const Ref<const MatrixXd>& _Z,
                void* params); // set data with default ctor
+  
+  // evaluate G matrix
+  /**
+   * @brief Evaluate G matrix for quantile regression location model.
+   * @param beta     Coefficient vector in linear location function.
+   */
   void evalG(const Ref<const MatrixXd>& Beta);
+  
+  /**
+   * @brief Evaluate G matrix for quantile regression location-scale model.
+   * @param beta     Coefficient vector of length \code{nBet} in linear location function.
+   * @param gamma    Coefficient vector of length \code{nGam} in exponential scale function.
+   * @param sig2     Scale parameter in scale function.
+   * @param Nu       Quantile parameters for each quantile level.
+   */
   void evalG(const Ref<const VectorXd>& beta, 
              const Ref<const VectorXd>& gamma,
              const double& sig2, // sig2 should be a scalar
              const Ref<const VectorXd>& Nu);
+  
+  // evaluate G matrix (smoothed version)
+  /**
+   * @brief First derivative of the smoothed check function.
+   * @param u     Argument of check function.
+   * @param tau   Quantile level  (0 < tau < 1).
+   * @param s     Smoothing parameter (s > 0).
+   */
+  double phi_tau_smooth(double u, double tau, double s); 
+  
+  /**
+   * @brief Evaluate G matrix for smoothed quantile regression location-scale model.
+   * @param beta     Coefficient vector in linear location function.
+   */
   void evalGSmooth(const Ref<const VectorXd>& beta,
                    const Ref<const VectorXd>& gamma,
                    const double& sig2, // sig2 should be a scalar
                    const Ref<const VectorXd>& Nu,
                    const double s);
-  void setG(const Ref<const MatrixXd>& _G); 
-  MatrixXd getG(); // TODO: should prob move to EL since duplicate for MR and QR
-  // smooth functions
-  // double rho_alpha_smooth(double u, double alpha);
-  double phi_alpha_smooth(double u, double alpha, double s); 
 };
 
 // default ctor 
@@ -64,16 +108,9 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
                                    void* params) {
   y = _y;
   X = _X;
-  double *alphaArr = (double*)(params);
-  nQts = alphaArr[0]; // first entry must be the number of quantile levels
-  alpha = &(alphaArr[1]); // rest are the quantile levels
-  
-  // std::cout << "nQts = " << nQts << std::endl;
-  // std::cout << "alpha = ";
-  // for (int ii=0; ii<nQts; ii++) {
-  //   std::cout << alpha[ii] << ' ';
-  // }
-  // std::cout << std::endl;
+  double *tauArr = (double*)(params);
+  nQts = tauArr[0]; // first entry must be the number of quantile levels
+  tau = &(tauArr[1]); // rest are the quantile levels
   
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
@@ -92,9 +129,9 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
   y = _y;
   X = _X;
   Z = _Z;
-  double *alphaArr = (double*)(params);
-  nQts = alphaArr[0]; // first entry must be the number of quantile levels
-  alpha = &(alphaArr[1]); // rest are the quantile levels
+  double *tauArr = (double*)(params);
+  nQts = tauArr[0]; // first entry must be the number of quantile levels
+  tau = &(tauArr[1]); // rest are the quantile levels
   
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
@@ -109,26 +146,21 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
   yXbeZg2 = RowVectorXd::Zero(nObs);
 }
 
-// revised L1 loss function for quantile regression
-// inline double QuantRegModel::rho_alpha(double u, double alpha) {
-//     return(u * (alpha - (u <= 0)));
-// }
-
-// 1st derivative of rho_alpha
-inline double QuantRegModel::phi_alpha(double u, double alpha) {
-    return((u <= 0) - alpha);
+// 1st derivative of rho_tau
+inline double QuantRegModel::phi_tau(double u, double tau) {
+    return((u <= 0) - tau);
 }
 
-// 1st derivative of rho_alpha_smooth
-inline double QuantRegModel::phi_alpha_smooth(double u, double alpha, double s) {
-  return(alpha-ind_smooth(u,s)-u*ind1_smooth(u,s));
+// 1st derivative of rho_tau_smooth
+inline double QuantRegModel::phi_tau_smooth(double u, double tau, double s) {
+  return(tau-ind_smooth(u,s)-u*ind1_smooth(u,s));
 }
 
 /*
 // single quantile case (location model)
 inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
   for(int ii=0; ii<y.size(); ii++) {
-      this->G.col(ii) = phi_alpha(y(ii)-X.col(ii).transpose()*beta, alpha[0])*X.col(ii);
+      this->G.col(ii) = phi_tau(y(ii)-X.col(ii).transpose()*beta, tau[0])*X.col(ii);
   }
 }
 */
@@ -138,7 +170,7 @@ inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta) {
   // stack multiple "Gs" for each quantile level
   for(int jj=0; jj<nQts; jj++) {
     for(int ii=0; ii<y.size(); ii++) {
-      this->G.block(jj*nBet,ii,nBet,1) = phi_alpha(y(ii)-X.col(ii).transpose()*Beta.col(jj), alpha[jj])*X.col(ii);
+      this->G.block(jj*nBet,ii,nBet,1) = phi_tau(y(ii)-X.col(ii).transpose()*Beta.col(jj), tau[jj])*X.col(ii);
     }
   }
 }
@@ -168,7 +200,7 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta,
   // quantile param(s)
   for (int ii=0; ii<nObs; ii++) {
     for (int jj=0; jj<nQts; jj++) {
-      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_alpha(yXbeZg(ii)/sqrt(sig2)-Nu(jj), alpha[jj]);
+      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_tau(yXbeZg(ii)/sqrt(sig2)-Nu(jj), tau[jj]);
     }
   }
   G = tG.transpose();
@@ -202,21 +234,10 @@ inline void QuantRegModel::evalGSmooth(const Ref<const VectorXd>& beta,
   // quantile param(s)
   for (int ii=0; ii<nObs; ii++) {
     for (int jj=0; jj<nQts; jj++) {
-      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_alpha_smooth(yXbeZg(ii)/sqrt(sig2)-Nu(jj),alpha[jj],s);
+      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_tau_smooth(yXbeZg(ii)/sqrt(sig2)-Nu(jj),tau[jj],s);
     }
   }
   G = tG.transpose();
-}
-
-
-// set function for G matrix
-inline void QuantRegModel::setG(const Ref<const MatrixXd>& _G) {
-    G = _G; 
-}
-
-// get function for G matrix
-inline MatrixXd QuantRegModel::getG() {
-    return(G);
 }
 
 #endif

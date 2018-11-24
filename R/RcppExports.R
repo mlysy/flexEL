@@ -61,19 +61,19 @@
     .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
 }
 
-.QuantReg_evalG <- function(y, X, alphaArr, beta) {
-    .Call(`_bayesEL_QuantReg_evalG`, y, X, alphaArr, beta)
+.QuantReg_evalG <- function(y, X, tauArr, beta) {
+    .Call(`_bayesEL_QuantReg_evalG`, y, X, tauArr, beta)
 }
 
-.QuantRegLS_evalG <- function(y, X, Z, alphaArr, beta, gamma, sig2, Nu) {
-    .Call(`_bayesEL_QuantRegLS_evalG`, y, X, Z, alphaArr, beta, gamma, sig2, Nu)
+.QuantRegLS_evalG <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu) {
+    .Call(`_bayesEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
 }
 
-.QuantRegLS_evalGSmooth <- function(y, X, Z, alphaArr, beta, gamma, sig2, Nu, s) {
-    .Call(`_bayesEL_QuantRegLS_evalGSmooth`, y, X, Z, alphaArr, beta, gamma, sig2, Nu, s)
+.QuantRegLS_evalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu, s) {
+    .Call(`_bayesEL_QuantRegLS_evalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
 }
 
-.rho1.smooth <- function(u, alpha, s) {
-    .Call(`_bayesEL_rho1Smooth`, u, alpha, s)
+.rho1.smooth <- function(u, tau, s) {
+    .Call(`_bayesEL_rho1Smooth`, u, tau, s)
 }
 

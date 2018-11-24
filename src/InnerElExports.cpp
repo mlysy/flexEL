@@ -45,7 +45,6 @@ Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool ver
 // as in the censored case 
 // [[Rcpp::export(".omega.hat")]]
 Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda) {
-  // TODO: pseudo-input, actually can have setG to allocate the space but do this for now 
   int nObs = G.cols();
   int nEqs = G.rows();
   InnerEL<MeanRegModel> IL(nObs,nEqs);

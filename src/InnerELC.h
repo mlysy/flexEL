@@ -143,10 +143,12 @@ public:
   void setWeights(const Ref<const VectorXd>& _weights); 
   void setOmegas(const Ref<const VectorXd>& _omegas);
   void setEpsilons(const Ref<const VectorXd>& _epsilons);
+  void setG(const Ref<const MatrixXd>& _G);
   VectorXd getLambda(); 
   VectorXd getWeights(); 
   VectorXd getOmegas(); 
   VectorXd getEpsilons();
+  MatrixXd getG();
   
   // smoothed version functions
   // VectorXd indSmooth(VectorXd x, VectorXd s);
@@ -480,6 +482,18 @@ inline double InnerELC<ELModel>::logEL() {
     // return((deltas.array()*omegas.array().log()
     //           + (1-deltas.array())*psos.array().log()).sum());
   }
+}
+
+// set function for G matrix
+template<typename ELModel>
+inline void InnerELC<ELModel>::setG(const Ref<const MatrixXd>& _G) {
+  G = _G; 
+}
+
+// get function for G matrix
+template<typename ELModel>
+inline MatrixXd InnerELC<ELModel>::getG() {
+  return(G);
 }
 
 /* TAKE OUT ALL MCMC SAMPLERS FOR NOW:

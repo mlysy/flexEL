@@ -15,26 +15,22 @@ using namespace Eigen;
 // [[Rcpp::export(".MeanReg_evalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
-    // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
-    InnerEL<MeanRegModel> MR;
-    // MR.setData(y,X,NULL); 
-    MR.setData(y,X); 
-    MR.evalG(beta);
-    Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
-    return(G); 
+  // std::cout << "in MeanReg_evalG" << std::endl;
+  InnerEL<MeanRegModel> MR;
+  MR.setData(y,X);
+  MR.evalG(beta);
+  Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+  return(G);
 }
 
-// consistent with the implementation for quantreg.
 // [[Rcpp::export(".MeanRegLS_evalG")]]
 Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
                                 Eigen::VectorXd beta, Eigen::VectorXd gamma, 
                                 double sig2) {
-  // InnerEL<MeanRegModel> MR(y, X, NULL); // instantiate
   InnerEL<MeanRegModel> MR;
-  // MR.setData(y,X,Z,NULL); 
   MR.setData(y,X,Z); 
-  MR.evalG(beta,gamma,sig2,Eigen::VectorXd::Zero(0));
+  MR.evalG(beta,gamma,sig2);
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
   return(G); 
 }
