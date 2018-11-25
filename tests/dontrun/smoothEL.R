@@ -1,6 +1,6 @@
 # see if this smoothes out the censored log likelihood 
 
-ind <- function(x) {
+ind_R <- function(x) {
   return(as.numeric(x <= 0))
 }
 
@@ -179,7 +179,7 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
 
 # curve(ind.smooth_R(x,s=10),from=-5,to=5,col='red')
 # curve(ind.smooth_R(x,s=100),from=-5,to=5,col='blue',add=TRUE)
-# curve(ind(x),from=-5,to=5,col='black',add=TRUE)
+# curve(ind_R(x),from=-5,to=5,col='black',add=TRUE)
 # legend('topright', legend=c("I(x<=0)","S(x,s=10)", "S(x,s=100)"), lty=c(1,1,1), col=c("black","red","blue"),cex=.8)
 
 library(MASS) # for use of Null

@@ -1,3 +1,9 @@
+/**
+ * @file QuantRegModel.h
+ * 
+ * @brief A base class for template classes InnerEL and InnerELC.
+ */
+
 #ifndef QUANTREGMODEL_h
 #define QUANTREGMODEL_h
 
@@ -6,6 +12,13 @@
 
 #include "IndSmooth.h"
 
+/**
+ * @file       QuantRegModel.h
+ * 
+ * @class      QuantRegModel
+ * 
+ * @brief      A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile regressions.
+ */
 class QuantRegModel {
 private:
   
@@ -17,6 +30,7 @@ private:
   
   /**
    * @brief First derivative of the check function.
+   * 
    * @param u     Argument of check function.
    * @param tau   Quantile level (0 < tau < 1).
    */
@@ -29,7 +43,7 @@ protected:
   MatrixXd X;
   MatrixXd Z;
   MatrixXd G;
-  double *tau; /**< quantile levels */ 
+  double *tau; /**< an array of quantile levels */ 
   
 public:
   
@@ -40,28 +54,47 @@ public:
   
   /**
    * @brief Constructor for QuantRegModel with dimensions as inputs.
-   * @param _nObs    Number of observations.
-   * @param _nEqs    Number of estimating equations.
+   * 
+   * @param nObs    Number of observations.
+   * @param nEqs    Number of estimating equations.
    */
-  QuantRegModel(int _nObs, int _nEqs);
+  QuantRegModel(int nObs, int nEqs);
   
-  void setData(const Ref<const VectorXd>& _y, 
-               const Ref<const MatrixXd>& _X,
+  /**
+   * @brief Set data for quantile regression location model.
+   * 
+   * @param y      Responses of length \code{nObs}.
+   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   * @parm params   An array of quantile levels.
+   */
+  void setData(const Ref<const VectorXd>& y, 
+               const Ref<const MatrixXd>& X,
                void* params); // set data with default ctor
-  void setData(const Ref<const VectorXd>& _y, 
-               const Ref<const MatrixXd>& _X,
-               const Ref<const MatrixXd>& _Z,
+  
+  /**
+   * @brief Set data for quantile regression location-scale model.
+   * 
+   * @param y      Responses of length \code{nObs}.
+   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   * @param Z      Covariate matrix of dimension \code{nGam} x \code{nObs}.
+   * @parm params   An array of quantile levels.
+   */
+  void setData(const Ref<const VectorXd>& y, 
+               const Ref<const MatrixXd>& X,
+               const Ref<const MatrixXd>& Z,
                void* params); // set data with default ctor
   
   // evaluate G matrix
   /**
    * @brief Evaluate G matrix for quantile regression location model.
+   * 
    * @param beta     Coefficient vector in linear location function.
    */
   void evalG(const Ref<const MatrixXd>& Beta);
   
   /**
    * @brief Evaluate G matrix for quantile regression location-scale model.
+   * 
    * @param beta     Coefficient vector of length \code{nBet} in linear location function.
    * @param gamma    Coefficient vector of length \code{nGam} in exponential scale function.
    * @param sig2     Scale parameter in scale function.
@@ -75,6 +108,7 @@ public:
   // evaluate G matrix (smoothed version)
   /**
    * @brief First derivative of the smoothed check function.
+   * 
    * @param u     Argument of check function.
    * @param tau   Quantile level  (0 < tau < 1).
    * @param s     Smoothing parameter (s > 0).
@@ -83,6 +117,7 @@ public:
   
   /**
    * @brief Evaluate G matrix for smoothed quantile regression location-scale model.
+   * 
    * @param beta     Coefficient vector in linear location function.
    */
   void evalGSmooth(const Ref<const VectorXd>& beta,

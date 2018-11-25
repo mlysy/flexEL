@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['innerel',['InnerEL',['../class_inner_e_l.html',1,'InnerEL&lt; ELModel &gt;'],['../class_inner_e_l.html#a575fea0c38476adc15078ac1e5c155c9',1,'InnerEL::InnerEL()']]],
-  ['innerel_2eh',['InnerEL.h',['../_inner_e_l_8h.html',1,'']]],
-  ['innerelc',['InnerELC',['../class_inner_e_l_c.html',1,'']]]
+  ['evalomegas',['evalOmegas',['../class_inner_e_l.html#a1d8bb04f1909465dd8b9b689d54f6c39',1,'InnerEL::evalOmegas()'],['../class_inner_e_l_c.html#ae3d1b7458d4867904f57f622924c42cb',1,'InnerELC::evalOmegas()']]],
+  ['evalweights',['evalWeights',['../class_inner_e_l_c.html#a1d77db76adf85491988db932ada05909',1,'InnerELC']]]
 ];

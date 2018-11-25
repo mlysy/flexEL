@@ -1,79 +1,97 @@
+/**
+ * @file MeanRegModel.h
+ * 
+ * @brief A base class for template classes InnerEL and InnerELC.
+ */
+
 #ifndef MEANREGMODEL_h
 #define MEANREGMODEL_h
 
 // #include <math.h>
 // #include <Rmath.h>
 
+/**
+ * @file       MeanRegModel.h
+ * 
+ * @class      MeanRegModel
+ * 
+ * @brief      A base class for template classes InnerEL and InnerELC to calculate estimating equations for mean regressions.
+ */
 class MeanRegModel {
 private:
-  
+
   RowVectorXd yXb;
   RowVectorXd eZg;
   RowVectorXd yXbeZg;
-  RowVectorXd yXbeZg2; 
+  RowVectorXd yXbeZg2;
   MatrixXd tG;
-  
+
 protected:
-  
+
   int nObs, nEqs, nBet, nGam;
   VectorXd y;
   MatrixXd X;
   MatrixXd Z;
   MatrixXd G;
-  
+
 public:
-  
+
   // constructors
   /**
   * @brief Default constructor for MeanRegModel.
   */
   MeanRegModel();
-  
+
   /**
    * @brief Constructor for MeanRegModel with dimensions as inputs.
-   * @param _nObs    Number of observations.
-   * @param _nEqs    Number of estimating equations.
+   * 
+   * @param nObs    Number of observations.
+   * @param nEqs    Number of estimating equations.
    */
-  MeanRegModel(int _nObs, int _nEqs);
-  
+  MeanRegModel(int nObs, int nEqs);
+
   // set data
   /**
    * @brief Set data for mean regression location model.
-   * @param _y      Responses of length nObs.
-   * @param _X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   * 
+   * @param y      Responses of length \code{nObs}.
+   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
    */
-  void setData(const Ref<const VectorXd>& _y, 
-               const Ref<const MatrixXd>& _X);
-  
+  void setData(const Ref<const VectorXd>& y,
+               const Ref<const MatrixXd>& X);
+
   /**
    * @brief Set data for mean regression location-scale model.
-   * @param _y      Responses of length nObs.
-   * @param _X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
-   * @param _Z      Covariate matrix of dimension \code{nGam} x \code{nObs}.
+   * 
+   * @param y      Responses of length \code{nObs}.
+   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   * @param Z      Covariate matrix of dimension \code{nGam} x \code{nObs}.
    */
-  void setData(const Ref<const VectorXd>& _y, 
-               const Ref<const MatrixXd>& _X,
-               const Ref<const MatrixXd>& _Z);
-            
-  // evalutate G matrix   
+  void setData(const Ref<const VectorXd>& y,
+               const Ref<const MatrixXd>& X,
+               const Ref<const MatrixXd>& Z);
+
+  // evalutate G matrix
   /**
    * @brief Evaluate G matrix for mean regression location model.
+   * 
    * @param beta     Coefficient vector in linear location function.
    */
-  void evalG(const Ref<const VectorXd>& beta); 
-  
+  void evalG(const Ref<const VectorXd>& beta);
+
   /**
    * @brief Evaluate G matrix for mean regression location-scale model.
+   * 
    * @param beta     Coefficient vector of length \code{nBet} in linear location function.
    * @param gamma    Coefficient vector of length \code{nGam} in exponential scale function.
    * @param sig2     Scale parameter in scale function.
    */
-  void evalG(const Ref<const VectorXd>& beta, 
-             const Ref<const VectorXd>& gamma, 
+  void evalG(const Ref<const VectorXd>& beta,
+             const Ref<const VectorXd>& gamma,
              const double& sig2);
 };
 
-// default ctor 
+// default ctor
 inline MeanRegModel::MeanRegModel(){}
 
 // ctor
@@ -90,8 +108,8 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
   X = _X;
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
-  nGam = 0; 
-  nEqs = nBet; 
+  nGam = 0;
+  nEqs = nBet;
   G = MatrixXd::Zero(nEqs,nObs);
   tG = MatrixXd::Zero(nObs, nEqs);
   yXb = RowVectorXd::Zero(nObs);
@@ -107,7 +125,7 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
   nObs = y.size();
   nBet = X.rows(); // X gets passed as nBet x nObs matrix
   nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
-  nEqs = nBet+nGam+1; 
+  nEqs = nBet+nGam+1;
   G = MatrixXd::Zero(nEqs,nObs);
   tG = MatrixXd::Zero(nObs, nEqs);
   eZg = RowVectorXd::Zero(nObs);
@@ -115,7 +133,7 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
   yXbeZg2 = RowVectorXd::Zero(nObs);
 }
 
-// form the G matrix for location linear regression model 
+// form the G matrix for location linear regression model
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
   yXb.noalias() = y.transpose() - beta.transpose() * X;
   tG = X.transpose();
@@ -123,8 +141,8 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
   G = tG.transpose();
 }
 
-// form the G matrix for location-scale linear regression model 
-inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta, 
+// form the G matrix for location-scale linear regression model
+inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
                                 const Ref<const VectorXd>& gamma,
                                 const double &sig2) {
   eZg.array() = (-gamma.transpose()*Z).array().exp();

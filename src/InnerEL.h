@@ -1,7 +1,8 @@
 /**
-* @file InnerEL.h
-* @brief Inner optimization for empirial likelihood problems.
-*/
+ * @file InnerEL.h
+ * 
+ * @brief Inner optimization for empirial likelihood problems.
+ */
 
 #ifndef INNEREL_h
 #define INNEREL_h
@@ -47,6 +48,7 @@ private:
   // maximum relative error in lambda
   /**
    * @brief      Calculating the maximum relative error between \p lambdaNew and \p lambdaOld
+   * 
    * @return     maximum relative error
    */
   double maxRelErr(const Ref<const VectorXd>& lambdaNew,
@@ -61,10 +63,11 @@ public:
   
   /**
    * @brief Constructor for InnerEL with dimensions of G matrix as inputs for memory allocation.
-   * @param _nObs    Number of observations.
-   * @param _nEqs    Number of estimating equations.
+   * 
+   * @param nObs    Number of observations.
+   * @param nEqs    Number of estimating equations.
    */
-  InnerEL(int _nObs, int _nEqs);
+  InnerEL(int nObs, int nEqs);
     
   // logstar and its derivatives for the EL dual problem
   /**
@@ -90,6 +93,7 @@ public:
   
   /**
    * @brief Find the optimal lambda by a Newton-Raphson algorithm.
+   * 
    * @param[out] nIter    Number of iterations to achieve convergence.
    * @param[out] maxErr   Maximum relative error among entires in lambda at the last step.
    */

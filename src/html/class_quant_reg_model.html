@@ -69,48 +69,24 @@ $(function() {
 <div class="title">QuantRegModel Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A base class for template classes <a class="el" href="class_inner_e_l.html">InnerEL</a> and <a class="el" href="class_inner_e_l_c.html">InnerELC</a> to calculate estimating equations for quantile regressions.  
+ <a href="class_quant_reg_model.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_quant_reg_model_8h_source.html">QuantRegModel.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:afb7f95167c030fc97e5a1eaac3e2eaa9"><td class="memItemLeft" align="right" valign="top"><a id="afb7f95167c030fc97e5a1eaac3e2eaa9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setData</b> (const Ref&lt; const VectorXd &gt; &amp;_y, const Ref&lt; const MatrixXd &gt; &amp;_X, void *params)</td></tr>
-<tr class="separator:afb7f95167c030fc97e5a1eaac3e2eaa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cfd187e76145d63c99b8ed05db6482a"><td class="memItemLeft" align="right" valign="top"><a id="a2cfd187e76145d63c99b8ed05db6482a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setData</b> (const Ref&lt; const VectorXd &gt; &amp;_y, const Ref&lt; const MatrixXd &gt; &amp;_X, const Ref&lt; const MatrixXd &gt; &amp;_Z, void *params)</td></tr>
-<tr class="separator:a2cfd187e76145d63c99b8ed05db6482a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeca115ca0f41a5fdc2ede47c579114f9"><td class="memItemLeft" align="right" valign="top"><a id="aeca115ca0f41a5fdc2ede47c579114f9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>evalG</b> (const Ref&lt; const MatrixXd &gt; &amp;Beta)</td></tr>
-<tr class="separator:aeca115ca0f41a5fdc2ede47c579114f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b02451b9f68ae67aeb0c12fc2e1c8a0"><td class="memItemLeft" align="right" valign="top"><a id="a1b02451b9f68ae67aeb0c12fc2e1c8a0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>evalG</b> (const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu)</td></tr>
-<tr class="separator:a1b02451b9f68ae67aeb0c12fc2e1c8a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace8bbf93190cd06834bcb07811dd91e9"><td class="memItemLeft" align="right" valign="top"><a id="ace8bbf93190cd06834bcb07811dd91e9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>evalGSmooth</b> (const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu, const double s)</td></tr>
-<tr class="separator:ace8bbf93190cd06834bcb07811dd91e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e125e25263162c6b23f3319ed36388a"><td class="memItemLeft" align="right" valign="top"><a id="a8e125e25263162c6b23f3319ed36388a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setG</b> (const Ref&lt; const MatrixXd &gt; &amp;_G)</td></tr>
-<tr class="separator:a8e125e25263162c6b23f3319ed36388a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c3698b034f778497d303787de46608f"><td class="memItemLeft" align="right" valign="top"><a id="a9c3698b034f778497d303787de46608f"></a>
-MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>getG</b> ()</td></tr>
-<tr class="separator:a9c3698b034f778497d303787de46608f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6d8965e115e3415d20148bd806daf7c"><td class="memItemLeft" align="right" valign="top"><a id="ab6d8965e115e3415d20148bd806daf7c"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>phi_alpha_smooth</b> (double u, double alpha, double s)</td></tr>
-<tr class="separator:ab6d8965e115e3415d20148bd806daf7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c2516cd1b3b19c21f03683f802ef6ed"><td class="memItemLeft" align="right" valign="top"><a id="a5c2516cd1b3b19c21f03683f802ef6ed"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a5c2516cd1b3b19c21f03683f802ef6ed">QuantRegModel</a> ()</td></tr>
+<tr class="memdesc:a5c2516cd1b3b19c21f03683f802ef6ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for <a class="el" href="class_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a>. <br /></td></tr>
+<tr class="separator:a5c2516cd1b3b19c21f03683f802ef6ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b04dfbbf2abe42fada14f3272de5883"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a8b04dfbbf2abe42fada14f3272de5883">QuantRegModel</a> (int nObs, int nEqs)</td></tr>
+<tr class="memdesc:a8b04dfbbf2abe42fada14f3272de5883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="class_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> with dimensions as inputs.  <a href="#a8b04dfbbf2abe42fada14f3272de5883">More...</a><br /></td></tr>
+<tr class="separator:a8b04dfbbf2abe42fada14f3272de5883"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:ac41daf30bb21cafaffcda33a0d6c9438"><td class="memItemLeft" align="right" valign="top"><a id="ac41daf30bb21cafaffcda33a0d6c9438"></a>
-VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>y</b></td></tr>
-<tr class="separator:ac41daf30bb21cafaffcda33a0d6c9438"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae27e4f655e6d8d357dfbc8ca962babc2"><td class="memItemLeft" align="right" valign="top"><a id="ae27e4f655e6d8d357dfbc8ca962babc2"></a>
-MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>X</b></td></tr>
-<tr class="separator:ae27e4f655e6d8d357dfbc8ca962babc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb798efb53c189b8537e937f1615c3d8"><td class="memItemLeft" align="right" valign="top"><a id="abb798efb53c189b8537e937f1615c3d8"></a>
-MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>Z</b></td></tr>
-<tr class="separator:abb798efb53c189b8537e937f1615c3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3aa56c7c8a5fd1efd89ec299d50fcfdf"><td class="memItemLeft" align="right" valign="top"><a id="a3aa56c7c8a5fd1efd89ec299d50fcfdf"></a>
-double *&#160;</td><td class="memItemRight" valign="bottom"><b>alpha</b></td></tr>
-<tr class="separator:a3aa56c7c8a5fd1efd89ec299d50fcfdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7445eb0105253a7b102bf829f262f9e"><td class="memItemLeft" align="right" valign="top"><a id="af7445eb0105253a7b102bf829f262f9e"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>nObs</b></td></tr>
 <tr class="separator:af7445eb0105253a7b102bf829f262f9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -123,13 +99,118 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>nBet</b></td></tr>
 <tr class="memitem:a728f568023281a1046c7ce87dd383d58"><td class="memItemLeft" align="right" valign="top"><a id="a728f568023281a1046c7ce87dd383d58"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>nGam</b></td></tr>
 <tr class="separator:a728f568023281a1046c7ce87dd383d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07a767534902c45f54963c14cf563bf0"><td class="memItemLeft" align="right" valign="top"><a id="a07a767534902c45f54963c14cf563bf0"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>nQts</b></td></tr>
+<tr class="memitem:a07a767534902c45f54963c14cf563bf0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a07a767534902c45f54963c14cf563bf0">nQts</a></td></tr>
 <tr class="separator:a07a767534902c45f54963c14cf563bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac41daf30bb21cafaffcda33a0d6c9438"><td class="memItemLeft" align="right" valign="top"><a id="ac41daf30bb21cafaffcda33a0d6c9438"></a>
+VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>y</b></td></tr>
+<tr class="separator:ac41daf30bb21cafaffcda33a0d6c9438"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae27e4f655e6d8d357dfbc8ca962babc2"><td class="memItemLeft" align="right" valign="top"><a id="ae27e4f655e6d8d357dfbc8ca962babc2"></a>
+MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>X</b></td></tr>
+<tr class="separator:ae27e4f655e6d8d357dfbc8ca962babc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb798efb53c189b8537e937f1615c3d8"><td class="memItemLeft" align="right" valign="top"><a id="abb798efb53c189b8537e937f1615c3d8"></a>
+MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>Z</b></td></tr>
+<tr class="separator:abb798efb53c189b8537e937f1615c3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a08775916c18a209da9307f0b76f4174f"><td class="memItemLeft" align="right" valign="top"><a id="a08775916c18a209da9307f0b76f4174f"></a>
 MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>G</b></td></tr>
 <tr class="separator:a08775916c18a209da9307f0b76f4174f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1942b670b32ff54595414f5348aaf0c"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#af1942b670b32ff54595414f5348aaf0c">tau</a></td></tr>
+<tr class="separator:af1942b670b32ff54595414f5348aaf0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p class="">A base class for template classes <a class="el" href="class_inner_e_l.html">InnerEL</a> and <a class="el" href="class_inner_e_l_c.html">InnerELC</a> to calculate estimating equations for quantile regressions. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a8b04dfbbf2abe42fada14f3272de5883"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b04dfbbf2abe42fada14f3272de5883">&#9670;&nbsp;</a></span>QuantRegModel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">QuantRegModel::QuantRegModel </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nObs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>nEqs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor for <a class="el" href="class_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> with dimensions as inputs. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nObs</td><td>Number of observations. </td></tr>
+    <tr><td class="paramname">nEqs</td><td>Number of estimating equations. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a07a767534902c45f54963c14cf563bf0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07a767534902c45f54963c14cf563bf0">&#9670;&nbsp;</a></span>nQts</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int QuantRegModel::nQts</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p class="">nQts is the number of quantile levels </p>
+
+</div>
+</div>
+<a id="af1942b670b32ff54595414f5348aaf0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1942b670b32ff54595414f5348aaf0c">&#9670;&nbsp;</a></span>tau</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* QuantRegModel::tau</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p class="">an array of quantile levels </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="_quant_reg_model_8h_source.html">QuantRegModel.h</a></li>
 </ul>

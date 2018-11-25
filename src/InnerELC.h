@@ -1,5 +1,6 @@
 /**
  * @file InnerELC.h
+ * 
  * @brief Inner optimization routine for empirial likelihood problems under right-censoring.
  */
 
@@ -62,8 +63,9 @@ private:
                    const Ref<const VectorXd>& lambdaOld);
   
   /**
-   * @brief      Helper function for evalWeights: calculate partial sum of omegas
-   * @return     Partial sum of omegas_jj s.t. eps_jj >= eps_ii
+   * @brief      Helper function for evalWeights: calculate partial sum of omegas.
+   * 
+   * @return     Partial sum of omegas_jj s.t. eps_jj >= eps_ii.
    */
   double evalPsos(const int ii);
   
@@ -76,16 +78,18 @@ public:
   
   /**
    * @brief Constructor for InnerELC with number of observations only as input for memory allocation.
-   * @param _nObs    Number of observations.
+   * 
+   * @param nObs    Number of observations.
    */
-  InnerELC(int _nObs);
+  InnerELC(int nObs);
   
   /**
    * @brief Constructor for InnerELC with dimensions of G matrix as inputs for memory allocation.
-   * @param _nObs    Number of observations.
-   * @param _nEqs    Number of estimating equations.
+   * 
+   * @param nObs    Number of observations.
+   * @param nEqs    Number of estimating equations.
    */
-  InnerELC(int _nObs, int _nEqs);
+  InnerELC(int nObs, int nEqs);
   
   // logsharp and its derivatives for the EL dual problem
   /**
@@ -116,6 +120,7 @@ public:
   
   /**
    * @brief Find the optimal lambda by a Newton-Raphson algorithm (with right-censored EL).
+   * 
    * @param[out] nIter    Number of iterations to achieve convergence.
    * @param[out] maxErr   Maximum relative error among entires in lambda at the last step.
    */
