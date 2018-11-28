@@ -21,9 +21,9 @@ class InnerEL : public ELModel {
 private:
   
   // required members in ELModel
-  using ELModel::G; /**< matrix of estimating equations */
-  using ELModel::nObs; /**< number of observations (number of columns of G) */
-  using ELModel::nEqs; /**< number of estimating equations (number of rows of G) */
+  using ELModel::G;
+  using ELModel::nObs; 
+  using ELModel::nEqs;
   
   // constants for logstar
   double trunc, aa, bb, cc; /**< constants in logstar functions */

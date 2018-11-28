@@ -1,5 +1,7 @@
 ## Note: the gradient in HMC paper only works for theta in the support of EL
 ## so if the initial point is far away this may not work.
+## In fact, log EL may not be convex in the parameters so the gradient is not 
+## guaranteed to work
 
 # ---- shared functions ----
 
@@ -158,16 +160,64 @@ qr.neglogEL.smooth_R <- function(y, X, tau, beta, s=10) {
   return(res)
 }
 
-# ---- qrls functions ----
-# qrls.deltaG_R <- function(y, X, Z, tau, beta, beta, gamma, sig2, nu, s=10) {
-#   # TODO: 
-#   # lx <- split(X, row(X))
-#   # dg <- mapply(function(x,y) {
-#   #   eps <- y - x %*% beta
-#   #   tcrossprod(rho2.smooth_R(eps,tau,s)[1]*x,x)
-#   # }, lx, y, SIMPLIFY = FALSE)
-#   # return(dg)
-# }
+# ---- mrls functions ----
+
+
+# ---- qrls.smooth functions ----
+qrls.deltaG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
+  lx <- split(X, row(X))
+  lz <- split(Z, row(Z))
+  p <- length(beta)
+  q <- length(gamma)
+  d <- p+q+2 # Note: this is for when the number of quantile levels is 1
+  dg <- mapply(function(x,z,y) {
+    # some consts to be used multiple times
+    emzg <- c(exp(-z %*% gamma)) # e to the minuz z * gamma (should be a scalar)
+    em2zg <- emzg * emzg # e to the minuz 2 * z * gamma
+    ymxb <- c(y - x %*% beta) # y minus x * beta (should be a scalar)
+    ymxb2 <- ymxb * ymxb # (y minus x * beta)^2
+    sig <- sqrt(sig2) # TODO: what if negative?
+    eps <- 1/sig*emzg*ymxb
+    rsemm <- rho2.smooth_R(eps-nu,tau,s) # rho second derivative of eps minus nu
+    
+    # pre-allocate space for hessian
+    mat <- matrix(NA,nrow=d,ncol=d)
+    
+    # derivative w.r.t beta
+    mat[1:p,1:p] <- -em2zg*tcrossprod(x,x)
+    mat[1:p,(p+1):(p+q)] <- 2*em2zg*ymxb*tcrossprod(x,z)
+    mat[1:p,p+q+1] <- -2/sig2*em2zg*ymxb*x
+    mat[1:p,d] <- -1/sig*rsemm*emzg*x
+    
+    # symmetric 
+    mat[(p+1):(p+q),1:p] <- t(mat[1:p,(p+1):(p+q)])
+    mat[p+q+1,1:p] <- t(mat[1:p,p+q+1])
+    mat[d,1:p] <- t(mat[1:p,d])
+    
+    # derivative w.r.t. gamma
+    mat[(p+1):(p+q),(p+1):(p+q)] <- 2*em2zg*ymxb2*tcrossprod(z,z)
+    mat[(p+1):(p+q),p+q+1] <- -2/sig2*em2zg*ymxb2*z
+    mat[(p+1):(p+q),d] <- -1/sig*rsemm*emzg*ymxb*z
+    
+    # symmetric
+    mat[p+q+1,(p+1):(p+q)] <- t(mat[(p+1):(p+q),p+q+1])
+    mat[d,(p+1):(p+q)] <- t(mat[(p+1):(p+q),d])
+    
+    # derivative w.r.t. sig
+    mat[p+q+1,p+q+1] <- -2/(sig2*sig)*em2zg*ymxb2
+    mat[p+q+1,d] <- -1/sig2*rsemm*emzg*ymxb
+    
+    # symmetric
+    mat[d,p+q+1] <- mat[p+q+1,d]
+    
+    # derivative w.r.t nu
+    mat[d,d] <- -rsemm
+    
+    # return
+    mat
+  }, lx, lz, y, SIMPLIFY = FALSE)
+  return(dg)
+}
 
 qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
   nObs <- nrow(X)
@@ -185,26 +235,34 @@ qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
   return(G)
 }
 
-qrls.neglogEL_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
+qrls.neglogEL.smooth_R <- function(y, X, Z, tau, theta, s=10, ret_grad=TRUE) {
+  p <- ncol(X)
+  q <- ncol(Z)
+  beta <- theta[1:p]
+  gamma <- theta[(p+1):(p+q)]
+  sig2 <- theta[p+q+1]
+  nu <- theta[p+q+2]
   G <- qrls.evalG.smooth_R(y, X, Z, tau, beta, gamma, sig2, nu, s)
   lambda <- lambdaNR(G)
   if (!anyNA(lambda)) {
     omegas <- omega.hat(G)
     res <- -sum(log(omegas)) # negative logEL
-    gradlist <- qrls.deltaG_R(y, X, Z, tau, beta, gamma, sig2, nu, s)
-    grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
-    attr(res, "gradient") <- grad
+    if (ret_grad) {
+      gradlist <- qrls.deltaG.smooth_R(y, X, Z, tau, beta, gamma, sig2, nu, s)
+      grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
+      attr(res, "gradient") <- grad
+    }
   }
   else {
     # TODO: if not converged, what should be the gradient...??
     message("qrls.neglogEL_R: lambdaNR not coverged.")
-    res <- rep(Inf,length(beta))
-    attr(res, "gradient") <- rep(Inf,length(beta))
+    res <- rep(Inf)
+    if (ret_grad) {
+      attr(res, "gradient") <- rep(Inf,length(beta))
+    }
   }
   return(res)
 }
-
-
 
 # ---- mr.cens functions ----
 mr_cens.neglogEL.smooth_R <- function(y, X, deltas, beta, s=10) {

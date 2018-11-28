@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nqts',['nQts',['../class_quant_reg_model.html#a07a767534902c45f54963c14cf563bf0',1,'QuantRegModel']]]
+  ['g',['G',['../class_mean_reg_model.html#ae4b497393c0175a9f867bd832638134b',1,'MeanRegModel']]]
 ];

@@ -150,22 +150,23 @@ eps <- rnorm(n) # N(0,1) error term
 y <- c(X * mu0) + eps
 tau <- 0.75
 
-qr.neglogEL_R(y,X,tau,mu0)
+qr.neglogEL.smooth_R(y,X,tau,mu0)
 
 numpoints <- 100
 mu.seq <- seq(-.5+mu0+qnorm(tau),.5+mu0+qnorm(tau),length.out = numpoints)
 logel.seq <- rep(NA,numpoints)
 grad.seq <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  temp <- -qr.neglogEL_R(y,X,tau,mu.seq[ii],s=10)
+  temp <- -qr.neglogEL.smooth_R(y,X,tau,mu.seq[ii],s=10)
   logel.seq[ii] <- temp
   grad.seq[ii] <- attributes(temp)$gradient
 }
 logelmode <- plotEL(mu.seq, logel.seq, mu0+qnorm(tau), quantile(y,tau), expression(mu))
-plot(grad.seq,type='l')
-abline(h=0,col='blue')
 
-nlm(qr.neglogEL_R,1,y=y,X=X,tau=tau,s=10)
+(nlmout <- nlm(qr.neglogEL.smooth_R,1,y=y,X=X,tau=tau,s=10))
+plot(mu.seq,grad.seq,type='l')
+abline(h=0,col='blue')
+abline(v=nlmout$estimate,col='blue')
 
 # 2-d problem
 n <- 500
@@ -185,7 +186,7 @@ beta.hat <- coef(rq(y~X-1),tau)
 beta.hat
 qr.neglogEL_R(y,X,tau,beta0,s = 10)
 
-nlm(qr.neglogEL_R,beta.hat,y=y,X=X,tau=tau)
+nlm(qr.neglogEL.smooth_R,beta.hat,y=y,X=X,tau=tau)
 
 # 3-d problem
 n <- 200
@@ -285,3 +286,139 @@ negnorm <- function(x) {
   return(-dnorm(x, mean=1))
 }
 nlm(negnorm,1)
+
+## qrls.smooth
+
+# check if the hessian is close to what nlm return
+
+n <- 200
+tau <- 0.75
+beta0 <- c(0.5,1)
+gamma0 <- -0.5
+sig20 <- 1
+
+X <- cbind(rep(1,n),rnorm(n))
+Z <- matrix(rnorm(1*n),n,1)
+genout <- gen_eps(n, dist = "norm", tau = tau)
+eps <- genout$eps
+nu0 <- genout$nu0
+theta0 <- c(beta0,gamma0,sig20,nu0)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps)
+plot(y~X[,2], cex=0.3)
+
+# initial value
+hlmout <- hlm.fit(y, X, cbind(1,Z))
+hlmout$conv
+
+beta.hlm <- hlmout$beta
+gamma.hlm <- hlmout$gamma[2]*0.5
+sig2.hlm <- exp(hlmout$gamma[1])
+nu.hlm <- quantile((y-X %*% beta.hlm)*exp(-Z %*% gamma.hlm)/sqrt(sig2.hlm),tau)
+(theta.hlm <- c(beta.hlm,gamma.hlm,sig2.hlm,nu.hlm))
+
+(nlmout <- nlm(f=qrls.neglogEL.smooth_R,p=theta.hlm,y=y,X=X,Z=Z,tau=tau,s=10,ret_grad=FALSE,
+               check.analyticals = TRUE, print.level = 2))
+(theta.nlm <- nlmout$estimate)
+nlmout$gradient
+
+qrls.neglogEL.smooth_R(y,X,Z,tau,theta.nlm)
+
+# what if fix nu.. does not work either:(
+# opt_bool: T if an entry is to be optimized
+# theta.fix: fixed params not to be optimized
+qrls.neglogEL.smooth_R_fix <- function(y,X,Z,tau,theta.opt,theta.fix,opt_bool,s=10,ret_grad=TRUE) {
+  theta.new <- rep(NA,ncol(X)+ncol(Z)+2)
+  theta.new[opt_bool] <- theta.opt
+  theta.new[!opt_bool] <- theta.fix
+  retval <- qrls.neglogEL.smooth_R(y,X,Z,tau,theta.new,s,ret_grad)
+  gradval <- attributes(retval)$gradient
+  gradvalmn <- gradval[opt_bool]
+  attr(retval, "gradient") <- gradvalmn
+  retval
+}
+
+qrls.neglogEL.smooth_R_fix(y,X,Z,tau,beta.hlm[1],
+                           c(beta.hlm[2],gamma.hlm,sig2.hlm,nu.hlm),
+                           opt_bool=c(T,F,F,F,F))
+(nlmout <- nlm(f=qrls.neglogEL.smooth_R_fix,p=sig2.hlm,
+               theta.fix=c(beta.hlm,gamma.hlm,nu.hlm),opt_bool=c(F,F,F,T,F),
+               y=y,X=X,Z=Z,tau=tau,ret_grad=TRUE))
+
+# check as one param moves, how does its gradient move
+
+numpoints <- 300
+beta0.seq <- seq(-.5+theta.nlm[1], .5+theta.nlm[1], length.out = numpoints)
+logel.beta0 <- rep(NA,numpoints)
+beta0.grad <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  theta.temp <- theta.nlm
+  theta.temp[1] <- beta0.seq[ii]
+  retval <- qrls.neglogEL.smooth_R(y,X,Z,tau,theta.temp)
+  logel.beta0[ii] <- retval
+  beta0.grad[ii] <- attributes(retval)$gradient[1]
+}
+plot(beta0.seq,logel.beta0,cex=.2)
+plot(beta0.seq,beta0.grad,cex=.2)
+abline(h=0,col='red')
+abline(v=theta.nlm[1],col='red')
+
+beta1.seq <- seq(-.5+theta.nlm[2], .5+theta.nlm[2], length.out = numpoints)
+logel.beta1 <- rep(NA,numpoints)
+beta1.grad <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  theta.temp <- theta.nlm
+  theta.temp[2] <- beta1.seq[ii]
+  retval <- qrls.neglogEL.smooth_R(y,X,Z,tau,theta.temp)
+  logel.beta1[ii] <- retval
+  beta1.grad[ii] <- attributes(retval)$gradient[2]
+}
+plot(beta1.seq,logel.beta1,cex=.2)
+plot(beta1.seq,beta1.grad,cex=.2)
+abline(h=0,col='red')
+abline(v=theta.nlm[2],col='red')
+
+gamma.seq <- seq(-.5+theta.nlm[3], .5+theta.nlm[3], length.out = numpoints)
+logel.gamma <- rep(NA,numpoints)
+gamma.grad <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  theta.temp <- theta.nlm
+  theta.temp[3] <- gamma.seq[ii]
+  retval <- qrls.neglogEL.smooth_R(y,X,Z,tau,theta.temp)
+  logel.gamma[ii] <- retval
+  gamma.grad[ii] <- attributes(retval)$gradient[3]
+}
+plot(gamma.seq,logel.gamma,cex=.2)
+plot(gamma.seq,gamma.grad,cex=.2)
+abline(h=0,col='red')
+abline(v=theta.nlm[3],col='red')
+
+sig2.seq <- seq(-.5+theta.nlm[4], .5+theta.nlm[4], length.out = numpoints)
+logel.sig2 <- rep(NA,numpoints)
+sig2.grad <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  theta.temp <- theta.nlm
+  theta.temp[4] <- sig2.seq[ii]
+  retval <- qrls.neglogEL.smooth_R(y,X,Z,tau,theta.temp)
+  logel.sig2[ii] <- retval
+  sig2.grad[ii] <- attributes(retval)$gradient[4]
+}
+plot(sig2.seq,logel.sig2,cex=.2)
+plot(sig2.seq,sig2.grad,cex=.2)
+abline(h=0,col='red')
+abline(v=theta.nlm[4],col='red')
+
+nu.seq <- seq(-.5+theta.nlm[5], .5+theta.nlm[5], length.out = numpoints)
+logel.nu <- rep(NA,numpoints)
+nu.grad <- rep(NA,numpoints)
+for (ii in 1:numpoints) {
+  theta.temp <- theta.nlm
+  theta.temp[5] <- nu.seq[ii]
+  retval <- qrls.neglogEL.smooth_R(y,X,Z,tau,theta.temp)
+  logel.nu[ii] <- retval
+  nu.grad[ii] <- attributes(retval)$gradient[5]
+}
+plot(nu.seq,logel.nu,cex=.2)
+plot(nu.seq,nu.grad,cex=.2)
+abline(h=0,col='red')
+abline(v=theta.nlm[5],col='red')
+

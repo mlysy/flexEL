@@ -63,9 +63,9 @@ public:
   /**
    * @brief Set data for quantile regression location model.
    * 
-   * @param y      Responses of length \code{nObs}.
-   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
-   * @parm params   An array of quantile levels.
+   * @param y      Responses of length <code>nObs</code>.
+   * @param X      Covariate matrix of dimension <code>nBet</code> x <code>nObs</code>.
+   * @param params   An array of quantile levels.
    */
   void setData(const Ref<const VectorXd>& y, 
                const Ref<const MatrixXd>& X,
@@ -74,10 +74,10 @@ public:
   /**
    * @brief Set data for quantile regression location-scale model.
    * 
-   * @param y      Responses of length \code{nObs}.
-   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
-   * @param Z      Covariate matrix of dimension \code{nGam} x \code{nObs}.
-   * @parm params   An array of quantile levels.
+   * @param y      Responses of length <code>nObs</code>.
+   * @param X      Covariate matrix of dimension <code>nBet</code> x <code>nObs</code>.
+   * @param Z      Covariate matrix of dimension <code>nGam</code> x <code>nObs</code>.
+   * @param params   An array of quantile levels.
    */
   void setData(const Ref<const VectorXd>& y, 
                const Ref<const MatrixXd>& X,
@@ -88,15 +88,15 @@ public:
   /**
    * @brief Evaluate G matrix for quantile regression location model.
    * 
-   * @param beta     Coefficient vector in linear location function.
+   * @param beta     Coefficient vector of length <code>nObs</code> in linear location function.
    */
   void evalG(const Ref<const MatrixXd>& Beta);
   
   /**
    * @brief Evaluate G matrix for quantile regression location-scale model.
    * 
-   * @param beta     Coefficient vector of length \code{nBet} in linear location function.
-   * @param gamma    Coefficient vector of length \code{nGam} in exponential scale function.
+   * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
+   * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
    * @param sig2     Scale parameter in scale function.
    * @param Nu       Quantile parameters for each quantile level.
    */
@@ -118,7 +118,7 @@ public:
   /**
    * @brief Evaluate G matrix for smoothed quantile regression location-scale model.
    * 
-   * @param beta     Coefficient vector in linear location function.
+   * @param beta     Coefficient vector of length <code>nObs</code> in linear location function.
    */
   void evalGSmooth(const Ref<const VectorXd>& beta,
                    const Ref<const VectorXd>& gamma,

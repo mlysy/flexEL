@@ -22,7 +22,7 @@ Z <- matrix(rnorm(n),n,q)
 beta0 <- .5
 # gamma0 <- rnorm(q)
 gamma0 <- -.5
-sig20 <- abs(rnorm(1)) # NEW: scale param
+# sig20 <- abs(rnorm(1)) # NEW: scale param
 sig20 <- 1
 
 # normal(0,1) error

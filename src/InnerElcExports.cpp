@@ -46,9 +46,9 @@ Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
                           int maxIter, double relTol, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
-  InnerELC<MeanRegModel> ILC(nObs,nEqs); 
+  InnerELC<MeanRegModel> ILC(nObs,nEqs);
   ILC.setG(G); // assign a given G
-  ILC.setWeights(weights); 
+  ILC.setWeights(weights);
   ILC.setTol(maxIter, relTol);
   
   // initialize variables for output here 
@@ -56,13 +56,13 @@ Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
   double maxErr;
   ILC.lambdaNR(nIter, maxErr);
   VectorXd lambda = ILC.getLambda(); // output
-  
+
   // check convergence
   bool not_conv = (nIter == maxIter) && (maxErr > relTol);
   if(verbose) {
     Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
   }
-  
+
   // fill in NaN if not converged
   if (not_conv) {
     for (int ii=0; ii<lambda.size(); ii++) {

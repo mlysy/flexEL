@@ -161,7 +161,7 @@ y <- beta_I + c(X1 %*% beta_S) + eps
 plot(X1,y,cex=0.3)
 
 # grid plot of conditionals: beta1|beta2 and beta2|beta1
-adjust <- FALSE
+adjust <- TRUE
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-1,beta0[1]+1,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
@@ -207,3 +207,55 @@ if (adjust) {
 
 any(is.infinite(logel.seq[2,]))
 
+# --------------------------------------------------------------------------- 
+# mr: is the conditional log EL curve smooth if there is no censoring for beta1?
+n <- 100
+p <- 2
+X1 <- matrix(rnorm(n),n,1)
+X <- cbind(1,X1)
+beta_I <- 1
+beta_S <- 1.5
+beta0 <- c(beta_I, beta_S)
+y <- beta_I + c(X1 %*% beta_S) + eps 
+
+adjust <- FALSE
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-5,beta0[1]+5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-5,beta0[2]+5,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
+  epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
+  if(adjust) {
+    G <- adjG_R(G)
+    omegas <- omega.hat_R(G, adjust=adjust)$omegas
+    logel.seq[1,ii] <- logEL_R(omegas)
+  }
+  else {
+    omegas <- omega.hat(G)
+    logel.seq[1,ii] <- logEL(omegas)
+  }
+  
+  G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
+  epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
+  if(adjust) {
+    G <- adjG_R(G)
+    omegas <- omega.hat_R(G, adjust=adjust)$omegas
+    logel.seq[2,ii] <- logEL_R(omegas)
+  }
+  else {
+    omegas <- omega.hat(G)
+    logel.seq[2,ii] <- logEL(omegas)
+  }
+}
+
+if (!adjust) {
+  logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
+  logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+}
+
+# --------------------------------------------------------------------------- 
+# mrls: is the conditional log EL curve smooth if there is no censoring for params other than beta0?

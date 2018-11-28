@@ -12,34 +12,36 @@
 
 /**
  * @file       MeanRegModel.h
- * 
+ *
  * @class      MeanRegModel
- * 
+ *
  * @brief      A base class for template classes InnerEL and InnerELC to calculate estimating equations for mean regressions.
  */
 class MeanRegModel {
 private:
 
-  RowVectorXd yXb;
-  RowVectorXd eZg;
-  RowVectorXd yXbeZg;
-  RowVectorXd yXbeZg2;
-  MatrixXd tG;
+  RowVectorXd yXb; // y - X*beta
+  RowVectorXd eZg; // exp(-Z*gamma)
+  RowVectorXd yXbeZg; // (y - X*beta)*exp(-Z*gamma)
+  RowVectorXd yXbeZg2; // (y - X*beta)^2*exp(-2*Z*gamma)
+  MatrixXd tG; // t(G)
+  int nBet, nGam; // dimensions of beta and gamma
+  VectorXd y; // vector of responses
+  MatrixXd X; // covariate matrix used in location function
+  MatrixXd Z; // covariate matrix used in scale function
 
 protected:
 
-  int nObs, nEqs, nBet, nGam;
-  VectorXd y;
-  MatrixXd X;
-  MatrixXd Z;
-  MatrixXd G;
+  int nObs; /**< number of observations (number of columns of G) */
+  int nEqs; /**< number of estimating equations (number of rows of G) */
+  MatrixXd G; /**< matrix of estimating equations of dimension <code>nEqs</code> x <code>nObs</code>*/
 
 public:
 
   // constructors
   /**
-  * @brief Default constructor for MeanRegModel.
-  */
+   * @brief Default constructor for MeanRegModel.
+   */
   MeanRegModel();
 
   /**
@@ -54,8 +56,8 @@ public:
   /**
    * @brief Set data for mean regression location model.
    * 
-   * @param y      Responses of length \code{nObs}.
-   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
+   * @param y      Responses of length <code>nObs</code>.
+   * @param X      Covariate matrix of dimension <code>nBet</code> x <code>nObs</code>.
    */
   void setData(const Ref<const VectorXd>& y,
                const Ref<const MatrixXd>& X);
@@ -63,9 +65,9 @@ public:
   /**
    * @brief Set data for mean regression location-scale model.
    * 
-   * @param y      Responses of length \code{nObs}.
-   * @param X      Covariate matrix of dimension \code{nBet} x \code{nObs}.
-   * @param Z      Covariate matrix of dimension \code{nGam} x \code{nObs}.
+   * @param y      Responses of length <code>nObs</code>.
+   * @param X      Covariate matrix of dimension <code>nBet</code> x <code>nObs</code>.
+   * @param Z      Covariate matrix of dimension <code>nGam</code> x <code>nObs</code>.
    */
   void setData(const Ref<const VectorXd>& y,
                const Ref<const MatrixXd>& X,
@@ -75,15 +77,15 @@ public:
   /**
    * @brief Evaluate G matrix for mean regression location model.
    * 
-   * @param beta     Coefficient vector in linear location function.
+   * @param beta     Coefficient vector of length <code>nObs</code> in linear location function.
    */
   void evalG(const Ref<const VectorXd>& beta);
 
   /**
    * @brief Evaluate G matrix for mean regression location-scale model.
    * 
-   * @param beta     Coefficient vector of length \code{nBet} in linear location function.
-   * @param gamma    Coefficient vector of length \code{nGam} in exponential scale function.
+   * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
+   * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
    * @param sig2     Scale parameter in scale function.
    */
   void evalG(const Ref<const VectorXd>& beta,

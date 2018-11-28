@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['quantregmodel',['QuantRegModel',['../class_quant_reg_model.html',1,'QuantRegModel'],['../class_quant_reg_model.html#a5c2516cd1b3b19c21f03683f802ef6ed',1,'QuantRegModel::QuantRegModel()'],['../class_quant_reg_model.html#a8b04dfbbf2abe42fada14f3272de5883',1,'QuantRegModel::QuantRegModel(int nObs, int nEqs)']]],
-  ['quantregmodel_2eh',['QuantRegModel.h',['../_quant_reg_model_8h.html',1,'']]]
+  ['neqs',['nEqs',['../class_mean_reg_model.html#a87658d2e0b1e2b43fb030d7328cb6de1',1,'MeanRegModel']]],
+  ['nobs',['nObs',['../class_mean_reg_model.html#a6b3c8482ec1ebdeb0a038d168492e904',1,'MeanRegModel']]],
+  ['nqts',['nQts',['../class_quant_reg_model.html#a07a767534902c45f54963c14cf563bf0',1,'QuantRegModel']]]
 ];

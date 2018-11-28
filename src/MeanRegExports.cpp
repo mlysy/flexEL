@@ -1,3 +1,8 @@
+/**
+ * @file MeanRegExports.cpp
+ * 
+ * @brief Export MeanRegModel functions to R.
+ */
 // port some of MeanReg functions to R
 
 #include <Rcpp.h>

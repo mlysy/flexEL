@@ -1,3 +1,9 @@
+/**
+ * @file InnerElExports.cpp
+ * 
+ * @brief Export InnerEL functions to R.
+ */
+
 // port some of InnerEL to R
 
 #include <Rcpp.h>

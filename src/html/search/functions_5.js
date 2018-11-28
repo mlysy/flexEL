@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['settol',['setTol',['../class_inner_e_l.html#a37b7a5727dcc9e44ea218874b717eae7',1,'InnerEL::setTol()'],['../class_inner_e_l_c.html#a7590c4461d1a42fdd2d19f006972ea4d',1,'InnerELC::setTol(const int &amp;_maxIter, const double &amp;_relTol, const double &amp;_absTol)'],['../class_inner_e_l_c.html#a1e83be14484d2bc9c9ad154e0ed838f8',1,'InnerELC::setTol(const int &amp;_maxIter, const double &amp;_relTol)']]]
+  ['quantregmodel',['QuantRegModel',['../class_quant_reg_model.html#a5c2516cd1b3b19c21f03683f802ef6ed',1,'QuantRegModel::QuantRegModel()'],['../class_quant_reg_model.html#a8b04dfbbf2abe42fada14f3272de5883',1,'QuantRegModel::QuantRegModel(int nObs, int nEqs)']]]
 ];

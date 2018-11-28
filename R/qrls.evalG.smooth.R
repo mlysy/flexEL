@@ -10,7 +10,7 @@
 #' @param s A positive scalar as smoothing parameter.
 #' @return G matrix for location-scale quantile regression model. 
 #' @export qrls.evalG.smooth
-qrls.evalG.smooth <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp) { 
+qrls.evalG.smooth <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 10) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")

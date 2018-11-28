@@ -84,6 +84,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8b04dfbbf2abe42fada14f3272de5883"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a8b04dfbbf2abe42fada14f3272de5883">QuantRegModel</a> (int nObs, int nEqs)</td></tr>
 <tr class="memdesc:a8b04dfbbf2abe42fada14f3272de5883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="class_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> with dimensions as inputs.  <a href="#a8b04dfbbf2abe42fada14f3272de5883">More...</a><br /></td></tr>
 <tr class="separator:a8b04dfbbf2abe42fada14f3272de5883"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bfaa22d79af7f789b73aba6d3f7537b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a7bfaa22d79af7f789b73aba6d3f7537b">setData</a> (const Ref&lt; const VectorXd &gt; &amp;y, const Ref&lt; const MatrixXd &gt; &amp;X, void *params)</td></tr>
+<tr class="memdesc:a7bfaa22d79af7f789b73aba6d3f7537b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set data for quantile regression location model.  <a href="#a7bfaa22d79af7f789b73aba6d3f7537b">More...</a><br /></td></tr>
+<tr class="separator:a7bfaa22d79af7f789b73aba6d3f7537b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36f7fd1242e890396fdf95ec944044e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a36f7fd1242e890396fdf95ec944044e6">setData</a> (const Ref&lt; const VectorXd &gt; &amp;y, const Ref&lt; const MatrixXd &gt; &amp;X, const Ref&lt; const MatrixXd &gt; &amp;Z, void *params)</td></tr>
+<tr class="memdesc:a36f7fd1242e890396fdf95ec944044e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set data for quantile regression location-scale model.  <a href="#a36f7fd1242e890396fdf95ec944044e6">More...</a><br /></td></tr>
+<tr class="separator:a36f7fd1242e890396fdf95ec944044e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeca115ca0f41a5fdc2ede47c579114f9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#aeca115ca0f41a5fdc2ede47c579114f9">evalG</a> (const Ref&lt; const MatrixXd &gt; &amp;Beta)</td></tr>
+<tr class="memdesc:aeca115ca0f41a5fdc2ede47c579114f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location model.  <a href="#aeca115ca0f41a5fdc2ede47c579114f9">More...</a><br /></td></tr>
+<tr class="separator:aeca115ca0f41a5fdc2ede47c579114f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b02451b9f68ae67aeb0c12fc2e1c8a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a1b02451b9f68ae67aeb0c12fc2e1c8a0">evalG</a> (const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu)</td></tr>
+<tr class="memdesc:a1b02451b9f68ae67aeb0c12fc2e1c8a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location-scale model.  <a href="#a1b02451b9f68ae67aeb0c12fc2e1c8a0">More...</a><br /></td></tr>
+<tr class="separator:a1b02451b9f68ae67aeb0c12fc2e1c8a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dd27239b95e923011dd095c5209f55e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a1dd27239b95e923011dd095c5209f55e">phi_tau_smooth</a> (double u, double <a class="el" href="class_quant_reg_model.html#af1942b670b32ff54595414f5348aaf0c">tau</a>, double s)</td></tr>
+<tr class="memdesc:a1dd27239b95e923011dd095c5209f55e"><td class="mdescLeft">&#160;</td><td class="mdescRight">First derivative of the smoothed check function.  <a href="#a1dd27239b95e923011dd095c5209f55e">More...</a><br /></td></tr>
+<tr class="separator:a1dd27239b95e923011dd095c5209f55e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace8bbf93190cd06834bcb07811dd91e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#ace8bbf93190cd06834bcb07811dd91e9">evalGSmooth</a> (const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu, const double s)</td></tr>
+<tr class="memdesc:ace8bbf93190cd06834bcb07811dd91e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for smoothed quantile regression location-scale model.  <a href="#ace8bbf93190cd06834bcb07811dd91e9">More...</a><br /></td></tr>
+<tr class="separator:ace8bbf93190cd06834bcb07811dd91e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -158,6 +176,325 @@ MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>G</b></td></tr>
   <table class="params">
     <tr><td class="paramname">nObs</td><td>Number of observations. </td></tr>
     <tr><td class="paramname">nEqs</td><td>Number of estimating equations. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="aeca115ca0f41a5fdc2ede47c579114f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeca115ca0f41a5fdc2ede47c579114f9">&#9670;&nbsp;</a></span>evalG() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void QuantRegModel::evalG </td>
+          <td>(</td>
+          <td class="paramtype">const Ref&lt; const MatrixXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>Beta</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate G matrix for quantile regression location model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nObs</code> in linear location function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1b02451b9f68ae67aeb0c12fc2e1c8a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b02451b9f68ae67aeb0c12fc2e1c8a0">&#9670;&nbsp;</a></span>evalG() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void QuantRegModel::evalG </td>
+          <td>(</td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>gamma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double &amp;&#160;</td>
+          <td class="paramname"><em>sig2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>Nu</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate G matrix for quantile regression location-scale model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+    <tr><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
+    <tr><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
+    <tr><td class="paramname">Nu</td><td>Quantile parameters for each quantile level. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ace8bbf93190cd06834bcb07811dd91e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace8bbf93190cd06834bcb07811dd91e9">&#9670;&nbsp;</a></span>evalGSmooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void QuantRegModel::evalGSmooth </td>
+          <td>(</td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>gamma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double &amp;&#160;</td>
+          <td class="paramname"><em>sig2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>Nu</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate G matrix for smoothed quantile regression location-scale model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nObs</code> in linear location function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1dd27239b95e923011dd095c5209f55e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dd27239b95e923011dd095c5209f55e">&#9670;&nbsp;</a></span>phi_tau_smooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double QuantRegModel::phi_tau_smooth </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>tau</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>First derivative of the smoothed check function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Argument of check function. </td></tr>
+    <tr><td class="paramname">tau</td><td>Quantile level (0 &lt; tau &lt; 1). </td></tr>
+    <tr><td class="paramname">s</td><td>Smoothing parameter (s &gt; 0). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7bfaa22d79af7f789b73aba6d3f7537b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bfaa22d79af7f789b73aba6d3f7537b">&#9670;&nbsp;</a></span>setData() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void QuantRegModel::setData </td>
+          <td>(</td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const MatrixXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set data for quantile regression location model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Responses of length <code>nObs</code>. </td></tr>
+    <tr><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>nObs</code>. </td></tr>
+    <tr><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a36f7fd1242e890396fdf95ec944044e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36f7fd1242e890396fdf95ec944044e6">&#9670;&nbsp;</a></span>setData() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void QuantRegModel::setData </td>
+          <td>(</td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const MatrixXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const MatrixXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>Z</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set data for quantile regression location-scale model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Responses of length <code>nObs</code>. </td></tr>
+    <tr><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>nObs</code>. </td></tr>
+    <tr><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>nObs</code>. </td></tr>
+    <tr><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
   </table>
   </dd>
 </dl>

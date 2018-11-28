@@ -9,7 +9,7 @@ source("gen_eps.R")
 
 # ---- X and Z both dim 1 (works fine for all eps here) ----
 # dimensions
-n <- 300 # number of observations
+n <- 10 # number of observations
 p <- 1
 q <- 1
 
@@ -21,13 +21,14 @@ Z <- matrix(rnorm(n),n,q)
 # Z <- X
 
 # parameters
-beta0 <- rnorm(p)
-beta0
-gamma0 <- rnorm(q)
-gamma0
-sig20 <- abs(rnorm(1))
-# beta0 <- 0.5
-# gamma0 <- -0.5
+# beta0 <- rnorm(p)
+# beta0
+# gamma0 <- rnorm(q)
+# gamma0
+# sig20 <- abs(rnorm(1))
+beta0 <- 0.5
+gamma0 <- -0.5
+sig20 <- 1
 alpha <- 0.75
 
 # dist is one of "norm","t","chisq","lnorm"
@@ -209,16 +210,18 @@ numpoints <- 100
 beta.seq1 <- seq(-1+beta0[1],1+beta0[1],length.out = numpoints)
 logel.seq1 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,c(beta.seq1[ii],beta0[2]),gamma0/2,sig20,nu0)
+  # G <- qrls.evalG(y,X,Z,alpha,c(beta.seq1[ii],beta0[2]),gamma0/2,sig20,nu0)
+  G <- qrls.evalG.smooth(y,X,Z,alpha,c(beta.seq1[ii],beta0[2]),gamma0/2,sig20,nu0,sp=10)
   omegas <- omega.hat(G)
   logel.seq1[ii] <- logEL(omegas)
 }
 logelmode1 <- plotEL(beta.seq1, logel.seq1, beta0[1], NA, expression(beta[0]))
 
-beta.seq2 <- seq(-1+beta0[2],1+beta0[2],length.out = numpoints)
+beta.seq2 <- seq(-.1+beta0[2],.1+beta0[2],length.out = numpoints)
 logel.seq2 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,c(beta0[1],beta.seq2[ii]),gamma0/2,sig20,nu0)
+  # G <- qrls.evalG(y,X,Z,alpha,c(beta0[1],beta.seq2[ii]),gamma0/2,sig20,nu0)
+  G <- qrls.evalG.smooth(y,X,Z,alpha,c(beta0[1],beta.seq2[ii]),gamma0/2,sig20,nu0,sp=10)
   omegas <- omega.hat(G)
   logel.seq2[ii] <- logEL(omegas)
 }
@@ -227,7 +230,8 @@ logelmode2 <- plotEL(beta.seq2, logel.seq2, beta0[2], NA, expression(beta[1]))
 gamma.seq1 <- seq(-1+gamma0[1]/2,1+gamma0[1]/2,length.out = numpoints)
 logel.seq3 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma.seq1[ii],gamma0[2]/2),sig20,nu0)
+  # G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma.seq1[ii],gamma0[2]/2),sig20,nu0)
+  G <- qrls.evalG.smooth(y,X,Z,alpha,beta0,c(gamma.seq1[ii],gamma0[2]/2),sig20,nu0,sp=10)
   omegas <- omega.hat(G)
   logel.seq3[ii] <- logEL(omegas)
 }
@@ -236,7 +240,8 @@ logelmode3 <- plotEL(gamma.seq1, logel.seq3, gamma0[1]/2, NA, expression(gamma[0
 gamma.seq2 <- seq(-1+gamma0[2]/2,1+gamma0[2]/2,length.out = numpoints)
 logel.seq4 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma0[1]/2,gamma.seq2[ii]),sig20,nu0)
+  # G <- qrls.evalG(y,X,Z,alpha,beta0,c(gamma0[1]/2,gamma.seq2[ii]),sig20,nu0)
+  G <- qrls.evalG.smooth(y,X,Z,alpha,beta0,c(gamma0[1]/2,gamma.seq2[ii]),sig20,nu0,sp=10)
   omegas <- omega.hat(G)
   logel.seq4[ii] <- logEL(omegas)
 }
@@ -246,15 +251,17 @@ sig2.seq <- seq(-.75+sig20,1+sig20,length.out = numpoints)
 logel.seq5 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
   G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig2.seq[ii],nu0)
+  G <- qrls.evalG.smooth(y,X,Z,alpha,beta0,gamma0/2,sig2.seq[ii],nu0,sp=10)
   omegas <- omega.hat(G)
   logel.seq5[ii] <- logEL(omegas)
 }
-logelmode5 <- plotEL(nu.seq, logel.seq5, nu0, NA, expression(nu))
+logelmode5 <- plotEL(sig2.seq, logel.seq5, sig20, NA, expression(nu))
 
 nu.seq <- seq(-1+nu0,1+nu0,length.out = numpoints)
 logel.seq6 <- rep(NA,numpoints)
 for (ii in 1:numpoints) {
-  G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig20,nu.seq[ii])
+  # G <- qrls.evalG(y,X,Z,alpha,beta0,gamma0/2,sig20,nu.seq[ii])
+  G <- qrls.evalG.smooth(y,X,Z,alpha,beta0,gamma0/2,sig20,nu.seq[ii],sp=10)
   omegas <- omega.hat(G)
   logel.seq6[ii] <- logEL(omegas)
 }
