@@ -2,78 +2,78 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 .ind.smooth <- function(x, s) {
-    .Call(`_bayesEL_indSmooth`, x, s)
+    .Call(`_flexEL_indSmooth`, x, s)
 }
 
 .ind1.smooth <- function(x, s) {
-    .Call(`_bayesEL_ind1Smooth`, x, s)
+    .Call(`_flexEL_ind1Smooth`, x, s)
 }
 
 .evalWeights <- function(deltas, omegas, epsilons) {
-    .Call(`_bayesEL_evalWeights`, deltas, omegas, epsilons)
+    .Call(`_flexEL_evalWeights`, deltas, omegas, epsilons)
 }
 
 .lambdaNRC <- function(G, weights, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_lambdaNRC`, G, weights, maxIter, relTol, verbose)
+    .Call(`_flexEL_lambdaNRC`, G, weights, maxIter, relTol, verbose)
 }
 
 .omega.hat.EM <- function(omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, verbose) {
-    .Call(`_bayesEL_omegaHatEM`, omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, verbose)
+    .Call(`_flexEL_omegaHatEM`, omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, verbose)
 }
 
 .logELC <- function(omegas, epsilons, deltas) {
-    .Call(`_bayesEL_logELC`, omegas, epsilons, deltas)
+    .Call(`_flexEL_logELC`, omegas, epsilons, deltas)
 }
 
 .evalPsos.smooth <- function(ii, omegas, epsilons, s) {
-    .Call(`_bayesEL_evalPsosSmooth`, ii, omegas, epsilons, s)
+    .Call(`_flexEL_evalPsosSmooth`, ii, omegas, epsilons, s)
 }
 
 .logEL.smooth <- function(omegas, epsilons, deltas, s) {
-    .Call(`_bayesEL_logELSmooth`, omegas, epsilons, deltas, s)
+    .Call(`_flexEL_logELSmooth`, omegas, epsilons, deltas, s)
 }
 
 .evalWeights.smooth <- function(deltas, omegas, epsilons, s) {
-    .Call(`_bayesEL_evalWeightsSmooth`, deltas, omegas, epsilons, s)
+    .Call(`_flexEL_evalWeightsSmooth`, deltas, omegas, epsilons, s)
 }
 
 .omega.hat.EM.smooth <- function(omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose) {
-    .Call(`_bayesEL_omegaHatEMSmooth`, omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose)
+    .Call(`_flexEL_omegaHatEMSmooth`, omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose)
 }
 
 .lambdaNR <- function(G, maxIter, relTol, verbose) {
-    .Call(`_bayesEL_lambdaNR`, G, maxIter, relTol, verbose)
+    .Call(`_flexEL_lambdaNR`, G, maxIter, relTol, verbose)
 }
 
 .omega.hat <- function(G, lambda) {
-    .Call(`_bayesEL_omegaHat`, G, lambda)
+    .Call(`_flexEL_omegaHat`, G, lambda)
 }
 
 .logEL <- function(omegas) {
-    .Call(`_bayesEL_logEL`, omegas)
+    .Call(`_flexEL_logEL`, omegas)
 }
 
 .MeanReg_evalG <- function(y, X, beta) {
-    .Call(`_bayesEL_MeanReg_evalG`, y, X, beta)
+    .Call(`_flexEL_MeanReg_evalG`, y, X, beta)
 }
 
 .MeanRegLS_evalG <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_bayesEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
+    .Call(`_flexEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
 }
 
 .QuantReg_evalG <- function(y, X, tauArr, beta) {
-    .Call(`_bayesEL_QuantReg_evalG`, y, X, tauArr, beta)
+    .Call(`_flexEL_QuantReg_evalG`, y, X, tauArr, beta)
 }
 
 .QuantRegLS_evalG <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu) {
-    .Call(`_bayesEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
+    .Call(`_flexEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
 }
 
 .QuantRegLS_evalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu, s) {
-    .Call(`_bayesEL_QuantRegLS_evalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
+    .Call(`_flexEL_QuantRegLS_evalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
 }
 
 .rho1.smooth <- function(u, tau, s) {
-    .Call(`_bayesEL_rho1Smooth`, u, tau, s)
+    .Call(`_flexEL_rho1Smooth`, u, tau, s)
 }
 

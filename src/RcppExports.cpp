@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // indSmooth
 double indSmooth(double x, double s);
-RcppExport SEXP _bayesEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // ind1Smooth
 double ind1Smooth(double x, double s);
-RcppExport SEXP _bayesEL_ind1Smooth(SEXP xSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_ind1Smooth(SEXP xSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,7 +32,7 @@ END_RCPP
 }
 // evalWeights
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons);
-RcppExport SEXP _bayesEL_evalWeights(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP) {
+RcppExport SEXP _flexEL_evalWeights(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,7 +45,7 @@ END_RCPP
 }
 // lambdaNRC
 Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, int maxIter, double relTol, bool verbose);
-RcppExport SEXP _bayesEL_lambdaNRC(SEXP GSEXP, SEXP weightsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _flexEL_lambdaNRC(SEXP GSEXP, SEXP weightsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -60,7 +60,7 @@ END_RCPP
 }
 // omegaHatEM
 Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit, Eigen::MatrixXd G, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, int maxIter, double relTol, double absTol, bool verbose);
-RcppExport SEXP _bayesEL_omegaHatEM(SEXP omegasInitSEXP, SEXP GSEXP, SEXP deltasSEXP, SEXP epsilonsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP absTolSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _flexEL_omegaHatEM(SEXP omegasInitSEXP, SEXP GSEXP, SEXP deltasSEXP, SEXP epsilonsSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP absTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -78,7 +78,7 @@ END_RCPP
 }
 // logELC
 double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas);
-RcppExport SEXP _bayesEL_logELC(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP) {
+RcppExport SEXP _flexEL_logELC(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -91,7 +91,7 @@ END_RCPP
 }
 // evalPsosSmooth
 double evalPsosSmooth(int ii, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, double s);
-RcppExport SEXP _bayesEL_evalPsosSmooth(SEXP iiSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_evalPsosSmooth(SEXP iiSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -105,7 +105,7 @@ END_RCPP
 }
 // logELSmooth
 double logELSmooth(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, double s);
-RcppExport SEXP _bayesEL_logELSmooth(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_logELSmooth(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -119,7 +119,7 @@ END_RCPP
 }
 // evalWeightsSmooth
 Eigen::VectorXd evalWeightsSmooth(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, double s);
-RcppExport SEXP _bayesEL_evalWeightsSmooth(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_evalWeightsSmooth(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -133,7 +133,7 @@ END_RCPP
 }
 // omegaHatEMSmooth
 Eigen::VectorXd omegaHatEMSmooth(Eigen::VectorXd omegasInit, Eigen::MatrixXd G, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, double s, int maxIter, double relTol, double absTol, bool verbose);
-RcppExport SEXP _bayesEL_omegaHatEMSmooth(SEXP omegasInitSEXP, SEXP GSEXP, SEXP deltasSEXP, SEXP epsilonsSEXP, SEXP sSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP absTolSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _flexEL_omegaHatEMSmooth(SEXP omegasInitSEXP, SEXP GSEXP, SEXP deltasSEXP, SEXP epsilonsSEXP, SEXP sSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP absTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -152,7 +152,7 @@ END_RCPP
 }
 // lambdaNR
 Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose);
-RcppExport SEXP _bayesEL_lambdaNR(SEXP GSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _flexEL_lambdaNR(SEXP GSEXP, SEXP maxIterSEXP, SEXP relTolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -166,7 +166,7 @@ END_RCPP
 }
 // omegaHat
 Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda);
-RcppExport SEXP _bayesEL_omegaHat(SEXP GSEXP, SEXP lambdaSEXP) {
+RcppExport SEXP _flexEL_omegaHat(SEXP GSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -178,7 +178,7 @@ END_RCPP
 }
 // logEL
 double logEL(Eigen::VectorXd omegas);
-RcppExport SEXP _bayesEL_logEL(SEXP omegasSEXP) {
+RcppExport SEXP _flexEL_logEL(SEXP omegasSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -189,7 +189,7 @@ END_RCPP
 }
 // MeanReg_evalG
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta);
-RcppExport SEXP _bayesEL_MeanReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
+RcppExport SEXP _flexEL_MeanReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -202,7 +202,7 @@ END_RCPP
 }
 // MeanRegLS_evalG
 Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
-RcppExport SEXP _bayesEL_MeanRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
+RcppExport SEXP _flexEL_MeanRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -218,7 +218,7 @@ END_RCPP
 }
 // QuantReg_evalG
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::VectorXd beta);
-RcppExport SEXP _bayesEL_QuantReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP tauArrSEXP, SEXP betaSEXP) {
+RcppExport SEXP _flexEL_QuantReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP tauArrSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -232,7 +232,7 @@ END_RCPP
 }
 // QuantRegLS_evalG
 Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu);
-RcppExport SEXP _bayesEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP) {
+RcppExport SEXP _flexEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -250,7 +250,7 @@ END_RCPP
 }
 // QuantRegLS_evalGSmooth
 Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s);
-RcppExport SEXP _bayesEL_QuantRegLS_evalGSmooth(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_QuantRegLS_evalGSmooth(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -269,7 +269,7 @@ END_RCPP
 }
 // rho1Smooth
 double rho1Smooth(double u, double tau, double s);
-RcppExport SEXP _bayesEL_rho1Smooth(SEXP uSEXP, SEXP tauSEXP, SEXP sSEXP) {
+RcppExport SEXP _flexEL_rho1Smooth(SEXP uSEXP, SEXP tauSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -282,29 +282,29 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_bayesEL_indSmooth", (DL_FUNC) &_bayesEL_indSmooth, 2},
-    {"_bayesEL_ind1Smooth", (DL_FUNC) &_bayesEL_ind1Smooth, 2},
-    {"_bayesEL_evalWeights", (DL_FUNC) &_bayesEL_evalWeights, 3},
-    {"_bayesEL_lambdaNRC", (DL_FUNC) &_bayesEL_lambdaNRC, 5},
-    {"_bayesEL_omegaHatEM", (DL_FUNC) &_bayesEL_omegaHatEM, 8},
-    {"_bayesEL_logELC", (DL_FUNC) &_bayesEL_logELC, 3},
-    {"_bayesEL_evalPsosSmooth", (DL_FUNC) &_bayesEL_evalPsosSmooth, 4},
-    {"_bayesEL_logELSmooth", (DL_FUNC) &_bayesEL_logELSmooth, 4},
-    {"_bayesEL_evalWeightsSmooth", (DL_FUNC) &_bayesEL_evalWeightsSmooth, 4},
-    {"_bayesEL_omegaHatEMSmooth", (DL_FUNC) &_bayesEL_omegaHatEMSmooth, 9},
-    {"_bayesEL_lambdaNR", (DL_FUNC) &_bayesEL_lambdaNR, 4},
-    {"_bayesEL_omegaHat", (DL_FUNC) &_bayesEL_omegaHat, 2},
-    {"_bayesEL_logEL", (DL_FUNC) &_bayesEL_logEL, 1},
-    {"_bayesEL_MeanReg_evalG", (DL_FUNC) &_bayesEL_MeanReg_evalG, 3},
-    {"_bayesEL_MeanRegLS_evalG", (DL_FUNC) &_bayesEL_MeanRegLS_evalG, 6},
-    {"_bayesEL_QuantReg_evalG", (DL_FUNC) &_bayesEL_QuantReg_evalG, 4},
-    {"_bayesEL_QuantRegLS_evalG", (DL_FUNC) &_bayesEL_QuantRegLS_evalG, 8},
-    {"_bayesEL_QuantRegLS_evalGSmooth", (DL_FUNC) &_bayesEL_QuantRegLS_evalGSmooth, 9},
-    {"_bayesEL_rho1Smooth", (DL_FUNC) &_bayesEL_rho1Smooth, 3},
+    {"_flexEL_indSmooth", (DL_FUNC) &_flexEL_indSmooth, 2},
+    {"_flexEL_ind1Smooth", (DL_FUNC) &_flexEL_ind1Smooth, 2},
+    {"_flexEL_evalWeights", (DL_FUNC) &_flexEL_evalWeights, 3},
+    {"_flexEL_lambdaNRC", (DL_FUNC) &_flexEL_lambdaNRC, 5},
+    {"_flexEL_omegaHatEM", (DL_FUNC) &_flexEL_omegaHatEM, 8},
+    {"_flexEL_logELC", (DL_FUNC) &_flexEL_logELC, 3},
+    {"_flexEL_evalPsosSmooth", (DL_FUNC) &_flexEL_evalPsosSmooth, 4},
+    {"_flexEL_logELSmooth", (DL_FUNC) &_flexEL_logELSmooth, 4},
+    {"_flexEL_evalWeightsSmooth", (DL_FUNC) &_flexEL_evalWeightsSmooth, 4},
+    {"_flexEL_omegaHatEMSmooth", (DL_FUNC) &_flexEL_omegaHatEMSmooth, 9},
+    {"_flexEL_lambdaNR", (DL_FUNC) &_flexEL_lambdaNR, 4},
+    {"_flexEL_omegaHat", (DL_FUNC) &_flexEL_omegaHat, 2},
+    {"_flexEL_logEL", (DL_FUNC) &_flexEL_logEL, 1},
+    {"_flexEL_MeanReg_evalG", (DL_FUNC) &_flexEL_MeanReg_evalG, 3},
+    {"_flexEL_MeanRegLS_evalG", (DL_FUNC) &_flexEL_MeanRegLS_evalG, 6},
+    {"_flexEL_QuantReg_evalG", (DL_FUNC) &_flexEL_QuantReg_evalG, 4},
+    {"_flexEL_QuantRegLS_evalG", (DL_FUNC) &_flexEL_QuantRegLS_evalG, 8},
+    {"_flexEL_QuantRegLS_evalGSmooth", (DL_FUNC) &_flexEL_QuantRegLS_evalGSmooth, 9},
+    {"_flexEL_rho1Smooth", (DL_FUNC) &_flexEL_rho1Smooth, 3},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_bayesEL(DllInfo *dll) {
+RcppExport void R_init_flexEL(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
