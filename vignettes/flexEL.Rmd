@@ -1,0 +1,47 @@
+---
+title: "A flexible framework for Empirical Likelihood Regression Models"
+author: ""
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{flexEL}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Problem Statement
+
+Talk about the EL framework in general --- the only thing required to supply is the estimating matrix $G$. 
+
+### EL framework for data without length-bias
+
+### EL framework for data under right-censoring
+
+#### Continuity-Correction of EL under right-censoring
+
+## Usage Explained by Examples
+
+Use a simple two-parameter mean regression location model as an example. State the regression problem here.
+
+### Usage in R
+
+Talk about how user can supply $G$ matrix using R interface and solve their EL problem. Use the above mean regression example.
+
+### Usage in C++
+
+Talk about how user can supply a C++ header file to construct $G$ matrix efficiently and exported as R function to solve their EL problem. Use the above mean regression example. 
+
+## Models Included in the \texttt{flexEL} Package
+
+Talk about the mean and quantile regression included in this pacakge. Explain smoothing 
+
+## Other Optimization / Modification Methods included
+
+If Aitken acceleration for EM and adjusted G matrix for support modification are included, talk about them here.
+
+## TODO
+
+Ongoing and to-be-done works. 
+
