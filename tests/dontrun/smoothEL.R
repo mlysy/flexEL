@@ -177,10 +177,13 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
   }
 }
 
-# curve(ind.smooth_R(x,s=10),from=-5,to=5,col='red')
+# par(mfrow=c(1,1))
+# curve(ind.smooth_R(x,s=10),from=-5,to=5,col='red',ylab='S(x;s)',
+#       cex.lab=1.5,cex.axis=1.2)
 # curve(ind.smooth_R(x,s=100),from=-5,to=5,col='blue',add=TRUE)
 # curve(ind_R(x),from=-5,to=5,col='black',add=TRUE)
-# legend('topright', legend=c("I(x<=0)","S(x,s=10)", "S(x,s=100)"), lty=c(1,1,1), col=c("black","red","blue"),cex=.8)
+# legend('topright', legend=c("I(x<=0)","S(x,s=10)", "S(x,s=100)"), 
+#        lty=c(1,1,1), col=c("black","red","blue"),cex=1.5)
 
 library(MASS) # for use of Null
 # wrapper of omega.hat_R for optimCheck

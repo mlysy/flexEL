@@ -54,7 +54,7 @@ legend('topright',legend=c(expression('true param'),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
 
 # ---- 2-d problem (1 intercept, 1 slope) ----
-n <- 500
+n <- 200
 p <- 2
 alpha <- 0.75
 X0 <- matrix(rep(1,n),n,1)
@@ -76,12 +76,17 @@ beta2.seq <- seq(beta0[2]-.5,beta0[2]+.5,length.out = numpoints)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 for (ii in 1:numpoints) {
   G <- qr.evalG(y,X,alpha,c(beta1.seq[ii],beta0[2]))
-  logel.seq[1,ii] <- logEL(G)
+  omegas <- omega.hat(G)
+  logel.seq[1,ii] <- logEL(omegas)
   G <- qr.evalG(y,X,alpha,c(beta0[1],beta2.seq[ii]))
-  logel.seq[2,ii] <- logEL(G)
+  omegas <- omega.hat(G)
+  logel.seq[2,ii] <- logEL(omegas)
 }
-logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
-logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+par(mfrow=c(1,2))
+logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]),
+                     legend.loc = 'topright', cex.lab = 1.5, cex.axis = 1.2, cex=1.2)
+logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]),
+                     legend.loc = 'topleft', cex.lab = 1.5, cex.axis = 1.2, cex=1.2)
 
 # calculate marginal posterior
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))

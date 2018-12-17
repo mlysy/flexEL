@@ -16,7 +16,7 @@ qrls_cens.neglogEL.smooth <- function(y, X, Z, deltas, tau, theta, sp=10) {
   nu <- theta[nBet+nGam+2]
   G <- qrls.evalG.smooth(y, X, Z, tau, beta, gamma, sig2, nu, sp)
   if (anyNA(G)) return(Inf)
-  epsilons <- .evalEpsilonsLS(y,t(X),t(Z),beta,gamma,sig2)
+  epsilons <- (y - X %*% beta)*exp(-Z %*% gamma)/sqrt(sig2)
   omegas <- omega.hat.EM.smooth(G,deltas,epsilons,sp)
   if (!anyNA(omegas)) {
     res <- -logEL.smooth(omegas,epsilons,deltas)

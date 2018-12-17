@@ -22,11 +22,11 @@
 class QuantRegModel {
 private:
   
-  RowVectorXd yXb;
-  RowVectorXd eZg;
-  RowVectorXd yXbeZg;
-  RowVectorXd yXbeZg2;
-  MatrixXd tG;
+  RowVectorXd yXb_;
+  RowVectorXd eZg_;
+  RowVectorXd yXbeZg_;
+  RowVectorXd yXbeZg2_;
+  MatrixXd tG_;
   
   /**
    * @brief First derivative of the check function.
@@ -38,11 +38,12 @@ private:
   
 protected:
   
-  int nObs, nEqs, nBet, nGam, nQts; /**< nQts is the number of quantile levels */ 
-  VectorXd y;
-  MatrixXd X;
-  MatrixXd Z;
-  MatrixXd G;
+  int nObs_, nEqs_;
+  int nBet_, nGam_, nQts_; /**< nQts is the number of quantile levels */ 
+  VectorXd y_;
+  MatrixXd X_;
+  MatrixXd Z_;
+  MatrixXd G_;
   double *tau; /**< an array of quantile levels */ 
   
 public:
@@ -131,54 +132,54 @@ public:
 inline QuantRegModel::QuantRegModel(){}
 
 // ctor
-inline QuantRegModel::QuantRegModel(int _nObs, int _nEqs) {
-  nObs = _nObs;
-  nEqs = _nEqs; // X gets passed as nBet x nObs matrix
-  G = MatrixXd::Zero(nEqs,nObs);
+inline QuantRegModel::QuantRegModel(int nObs, int nEqs) {
+  nObs_ = nObs;
+  nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
+  G_ = MatrixXd::Zero(nEqs_,nObs_);
 }
 
 // setData (with default ctor)
-inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
-                                   const Ref<const MatrixXd>& _X,
+inline void QuantRegModel::setData(const Ref<const VectorXd>& y,
+                                   const Ref<const MatrixXd>& X,
                                    void* params) {
-  y = _y;
-  X = _X;
+  y_ = y;
+  X_ = X;
   double *tauArr = (double*)(params);
-  nQts = tauArr[0]; // first entry must be the number of quantile levels
+  nQts_ = tauArr[0]; // first entry must be the number of quantile levels
   tau = &(tauArr[1]); // rest are the quantile levels
   
-  nObs = y.size();
-  nBet = X.rows(); // X gets passed as nBet x nObs matrix
-  nGam = 0; 
-  nEqs = nBet*nQts; // Total number of equations
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = 0; 
+  nEqs_ = nBet_*nQts_; // Total number of equations
   
-  G = MatrixXd::Zero(nEqs,nObs);
-  tG = MatrixXd::Zero(nObs,nEqs);
+  G_ = MatrixXd::Zero(nEqs_,nObs_);
+  tG_ = MatrixXd::Zero(nObs_,nEqs_);
 }
 
 // setData (location-scale model) (with default ctor)
-inline void QuantRegModel::setData(const Ref<const VectorXd>& _y,
-                                   const Ref<const MatrixXd>& _X,
-                                   const Ref<const MatrixXd>& _Z,
+inline void QuantRegModel::setData(const Ref<const VectorXd>& y,
+                                   const Ref<const MatrixXd>& X,
+                                   const Ref<const MatrixXd>& Z,
                                    void* params) {
-  y = _y;
-  X = _X;
-  Z = _Z;
+  y_ = y;
+  X_ = X;
+  Z_ = Z;
   double *tauArr = (double*)(params);
-  nQts = tauArr[0]; // first entry must be the number of quantile levels
+  nQts_ = tauArr[0]; // first entry must be the number of quantile levels
   tau = &(tauArr[1]); // rest are the quantile levels
   
-  nObs = y.size();
-  nBet = X.rows(); // X gets passed as nBet x nObs matrix
-  nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
-  nEqs = nBet+nGam+1+nQts; 
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = Z.rows(); // Z gets passed as nGam x nObs matrix
+  nEqs_ = nBet_+nGam_+1+nQts_; 
   // nEqs = nQts*(nBet+nGam+2);
   // nEqs = nQts*(nBet+nGam);
-  G = MatrixXd::Zero(nEqs,nObs);
-  tG = MatrixXd::Zero(nObs,nEqs);
-  eZg = RowVectorXd::Zero(nObs);
-  yXbeZg = RowVectorXd::Zero(nObs);
-  yXbeZg2 = RowVectorXd::Zero(nObs);
+  G_ = MatrixXd::Zero(nEqs_,nObs_);
+  tG_ = MatrixXd::Zero(nObs_,nEqs_);
+  eZg_ = RowVectorXd::Zero(nObs_);
+  yXbeZg_ = RowVectorXd::Zero(nObs_);
+  yXbeZg2_ = RowVectorXd::Zero(nObs_);
 }
 
 // 1st derivative of rho_tau
@@ -203,9 +204,9 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
 // multiple quantile case (location model)
 inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta) {
   // stack multiple "Gs" for each quantile level
-  for(int jj=0; jj<nQts; jj++) {
-    for(int ii=0; ii<y.size(); ii++) {
-      this->G.block(jj*nBet,ii,nBet,1) = phi_tau(y(ii)-X.col(ii).transpose()*Beta.col(jj), tau[jj])*X.col(ii);
+  for(int jj=0; jj<nQts_; jj++) {
+    for(int ii=0; ii<y_.size(); ii++) {
+      this->G_.block(jj*nBet_,ii,nBet_,1) = phi_tau(y_(ii)-X_.col(ii).transpose()*Beta.col(jj), tau[jj])*X_.col(ii);
     }
   }
 }
@@ -219,26 +220,27 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta,
   // std::cout << "nQts = " << nQts << std::endl;
   // TODO: warning if negative sig2?
   if (sig2 < 0) std::cout << "qrls.evalG: negative variance." << std::endl;
-  eZg.array() = (-gamma.transpose()*Z).array().exp();
-  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
-  yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
+  eZg_.array() = (-gamma.transpose()*Z_).array().exp();
+  yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
+  yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
   // 1st deriv w.r.t beta
-  tG.block(0,0,nObs,nBet) = X.transpose();
-  tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
+  tG_.block(0,0,nObs_,nBet_) = X_.transpose();
+  tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
   // 1st deriv w.r.t gamma
-  tG.block(0,nBet,nObs,nGam) = Z.transpose();
+  tG_.block(0,nBet_,nObs_,nGam_) = Z_.transpose();
   // tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
+  // tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
+  tG_.block(0,nBet_,nObs_,nGam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array()/sig2); // NEW (DEC 6)
   // variance param
-  tG.block(0,nBet+nGam,nObs,1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
+  tG_.block(0,nBet_+nGam_,nObs_,1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
   // std::cout << "tG = \n" << tG << std::endl;
   // quantile param(s)
-  for (int ii=0; ii<nObs; ii++) {
-    for (int jj=0; jj<nQts; jj++) {
-      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_tau(yXbeZg(ii)/sqrt(sig2)-Nu(jj), tau[jj]);
+  for (int ii=0; ii<nObs_; ii++) {
+    for (int jj=0; jj<nQts_; jj++) {
+      tG_.block(ii,nBet_+nGam_+1+jj,1,1).array() = phi_tau(yXbeZg_(ii)/sqrt(sig2)-Nu(jj), tau[jj]);
     }
   }
-  G = tG.transpose();
+  G_ = tG_.transpose();
 }
 
 
@@ -253,26 +255,27 @@ inline void QuantRegModel::evalGSmooth(const Ref<const VectorXd>& beta,
   // std::cout << "ncol = " << G.cols() << std::endl;
   // TODO: warning if negative sig2?
   if (sig2 < 0) std::cout << "qrls.evalG: negative variance." << std::endl;
-  eZg.array() = (-gamma.transpose()*Z).array().exp();
-  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
-  yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
+  eZg_.array() = (-gamma.transpose()*Z_).array().exp();
+  yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
+  yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
   // 1st deriv w.r.t beta
-  tG.block(0,0,nObs,nBet) = X.transpose();
-  tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
+  tG_.block(0,0,nObs_,nBet_) = X_.transpose();
+  tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
   // 1st deriv w.r.t gamma
-  tG.block(0,nBet,nObs,nGam) = Z.transpose();
+  tG_.block(0,nBet_,nObs_,nGam_) = Z_.transpose();
   // tG.block(0,nBet,nObs,nGam).array().colwise() *= yXbeZg2.transpose().array();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
+  // tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
+  tG_.block(0,nBet_,nObs_,nGam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array()/sig2); // NEW (DEC 6)
   // variance param
-  tG.block(0,nBet+nGam,nObs,1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
+  tG_.block(0,nBet_+nGam_,nObs_,1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
   // std::cout << "tG = \n" << tG << std::endl;
   // quantile param(s)
-  for (int ii=0; ii<nObs; ii++) {
-    for (int jj=0; jj<nQts; jj++) {
-      tG.block(ii,nBet+nGam+1+jj,1,1).array() = phi_tau_smooth(yXbeZg(ii)/sqrt(sig2)-Nu(jj),tau[jj],s);
+  for (int ii=0; ii<nObs_; ii++) {
+    for (int jj=0; jj<nQts_; jj++) {
+      tG_.block(ii,nBet_+nGam_+1+jj,1,1).array() = phi_tau_smooth(yXbeZg_(ii)/sqrt(sig2)-Nu(jj),tau[jj],s);
     }
   }
-  G = tG.transpose();
+  G_ = tG_.transpose();
 }
 
 #endif

@@ -18,13 +18,14 @@ max.xdiff <- function(x) {
 # 3-d plot with plotly
 # to set labels: https://plot.ly/r/figure-labels/
 # type could be "surface" or "contour"
-plot3d <- function(type="surface", seq.x, seq.y, seq.z, 
-                   xlab="intercept", ylab="slope", zlab="logEL",
+plot3d <- function(type="surface", seq.x, seq.y, seq.z, showscale=FALSE,
+                   xlab="intercept", ylab="slope", zlab="log EL",
                    title=NULL,
                    m1, logel.m1, lab.m1="true val",
                    m2, logel.m2, lab.m2="est val") {
   p <- plot_ly(x=seq.x, y=seq.y, z=seq.z,
-               type=type) %>% 
+               type=type,
+               showscale=showscale) %>% 
     layout(
       title = title,
       scene = list(
@@ -48,19 +49,22 @@ plot3d <- function(type="surface", seq.x, seq.y, seq.z,
 }
 
 # EL curve plot
-plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = 'param', legend.loc = 'topright') {
+plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = 'param', 
+                   cex.lab = 1, cex.axis = 1, legend.loc = 'topright', ...) {
     plot(mu.seq, exp(logel.seq-max(logel.seq)),
-         cex=0.2, xlab = mu.name, ylab = 'log EL', type = 'l')
-    abline(v = trueval, col = 'red', lty=2) # true param
-    abline(v = mu.seq[which.max(logel.seq)], lty=2) # mode of EL
-    if (!is.na(obs)) {
+         cex.lab = cex.lab, cex.axis = cex.axis, xlab = mu.name, ylab = 'EL', type = 'l')
+    if (!missing(legend.loc)) {
+      abline(v = trueval, col = 'red', lty=2) # true param
+      abline(v = mu.seq[which.max(logel.seq)], lty=2) # mode of EL
+      if (!is.na(obs)) {
         abline(v = obs, col='blue', lty=2) # observed mean / quantile
-        legend('topright',legend=c('true param', 'logEL mode', 'observed'),
-               lty = c(2,2,2), col = c('red','black','blue'), cex = 0.6)
-    }
-    else{
-        legend(legend.loc,legend=c('true param', 'logEL mode'),
-               lty = c(2,2), col = c('red','black'), cex = 0.6)
+        legend('topright',legend=c('true', 'mode', 'observed'),
+               lty = c(2,2,2), col = c('red','black','blue'), ...)
+      }
+      else{
+        legend(legend.loc,legend=c('true', 'mode'),
+               lty = c(2,2), col = c('red','black'), ...)
+      }
     }
     return(mu.seq[which.max(logel.seq)]) # return the mode
 }

@@ -229,7 +229,8 @@ qrls.evalG.smooth_R <- function(y, X, Z, tau, beta, gamma, sig2, nu, s=10) {
   yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
   G[,1:nBeta] <- yXbeZg * eZg * X
   # G[,nBeta+1:nGamma] <- yXbeZg2 * Z
-  G[,nBeta+1:nGamma] <- (1-yXbeZg2) * Z
+  # G[,nBeta+1:nGamma] <- (1-yXbeZg2) * Z
+  G[,nBeta+1:nGamma] <- (1-yXbeZg2/sig2) * Z
   G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
   G[,nBeta+nGamma+2] <- rho1.smooth_R(yXbeZg/sqrt(sig2)-nu, tau, s)
   return(G)

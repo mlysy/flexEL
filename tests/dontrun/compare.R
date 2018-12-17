@@ -707,3 +707,60 @@ for (ii in 1:length(ns)) {
 sink() 
 sink(type="message")
 
+# --------------------------------------------------------------------------- 
+# speed comparison of lambdaNR
+
+# no censoring
+reptimes <- 500
+n <- 4000
+p <- 5
+system.time(
+  for (ii in 1:reptimes) {
+    G <- matrix(rnorm(n*p),nrow=n,ncol=p)
+    lambdaNR(G)
+    # lambdaNR_R(G)
+  }
+)
+# n=100: C++ 0.047; R 2.934
+# n=500: C++ 0.160; R 11.805
+# n=1000: C++ 0.518; R 22.621
+# n=2000: C++ 0.551; R 40.708
+# n=4000: C++ 1.091; R 69.983
+# n=5000: C++ 1.422; R 85.307 
+ns <- c(100,500,1000,2000,4000)
+cpp_nocens <- c(0.047,0.160,0.518,0.551,1.091)/500
+r_nocens <- c(2.934,11.805,22.621,40.708,69.983)/500
+plot(ns,r_nocens,ylim=range(cpp_nocens,r_nocens),
+     xlab='n',ylab="avg time in seconds",type='l',
+     cex.lab=1.5,cex.axis=1.5)
+points(ns,r_nocens,cex=2,col='blue')
+lines(ns,cpp_nocens,type='l')
+points(ns,cpp_nocens,cex=2,pch=2,col='red')
+legend("topleft", pch=c(1,2), col=c('blue','red'),legend = c("R","C++"), cex=2)
+
+# right-censoring
+reptimes <- 500
+n <- 1000
+p <- 5
+system.time(
+  for (ii in 1:reptimes) {
+    weights <- rnorm(n)
+    weights <- weights/sum(weights)*n
+    G <- matrix(rnorm(n*p),nrow=n,ncol=p)
+    # lambdaNR_cens(G,weights)
+    lambdaNRC_R(G,weights)
+  }
+)
+# n=100: C++ 0.053; R 2.451
+# n=500: C++ 0.165; R 8.336
+# n=1000: C++ 0.400; R 15.724
+ns <- c(100,500,1000)
+cpp_nocens <- c(0.053,0.165,0.400)/500
+r_nocens <- c(2.934,11.805,22.621)/500
+plot(ns,r_nocens,ylim=range(cpp_nocens,r_nocens),
+     xlab='n',ylab="avg time in sec",type='l',
+     cex.lab=1.5,cex.axis=1.25)
+points(ns,r_nocens,cex=1,col='blue')
+lines(ns,cpp_nocens,type='l')
+points(ns,cpp_nocens,cex=1,pch=2,col='red')
+legend("topleft", pch=c(1,2), col=c('blue','red'),legend = c("R","C++"), cex=2)

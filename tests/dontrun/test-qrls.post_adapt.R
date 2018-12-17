@@ -344,5 +344,3 @@ lines(nu.seq, norm_pdf(logel.seq6, nu.seq),
       cex=0.1, col = 'blue', type='l')
 abline(v=nu0,col='red')
 abline(v=mean(theta_chain[5,]),col='blue')
-
-

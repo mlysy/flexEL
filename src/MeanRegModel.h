@@ -20,21 +20,21 @@
 class MeanRegModel {
 private:
 
-  RowVectorXd yXb; // y - X*beta
-  RowVectorXd eZg; // exp(-Z*gamma)
-  RowVectorXd yXbeZg; // (y - X*beta)*exp(-Z*gamma)
-  RowVectorXd yXbeZg2; // (y - X*beta)^2*exp(-2*Z*gamma)
-  MatrixXd tG; // t(G)
-  int nBet, nGam; // dimensions of beta and gamma
-  VectorXd y; // vector of responses
-  MatrixXd X; // covariate matrix used in location function
-  MatrixXd Z; // covariate matrix used in scale function
+  RowVectorXd yXb_; // y - X*beta
+  RowVectorXd eZg_; // exp(-Z*gamma)
+  RowVectorXd yXbeZg_; // (y - X*beta)*exp(-Z*gamma)
+  RowVectorXd yXbeZg2_; // (y - X*beta)^2*exp(-2*Z*gamma)
+  MatrixXd tG_; // t(G)
+  int nBet_, nGam_; // dimensions of beta and gamma
+  VectorXd y_; // vector of responses
+  MatrixXd X_; // covariate matrix used in location function
+  MatrixXd Z_; // covariate matrix used in scale function
 
 protected:
 
-  int nObs; /**< number of observations (number of columns of G) */
-  int nEqs; /**< number of estimating equations (number of rows of G) */
-  MatrixXd G; /**< matrix of estimating equations of dimension <code>nEqs</code> x <code>nObs</code>*/
+  int nObs_; /**< number of observations (number of columns of G) */
+  int nEqs_; /**< number of estimating equations (number of rows of G) */
+  MatrixXd G_; /**< matrix of estimating equations of dimension <code>nEqs</code> x <code>nObs</code>*/
 
 public:
 
@@ -97,65 +97,65 @@ public:
 inline MeanRegModel::MeanRegModel(){}
 
 // ctor
-inline MeanRegModel::MeanRegModel(int _nObs, int _nEqs) {
-  nObs = _nObs;
-  nEqs = _nEqs; // X gets passed as nBet x nObs matrix
-  G = MatrixXd::Zero(nEqs,nObs);
+inline MeanRegModel::MeanRegModel(int nObs, int nEqs) {
+  nObs_ = nObs;
+  nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
+  G_ = MatrixXd::Zero(nEqs_,nObs_);
 }
 
 // setData location model (with default ctor)
-inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
-                                  const Ref<const MatrixXd>& _X) {
-  y = _y;
-  X = _X;
-  nObs = y.size();
-  nBet = X.rows(); // X gets passed as nBet x nObs matrix
-  nGam = 0;
-  nEqs = nBet;
-  G = MatrixXd::Zero(nEqs,nObs);
-  tG = MatrixXd::Zero(nObs, nEqs);
-  yXb = RowVectorXd::Zero(nObs);
+inline void MeanRegModel::setData(const Ref<const VectorXd>& y,
+                                  const Ref<const MatrixXd>& X) {
+  y_ = y;
+  X_ = X;
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = 0;
+  nEqs_ = nBet_;
+  G_ = MatrixXd::Zero(nEqs_,nObs_);
+  tG_ = MatrixXd::Zero(nObs_, nEqs_);
+  yXb_ = RowVectorXd::Zero(nObs_);
 }
 
 // setData location-scale model (with default ctor)
-inline void MeanRegModel::setData(const Ref<const VectorXd>& _y,
-                                  const Ref<const MatrixXd>& _X,
-                                  const Ref<const MatrixXd>& _Z) {
-  y = _y;
-  X = _X;
-  Z = _Z;
-  nObs = y.size();
-  nBet = X.rows(); // X gets passed as nBet x nObs matrix
-  nGam = Z.rows(); // Z gets passed as nGam x nObs matrix
-  nEqs = nBet+nGam+1;
-  G = MatrixXd::Zero(nEqs,nObs);
-  tG = MatrixXd::Zero(nObs, nEqs);
-  eZg = RowVectorXd::Zero(nObs);
-  yXbeZg = RowVectorXd::Zero(nObs);
-  yXbeZg2 = RowVectorXd::Zero(nObs);
+inline void MeanRegModel::setData(const Ref<const VectorXd>& y,
+                                  const Ref<const MatrixXd>& X,
+                                  const Ref<const MatrixXd>& Z) {
+  y_ = y;
+  X_ = X;
+  Z_ = Z;
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = Z.rows(); // Z gets passed as nGam x nObs matrix
+  nEqs_ = nBet_+nGam_+1;
+  G_ = MatrixXd::Zero(nEqs_,nObs_);
+  tG_ = MatrixXd::Zero(nObs_, nEqs_);
+  eZg_ = RowVectorXd::Zero(nObs_);
+  yXbeZg_ = RowVectorXd::Zero(nObs_);
+  yXbeZg2_ = RowVectorXd::Zero(nObs_);
 }
 
 // form the G matrix for location linear regression model
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
-  yXb.noalias() = y.transpose() - beta.transpose() * X;
-  tG = X.transpose();
-  tG.array().colwise() *= yXb.transpose().array();
-  G = tG.transpose();
+  yXb_.noalias() = y_.transpose() - beta.transpose() * X_;
+  tG_ = X_.transpose();
+  tG_.array().colwise() *= yXb_.transpose().array();
+  G_ = tG_.transpose();
 }
 
 // form the G matrix for location-scale linear regression model
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
                                 const Ref<const VectorXd>& gamma,
                                 const double &sig2) {
-  eZg.array() = (-gamma.transpose()*Z).array().exp();
-  yXbeZg.array() = (y.transpose()-beta.transpose()*X).array() * eZg.array();
-  yXbeZg2.array() = yXbeZg.array()*yXbeZg.array();
-  tG.block(0,0,nObs,nBet) = X.transpose();
-  tG.block(0,0,nObs,nBet).array().colwise() *= yXbeZg.transpose().array() * eZg.transpose().array();
-  tG.block(0,nBet,nObs,nGam) = Z.transpose();
-  tG.block(0,nBet,nObs,nGam).array().colwise() *= (1.0-yXbeZg2.transpose().array());
-  tG.rightCols(1).array() = 1/sig2*yXbeZg2.transpose().array()-1;
-  G = tG.transpose();
+  eZg_.array() = (-gamma.transpose()*Z_).array().exp();
+  yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
+  yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
+  tG_.block(0,0,nObs_,nBet_) = X_.transpose();
+  tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
+  tG_.block(0,nBet_,nObs_,nGam_) = Z_.transpose();
+  tG_.block(0,nBet_,nObs_,nGam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array());
+  tG_.rightCols(1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
+  G_ = tG_.transpose();
 }
 
 #endif

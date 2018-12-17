@@ -268,4 +268,3 @@ lines(beta.seq.tilda, norm_pdf(logel.seq.tilda, beta.seq.tilda), type='l',col='b
 legend('topright',legend=c(expression('use y'),
                            expression('use y.tilda')),
        lty = c(1,1), col = c('red','blue'), cex = 0.6)
-      

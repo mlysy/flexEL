@@ -216,7 +216,7 @@ plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m2=lmcoef, logel.m2=logel.est)
 
 # ---- qr ----
-n <- 100
+n <- 200
 p <- 2
 alpha <- 0.75
 X0 <- matrix(rep(1,n),n,1)
@@ -254,47 +254,45 @@ logel.true <- logEL(omegas)
 G <- qr.evalG(y,X,alpha,qrcoef)
 omegas <- omega.hat(G)
 logel.est <- logEL(omegas)
-plot3d(seq.x=theta1.seq, seq.y=theta2.seq, seq.z=t(logel.mat),
+plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m1=beta0, logel.m1=logel.true,
        m2=qrcoef, logel.m2=logel.est)
 
 # ---- qr.cens ----
-n <- 100
+n <- 200
 p <- 2
-alpha <- 0.5
+tau <- 0.75
 X0 <- matrix(rep(1,n),n,1)
 # X1 <- matrix(seq(-2,2,length.out = n),n,1)
 X1 <- matrix(rnorm(n),n,1)
 X <- cbind(X0,X1)
 
 # eps <- rnorm(n) # N(0,1) error term
-genout <- gen_eps(n, dist = "norm", df = NULL, tau = alpha)
+genout <- gen_eps(n, dist = "norm", df = NULL, tau = tau)
 eps <- genout$eps
 nu0 <- genout$nu0
 
-beta_I <- 0.5
-beta_S <- 1
-yy <- c(X1 %*% beta_S) + eps 
-plot(X1,yy,cex=0.3)
+beta_I <- 0
+beta_S <- 1.5
 beta0 <- c(beta_I, beta_S)
 beta0
 
 # random censoring
-cc <- rnorm(n,mean=1.5,sd=1)
-deltas <- yy<=cc
-y <- yy
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
 sum(1-deltas)/n
-y[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+eps[as.logical(1-deltas)] <- cc[as.logical(1-deltas)]
+y <- c(X1 %*% beta_S) + eps 
 
 numpoints <- 100
-beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
-beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+beta1.seq <- seq(nu0-1,nu0+1,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1,beta0[2]+1,length.out = numpoints)
 # theta.seq <- cbind(theta1.seq,theta2.seq)
 logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
 
 Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
 logel.mat <- apply(Beta.seq, 1, function(bb) {
-  G <- qr.evalG(y,X,alpha,matrix(c(bb[1],bb[2]),2,1))
+  G <- qr.evalG(y,X,tau,matrix(c(bb[1],bb[2]),2,1))
   epsilons <- y - c(X %*% matrix(c(bb[1],bb[2]),2,1))
   omegas <- omega.hat(G,deltas,epsilons)
   logEL(omegas,epsilons,deltas)
@@ -307,20 +305,21 @@ anyNA(logel.mat)
 
 # quantile regression
 library(quantreg)
-qrcoef <- coef(rq(y~X1,tau=alpha))
+qrcoef <- coef(rq(y~X1,tau=tau))
 
 # plot 3d surface
-G <- qr.evalG(y,X,alpha,beta0)
+G <- qr.evalG(y,X,tau,beta0)
 epsilons <- y - c(X %*% beta0)
 omegas <- omega.hat(G,deltas,epsilons)
 logel.true <- logEL(omegas,epsilons,deltas)
-G <- qr.evalG(y,X,alpha,qrcoef)
+G <- qr.evalG(y,X,tau,qrcoef)
 epsilons <- y - c(X %*% qrcoef)
 omegas <- omega.hat(G,deltas,epsilons)
 logel.est <- logEL(omegas,epsilons,deltas)
-plot3d(seq.x=theta1.seq, seq.y=theta2.seq, seq.z=t(logel.mat),
-       m1=beta0, logel.m1=logel.true,
-       m2=qrcoef, logel.m2=logel.est)
+plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),zlab="log CEL")
+# plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+#        m1=beta0, logel.m1=logel.true,
+#        m2=qrcoef, logel.m2=logel.est)
 
 # ---- smoothed qr ----
 # 2-d problem
@@ -368,6 +367,72 @@ logel.est <- logEL(omegas)
 plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
        m1=beta0, logel.m1=logel.true,
        m2=qrcoef, logel.m2=logel.est)
+
+# ---- smoothed qr_cens ----
+n <- 200
+p <- 2
+alpha <- 0.5
+X0 <- matrix(rep(1,n),n,1)
+# X1 <- matrix(seq(-2,2,length.out = n),n,1)
+X1 <- matrix(rnorm(n),n,1)
+X <- cbind(X0,X1)
+
+# eps <- rnorm(n) # N(0,1) error term
+genout <- gen_eps(n, dist = "norm", df = NULL, tau = alpha)
+eps <- genout$eps
+nu0 <- genout$nu0
+
+beta_I <- 0.5
+beta_S <- 1
+plot(X1,yy,cex=0.3)
+beta0 <- c(beta_I, beta_S)
+beta0
+
+# random censoring
+cc <- rnorm(n,mean=1.35,sd=1)
+deltas <- eps<=cc
+sum(1-deltas)/n
+eps[as.logical(1-deltas)] <- eps[as.logical(1-deltas)]
+y <- c(X1 %*% beta_S) + eps 
+
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-1.5,beta0[1]+1.5,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-1.5,beta0[2]+1.5,length.out = numpoints)
+# theta.seq <- cbind(theta1.seq,theta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+
+s <- 1
+Beta.seq <- as.matrix(expand.grid(beta1.seq, beta2.seq))
+logel.mat <- apply(Beta.seq, 1, function(bb) {
+  G <- qr.evalG.smooth_R(y,X,alpha,c(bb[1],bb[2]),s=s)
+  epsilons <- y - c(X %*% matrix(c(bb[1],bb[2]),2,1))
+  omegas <- omega.hat.EM.smooth(G,deltas,epsilons,sp=s)
+  logEL.smooth(omegas,epsilons,deltas,sp=s)
+})
+logel.mat <- matrix(logel.mat, numpoints, numpoints)
+logel.mat[is.infinite(logel.mat)] <- NaN
+anyNA(logel.mat)
+# el.mat <- exp(logel.mat - max(logel.mat))
+# logel.marg <- log(cbind(beta1 = rowSums(el.mat), beta2 = colSums(el.mat)))
+
+# quantile regression
+library(quantreg)
+qrcoef <- coef(rq(y~X1,tau=alpha))
+
+# plot 3d surface
+G <- qr.evalG(y,X,alpha,beta0)
+epsilons <- y - c(X %*% beta0)
+omegas <- omega.hat(G,deltas,epsilons)
+logel.true <- logEL(omegas,epsilons,deltas)
+G <- qr.evalG(y,X,alpha,qrcoef)
+epsilons <- y - c(X %*% qrcoef)
+omegas <- omega.hat(G,deltas,epsilons)
+logel.est <- logEL(omegas,epsilons,deltas)
+plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),zlab="log SCEL")
+# plot3d(seq.x=beta1.seq, seq.y=beta2.seq, seq.z=t(logel.mat),
+#        m1=beta0, logel.m1=logel.true,
+#        m2=qrcoef, logel.m2=logel.est)
+
 
 # ---- EL + censoring: how does the support change when % changes ----
 # mr.cens 

@@ -200,8 +200,10 @@ for (ii in 1:numpoints) {
   }
 }
 par(mfrow=c(1,2))
-logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
-logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))
+logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]),
+                     legend.loc = 'topright', cex.lab = 1.5, cex.axis = 1.2, cex = 1.2)
+logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]),
+                     legend.loc = 'topleft', cex.lab = 1.5, cex.axis = 1.2, cex = 1.2)
 par(mfrow=c(1,1))
 
 # smoothed censored logEL

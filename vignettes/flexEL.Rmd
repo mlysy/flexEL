@@ -96,7 +96,7 @@ Due to right-censoring, this inner optimization problem turns out to be difficul
 
 ## Usage of <code>flexEL</code> Explained by Examples
 
-Upon observing data, the purpose is to find the estimates of the parameters of your semi-parametric regression model. To achieve this, two steps needed to be done:
+Upon observing data, the purpose is to find the estimates of the parameters of your semi-parametric regression model. To achieve this, two steps are required:
 
 1. Construct the log EL function according to your model
 2. Obtain an estimate based on the log EL function
