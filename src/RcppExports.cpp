@@ -6,6 +6,18 @@
 
 using namespace Rcpp;
 
+// adjG
+Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a);
+RcppExport SEXP _flexEL_adjG(SEXP GSEXP, SEXP aSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    rcpp_result_gen = Rcpp::wrap(adjG(G, a));
+    return rcpp_result_gen;
+END_RCPP
+}
 // indSmooth
 double indSmooth(double x, double s);
 RcppExport SEXP _flexEL_indSmooth(SEXP xSEXP, SEXP sSEXP) {
@@ -282,6 +294,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {"_flexEL_indSmooth", (DL_FUNC) &_flexEL_indSmooth, 2},
     {"_flexEL_ind1Smooth", (DL_FUNC) &_flexEL_ind1Smooth, 2},
     {"_flexEL_evalWeights", (DL_FUNC) &_flexEL_evalWeights, 3},
