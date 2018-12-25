@@ -21,7 +21,8 @@ using namespace Eigen;
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
   // std::cout << "in MeanReg_evalG" << std::endl;
-  InnerEL<MeanRegModel> MR;
+  el::InnerEL<MeanRegModel> MR;
+  // MR.setOpts(); // TODO
   MR.setData(y,X);
   MR.evalG(beta);
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
@@ -33,7 +34,7 @@ Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y,
                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
                                 Eigen::VectorXd beta, Eigen::VectorXd gamma, 
                                 double sig2) {
-  InnerEL<MeanRegModel> MR;
+  el::InnerEL<MeanRegModel> MR;
   MR.setData(y,X,Z); 
   MR.evalG(beta,gamma,sig2);
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs

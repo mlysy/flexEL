@@ -5,7 +5,7 @@
 
 // for an (m x N) matrix G = [g1 ... gN], calculates the (m x mN) matrix
 // GGt = [g1 g1' ... gN gN']
-inline void block_outer(Eigen::MatrixXd &GGt, const Ref<const MatrixXd>& G) {
+inline void block_outer(Eigen::MatrixXd &GGt, const Eigen::Ref<const Eigen::MatrixXd>& G) {
   int nEqs = G.rows();
   int nObs = G.cols();
   // for each row of G, compute outer product and store as block and put into GGt

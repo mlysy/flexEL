@@ -6,6 +6,72 @@ source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
 source("gen_eps.R")
 
+# ---- support modification when there is no censoring ----
+# mr with 1 intercept & 1 slope 
+n <- 300
+X0 <- matrix(rep(1,n),n,1)
+X1 <- matrix(rnorm(n),n,1)
+X <- cbind(X0,X1)
+eps <- gen_eps(n)
+beta_intercept <- 1
+beta_slope <- 1.5
+y <- 1 + c(X1 %*% beta_slope) + eps 
+plot(X1,y,cex=0.3)
+beta0 <- c(beta_intercept, beta_slope)
+
+adjust <- TRUE
+numpoints <- 100
+beta1.seq <- seq(beta0[1]-3,beta0[1]+3,length.out = numpoints)
+beta2.seq <- seq(beta0[2]-3,beta0[2]+3,length.out = numpoints)
+beta.seq <- cbind(beta1.seq,beta2.seq)
+logel.seq <- matrix(rep(NA,2*numpoints),2,numpoints)
+for (ii in 1:numpoints) {
+  if (ii %% 10 == 0) message("ii = ", ii)
+  
+  # beta0
+  G <- mr.evalG(y,X,c(beta1.seq[ii],beta0[2]))
+  if(adjust) {
+    G <- adjG_R(G)
+    omegas <- omega.hat_R(G,adjust=adjust)
+    logel.seq[1,ii] <- logEL_R(omegas)
+  }
+  else {
+    omegas <- omega.hat(G)
+    logel.seq[1,ii] <- logEL(omegas)
+  }
+  
+  # beta1
+  G <- mr.evalG(y,X,c(beta0[1],beta2.seq[ii]))
+  if(adjust) {
+    G <- adjG_R(G)
+    omegas <- omega.hat_R(G,adjust=adjust)
+    logel.seq[2,ii] <- logEL_R(omegas,adjust)
+  }
+  else {
+    omegas <- omega.hat(G)
+    logel.seq[2,ii] <- logEL(omegas)
+  }
+}
+
+par(mfrow=c(1,2))
+if (!adjust) {
+  # plot(logel.seq[1,])
+  # plot(logel.seq[2,])
+  logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, 
+                       log.scale = TRUE, expression(beta[0]), legend.loc='topright')
+  logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, 
+                       log.scale = TRUE, expression(beta[1]), legend.loc='topright')
+}
+if (adjust) {
+  # plot(logel.seq[1,])
+  # plot(logel.seq[2,])
+  logelmode1_adj <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, 
+                           log.scale = TRUE, expression(beta[0]), legend.loc='topright')
+  logelmode2_adj <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, 
+                           log.scale = TRUE, expression(beta[1]), legend.loc='topright')
+}
+
+
 # ---- rand G ----
 adjust <- TRUE
 for (ii in 1:100) {
@@ -216,9 +282,10 @@ X <- cbind(1,X1)
 beta_I <- 1
 beta_S <- 1.5
 beta0 <- c(beta_I, beta_S)
+eps <- gen_eps(n)
 y <- beta_I + c(X1 %*% beta_S) + eps 
 
-adjust <- FALSE
+adjust <- TRUE
 numpoints <- 100
 beta1.seq <- seq(beta0[1]-5,beta0[1]+5,length.out = numpoints)
 beta2.seq <- seq(beta0[2]-5,beta0[2]+5,length.out = numpoints)
@@ -231,7 +298,7 @@ for (ii in 1:numpoints) {
   epsilons <- y - c(X %*% c(beta1.seq[ii],beta0[2]))
   if(adjust) {
     G <- adjG_R(G)
-    omegas <- omega.hat_R(G, adjust=adjust)$omegas
+    omegas <- omega.hat_R(G, adjust=adjust)
     logel.seq[1,ii] <- logEL_R(omegas)
   }
   else {
@@ -243,7 +310,7 @@ for (ii in 1:numpoints) {
   epsilons <- y - c(X %*% c(beta0[1],beta2.seq[ii]))
   if(adjust) {
     G <- adjG_R(G)
-    omegas <- omega.hat_R(G, adjust=adjust)$omegas
+    omegas <- omega.hat_R(G, adjust=adjust)
     logel.seq[2,ii] <- logEL_R(omegas)
   }
   else {
@@ -252,6 +319,7 @@ for (ii in 1:numpoints) {
   }
 }
 
+par(mfrow=c(1,2))
 if (!adjust) {
   logelmode1 <- plotEL(beta1.seq, logel.seq[1,], beta0[1], NA, expression(beta[0]))
   logelmode2 <- plotEL(beta2.seq, logel.seq[2,], beta0[2], NA, expression(beta[1]))

@@ -21,7 +21,7 @@ adjG_R <- function(G, an) {
   gbar <- 1/n*colSums(G)
   if (missing(an)) an <- max(1,0.5*log(n))
   gadd <- -an*gbar
-  return(rbind(G,gadd))
+  return(unname(rbind(G,gadd)))
 }
 
 # ---- non-censoring EL ----

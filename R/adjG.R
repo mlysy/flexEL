@@ -6,7 +6,7 @@
 #' @details ...
 #' @export adjG
 adjG <- function(G, a) {
-  n <- nrow(G)
-  if (missing(a)) a <- max(1,0.5*log(n))
+  nObs <- nrow(G)
+  if (missing(a)) a <- max(1,0.5*log(nObs))
   return(t(.adjG(t(G),a)))
 }

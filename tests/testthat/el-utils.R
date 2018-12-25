@@ -49,10 +49,16 @@ plot3d <- function(type="surface", seq.x, seq.y, seq.z, showscale=FALSE,
 }
 
 # EL curve plot
-plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, mu.name = 'param', 
+plotEL <- function(mu.seq, logel.seq, trueval, obs = NA, log.scale = FALSE, mu.name = 'param', 
                    cex.lab = 1, cex.axis = 1, legend.loc = 'topright', ...) {
-    plot(mu.seq, exp(logel.seq-max(logel.seq)),
-         cex.lab = cex.lab, cex.axis = cex.axis, xlab = mu.name, ylab = 'EL', type = 'l')
+    if (log.scale) {
+      plot(mu.seq, logel.seq,
+           cex.lab = cex.lab, cex.axis = cex.axis, xlab = mu.name, ylab = 'EL', type = 'l')
+    }
+    else {
+      plot(mu.seq, exp(logel.seq-max(logel.seq)),
+           cex.lab = cex.lab, cex.axis = cex.axis, xlab = mu.name, ylab = 'EL', type = 'l')
+    }
     if (!missing(legend.loc)) {
       abline(v = trueval, col = 'red', lty=2) # true param
       abline(v = mu.seq[which.max(logel.seq)], lty=2) # mode of EL

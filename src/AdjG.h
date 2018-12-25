@@ -3,7 +3,7 @@
 
 #include <RcppEigen.h>
 
-// returns the adjusted G matrix given a G matrix of dimension nEqs x n Obs
+// returns the adjusted G matrix given a G matrix of dimension nEqs x nObs
 inline Eigen::MatrixXd adj_G(Eigen::MatrixXd G, double a) {
   int nObs = G.cols();
   int nEqs = G.rows();
