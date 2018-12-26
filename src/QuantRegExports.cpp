@@ -1,14 +1,20 @@
-// port some of QuantReg to R
+/**
+ * @file QuantRegExports.cpp
+ * 
+ * @brief Export QuantRegModel functions to R.
+ */
 
 #include <Rcpp.h>
-using namespace Rcpp;
-//[[Rcpp::depends("RcppEigen")]]
 #include <RcppEigen.h>
-using namespace Eigen;
 #include "InnerEL.h"
 #include "InnerELC.h"
 #include "QuantRegModel.h"
 #include "dVecTobArr.h"
+
+//[[Rcpp::depends("RcppEigen")]]
+
+using namespace Rcpp;
+using namespace Eigen;
 
 // double tau
 // [[Rcpp::export(".QuantReg_evalG")]]

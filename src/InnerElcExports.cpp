@@ -1,4 +1,8 @@
-// port some of InnerELC to R
+/**
+ * @file InnerElcExports.cpp
+ * 
+ * @brief Export InnerELC functions to R.
+ */
 
 #include <Rcpp.h>
 #include <RcppEigen.h>

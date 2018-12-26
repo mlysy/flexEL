@@ -135,7 +135,7 @@ inline QuantRegModel::QuantRegModel(){}
 inline QuantRegModel::QuantRegModel(int nObs, int nEqs) {
   nObs_ = nObs;
   nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
-  G_ = MatrixXd::Zero(nEqs_,nObs_);
+  // G_ = MatrixXd::Zero(nEqs_,nObs_);
 }
 
 // setData (with default ctor)
@@ -153,8 +153,8 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& y,
   nGam_ = 0; 
   nEqs_ = nBet_*nQts_; // Total number of equations
   
-  G_ = MatrixXd::Zero(nEqs_,nObs_);
-  tG_ = MatrixXd::Zero(nObs_,nEqs_);
+  // G_ = MatrixXd::Zero(nEqs_,nObs_);
+  // tG_ = MatrixXd::Zero(nObs_,nEqs_);
 }
 
 // setData (location-scale model) (with default ctor)
@@ -173,13 +173,12 @@ inline void QuantRegModel::setData(const Ref<const VectorXd>& y,
   nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
   nGam_ = Z.rows(); // Z gets passed as nGam x nObs matrix
   nEqs_ = nBet_+nGam_+1+nQts_; 
-  // nEqs = nQts*(nBet+nGam+2);
-  // nEqs = nQts*(nBet+nGam);
-  G_ = MatrixXd::Zero(nEqs_,nObs_);
-  tG_ = MatrixXd::Zero(nObs_,nEqs_);
-  eZg_ = RowVectorXd::Zero(nObs_);
-  yXbeZg_ = RowVectorXd::Zero(nObs_);
-  yXbeZg2_ = RowVectorXd::Zero(nObs_);
+  
+  // G_ = MatrixXd::Zero(nEqs_,nObs_);
+  // tG_ = MatrixXd::Zero(nObs_,nEqs_);
+  // eZg_ = RowVectorXd::Zero(nObs_);
+  // yXbeZg_ = RowVectorXd::Zero(nObs_);
+  // yXbeZg2_ = RowVectorXd::Zero(nObs_);
 }
 
 // 1st derivative of rho_tau
@@ -204,6 +203,7 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta) {
 // multiple quantile case (location model)
 inline void QuantRegModel::evalG(const Ref<const MatrixXd>& Beta) {
   // stack multiple "Gs" for each quantile level
+  G_ = MatrixXd::Zero(nEqs_,nObs_); // NEW: DEC 25
   for(int jj=0; jj<nQts_; jj++) {
     for(int ii=0; ii<y_.size(); ii++) {
       this->G_.block(jj*nBet_,ii,nBet_,1) = phi_tau(y_(ii)-X_.col(ii).transpose()*Beta.col(jj), tau[jj])*X_.col(ii);
@@ -223,6 +223,8 @@ inline void QuantRegModel::evalG(const Ref<const VectorXd>& beta,
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
+  
+  tG_ = MatrixXd::Zero(nObs_,nEqs_); // NEW: DEC 25
   // 1st deriv w.r.t beta
   tG_.block(0,0,nObs_,nBet_) = X_.transpose();
   tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
@@ -258,6 +260,8 @@ inline void QuantRegModel::evalGSmooth(const Ref<const VectorXd>& beta,
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
+  
+  tG_ = MatrixXd::Zero(nObs_,nEqs_);
   // 1st deriv w.r.t beta
   tG_.block(0,0,nObs_,nBet_) = X_.transpose();
   tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();

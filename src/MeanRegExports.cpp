@@ -3,26 +3,25 @@
  * 
  * @brief Export MeanRegModel functions to R.
  */
-// port some of MeanReg functions to R
 
 #include <Rcpp.h>
-using namespace Rcpp;
-//[[Rcpp::depends("RcppEigen")]]
 #include <RcppEigen.h>
-using namespace Eigen;
 #include "InnerEL.h"
 #include "InnerELC.h"
 #include "MeanRegModel.h"
 #include "dVecTobArr.h"
+
+//[[Rcpp::depends("RcppEigen")]]
+
+using namespace Rcpp;
+using namespace Eigen;
 
 /* ------ G matrix construction ------ */
 
 // [[Rcpp::export(".MeanReg_evalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
-  // std::cout << "in MeanReg_evalG" << std::endl;
   el::InnerEL<MeanRegModel> MR;
-  // MR.setOpts(); // TODO
   MR.setData(y,X);
   MR.evalG(beta);
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs

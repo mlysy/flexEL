@@ -100,7 +100,7 @@ inline MeanRegModel::MeanRegModel(){}
 inline MeanRegModel::MeanRegModel(int nObs, int nEqs) {
   nObs_ = nObs;
   nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
-  G_ = MatrixXd::Zero(nEqs_,nObs_);
+  // G_ = MatrixXd::Zero(nEqs_,nObs_);
 }
 
 // setData location model (with default ctor)
@@ -112,9 +112,9 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& y,
   nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
   nGam_ = 0;
   nEqs_ = nBet_;
-  G_ = MatrixXd::Zero(nEqs_,nObs_);
-  tG_ = MatrixXd::Zero(nObs_, nEqs_);
-  yXb_ = RowVectorXd::Zero(nObs_);
+  // G_ = MatrixXd::Zero(nEqs_,nObs_);
+  // tG_ = MatrixXd::Zero(nObs_, nEqs_);
+  // yXb_ = RowVectorXd::Zero(nObs_);
 }
 
 // setData location-scale model (with default ctor)
@@ -128,16 +128,17 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& y,
   nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
   nGam_ = Z.rows(); // Z gets passed as nGam x nObs matrix
   nEqs_ = nBet_+nGam_+1;
-  G_ = MatrixXd::Zero(nEqs_,nObs_);
-  tG_ = MatrixXd::Zero(nObs_, nEqs_);
-  eZg_ = RowVectorXd::Zero(nObs_);
-  yXbeZg_ = RowVectorXd::Zero(nObs_);
-  yXbeZg2_ = RowVectorXd::Zero(nObs_);
+  // G_ = MatrixXd::Zero(nEqs_,nObs_);
+  // tG_ = MatrixXd::Zero(nObs_, nEqs_);
+  // eZg_ = RowVectorXd::Zero(nObs_);
+  // yXbeZg_ = RowVectorXd::Zero(nObs_);
+  // yXbeZg2_ = RowVectorXd::Zero(nObs_);
 }
 
 // form the G matrix for location linear regression model
 inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
-  yXb_.noalias() = y_.transpose() - beta.transpose() * X_;
+  // yXb_.noalias() = y_.transpose() - beta.transpose() * X_;
+  yXb_ = y_.transpose() - beta.transpose() * X_;
   tG_ = X_.transpose();
   tG_.array().colwise() *= yXb_.transpose().array();
   G_ = tG_.transpose();
@@ -150,6 +151,8 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
+  
+  tG_ = MatrixXd::Zero(nObs_, nEqs_); // NEW: DEC 25
   tG_.block(0,0,nObs_,nBet_) = X_.transpose();
   tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
   tG_.block(0,nBet_,nObs_,nGam_) = Z_.transpose();

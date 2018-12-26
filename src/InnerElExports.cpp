@@ -4,8 +4,6 @@
  * @brief Export InnerEL functions to R.
  */
 
-// port some of InnerEL to R
-
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "InnerEL.h"
