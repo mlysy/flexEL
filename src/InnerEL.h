@@ -30,7 +30,7 @@ namespace el {
   private:
     
     // required members in ELModel
-    using ELModel::G_;
+    // using ELModel::G_; // REMOVED: JAN 1
     using ELModel::nObs_; 
     using ELModel::nEqs_;
     
@@ -38,6 +38,7 @@ namespace el {
     double trunc_, aa_, bb_, cc_; /**< constants in logstar functions */
   
     // placeholders for lambdaNR
+    MatrixXd G_; // NEW: JAN 1
     VectorXd lambda0_; // TODO: not used yet!
     VectorXd lambdaOld_; /**< old lambda in Newton-Raphson iterations */
     VectorXd lambdaNew_; /**< new lambda in Newton-Raphson iterations */
@@ -138,7 +139,8 @@ namespace el {
     void setG(const Ref<const MatrixXd>& G);
     VectorXd getLambda(); 
     VectorXd getOmegas();
-    MatrixXd getG(); 
+    MatrixXd getG();
+    // Ref<MatrixXd> getG(); 
     
     // nBet, nGam and nQts are FOR THE MCMC SAMPELERS
     // using ELModel::nBet;
@@ -168,6 +170,7 @@ inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
   bb_ = 2.0 * nObs_;
   cc_ = -1.5 - log(nObs_);
   // Newton-Raphson initialization
+  G_ = MatrixXd::Zero(nEqs_,nObs_); // NEW: JAN 1
   GGt_ = MatrixXd::Zero(nEqs_,nObs_*nEqs_);
   lambdaOld_ = VectorXd::Zero(nEqs_); // Initialize to all 0's
   lambdaNew_ = VectorXd::Zero(nEqs_);
@@ -333,6 +336,10 @@ inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
 }
 
 // get function for G matrix
+// template<typename ELModel>
+// inline Ref<MatrixXd> el::InnerEL<ELModel>::getG() {
+//   return(G_);
+// }
 template<typename ELModel>
 inline MatrixXd el::InnerEL<ELModel>::getG() {
   return(G_);

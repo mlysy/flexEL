@@ -21,24 +21,46 @@ using namespace Eigen;
 // [[Rcpp::export(".MeanReg_evalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
-  el::InnerEL<MeanRegModel> MR;
+  int nObs = X.cols();
+  int nEqs = X.rows();
+  el::InnerEL<MeanRegModel> MR(nObs,nEqs);
   MR.setData(y,X);
-  MR.evalG(beta);
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+  MR.evalG(G,beta);
   return(G);
 }
+// Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
+//                               Eigen::VectorXd beta) {
+//   el::InnerEL<MeanRegModel> MR;
+//   MR.setData(y,X);
+//   MR.evalG(beta);
+//   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+//   return(G);
+// }
 
 // [[Rcpp::export(".MeanRegLS_evalG")]]
 Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
                                 Eigen::VectorXd beta, Eigen::VectorXd gamma, 
                                 double sig2) {
-  el::InnerEL<MeanRegModel> MR;
+  int nObs = X.cols();
+  int nEqs = X.rows()+Z.rows()+1;
+  el::InnerEL<MeanRegModel> MR(nObs,nEqs);
   MR.setData(y,X,Z); 
-  MR.evalG(beta,gamma,sig2);
   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+  MR.evalG(G,beta,gamma,sig2);
   return(G); 
 }
+// Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
+//                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
+//                                 Eigen::VectorXd beta, Eigen::VectorXd gamma, 
+//                                 double sig2) {
+//   el::InnerEL<MeanRegModel> MR;
+//   MR.setData(y,X,Z); 
+//   MR.evalG(beta,gamma,sig2);
+//   Eigen::MatrixXd G = MR.getG(); // G is nEqs x nObs
+//   return(G); 
+// }
 
 /* ------ posterior samplers ------ */
 /*

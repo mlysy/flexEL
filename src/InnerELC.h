@@ -34,7 +34,7 @@ namespace el {
   private:
     
     // required members in ELModel
-    using ELModel::G_;
+    // using ELModel::G_; // REMOVED: JAN 1
     using ELModel::nObs_;
     using ELModel::nEqs_;
     
@@ -49,6 +49,7 @@ namespace el {
     VectorXd psots_; /**< partial sum of omegatildas */
   
     // placeholders for lambdaNR
+    MatrixXd G_; // NEW: JAN 1
     VectorXd lambda0_; // TODO: not used yet!
     VectorXd lambdaOld_;
     VectorXd lambdaNew_;
@@ -210,6 +211,7 @@ inline el::InnerELC<ELModel>::InnerELC(int nObs, int nEqs): ELModel(nObs, nEqs){
   // Initialize omegas to 1/nObs
   omegas_ = VectorXd::Zero(nObs_).array() + 1.0/(double)nObs_; 
   // Newton-Raphson initialization
+  G_ = MatrixXd::Zero(nEqs_,nObs_); // NEW: JAN 1
   GGt_ = MatrixXd::Zero(nEqs_,nObs_*nEqs_);
   lambdaOld_ = VectorXd::Zero(nEqs_); // Initialize to all 0's
   lambdaNew_ = VectorXd::Zero(nEqs_);

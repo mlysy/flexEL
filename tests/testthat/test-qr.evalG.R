@@ -1,5 +1,5 @@
 #---- testing qr.eval.G (location model) ----
-# library(bayesEL) # always load the package (with library)
+# library(flexEL) # always load the package (with library)
 source("el-utils.R")
 source("el-rfuns.R")
 source("el-model.R")

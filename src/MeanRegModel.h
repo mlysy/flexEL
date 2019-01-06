@@ -34,7 +34,7 @@ protected:
 
   int nObs_; /**< number of observations (number of columns of G) */
   int nEqs_; /**< number of estimating equations (number of rows of G) */
-  MatrixXd G_; /**< matrix of estimating equations of dimension <code>nEqs</code> x <code>nObs</code>*/
+  // MatrixXd G_; /**< matrix of estimating equations of dimension <code>nEqs</code> x <code>nObs</code>*/ // REMOVED: JAN 1
 
 public:
 
@@ -79,7 +79,9 @@ public:
    * 
    * @param beta     Coefficient vector of length <code>nObs</code> in linear location function.
    */
-  void evalG(const Ref<const VectorXd>& beta);
+  void evalG(Ref<MatrixXd> G, const Ref<const VectorXd>& beta); // NEW: JAN 1
+  // void evalG(const Ref<const VectorXd>& beta);
+  
 
   /**
    * @brief Evaluate G matrix for mean regression location-scale model.
@@ -88,9 +90,14 @@ public:
    * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
    * @param sig2     Scale parameter in scale function.
    */
-  void evalG(const Ref<const VectorXd>& beta,
+  void evalG(Ref<MatrixXd> G,
+             const Ref<const VectorXd>& beta,
              const Ref<const VectorXd>& gamma,
-             const double& sig2);
+             const double& sig2); // NEW: JAN 1
+  // void evalG(const Ref<const VectorXd>& beta,
+  //            const Ref<const VectorXd>& gamma,
+  //            const double& sig2); 
+  
 };
 
 // default ctor
@@ -100,6 +107,7 @@ inline MeanRegModel::MeanRegModel(){}
 inline MeanRegModel::MeanRegModel(int nObs, int nEqs) {
   nObs_ = nObs;
   nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
+  // TODO: could possibly add pre-allocation for X, y or maybe Z here to avoid dynamic allocation in setData?
   // G_ = MatrixXd::Zero(nEqs_,nObs_);
 }
 
@@ -136,16 +144,24 @@ inline void MeanRegModel::setData(const Ref<const VectorXd>& y,
 }
 
 // form the G matrix for location linear regression model
-inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
+inline void MeanRegModel::evalG(Ref<MatrixXd> G, const Ref<const VectorXd>& beta) {
   // yXb_.noalias() = y_.transpose() - beta.transpose() * X_;
   yXb_ = y_.transpose() - beta.transpose() * X_;
   tG_ = X_.transpose();
   tG_.array().colwise() *= yXb_.transpose().array();
-  G_ = tG_.transpose();
+  G = tG_.transpose();
 }
+// inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta) {
+//   // yXb_.noalias() = y_.transpose() - beta.transpose() * X_;
+//   yXb_ = y_.transpose() - beta.transpose() * X_;
+//   tG_ = X_.transpose();
+//   tG_.array().colwise() *= yXb_.transpose().array();
+//   G_ = tG_.transpose();
+// }
 
 // form the G matrix for location-scale linear regression model
-inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
+inline void MeanRegModel::evalG(Ref<MatrixXd> G, 
+                                const Ref<const VectorXd>& beta,
                                 const Ref<const VectorXd>& gamma,
                                 const double &sig2) {
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
@@ -158,7 +174,22 @@ inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
   tG_.block(0,nBet_,nObs_,nGam_) = Z_.transpose();
   tG_.block(0,nBet_,nObs_,nGam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array());
   tG_.rightCols(1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
-  G_ = tG_.transpose();
+  G = tG_.transpose();
 }
+// inline void MeanRegModel::evalG(const Ref<const VectorXd>& beta,
+//                                 const Ref<const VectorXd>& gamma,
+//                                 const double &sig2) {
+//   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
+//   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
+//   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
+//   
+//   tG_ = MatrixXd::Zero(nObs_, nEqs_); // NEW: DEC 25
+//   tG_.block(0,0,nObs_,nBet_) = X_.transpose();
+//   tG_.block(0,0,nObs_,nBet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
+//   tG_.block(0,nBet_,nObs_,nGam_) = Z_.transpose();
+//   tG_.block(0,nBet_,nObs_,nGam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array());
+//   tG_.rightCols(1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
+//   G_ = tG_.transpose();
+// }
 
 #endif
