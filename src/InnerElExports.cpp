@@ -15,17 +15,18 @@ using namespace Eigen;
 using namespace Rcpp;
 
 // [[Rcpp::export(".lambdaNR")]]
-Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool verbose) {
+Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool support, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
   el::InnerEL<MeanRegModel> IL(nObs,nEqs);
+  IL.setOpts(maxIter,relTol,support);
   IL.setG(G); // assign the given G
   
   // initialize variables for output here 
   int nIter;
   double maxErr;
   bool not_conv;
-  IL.setTol(maxIter, relTol);
+  // IL.setTol(maxIter, relTol);
   IL.lambdaNR(nIter, maxErr);
   VectorXd lambda = IL.getLambda(); // output (could be not converged)
   // check convergence
@@ -41,7 +42,6 @@ Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool ver
     }
   }
   return lambda;
-  
   // return the status and value
   // return Rcpp::List::create(_["lambda"] = lambda,
   //                           _["convergence"] = !not_conv);
@@ -50,10 +50,11 @@ Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool ver
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
 // as in the censored case 
 // [[Rcpp::export(".omega.hat")]]
-Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda) {
+Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support) {
   int nObs = G.cols();
   int nEqs = G.rows();
   el::InnerEL<MeanRegModel> IL(nObs,nEqs);
+  IL.setOpts(support);
   IL.setG(G); // assign the given G
   IL.setLambda(lambda); 
   IL.evalOmegas(); // calculate omegas
@@ -63,8 +64,10 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda) {
 
 // Calculate logEL given omegas
 // [[Rcpp::export(".logEL")]]
-double logEL(Eigen::VectorXd omegas) {
-  el::InnerEL<MeanRegModel> IL;
+double logEL(Eigen::VectorXd omegas, bool support) {
+  int nObs = omegas.size();
+  el::InnerEL<MeanRegModel> IL(nObs,1);
+  IL.setOpts(support);
   IL.setOmegas(omegas); 
   double logel = IL.logEL();
   return logel; 

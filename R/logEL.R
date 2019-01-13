@@ -6,9 +6,9 @@
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export logEL
-logEL <- function(omega, eps, delta) {
+logEL <- function(omega, eps, delta, support = FALSE) {
   if (missing(eps) && missing(delta)) {
-    logel <- .logEL(omega)
+    logel <- .logEL(omega, support)
   }
   else {
     logel <- .logELC(omega,eps,delta)

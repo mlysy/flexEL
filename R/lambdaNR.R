@@ -7,8 +7,10 @@
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
 #' @export lambdaNR
-lambdaNR <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
-  lambda <- .lambdaNR(G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+lambdaNR <- function(G, max_iter = 100, rel_tol = 1e-7, support = FALSE, verbose = FALSE) { 
+  lambda <- .lambdaNR(G = t(G), 
+                      maxIter = max_iter, relTol = rel_tol, support = support, 
+                      verbose = verbose)
   return(lambda)
 }
 

@@ -5,7 +5,7 @@
 \title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.}
 \usage{
 omega.hat.EM.smooth(G, deltas, epsilons, sp = 10, max_iter = 100,
-  rel_tol = 1e-05, abs_tol = 0.001, verbose = FALSE)
+  rel_tol = 1e-05, abs_tol = 0.001, support = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}

@@ -4,7 +4,7 @@
 \alias{logEL}
 \title{log empirical likelihood}
 \usage{
-logEL(omega, eps, delta)
+logEL(omega, eps, delta, support = FALSE)
 }
 \arguments{
 \item{omega}{Length-\code{nObs} probability vector.}

@@ -56,9 +56,10 @@ namespace el {
     int maxIter_; /**< maximum number of iterations */
     double relTol_; /**< relative tolerance */
     bool support_; /**< whether do support correction or not */ 
-    // TODO: differ in allocation of space for omegas and G related matrices, 
-    // but have to set options first? maybe allocate space for omegas and G related in setOpts ..
-    // Problem is size of G is assigned in ELModel, so initialization might have to be changed ..
+
+    // for support modification
+    int nObs1_; // nObs1_ = nObs_+1: for initial space allocation
+    int nObs2_; // nObs2_ = nObs_+support: used nObs_ in calculation
     
     // maximum relative error in lambda
     /**
@@ -87,10 +88,21 @@ namespace el {
     
     // Set options
     /**
-    * @brief Set tolerance values for NR.
+    * @brief Set tolerance values for NR, support correction option, and initial value of lambda.
     */
-    void setOpts(const int& maxIter, const double& relTol, 
+    void setOpts(const int& maxIter, const double& relTol,
                  const bool& support, const Ref<const VectorXd>& lambda0);
+    
+    /**
+     * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
+     */
+    void setOpts(const int& maxIter, const double& relTol,
+                 const bool& support);
+    
+    /**
+     * @brief Set support correction option only. 
+     */
+    void setOpts(const bool& support);
     
     // logstar and its derivatives for the EL dual problem
     /**
@@ -164,35 +176,80 @@ inline el::InnerEL<ELModel>::InnerEL(){}
 // ctor with dimensions as input
 template<typename ELModel>
 inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
-  omegas_ = VectorXd::Zero(nObs_).array() + 1.0/(double)nObs_; // Initialize to 1/nObs_
+  // support correction
+  support_ = false;
+  nObs1_ = nObs_+1;
+  nObs2_ = nObs_+support_;
+  // initialization of constants
   trunc_ = 1.0 / nObs_;
   aa_ = -.5 * nObs_*nObs_;
   bb_ = 2.0 * nObs_;
   cc_ = -1.5 - log(nObs_);
-  // Newton-Raphson initialization
-  G_ = MatrixXd::Zero(nEqs_,nObs_); // NEW: JAN 1
-  GGt_ = MatrixXd::Zero(nEqs_,nObs_*nEqs_);
+  // space allocation
+  omegas_ = VectorXd::Zero(nObs1_).array() + 1.0/(double)nObs1_; // Initialize to 1/nObs_
+  G_ = MatrixXd::Zero(nEqs_,nObs1_); // NEW: JAN 1
+  GGt_ = MatrixXd::Zero(nEqs_,nObs1_*nEqs_);
+  lambda0_ = VectorXd::Zero(nEqs_); // default initial value of lambda
   lambdaOld_ = VectorXd::Zero(nEqs_); // Initialize to all 0's
   lambdaNew_ = VectorXd::Zero(nEqs_);
   Q1_ = VectorXd::Zero(nEqs_);
   Q2_ = MatrixXd::Zero(nEqs_,nEqs_);
-  Glambda_ = VectorXd::Zero(nObs_);
-  Gl11_ = ArrayXd::Zero(nObs_);
-  rho_ = VectorXd::Zero(nObs_);
+  Glambda_ = VectorXd::Zero(nObs1_);
+  Gl11_ = ArrayXd::Zero(nObs1_);
+  rho_ = VectorXd::Zero(nObs1_);
   relErr_ = VectorXd::Zero(nEqs_);
   Q2ldlt_.compute(MatrixXd::Identity(nEqs_,nEqs_));
-  // support correction
-  support_ = false;
 }
+
+// // ctor with dimensions as input
+// template<typename ELModel>
+// inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
+//   // support correction
+//   support_ = false; // TODO: let ctor take support as an argument??
+//   // initialization
+//   omegas_ = VectorXd::Zero(nObs_).array() + 1.0/(double)nObs_; // Initialize to 1/nObs_
+//   trunc_ = 1.0 / nObs_;
+//   aa_ = -.5 * nObs_*nObs_;
+//   bb_ = 2.0 * nObs_;
+//   cc_ = -1.5 - log(nObs_);
+//   // Newton-Raphson initialization
+//   G_ = MatrixXd::Zero(nEqs_,nObs_); // NEW: JAN 1
+//   GGt_ = MatrixXd::Zero(nEqs_,nObs_*nEqs_);
+//   lambdaOld_ = VectorXd::Zero(nEqs_); // Initialize to all 0's
+//   lambdaNew_ = VectorXd::Zero(nEqs_);
+//   Q1_ = VectorXd::Zero(nEqs_);
+//   Q2_ = MatrixXd::Zero(nEqs_,nEqs_);
+//   Glambda_ = VectorXd::Zero(nObs_);
+//   Gl11_ = ArrayXd::Zero(nObs_);
+//   rho_ = VectorXd::Zero(nObs_);
+//   relErr_ = VectorXd::Zero(nEqs_);
+//   Q2ldlt_.compute(MatrixXd::Identity(nEqs_,nEqs_));
+// }
 
 // set options
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
-                                      const bool& support, const Ref<const VectorXd>& lambda0) {
+                                          const bool& support, const Ref<const VectorXd>& lambda0) {
   maxIter_ = maxIter;
   relTol_ = relTol;
   support_ = support;
+  nObs2_ = nObs_+support_;
   lambda0_ = lambda0;
+}
+
+template<typename ELModel>
+inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+                                          const bool& support) {
+  maxIter_ = maxIter;
+  relTol_ = relTol;
+  support_ = support;
+  nObs2_ = nObs_+support_;
+}
+
+template<typename ELModel>
+inline void el::InnerEL<ELModel>::setOpts(const bool& support) {
+  support_ = support;
+  nObs2_ = nObs_+support_;
 }
 
 // logstar
@@ -247,31 +304,66 @@ inline void el::InnerEL<ELModel>::setTol(const int& maxIter, const double& relTo
 
 // Note: maxIter and relTol must have been assigned 
 // Newton-Raphson algorithm
+// template<typename ELModel>
+// inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
+//   lambdaOld_.fill(0.0); // TODO: set this to lambda0 each time if lambda0 is assigned?
+//   lambdaNew_.fill(0.0);
+//   int ii, jj;
+//   // blockOuter(); // initialize GGt
+//   block_outer(GGt_,G_);
+//   // newton-raphson loop
+//   for(ii=0; ii<maxIter_; ii++) {
+//     // Q1 and Q2
+//     Glambda_.noalias() = lambdaOld_.transpose() * G_;
+//     Glambda_ = 1.0 - Glambda_.array();
+//     Q2_.fill(0.0);
+//     for(jj=0; jj<nObs_; jj++) {
+//         rho_(jj) = logstar1(Glambda_(jj));
+//         Q2_ += logstar2(Glambda_(jj)) * GGt_.block(0,jj*nEqs_,nEqs_,nEqs_);
+//     }
+//     Q1_ = -G_ * rho_;
+//     // update lambda
+//     Q2ldlt_.compute(Q2_);
+//     lambdaNew_.noalias() = lambdaOld_ - Q2ldlt_.solve(Q1_);
+//     // maxErr = maxRelErr(lambdaNew_, lambdaOld_); // maximum relative error
+//     maxErr = maxRelErr();
+//     if (maxErr < relTol_) {
+//         break;
+//     }
+//     lambdaOld_ = lambdaNew_; // complete cycle
+//   }
+//   nIter = ii; // output lambda and also nIter and maxErr
+//   return;
+// }
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
-  lambdaOld_.fill(0.0); // TODO: set this to lambda0 each time if lambda0 is assigned?
-  lambdaNew_.fill(0.0);
-  int ii, jj;
-  // blockOuter(); // initialize GGt
-  block_outer(GGt_,G_);
+  // lambdaOld_.fill(0.0); // TODO: set this to lambda0 each time if lambda0 is assigned?
+  lambdaOld_ = lambda0_; // set to initial value
+  lambdaNew_.fill(0.0); // may not be needed here..
+  
+  MatrixXd GGtUsed_ = GGt_.block(0,0,nEqs_,nObs2_*nEqs_);
+  MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_);
+  block_outer(GGtUsed_,GUsed_);
+  
   // newton-raphson loop
+  int ii, jj;
   for(ii=0; ii<maxIter_; ii++) {
     // Q1 and Q2
-    Glambda_.noalias() = lambdaOld_.transpose() * G_;
-    Glambda_ = 1.0 - Glambda_.array();
+    Glambda_.head(nObs2_).noalias() = lambdaOld_.transpose() * GUsed_;
+    Glambda_.head(nObs2_) = 1.0 - Glambda_.head(nObs2_).array();
     Q2_.fill(0.0);
     for(jj=0; jj<nObs_; jj++) {
-        rho_(jj) = logstar1(Glambda_(jj));
-        Q2_ += logstar2(Glambda_(jj)) * GGt_.block(0,jj*nEqs_,nEqs_,nEqs_);
+      rho_(jj) = logstar1(Glambda_.head(nObs2_)(jj));
+      Q2_ += logstar2(Glambda_.head(nObs2_)(jj)) * GGtUsed_.block(0,jj*nEqs_,nEqs_,nEqs_);
     }
-    Q1_ = -G_ * rho_;
+    Q1_ = -GUsed_ * rho_;
     // update lambda
     Q2ldlt_.compute(Q2_);
     lambdaNew_.noalias() = lambdaOld_ - Q2ldlt_.solve(Q1_);
     // maxErr = maxRelErr(lambdaNew_, lambdaOld_); // maximum relative error
     maxErr = maxRelErr();
     if (maxErr < relTol_) {
-        break;
+      break;
     }
     lambdaOld_ = lambdaNew_; // complete cycle
   }
@@ -281,33 +373,56 @@ inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
 
 // Note: G and lambdaNew must have been assigned before calling
 // i.e., in InnerElExports.cpp, assign lambdaNew first 
+// template<typename ELModel>
+// inline void el::InnerEL<ELModel>::evalOmegas() {
+//   // G and lambdaNew must have been assigned
+//   if (lambdaNew_ != lambdaNew_) { // if lambdaNew is NaN 
+//     for (int ii=0; ii<nObs_; ii++) {
+//       omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
+//     }
+//   }
+//   else {
+//     Glambda_.noalias() = lambdaNew_.transpose() * G_;
+//     Gl11_ = 1.0/(1.0-Glambda_.array());
+//     omegas_.array() = Gl11_.array() / Gl11_.sum(); // in fact, Gl11.sum() should be equal to nObs
+//   }
+// }
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::evalOmegas() {
   // G and lambdaNew must have been assigned
+  // std::cout << "lambdaNew = " << lambdaNew_.transpose() << std::endl;
   if (lambdaNew_ != lambdaNew_) { // if lambdaNew is NaN 
-    for (int ii=0; ii<nObs_; ii++) {
+    for (int ii=0; ii<nObs2_; ii++) {
       omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
     }
   }
   else {
-    Glambda_.noalias() = lambdaNew_.transpose() * G_;
-    Gl11_ = 1.0/(1.0-Glambda_.array());
-    omegas_.array() = Gl11_.array() / Gl11_.sum(); // in fact, Gl11.sum() should be equal to nObs
+    MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_);
+    Glambda_.head(nObs2_).noalias() = lambdaNew_.transpose() * GUsed_;
+    Gl11_.head(nObs2_) = 1.0/(1.0-Glambda_.head(nObs2_).array());
+    omegas_.head(nObs2_).array() = Gl11_.head(nObs2_).array() / Gl11_.head(nObs2_).sum(); // in fact, Gl11.sum() should be equal to nObs
   }
 }
 
 // Note: omegas must have been assigned before calling 
 // i.e., in InnerElExports.cpp, evaluate & assign omegas first 
+// template<typename ELModel>
+// inline double el::InnerEL<ELModel>::logEL() {
+//   // if omegas are NaN, return -Inf
+//   if (omegas_ != omegas_) return -INFINITY;
+//   else return(omegas_.array().log().sum());
+// }
 template<typename ELModel>
 inline double el::InnerEL<ELModel>::logEL() {
   // if omegas are NaN, return -Inf
-  if (omegas_ != omegas_) return -INFINITY;
-  else return(omegas_.array().log().sum());
+  if (omegas_.head(nObs2_) != omegas_.head(nObs2_)) return -INFINITY;
+  else return(omegas_.head(nObs2_).array().log().sum());
 }
 
 // setter for lamba
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& lambda) {
+  // lambdaOld_ = lambda;
   lambdaNew_ = lambda;
 }
 
@@ -320,19 +435,20 @@ inline VectorXd el::InnerEL<ELModel>::getLambda() {
 // setter for omegas
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) {
-    omegas_ = omegas; 
+  omegas_.head(nObs2_) = omegas; 
 }
 
 // getter for omegas
 template<typename ELModel>
 inline VectorXd el::InnerEL<ELModel>::getOmegas() {
-    return(omegas_);
+    return(omegas_.head(nObs2_+support_));
 }
 
 // set function for G matrix
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
-  G_ = G; 
+  // G_ = G;
+  G_.block(0,0,nEqs_,nObs2_) = G;
 }
 
 // get function for G matrix
@@ -342,7 +458,8 @@ inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
 // }
 template<typename ELModel>
 inline MatrixXd el::InnerEL<ELModel>::getG() {
-  return(G_);
+  // return(G_);
+  return(G_.block(0,0,nEqs_,nObs2_));
 }
 
 /* TAKE OUT ALL MCMC SAMPLERS FOR NOW:

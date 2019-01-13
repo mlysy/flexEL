@@ -107,7 +107,9 @@ inline MeanRegModel::MeanRegModel(){}
 inline MeanRegModel::MeanRegModel(int nObs, int nEqs) {
   nObs_ = nObs;
   nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
-  // TODO: could possibly add pre-allocation for X, y or maybe Z here to avoid dynamic allocation in setData?
+  
+  // TODO: pre-allocate space for data?
+  // y_ = VectorXd::Zero(nObs_);
   // G_ = MatrixXd::Zero(nEqs_,nObs_);
 }
 

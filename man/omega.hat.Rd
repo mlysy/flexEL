@@ -5,7 +5,7 @@
 \title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.}
 \usage{
 omega.hat(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-07,
-  abs_tol = 0.001, verbose = FALSE)
+  abs_tol = 0.001, support = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqns} matrix of constraints.}

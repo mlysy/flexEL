@@ -10,10 +10,10 @@
 #' @details The inner-loop optimization of EL is ...
 #' @export omega.hat.EM.smooth
 omega.hat.EM.smooth <- function(G, deltas, epsilons, sp=10, max_iter = 100, 
-                                rel_tol = 1e-5, abs_tol = 1e-3, verbose = FALSE) {
+                                rel_tol = 1e-5, abs_tol = 1e-3, support = FALSE, verbose = FALSE) {
   # Note: inital omegas obtained from non-censored optimization
-  lambda <- .lambdaNR(t(G), maxIter = 100, relTol = rel_tol, verbose = verbose)
-  omegasInit <- .omega.hat(t(G), lambda)
+  lambda <- .lambdaNR(t(G), maxIter = 100, relTol = rel_tol, support = support, verbose = verbose)
+  omegasInit <- .omega.hat(t(G), lambda, support)
   if (any(is.nan(omegasInit))) {
     # stop("Initial omegas are nans.")
     return(rep(NaN,length(deltas)))

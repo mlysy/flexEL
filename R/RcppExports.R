@@ -45,16 +45,16 @@
     .Call(`_flexEL_omegaHatEMSmooth`, omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, verbose)
 }
 
-.lambdaNR <- function(G, maxIter, relTol, verbose) {
-    .Call(`_flexEL_lambdaNR`, G, maxIter, relTol, verbose)
+.lambdaNR <- function(G, maxIter, relTol, support, verbose) {
+    .Call(`_flexEL_lambdaNR`, G, maxIter, relTol, support, verbose)
 }
 
-.omega.hat <- function(G, lambda) {
-    .Call(`_flexEL_omegaHat`, G, lambda)
+.omega.hat <- function(G, lambda, support) {
+    .Call(`_flexEL_omegaHat`, G, lambda, support)
 }
 
-.logEL <- function(omegas) {
-    .Call(`_flexEL_logEL`, omegas)
+.logEL <- function(omegas, support) {
+    .Call(`_flexEL_logEL`, omegas, support)
 }
 
 .MeanReg_evalG <- function(y, X, beta) {

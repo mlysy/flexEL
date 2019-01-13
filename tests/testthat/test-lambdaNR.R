@@ -20,7 +20,8 @@ test_that("no censoring: lambda.R == lambda.cpp", {
     max_iter <- sample(c(2, 10, 100), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     lambda.cpp <- lambdaNR(G = G,
-                           max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+                           max_iter = max_iter, rel_tol = rel_tol, support = FALSE, 
+                           verbose = FALSE)
     nrout <- lambdaNR_R(G = G,
                         max_iter = max_iter, rel_tol = rel_tol)
     lambda.R <- nrout$lambda
