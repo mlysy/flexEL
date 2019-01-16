@@ -8,8 +8,10 @@
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
 #' @export lambdaNR_cens
-lambdaNR_cens <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
-  lambda <- .lambdaNRC(G = t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+lambdaNR_cens <- function(G, weights, max_iter = 100, rel_tol = 1e-7, support = FALSE,
+                          verbose = FALSE) { 
+  lambda <- .lambdaNRC(G = t(G), weights, maxIter = max_iter, relTol = rel_tol, 
+                       support = support, verbose = verbose)
   return(lambda)
 }
 

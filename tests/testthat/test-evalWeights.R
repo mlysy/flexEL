@@ -22,7 +22,8 @@ test_that("weights.R == weights.cpp", {
     omegas <- abs(rnorm(nObs))
     omegas <- omegas / sum(omegas) # prob vector
     epsilons <- rnorm(nObs)
-    weights.cpp <- .evalWeights(deltas, omegas, epsilons)
+    support <- FALSE
+    weights.cpp <- .evalWeights(deltas, omegas, epsilons, support)
     expect_equal(sum(weights.cpp),nObs)
     weights.R <- evalWeights_R(deltas, omegas, epsilons)
     expect_equal(sum(weights.R),nObs)

@@ -11,7 +11,7 @@ logEL <- function(omega, eps, delta, support = FALSE) {
     logel <- .logEL(omega, support)
   }
   else {
-    logel <- .logELC(omega,eps,delta)
+    logel <- .logELC(omega,eps,delta,support)
   }
   return(logel)
 }

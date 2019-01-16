@@ -36,9 +36,10 @@ Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::Matr
 // Note: for testing purpose only
 // [[Rcpp::export(".evalWeights")]]
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
-                           Eigen::VectorXd epsilons) {
+                           Eigen::VectorXd epsilons, bool support) {
   int nObs = omegas.size();
-  el::InnerELC<MeanRegModel> ILC(nObs);
+  el::InnerELC<MeanRegModel> ILC(nObs,1);
+  ILC.setOpts(support);
   ILC.setDeltas(deltas);
   ILC.setOmegas(omegas);
   ILC.setEpsilons(epsilons); 
@@ -49,13 +50,14 @@ Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
 
 // [[Rcpp::export(".lambdaNRC")]]
 Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
-                          int maxIter, double relTol, bool verbose) {
+                          int maxIter, double relTol, bool support, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
   el::InnerELC<MeanRegModel> ILC(nObs,nEqs);
+  ILC.setOpts(maxIter, relTol, support);
   ILC.setG(G); // assign a given G
   ILC.setWeights(weights);
-  ILC.setTol(maxIter, relTol);
+  // ILC.setTol(maxIter, relTol);
   
   // initialize variables for output here 
   int nIter;
@@ -88,25 +90,28 @@ Eigen::VectorXd lambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
 Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit, 
                            Eigen::MatrixXd G, Eigen::VectorXd deltas,
                            Eigen::VectorXd epsilons, 
-                           int maxIter, double relTol, double absTol, bool verbose) {
+                           int maxIter, double relTol, double absTol, bool support, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
   el::InnerELC<MeanRegModel> ILC(nObs,nEqs); 
+  ILC.setOpts(maxIter, relTol, absTol, support);
   ILC.setDeltas(deltas);
   ILC.setG(G); // assign a given G
   ILC.setEpsilons(epsilons); 
-  ILC.setTol(maxIter, relTol, absTol);
+  // ILC.setTol(maxIter, relTol, absTol);
   ILC.setOmegas(omegasInit); // set initial omegas from uncensored omega.hat
   ILC.evalOmegas();
   VectorXd omegasnew = ILC.getOmegas(); // output
-  return omegasnew; 
+  return omegasnew;
+  // return Eigen::VectorXd::Zero(nObs);
 }
 
 // [[Rcpp::export(".logELC")]]
 double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, 
-              Eigen::VectorXd deltas) {
+              Eigen::VectorXd deltas, bool support) {
   int nObs = omegas.size();
-  el::InnerELC<MeanRegModel> ILC(nObs);
+  el::InnerELC<MeanRegModel> ILC(nObs,1);
+  ILC.setOpts(support);
   ILC.setDeltas(deltas);
   ILC.setEpsilons(epsilons); 
   ILC.setOmegas(omegas);
@@ -116,9 +121,10 @@ double logELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
 
 // [[Rcpp::export(".evalPsos.smooth")]]
 double evalPsosSmooth(int ii, Eigen::VectorXd omegas, 
-                      Eigen::VectorXd epsilons, double s) {
+                      Eigen::VectorXd epsilons, double s, bool support) {
   int nObs = omegas.size();
-  el::InnerELC<MeanRegModel> ILC(nObs);
+  el::InnerELC<MeanRegModel> ILC(nObs,1);
+  ILC.setOpts(support);
   ILC.setEpsilons(epsilons);
   ILC.setOmegas(omegas);
   return ILC.evalPsosSmooth(ii-1,s); // ii is 1 larger in R than in C++
@@ -127,9 +133,10 @@ double evalPsosSmooth(int ii, Eigen::VectorXd omegas,
 // [[Rcpp::export(".logEL.smooth")]]
 double logELSmooth(Eigen::VectorXd omegas, 
                    Eigen::VectorXd epsilons, 
-                   Eigen::VectorXd deltas, double s) {
+                   Eigen::VectorXd deltas, double s, bool support) {
   int nObs = omegas.size();
-  el::InnerELC<MeanRegModel> ILC(nObs);
+  el::InnerELC<MeanRegModel> ILC(nObs,1);
+  ILC.setOpts(support);
   ILC.setOmegas(omegas);
   ILC.setEpsilons(epsilons);
   ILC.setDeltas(deltas);
@@ -139,9 +146,10 @@ double logELSmooth(Eigen::VectorXd omegas,
 // [[Rcpp::export(".evalWeights.smooth")]]
 Eigen::VectorXd evalWeightsSmooth(Eigen::VectorXd deltas, 
                                   Eigen::VectorXd omegas, 
-                                  Eigen::VectorXd epsilons, double s) {
+                                  Eigen::VectorXd epsilons, double s, bool support) {
   int nObs = omegas.size();
-  el::InnerELC<MeanRegModel> ILC(nObs);
+  el::InnerELC<MeanRegModel> ILC(nObs,1);
+  ILC.setOpts(support);
   ILC.setOmegas(omegas);
   ILC.setEpsilons(epsilons);
   ILC.setDeltas(deltas);
@@ -155,14 +163,15 @@ Eigen::VectorXd omegaHatEMSmooth(Eigen::VectorXd omegasInit,
                                  Eigen::MatrixXd G, Eigen::VectorXd deltas,
                                  Eigen::VectorXd epsilons, double s, 
                                  int maxIter, double relTol, double absTol, 
-                                 bool verbose) {
+                                 bool support, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
   el::InnerELC<MeanRegModel> ILC(nObs,nEqs); 
   ILC.setDeltas(deltas);
   ILC.setG(G); // assign a given G
   ILC.setEpsilons(epsilons); 
-  ILC.setTol(maxIter, relTol, absTol);
+  ILC.setOpts(maxIter, relTol, absTol, support);
+  // ILC.setTol(maxIter, relTol, absTol);
   ILC.setOmegas(omegasInit); // set initial omegas from uncensored omega.hat
   ILC.evalOmegasSmooth(s);
   VectorXd omegasnew = ILC.getOmegas(); // output

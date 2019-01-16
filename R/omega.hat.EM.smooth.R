@@ -19,6 +19,6 @@ omega.hat.EM.smooth <- function(G, deltas, epsilons, sp=10, max_iter = 100,
     return(rep(NaN,length(deltas)))
   }
   omegahat <- .omega.hat.EM.smooth(omegasInit, t(G), deltas, epsilons,
-                                   sp, max_iter, rel_tol, abs_tol, verbose)
+                                   sp, max_iter, rel_tol, abs_tol, support, verbose)
   return(omegahat)
 }

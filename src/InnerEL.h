@@ -56,6 +56,7 @@ namespace el {
     int maxIter_; /**< maximum number of iterations */
     double relTol_; /**< relative tolerance */
     bool support_; /**< whether do support correction or not */ 
+    double supa_; // tuning parameter for support currection
 
     // for support modification
     int nObs1_; // nObs1_ = nObs_+1: for initial space allocation
@@ -91,13 +92,32 @@ namespace el {
     * @brief Set tolerance values for NR, support correction option, and initial value of lambda.
     */
     void setOpts(const int& maxIter, const double& relTol,
-                 const bool& support, const Ref<const VectorXd>& lambda0);
+                 const bool& support, const double& supa, 
+                 const Ref<const VectorXd>& lambda0);
+    
+    /**
+     * @brief Set tolerance values for NR, support correction option, and initial value of lambda.
+     */
+    void setOpts(const int& maxIter, const double& relTol,
+                 const bool& support, 
+                 const Ref<const VectorXd>& lambda0);
     
     /**
      * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
      */
     void setOpts(const int& maxIter, const double& relTol,
                  const bool& support);
+    
+    /**
+     * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
+     */
+    void setOpts(const int& maxIter, const double& relTol,
+                 const bool& support, const double& supa);
+    
+    /**
+     * @brief Set support correction option only. 
+     */
+    void setOpts(const bool& support, const double& supa);
     
     /**
      * @brief Set support correction option only. 
@@ -229,12 +249,36 @@ inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
 // set options
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
-                                          const bool& support, const Ref<const VectorXd>& lambda0) {
+                                          const bool& support, const double& supa, 
+                                          const Ref<const VectorXd>& lambda0) {
   maxIter_ = maxIter;
   relTol_ = relTol;
   support_ = support;
+  supa_ = supa;
   nObs2_ = nObs_+support_;
   lambda0_ = lambda0;
+}
+
+template<typename ELModel>
+inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+                                          const bool& support, 
+                                          const Ref<const VectorXd>& lambda0) {
+  maxIter_ = maxIter;
+  relTol_ = relTol;
+  support_ = support;
+  supa_ = std::min((double)nObs_,0.5*log(nObs_));
+  nObs2_ = nObs_+support_;
+  lambda0_ = lambda0;
+}
+
+template<typename ELModel>
+inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+                                          const bool& support, const double& supa) {
+  maxIter_ = maxIter;
+  relTol_ = relTol;
+  support_ = support;
+  supa_ = supa;
+  nObs2_ = nObs_+support_;
 }
 
 template<typename ELModel>
@@ -243,12 +287,21 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
   maxIter_ = maxIter;
   relTol_ = relTol;
   support_ = support;
+  supa_ = std::min((double)nObs_,0.5*log(nObs_));
+  nObs2_ = nObs_+support_;
+}
+
+template<typename ELModel>
+inline void el::InnerEL<ELModel>::setOpts(const bool& support, const double& supa) {
+  support_ = support;
+  supa_ = supa;
   nObs2_ = nObs_+support_;
 }
 
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setOpts(const bool& support) {
   support_ = support;
+  supa_ = std::min((double)nObs_,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
 }
 
@@ -390,14 +443,14 @@ inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::evalOmegas() {
   // G and lambdaNew must have been assigned
-  // std::cout << "lambdaNew = " << lambdaNew_.transpose() << std::endl;
   if (lambdaNew_ != lambdaNew_) { // if lambdaNew is NaN 
     for (int ii=0; ii<nObs2_; ii++) {
       omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
     }
   }
   else {
-    MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_);
+    if (support_) adj_G(G_,supa_);
+    MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_); // TODO: new allocation right now..
     Glambda_.head(nObs2_).noalias() = lambdaNew_.transpose() * GUsed_;
     Gl11_.head(nObs2_) = 1.0/(1.0-Glambda_.head(nObs2_).array());
     omegas_.head(nObs2_).array() = Gl11_.head(nObs2_).array() / Gl11_.head(nObs2_).sum(); // in fact, Gl11.sum() should be equal to nObs

@@ -49,7 +49,8 @@ test_that("no censoring: omegahat.cpp is optimal", {
   }
 })
 
-# checking optimality of the solution from C++ (with adjusted G matrix)
+# checking optimality of the solution from C++ (with adjusted G matrix) 
+# (TODO: make adjG internal..)
 test_that("no censoring: omegahat.cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -188,7 +189,10 @@ test_that("under censoring: omegahatCS.R == omegahatCS.cpp", {
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
-    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, verbose = FALSE)
+    support <- FALSE
+    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, 
+                                        max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
+                                        support = support, verbose = FALSE)
     omegahat.R <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, verbose = FALSE)$omegas
     if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
       message("R version did not converge but C++ does.")
@@ -217,8 +221,9 @@ test_that("under censoring: omegahat.cpp is optimal", {
     1-sum(deltas)/n
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
+    support <- FALSE
     omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, max_iter = max_iter, 
-                                          rel_tol = 1e-5, abs_tol = 1e-5, verbose = FALSE)
+                                          rel_tol = 1e-5, abs_tol = 1e-5, support = support, verbose = FALSE)
     # omegahat.cpp <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter,
     #                                       rel_tol = 1e-3, verbose = FALSE)$omegas
     if (!any(is.nan(omegahat.cpp))) {

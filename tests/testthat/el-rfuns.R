@@ -19,6 +19,7 @@ MaxRelErr <- function(lambdaNew, lambdaOld) {
 adjG_R <- function(G, an) {
   n <- nrow(G)
   gbar <- 1/n*colSums(G)
+  # print(gbar)
   if (missing(an)) an <- max(1,0.5*log(n))
   gadd <- -an*gbar
   return(unname(rbind(G,gadd)))

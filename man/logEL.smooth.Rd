@@ -4,7 +4,7 @@
 \alias{logEL.smooth}
 \title{Calculate the smoothed log empirical likelihood under censoring}
 \usage{
-logEL.smooth(omega, eps, deltas, sp = 10)
+logEL.smooth(omega, eps, deltas, sp = 10, support = FALSE)
 }
 \arguments{
 \item{omega}{Length-\code{nObs} probability vector.}

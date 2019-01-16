@@ -5,7 +5,7 @@
 \title{Solve the inner loop optimization of a censored EL function}
 \usage{
 lambdaNR_cens(G, weights, max_iter = 100, rel_tol = 1e-07,
-  verbose = FALSE)
+  support = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
