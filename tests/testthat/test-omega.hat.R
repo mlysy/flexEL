@@ -36,7 +36,8 @@ test_that("no censoring: omegahat.cpp is optimal", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+                              support = FALSE, verbose = FALSE)
     # check optimality by optim_proj if converged
     if (!any(is.nan(omegahat.cpp))) {
       # optimal of omega.check should be at xsol = 1s if omegahat is optimal
@@ -51,23 +52,38 @@ test_that("no censoring: omegahat.cpp is optimal", {
 
 # checking optimality of the solution from C++ (with adjusted G matrix) 
 # (TODO: make adjG internal..)
-test_that("no censoring: omegahat.cpp is optimal", {
+test_that("no censoring: omegahat.R == omegahat.cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    # max_iter <- sample(c(5, 10, 100), 1)
+    # max_iter <- sample(c(2, 10, 100), 1)
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    G <- adjG_R(G)
-    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-    ocheck <- optim_proj(xsol = rep(1,n-p+1),
-                         xrng = 0.05,
-                         fun = function(x) {omega.check(x, omegahat.cpp, G)},
-                         plot = FALSE)
-    expect_lt(max.xdiff(ocheck),0.01)
+    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+                              support = TRUE, verbose = FALSE)
+    omegahat.R <- omega.hat_R(G = adjG_R(G), max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    expect_equal(omegahat.cpp, omegahat.R)
   }
 })
+
+# test_that("no censoring: omegahat.cpp is optimal", {
+#   for(ii in 1:ntest) {
+#     n <- sample(10:20,1)
+#     p <- sample(1:(n-2), 1)
+#     # max_iter <- sample(c(5, 10, 100), 1)
+#     max_iter <- sample(c(10, 100, 500), 1)
+#     rel_tol <- runif(1, 1e-6, 1e-5)
+#     G <- matrix(rnorm(n*p),n,p) # random G here
+#     omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+#                               support = TRUE, verbose = FALSE)
+#     ocheck <- optim_proj(xsol = rep(1,n-p+1),
+#                          xrng = 0.05,
+#                          fun = function(x) {omega.check(x, omegahat.cpp, G)},
+#                          plot = FALSE)
+#     expect_lt(max.xdiff(ocheck),0.01)
+#   }
+# })
 
 # Censored case:
 test_that("under censoring: omegahatC.R == omegahatC.cpp", {

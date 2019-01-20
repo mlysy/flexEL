@@ -19,7 +19,6 @@ MaxRelErr <- function(lambdaNew, lambdaOld) {
 adjG_R <- function(G, an) {
   n <- nrow(G)
   gbar <- 1/n*colSums(G)
-  # print(gbar)
   if (missing(an)) an <- max(1,0.5*log(n))
   gadd <- -an*gbar
   return(unname(rbind(G,gadd)))
@@ -103,6 +102,8 @@ omega.hat.NC_R <- function(G, adjust = FALSE,
                            max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
   conv <- lambdaOut$convergence # 1 if converged
+  # message("lambda = ")
+  # print(lambdaOut$lambda)
   if (!conv) {
     nObs <- nrow(G)
     omegahat <- rep(NaN,nObs)
@@ -187,8 +188,6 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     rho[is.infinite(rho) & !weights.sav] <- 0 
     # Q1 <- G %*% (rho * weights)
     Q1 <- G %*% (rho * weights.sav)
-    # print("Q2invQ1 = ")
-    # print(t(solve(Q2,Q1)))
     lambdaNew <- lambdaOld - solve(Q2,Q1)
     maxErr <- MaxRelErr(lambdaNew, lambdaOld) # maximum relative error
     # message("maxErr = ", maxErr)

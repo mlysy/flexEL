@@ -208,6 +208,7 @@ inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
   // space allocation
   omegas_ = VectorXd::Zero(nObs1_).array() + 1.0/(double)nObs1_; // Initialize to 1/nObs_
   G_ = MatrixXd::Zero(nEqs_,nObs1_); // NEW: JAN 1
+  // std::cout << "G_ = \n" << G_ << std::endl;
   GGt_ = MatrixXd::Zero(nEqs_,nObs1_*nEqs_);
   lambda0_ = VectorXd::Zero(nEqs_); // default initial value of lambda
   lambdaOld_ = VectorXd::Zero(nEqs_); // Initialize to all 0's
@@ -266,7 +267,7 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
   maxIter_ = maxIter;
   relTol_ = relTol;
   support_ = support;
-  supa_ = std::min((double)nObs_,0.5*log(nObs_));
+  supa_ = std::max(1.0,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
   lambda0_ = lambda0;
 }
@@ -287,7 +288,7 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
   maxIter_ = maxIter;
   relTol_ = relTol;
   support_ = support;
-  supa_ = std::min((double)nObs_,0.5*log(nObs_));
+  supa_ = std::max(1.0,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
 }
 
@@ -301,7 +302,7 @@ inline void el::InnerEL<ELModel>::setOpts(const bool& support, const double& sup
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setOpts(const bool& support) {
   support_ = support;
-  supa_ = std::min((double)nObs_,0.5*log(nObs_));
+  supa_ = std::max(1.0,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
 }
 
@@ -398,16 +399,21 @@ inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
   MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_);
   block_outer(GGtUsed_,GUsed_);
   
+  // std::cout << "nObs2_ = " << nObs2_ << std::endl;
+  // std::cout << "GUsed_ = \n" << GUsed_.transpose() << std::endl;
+  
   // newton-raphson loop
   int ii, jj;
   for(ii=0; ii<maxIter_; ii++) {
+    // std::cout << "lambdaOld_ = " << lambdaOld_.transpose() << std::endl;
+    // std::cout << "lambdaNew_ = " << lambdaNew_.transpose() << std::endl;
     // Q1 and Q2
-    Glambda_.head(nObs2_).noalias() = lambdaOld_.transpose() * GUsed_;
-    Glambda_.head(nObs2_) = 1.0 - Glambda_.head(nObs2_).array();
+    Glambda_.noalias() = lambdaOld_.transpose() * GUsed_;
+    Glambda_= 1.0 - Glambda_.array();
     Q2_.fill(0.0);
-    for(jj=0; jj<nObs_; jj++) {
-      rho_(jj) = logstar1(Glambda_.head(nObs2_)(jj));
-      Q2_ += logstar2(Glambda_.head(nObs2_)(jj)) * GGtUsed_.block(0,jj*nEqs_,nEqs_,nEqs_);
+    for(jj=0; jj<nObs2_; jj++) {
+      rho_(jj) = logstar1(Glambda_(jj));
+      Q2_ += logstar2(Glambda_(jj)) * GGtUsed_.block(0,jj*nEqs_,nEqs_,nEqs_);
     }
     Q1_ = -GUsed_ * rho_;
     // update lambda
@@ -449,7 +455,7 @@ inline void el::InnerEL<ELModel>::evalOmegas() {
     }
   }
   else {
-    if (support_) adj_G(G_,supa_);
+    // if (support_) adj_G(G_,supa_);
     MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_); // TODO: new allocation right now..
     Glambda_.head(nObs2_).noalias() = lambdaNew_.transpose() * GUsed_;
     Gl11_.head(nObs2_) = 1.0/(1.0-Glambda_.head(nObs2_).array());
@@ -494,14 +500,17 @@ inline void el::InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) {
 // getter for omegas
 template<typename ELModel>
 inline VectorXd el::InnerEL<ELModel>::getOmegas() {
-    return(omegas_.head(nObs2_+support_));
+    return(omegas_.head(nObs2_));
 }
 
 // set function for G matrix
 template<typename ELModel>
 inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
   // G_ = G;
-  G_.block(0,0,nEqs_,nObs2_) = G;
+  // std::cout << "***before: G_ = \n" << G_ << std::endl;
+  G_.block(0,0,nEqs_,nObs_) = G;
+  // std::cout << "***after: G_ = \n" << G_ << std::endl;
+  if (support_) adj_G(G_,supa_);
 }
 
 // get function for G matrix

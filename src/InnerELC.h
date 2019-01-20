@@ -281,7 +281,7 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter,
   relTol_ = relTol;
   absTol_ = absTol;
   support_ = support;
-  supa_ = std::min((double)nObs_,0.5*log(nObs_));
+  supa_ = std::max(1.0,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
   lambda0_ = lambda0;
 }
@@ -692,7 +692,7 @@ inline void el::InnerELC<ELModel>::setLambda(const Ref<const VectorXd>& lambda) 
 // }
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setWeights(const Ref<const VectorXd>& weights) {
-  weights_.head(nObs_) = weights; 
+  weights_.head(nObs2_) = weights; 
 }
 
 // template<typename ELModel>
@@ -704,8 +704,8 @@ inline void el::InnerELC<ELModel>::setWeights(const Ref<const VectorXd>& weights
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) {
   // nObs = _omegas.size(); // TODO: where to set nObs
-  omegasInit_.head(nObs_) = omegas; // new
-  omegas_.head(nObs_) = omegas; 
+  omegasInit_.head(nObs2_) = omegas; // new
+  omegas_.head(nObs2_) = omegas; 
 }
 
 // template<typename ELModel>
