@@ -50,7 +50,7 @@ test_that("no censoring: omegahat.cpp is optimal", {
   }
 })
 
-# checking optimality of the solution from C++ (with adjusted G matrix) 
+# checking optimality of the solution from C++ (with support correction) 
 # (TODO: make adjG internal..)
 test_that("no censoring: omegahat.R == omegahat.cpp", {
   for(ii in 1:ntest) {
@@ -109,6 +109,33 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
     }
     else {
       expect_equal(omegahat.cpp, omegahat.R)
+    }
+  }
+})
+
+test_that("under censoring: omegahatC.R == omegahatC.cpp (with support correction) ", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    # max_iter <- sample(c(2, 10, 100), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    abs_tol <- runif(1, 1e-5, 1e-3)
+    G <- matrix(rnorm(n*p), n, p)
+    deltas <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    deltas[censinds] <- 0
+    epsilons <- rnorm(n)
+    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, 
+                              rel_tol = rel_tol, abs_tol = abs_tol, support = TRUE, verbose = FALSE)
+    omegahat.R <- omega.hat.EM_R(adjG_R(G), deltas, epsilons, adjust = TRUE, max_iter = max_iter, 
+                              rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
+    if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
+      message("R version did not converge but C++ does.")
+    }
+    else {
+      expect_equal(omegahat.cpp, omegahat.R, tolerance = 1e-4) # TODO: is this tolerance ok??
     }
   }
 })

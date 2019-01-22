@@ -37,7 +37,7 @@ Eigen::VectorXd evalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::Matr
 // [[Rcpp::export(".evalWeights")]]
 Eigen::VectorXd evalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, 
                            Eigen::VectorXd epsilons, bool support) {
-  int nObs = omegas.size();
+  int nObs = deltas.size(); // TODO: this is problematic -- which nObs to use
   el::InnerELC<MeanRegModel> ILC(nObs,1);
   ILC.setOpts(support);
   ILC.setDeltas(deltas);
@@ -97,7 +97,7 @@ Eigen::VectorXd omegaHatEM(Eigen::VectorXd omegasInit,
   ILC.setOpts(maxIter, relTol, absTol, support);
   ILC.setDeltas(deltas);
   ILC.setG(G); // assign a given G
-  ILC.setEpsilons(epsilons); 
+  ILC.setEpsilons(epsilons);
   // ILC.setTol(maxIter, relTol, absTol);
   ILC.setOmegas(omegasInit); // set initial omegas from uncensored omega.hat
   ILC.evalOmegas();

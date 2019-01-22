@@ -14,8 +14,6 @@ omega.hat <- function(G, deltas, epsilons, max_iter = 100,
   if (missing(deltas) && missing(epsilons)) {
     lambda <- .lambdaNR(t(G), maxIter = max_iter, relTol = rel_tol, 
                         support = support, verbose = verbose)
-    # message("lambda = ")
-    # print(lambda)
     omegahat <- .omega.hat(t(G), lambda = lambda, support = support)
   }
   else {
@@ -28,7 +26,7 @@ omega.hat <- function(G, deltas, epsilons, max_iter = 100,
       return(rep(NaN,length(deltas)))
     }
     omegahat <- .omega.hat.EM(omegasInit, t(G), deltas, epsilons,
-                              max_iter, rel_tol, absTol = abs_tol, 
+                              max_iter, rel_tol, absTol = abs_tol,
                               support = support, verbose = verbose)
   }
   return(omegahat)

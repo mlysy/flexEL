@@ -15,6 +15,7 @@
 #include "SortOrder.h"
 #include "IndSmooth.h" // for smoothed indicator function
 #include "BlockOuter.h"
+#include "AdjG.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
@@ -255,6 +256,8 @@ inline el::InnerELC<ELModel>::InnerELC(int nObs, int nEqs): ELModel(nObs, nEqs){
   Q2ldlt_.compute(MatrixXd::Identity(nEqs_,nEqs_));
   deltas_ = VectorXd::Zero(nObs1_);
   weights_ = VectorXd::Zero(nObs1_);
+  epsilons_ = VectorXd::Zero(nObs1_);
+  epsOrd_ = VectorXi::Zero(nObs1_);
 }
 
 // set options
@@ -270,6 +273,10 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter,
   supa_ = supa;
   nObs2_ = nObs_+support_;
   lambda0_ = lambda0;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 template<typename ELModel>
@@ -284,6 +291,10 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter,
   supa_ = std::max(1.0,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
   lambda0_ = lambda0;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 template<typename ELModel>
@@ -296,6 +307,10 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter,
   support_ = support;
   supa_ = supa;
   nObs2_ = nObs_+support_;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 template<typename ELModel>
@@ -308,6 +323,10 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter,
   support_ = support;
   supa_ = std::min((double)nObs_,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 template<typename ELModel>
@@ -318,6 +337,10 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter, const double& rel
   support_ = support;
   supa_ = supa;
   nObs2_ = nObs_+support_;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 template<typename ELModel>
@@ -328,6 +351,10 @@ inline void el::InnerELC<ELModel>::setOpts(const int& maxIter, const double& rel
   support_ = support;
   supa_ = std::min((double)nObs_,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 template<typename ELModel>
@@ -335,6 +362,10 @@ inline void el::InnerELC<ELModel>::setOpts(const bool& support) {
   support_ = support;
   supa_ = std::min((double)nObs_,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
+  if (support_) {
+    epsilons_.tail(1)(0) = -INFINITY;
+    deltas_.tail(1)(0) = 0;
+  }
 }
 
 // set tolerance for NR
@@ -463,8 +494,8 @@ inline void el::InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr) {
   int ii;
   for(ii=0; ii<maxIter_; ii++) {
     // Q1 and Q2
-    Glambda_.head(nObs2_).noalias() = lambdaOld_.transpose() * GUsed_;
-    Glambda_.head(nObs2_) = weights_.head(nObs2_).sum() + Glambda_.head(nObs2_).array();
+    Glambda_.noalias() = lambdaOld_.transpose() * GUsed_;
+    Glambda_ = weights_.head(nObs2_).sum() + Glambda_.array();
     Q2_.fill(0.0); 
     for(int jj=0; jj<nObs2_; jj++) {
       rho_(jj) = logsharp1(Glambda_(jj), weights_(jj));
@@ -530,8 +561,9 @@ inline double el::InnerELC<ELModel>::evalPsos(const int ii) {
 
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& epsilons) {
-  epsilons_ = epsilons;
-  epsOrd_ = sort_inds(epsilons_); 
+  epsilons_.head(nObs_) = epsilons;
+  // std::cout << "setEpsilons: epsilons = " << epsilons_.transpose() << std::endl;
+  epsOrd_.head(nObs2_) = sort_inds(epsilons_.head(nObs2_)); 
 }
 
 // // evaluate epsilons location model
@@ -600,7 +632,6 @@ inline void el::InnerELC<ELModel>::evalWeights() {
       if (kk == ii) break;
     }
   }
-  // assigned weights are still in the order of original data
   weights_.array() = deltas_.array() + psots_.array();
 }
 
@@ -656,11 +687,13 @@ inline void el::InnerELC<ELModel>::evalOmegas() {
   double maxErr;
   VectorXd lGq(nObs2_);
   double logelOld = logEL();
+  // std::cout << "logelOld = " << logelOld << std::endl;
   double logel = logelOld;
   int ii;
   for(ii=0; ii<maxIter_; ii++) {
     // E-step:
     evalWeights(); // assigns weights according to epsilons
+    // std::cout << "weights_ = " << weights_.transpose() << std::endl;
     // M-step:
     lambdaNR(nIter, maxErr);
     lGq = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
@@ -692,7 +725,7 @@ inline void el::InnerELC<ELModel>::setLambda(const Ref<const VectorXd>& lambda) 
 // }
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setWeights(const Ref<const VectorXd>& weights) {
-  weights_.head(nObs2_) = weights; 
+  weights_.head(nObs_) = weights; 
 }
 
 // template<typename ELModel>
@@ -716,7 +749,7 @@ inline void el::InnerELC<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) 
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setDeltas(const Ref<const VectorXd>& deltas) {
   psots_ = VectorXd::Zero(nObs2_); // TODO: initialization maybe should be done at better places
-  deltas_.head(nObs_) = deltas; 
+  deltas_.head(nObs_) = deltas;
 }
 
 // template<typename ELModel>
@@ -773,12 +806,8 @@ template<typename ELModel>
 inline double el::InnerELC<ELModel>::logEL() {
   // evalOmegas(maxIter,relTol); 
   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
-  else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
+  else if ((omegas_.head(nObs_).array() < -1e-10/nObs2_).any()) return -INFINITY;
   else {
-    if (support_) {
-      omegas_.tail(1)(0) = -INFINITY;
-      deltas_.tail(1)(0) = 0;
-    }
     omegas_ = omegas_.array().abs();
     VectorXd psos(nObs2_); 
     for (int ii=0; ii<nObs2_; ii++) {
@@ -798,8 +827,9 @@ inline double el::InnerELC<ELModel>::logEL() {
 // set function for G matrix
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setG(const Ref<const MatrixXd>& G) {
-  G_.block(0,0,nEqs_,nObs2_) = G;
+  G_.block(0,0,nEqs_,nObs_) = G;
   // G_ = G; 
+  if (support_) adj_G(G_,supa_);
 }
 
 // get function for G matrix

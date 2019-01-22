@@ -222,6 +222,8 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
 evalWeights_R <- function(deltas, omegas, epsilons) {
   nObs <- length(omegas)
   epsOrd <- order(epsilons)
+  # message("epsOrd = ")
+  # print(epsOrd-1)
   psots <- rep(0,nObs)
   for (ii in 1:nObs) {
     for (jj in 1:nObs) {
@@ -272,6 +274,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   }
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas,epsilons,deltas)
+  # message("logelOld = ", logelOld)
   
   # for debug
   if (dbg) {
@@ -285,12 +288,13 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
+    # message("weights = ")
+    # print(weights)
     # M step:
-    # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
     if (!lambdaOut$convergence) {
-      # message("lambdaNRC did not converge in EM")
+      message("lambdaNRC did not converge in EM")
       if (dbg) {
         return(list(conv=FALSE, omegas=rep(NaN,n), logels=logels, artome=artome))
       }
@@ -308,6 +312,7 @@ omega.hat.EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     # err <- MaxRelErr(lambdaNew,lambdaOld)
     # err <- MaxRelErr(omegas,omegasOld)
     logel <- logEL_R(omegas,epsilons,deltas)
+    # message("logel = ", logel)
     
     # for debug
     if (dbg) {
