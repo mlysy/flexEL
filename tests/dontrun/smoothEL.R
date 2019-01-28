@@ -31,18 +31,26 @@ ind1.smooth_R <- function(x, s=10) {
 # }
 
 # smoothed partial sum of omegas (vectorized version)
-evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10) {
-  psos <- sum(ind.smooth_R(epsilons[ii]-epsilons,s)*omegas)
+evalPsos.smooth_R <- function(ii, omegas, epsilons, s=10, support = FALSE) {
+  n <- length(epsilons)
+  if (support == TRUE  && ii == n) {
+    psos <- sum(omegas[1:(n-1)])+0.5*omegas[n]
+  }
+  else psos <- sum(ind.smooth_R(epsilons[ii]-epsilons,s)*omegas)
   return(psos)
 }
 
 # smoothed censored logEL
-logEL.smooth_R <- function(omegas,epsilons,deltas,s=10) {
+logEL.smooth_R <- function(omegas,epsilons,deltas,s=10,adjust=FALSE) {
+  # if (adjust) {
+  #   epsilons <- c(epsilons,-Inf)
+  #   deltas <- c(deltas,0)
+  # }
   epsOrd <- order(epsilons) # ascending order of epsilons
   n <- length(omegas)
   psos <- rep(0,n)
   for (ii in 1:n) {
-    psos[ii] <- evalPsos.smooth_R(ii,omegas,epsilons,s) 
+    psos[ii] <- evalPsos.smooth_R(ii,omegas,epsilons,s,support = adjust) 
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
@@ -66,16 +74,25 @@ logEL.smooth_R <- function(omegas,epsilons,deltas,s=10) {
 # }
 
 # smoothed evalWeight function with sigmoid function (more vectorized version)
-evalWeights.smooth_R <- function(deltas, omegas, epsilons, s=10) {
-  nObs <- length(omegas)
+evalWeights.smooth_R <- function(deltas, omegas, epsilons, s=10, support = FALSE) {
+  n <- length(epsilons)
   epsOrd <- order(epsilons)
-  psots <- rep(0,nObs)
-  psoss <- rep(NA,nObs)
-  for (jj in 1:nObs) {
-    psoss[jj] <- evalPsos.smooth_R(jj,omegas,epsilons,s)
+  psots <- rep(0,n)
+  psoss <- rep(NA,n)
+  for (jj in 1:n) {
+    psoss[jj] <- evalPsos.smooth_R(jj,omegas,epsilons,s,support)
   }
-  for (ii in 1:nObs) {
-    psots[ii] <- sum((1-deltas)*ind.smooth_R(epsilons-epsilons[ii],s)*omegas[ii]/psoss)
+  if (support) {
+    for (ii in 1:n) {
+      temp <- ind.smooth_R(epsilons-epsilons[ii],s)
+      if (ii==n) temp[n] <- ind.smooth_R(0,s)
+      psots[ii] <- sum((1-deltas)*temp*omegas[ii]/psoss)
+    }
+  }
+  else {
+    for (ii in 1:n) {
+      psots[ii] <- sum((1-deltas)*ind.smooth_R(epsilons-epsilons[ii],s)*omegas[ii]/psoss)
+    }
   }
   weights <- deltas + psots
   return(weights)
@@ -100,7 +117,7 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     epsilons <- c(epsilons,-Inf)
     deltas <- c(deltas,0)
   }
-  logelOld <- logEL.smooth_R(omegas,epsilons,deltas,s)
+  logelOld <- logEL.smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
   
   # for debug
   if (dbg) {
@@ -113,7 +130,8 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
-    weights <- evalWeights.smooth_R(deltas, omegas, epsilons, s)
+    weights <- evalWeights.smooth_R(deltas, omegas, epsilons, s, support = adjust)
+    # print(weights)
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
@@ -134,7 +152,7 @@ omega.hat.EM.smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     if (any(omegas < -rel_tol)) message("omega.hat.EM_R: negative omegas.")
     omegas <- abs(omegas)
     omegas <- omegas/sum(omegas)
-    logel <- logEL.smooth_R(omegas,epsilons,deltas,s)
+    logel <- logEL.smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
     
     # for debug
     if (dbg) {

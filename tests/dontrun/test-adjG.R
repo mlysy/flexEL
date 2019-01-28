@@ -1,5 +1,5 @@
 # ---- experiments with adjusted G matrix ----
-library(bayesEL)
+library(flexEL)
 library(optimCheck)
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
@@ -154,6 +154,52 @@ omegas.adj <- omega.hat.EM_R(G, deltas, epsilons, adjust = TRUE,
 logel.adj <- logEL_R(omegas.adj,epsilons,deltas,adjust=TRUE)
 
 # if the artificial point got a large weight, then the likelihood is affected
+
+
+# ---- use random G matrix to check if the logEL are close enough, number of steps to take (smooth)
+dif <- c()
+Gs <- list()
+del <- list()
+eps <- list()
+nrep <- 100
+count <- 0
+while(TRUE) {
+  count <- count + 1
+  if (count == nrep+1) break
+  message("count = ", count)
+  n <- 100
+  p <- 3
+  max_iter <- 200
+  rel_tol <- 1e-3
+  G <- matrix(rnorm(n*p), n, p)
+  deltas <- rep(1,n)
+  numcens <- 15
+  censinds <- sample(n,numcens)
+  deltas[censinds] <- 0
+  # if (sum(1-deltas)/n < 0.15 || sum(1-deltas)/n > 0.20) next
+  epsilons <- gen_eps(n)
+  omegas <- omega.hat.EM.smooth_R(G,deltas,epsilons)$omegas
+  logel <- logEL.smooth_R(omegas,epsilons,deltas)
+  G <- adjG_R(G)
+  omegas <- omega.hat.EM.smooth_R(G, deltas, epsilons, adjust = TRUE,
+                                  max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)$omegas
+  logel.adj <- logEL.smooth_R(omegas,c(epsilons,-Inf),c(deltas,0),adjust=TRUE)
+  
+  if(!is.infinite(logel)) {
+    Gs[[count]] <- G
+    del[[count]] <- deltas
+    eps[[count]] <- epsilons
+    dif <- c(dif, logel-logel.adj)
+  }
+  else {
+    count <- count-1
+    next
+  }
+}
+
+count
+plot(dif,cex=.3)
+which(abs(dif) > 1e-3)
 
 # ---- mr model: 1-d case ----
 n <- 100

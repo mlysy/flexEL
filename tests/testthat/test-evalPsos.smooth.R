@@ -21,3 +21,18 @@ test_that("evalPsos.R == evalPsos.cpp", {
     expect_equal(val.R, val.cpp)
   }
 })
+
+test_that("evalPsos.R == evalPsos.cpp (with support correction)", {
+  for(ii in 1:ntest) {
+    n <- sample(1:20,1)
+    s <- sample(1:100,1)
+    omegas <- abs(rnorm(n+1))
+    omegas <- omegas/sum(omegas)
+    epsilons <- rnorm(n)
+    ii <- sample(1:n,1)
+    support <- TRUE
+    val.cpp <- .evalPsos.smooth(ii,omegas,epsilons,s,support)
+    val.R <- evalPsos.smooth_R(ii,omegas,c(epsilons,-Inf),s)
+    expect_equal(val.R, val.cpp)
+  }
+})

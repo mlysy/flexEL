@@ -559,13 +559,6 @@ inline double el::InnerELC<ELModel>::evalPsos(const int ii) {
   return psos;
 }
 
-template<typename ELModel>
-inline void el::InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& epsilons) {
-  epsilons_.head(nObs_) = epsilons;
-  // std::cout << "setEpsilons: epsilons = " << epsilons_.transpose() << std::endl;
-  epsOrd_.head(nObs2_) = sort_inds(epsilons_.head(nObs2_)); 
-}
-
 // // evaluate epsilons location model
 // template<typename ELModel>
 // inline void InnerELC<ELModel>::evalEpsilons(const Ref<const VectorXd>& beta) {
@@ -714,6 +707,191 @@ inline void el::InnerELC<ELModel>::evalOmegas() {
   return;
 }
 
+// returns partial sum of omegas according to the epsilons(jj) that are larger  
+//   than epsilons(ii)
+// Note: epsOrd must have been assigned, i.e. have called sort_inds(epsilons); 
+// Note: s must be nonnegative
+// template<typename ELModel>
+// inline double el::InnerELC<ELModel>::evalPsosSmooth(const int ii, const double s) {
+//   double psos_smooth = 0;
+//   for (int jj=0; jj<nObs_; jj++) {
+//     psos_smooth += ind_smooth(epsilons_(ii)-epsilons_(jj),s)*omegas_(jj);
+//   }
+//   return(psos_smooth);
+//   // VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
+//   // return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
+// }
+template<typename ELModel>
+inline double el::InnerELC<ELModel>::evalPsosSmooth(const int ii, const double s) {
+  double psos_smooth = 0;
+  // std::cout << "nObs2_ = " << nObs2_ << std::endl;
+  if (support_ && ii == (nObs2_-1)) {
+    psos_smooth = omegas_.head(nObs2_-1).sum() + 0.5*omegas_(nObs2_-1);
+  }
+  else {
+    for (int jj=0; jj<nObs2_; jj++) {
+      psos_smooth += ind_smooth(epsilons_(ii)-epsilons_(jj),s)*omegas_(jj);
+    }
+  }
+  return(psos_smooth);
+  // VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
+  // return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
+}
+
+// template<typename ELModel>
+// inline double el::InnerELC<ELModel>::logELSmooth(const double s) {
+//   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
+//   else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
+//   else {
+//     omegas_ = omegas_.array().abs();
+//     VectorXd psos(nObs_); 
+//     for (int ii=0; ii<nObs_; ii++) {
+//       psos(ii) = evalPsosSmooth(ii,s);
+//     }
+//     ArrayXd logel(nObs_);
+//     for (int jj=0; jj<nObs_; jj++) {
+//       if (deltas_(jj) == 1) logel(jj) = log(omegas_(jj));
+//       else  logel(jj) = log(psos(jj));
+//     }
+//     return(logel.sum());
+//   }
+// }
+template<typename ELModel>
+inline double el::InnerELC<ELModel>::logELSmooth(const double s) {
+  if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
+  else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
+  else {
+    omegas_ = omegas_.array().abs();
+    VectorXd psos(nObs2_); 
+    for (int ii=0; ii<nObs2_; ii++) {
+      psos(ii) = evalPsosSmooth(ii,s);
+    }
+    ArrayXd logel(nObs2_);
+    for (int jj=0; jj<nObs2_; jj++) {
+      if (deltas_(jj) == 1) logel(jj) = log(omegas_(jj));
+      else  logel(jj) = log(psos(jj));
+    }
+    return(logel.sum());
+  }
+}
+
+// template<typename ELModel>
+// inline void el::InnerELC<ELModel>::evalWeightsSmooth(const double s) {
+//   psots_.fill(0.0); // TODO initialize psots somewhere else???
+//   VectorXd psoss = VectorXd::Zero(nObs_);
+//   for (int ii=0; ii<nObs_; ii++) {
+//     psoss(ii) = evalPsosSmooth(ii,s);
+//   }
+//   for (int jj=0; jj<nObs_; jj++) {
+//     for (int kk=0; kk<nObs_; kk++) {
+//       psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss(kk);
+//     }
+//   }
+//   weights_ = deltas_.array()+psots_.array();
+// }
+template<typename ELModel>
+inline void el::InnerELC<ELModel>::evalWeightsSmooth(const double s) {
+  psots_.fill(0.0); // TODO initialize psots somewhere else???
+  VectorXd psoss = VectorXd::Zero(nObs2_);
+  for (int ii=0; ii<nObs2_; ii++) {
+    psoss(ii) = evalPsosSmooth(ii,s);
+  }
+  if (support_) {
+    for (int jj=0; jj<nObs2_; jj++) {
+      for (int kk=0; kk<nObs2_; kk++) {
+        if (jj == nObs2_-1 && kk == nObs2_-1) {
+          psots_(jj) += (1-deltas_(kk))*ind_smooth(0.0,s)*omegas_(jj)/psoss(kk);
+        }
+        else psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss(kk);
+      }
+    }
+  }
+  else {
+    for (int jj=0; jj<nObs2_; jj++) {
+      for (int kk=0; kk<nObs2_; kk++) {
+        psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss(kk);
+      }
+    }
+  }
+  weights_ = deltas_.array()+psots_.array();
+}
+
+// template<typename ELModel>
+// inline void el::InnerELC<ELModel>::evalOmegasSmooth(const double s) {
+//   if (omegas_ != omegas_) {
+//     // std::cout << "evalOmegas: resetting omegas." << std::endl;
+//     omegas_ = omegasInit_;
+//   }
+//   int ii;
+//   int nIter;
+//   double maxErr;
+//   VectorXd lGq;
+//   double logelOld = logELSmooth(s);
+//   double logel = logelOld;
+//   for(ii=0; ii<maxIter_; ii++) {
+//     // E-step:
+//     evalWeightsSmooth(s); // assigns weights according to epsilons
+//     // M-step:
+//     lambdaNR(nIter, maxErr);
+//     lGq = ((lambdaNew_.transpose() * G_).array() + weights_.sum()).transpose();
+//     omegas_.array() = weights_.array() / lGq.array();
+//     omegas_.array() = omegas_.array() / (omegas_.array().sum()); // normalize
+//     logel = logELSmooth(s);
+//     absErr_ = abs(logel-logelOld);
+//     if (absErr_ < absTol_) break;
+//     logelOld = logel;
+//   }
+//   nIter = ii; 
+//   if (nIter == maxIter_ && absErr_ > absTol_) {
+//     // TODO: maybe should assign nan elsewhere 
+//     for (int ii=0; ii<nObs_; ii++) {
+//       omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
+//     }
+//   }
+//   return;
+// }
+template<typename ELModel>
+inline void el::InnerELC<ELModel>::evalOmegasSmooth(const double s) {
+  if (omegas_ != omegas_) {
+    // std::cout << "evalOmegas: resetting omegas." << std::endl;
+    omegas_ = omegasInit_;
+  }
+  int nIter;
+  double maxErr;
+  VectorXd lGq(nObs2_);
+  double logelOld = logELSmooth(s);
+  double logel = logelOld;
+  int ii;
+  for(ii=0; ii<maxIter_; ii++) {
+    // E-step:
+    evalWeightsSmooth(s); // assigns weights according to epsilons
+    // M-step:
+    lambdaNR(nIter, maxErr);
+    lGq = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
+    omegas_.head(nObs2_).array() = weights_.head(nObs2_).array() / lGq.array();
+    omegas_.head(nObs2_).array() = omegas_.head(nObs2_).array() / (omegas_.head(nObs2_).array().sum()); // normalize
+    logel = logELSmooth(s);
+    absErr_ = abs(logel-logelOld);
+    if (absErr_ < absTol_) break;
+    logelOld = logel;
+  }
+  nIter = ii; 
+  if (nIter == maxIter_ && absErr_ > absTol_) {
+    // TODO: maybe should assign nan elsewhere 
+    for (int ii=0; ii<nObs2_; ii++) {
+      omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+  return;
+}
+
+template<typename ELModel>
+inline void el::InnerELC<ELModel>::setEpsilons(const Ref<const VectorXd>& epsilons) {
+  epsilons_.head(nObs_) = epsilons;
+  // std::cout << "setEpsilons: epsilons = " << epsilons_.transpose() << std::endl;
+  epsOrd_.head(nObs2_) = sort_inds(epsilons_.head(nObs2_)); 
+}
+
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::setLambda(const Ref<const VectorXd>& lambda) {
   lambdaNew_ = lambda;
@@ -739,6 +917,7 @@ inline void el::InnerELC<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) 
   // nObs = _omegas.size(); // TODO: where to set nObs
   omegasInit_.head(nObs2_) = omegas; // new
   omegas_.head(nObs2_) = omegas; 
+  // std::cout << "after set: omegas_ = " << omegas_.transpose() << std::endl;
 }
 
 // template<typename ELModel>
@@ -1099,168 +1278,5 @@ inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn,
 }
 */
 
-// returns partial sum of omegas according to the epsilons(jj) that are larger  
-//   than epsilons(ii)
-// Note: epsOrd must have been assigned, i.e. have called sort_inds(epsilons); 
-// Note: s must be nonnegative
-// template<typename ELModel>
-// inline double el::InnerELC<ELModel>::evalPsosSmooth(const int ii, const double s) {
-//   double psos_smooth = 0;
-//   for (int jj=0; jj<nObs_; jj++) {
-//     psos_smooth += ind_smooth(epsilons_(ii)-epsilons_(jj),s)*omegas_(jj);
-//   }
-//   return(psos_smooth);
-//   // VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-//   // return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
-// }
-template<typename ELModel>
-inline double el::InnerELC<ELModel>::evalPsosSmooth(const int ii, const double s) {
-  double psos_smooth = 0;
-  for (int jj=0; jj<nObs2_; jj++) {
-    psos_smooth += ind_smooth(epsilons_(ii)-epsilons_(jj),s)*omegas_(jj);
-  }
-  return(psos_smooth);
-  // VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-  // return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
-}
-
-// template<typename ELModel>
-// inline double el::InnerELC<ELModel>::logELSmooth(const double s) {
-//   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
-//   else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
-//   else {
-//     omegas_ = omegas_.array().abs();
-//     VectorXd psos(nObs_); 
-//     for (int ii=0; ii<nObs_; ii++) {
-//       psos(ii) = evalPsosSmooth(ii,s);
-//     }
-//     ArrayXd logel(nObs_);
-//     for (int jj=0; jj<nObs_; jj++) {
-//       if (deltas_(jj) == 1) logel(jj) = log(omegas_(jj));
-//       else  logel(jj) = log(psos(jj));
-//     }
-//     return(logel.sum());
-//   }
-// }
-template<typename ELModel>
-inline double el::InnerELC<ELModel>::logELSmooth(const double s) {
-  if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
-  else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
-  else {
-    if (support_) {
-      omegas_.tail(1)(0) = -INFINITY;
-      deltas_.tail(1)(0) = 0;
-    }
-    omegas_ = omegas_.array().abs();
-    VectorXd psos(nObs2_); 
-    for (int ii=0; ii<nObs2_; ii++) {
-      psos(ii) = evalPsosSmooth(ii,s);
-    }
-    ArrayXd logel(nObs2_);
-    for (int jj=0; jj<nObs2_; jj++) {
-      if (deltas_(jj) == 1) logel(jj) = log(omegas_(jj));
-      else  logel(jj) = log(psos(jj));
-    }
-    return(logel.sum());
-  }
-}
-
-// template<typename ELModel>
-// inline void el::InnerELC<ELModel>::evalWeightsSmooth(const double s) {
-//   psots_.fill(0.0); // TODO initialize psots somewhere else???
-//   VectorXd psoss = VectorXd::Zero(nObs_);
-//   for (int ii=0; ii<nObs_; ii++) {
-//     psoss(ii) = evalPsosSmooth(ii,s);
-//   }
-//   for (int jj=0; jj<nObs_; jj++) {
-//     for (int kk=0; kk<nObs_; kk++) {
-//       psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss(kk);
-//     }
-//   }
-//   weights_ = deltas_.array()+psots_.array();
-// }
-template<typename ELModel>
-inline void el::InnerELC<ELModel>::evalWeightsSmooth(const double s) {
-  psots_.fill(0.0); // TODO initialize psots somewhere else???
-  VectorXd psoss = VectorXd::Zero(nObs2_);
-  for (int ii=0; ii<nObs2_; ii++) {
-    psoss(ii) = evalPsosSmooth(ii,s);
-  }
-  for (int jj=0; jj<nObs2_; jj++) {
-    for (int kk=0; kk<nObs2_; kk++) {
-      psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss(kk);
-    }
-  }
-  weights_ = deltas_.array()+psots_.array();
-}
-
-// template<typename ELModel>
-// inline void el::InnerELC<ELModel>::evalOmegasSmooth(const double s) {
-//   if (omegas_ != omegas_) {
-//     // std::cout << "evalOmegas: resetting omegas." << std::endl;
-//     omegas_ = omegasInit_;
-//   }
-//   int ii;
-//   int nIter;
-//   double maxErr;
-//   VectorXd lGq;
-//   double logelOld = logELSmooth(s);
-//   double logel = logelOld;
-//   for(ii=0; ii<maxIter_; ii++) {
-//     // E-step:
-//     evalWeightsSmooth(s); // assigns weights according to epsilons
-//     // M-step:
-//     lambdaNR(nIter, maxErr);
-//     lGq = ((lambdaNew_.transpose() * G_).array() + weights_.sum()).transpose();
-//     omegas_.array() = weights_.array() / lGq.array();
-//     omegas_.array() = omegas_.array() / (omegas_.array().sum()); // normalize
-//     logel = logELSmooth(s);
-//     absErr_ = abs(logel-logelOld);
-//     if (absErr_ < absTol_) break;
-//     logelOld = logel;
-//   }
-//   nIter = ii; 
-//   if (nIter == maxIter_ && absErr_ > absTol_) {
-//     // TODO: maybe should assign nan elsewhere 
-//     for (int ii=0; ii<nObs_; ii++) {
-//       omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
-//     }
-//   }
-//   return;
-// }
-template<typename ELModel>
-inline void el::InnerELC<ELModel>::evalOmegasSmooth(const double s) {
-  if (omegas_ != omegas_) {
-    // std::cout << "evalOmegas: resetting omegas." << std::endl;
-    omegas_ = omegasInit_;
-  }
-  int nIter;
-  double maxErr;
-  VectorXd lGq(nObs2_);
-  double logelOld = logELSmooth(s);
-  double logel = logelOld;
-  int ii;
-  for(ii=0; ii<maxIter_; ii++) {
-    // E-step:
-    evalWeightsSmooth(s); // assigns weights according to epsilons
-    // M-step:
-    lambdaNR(nIter, maxErr);
-    lGq = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
-    omegas_.head(nObs2_).array() = weights_.head(nObs2_).array() / lGq.array();
-    omegas_.head(nObs2_).array() = omegas_.head(nObs2_).array() / (omegas_.head(nObs2_).array().sum()); // normalize
-    logel = logELSmooth(s);
-    absErr_ = abs(logel-logelOld);
-    if (absErr_ < absTol_) break;
-    logelOld = logel;
-  }
-  nIter = ii; 
-  if (nIter == maxIter_ && absErr_ > absTol_) {
-    // TODO: maybe should assign nan elsewhere 
-    for (int ii=0; ii<nObs2_; ii++) {
-      omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
-    }
-  }
-  return;
-}
 
 #endif
