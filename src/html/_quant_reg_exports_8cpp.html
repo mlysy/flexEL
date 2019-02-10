@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Project: InnerElExports.cpp File Reference</title>
+<title>My Project: QuantRegExports.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,31 +64,36 @@ $(function() {
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">InnerElExports.cpp File Reference</div>  </div>
+<div class="title">QuantRegExports.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Export InnerEL functions to R.  
+<p>Export <a class="el" href="class_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> functions to R.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;Rcpp.h&gt;</code><br />
 <code>#include &lt;RcppEigen.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="_inner_e_l_8h_source.html">InnerEL.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_mean_reg_model_8h_source.html">MeanRegModel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_inner_e_l_c_8h_source.html">InnerELC.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_quant_reg_model_8h_source.html">QuantRegModel.h</a>&quot;</code><br />
+<code>#include &quot;dVecTobArr.h&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a4fb54e9f7df3850d769b8c98704222e6"><td class="memItemLeft" align="right" valign="top"><a id="a4fb54e9f7df3850d769b8c98704222e6"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>lambdaNR</b> (Eigen::MatrixXd G, int maxIter, double relTol, bool support, bool verbose)</td></tr>
-<tr class="separator:a4fb54e9f7df3850d769b8c98704222e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0906e141fa2acd06406d4ee4238ed263"><td class="memItemLeft" align="right" valign="top"><a id="a0906e141fa2acd06406d4ee4238ed263"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>omegaHat</b> (Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support)</td></tr>
-<tr class="separator:a0906e141fa2acd06406d4ee4238ed263"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae041bc1408a163fb9e2d39d94dc1095e"><td class="memItemLeft" align="right" valign="top"><a id="ae041bc1408a163fb9e2d39d94dc1095e"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>logEL</b> (Eigen::VectorXd omegas, bool support)</td></tr>
-<tr class="separator:ae041bc1408a163fb9e2d39d94dc1095e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc94df2994f75d3fc8f9a39d4db70bb9"><td class="memItemLeft" align="right" valign="top"><a id="adc94df2994f75d3fc8f9a39d4db70bb9"></a>
+Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>QuantReg_evalG</b> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::VectorXd beta)</td></tr>
+<tr class="separator:adc94df2994f75d3fc8f9a39d4db70bb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a9329914992b59cd20891362754f610"><td class="memItemLeft" align="right" valign="top"><a id="a1a9329914992b59cd20891362754f610"></a>
+Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>QuantRegLS_evalG</b> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu)</td></tr>
+<tr class="separator:a1a9329914992b59cd20891362754f610"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fa9f84c66c365c7e838bee3c51d5bf3"><td class="memItemLeft" align="right" valign="top"><a id="a0fa9f84c66c365c7e838bee3c51d5bf3"></a>
+Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>QuantRegLS_evalGSmooth</b> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s)</td></tr>
+<tr class="separator:a0fa9f84c66c365c7e838bee3c51d5bf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ee98a28c54ff93e684984ec7749a6c3"><td class="memItemLeft" align="right" valign="top"><a id="a1ee98a28c54ff93e684984ec7749a6c3"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>rho1Smooth</b> (double u, double tau, double s)</td></tr>
+<tr class="separator:a1ee98a28c54ff93e684984ec7749a6c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p class="">Export InnerEL functions to R. </p>
+<div class="textblock"><p class="">Export <a class="el" href="class_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> functions to R. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Project: InnerElExports.cpp File Reference</title>
+<title>My Project: AdjG.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -45,6 +45,7 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -59,37 +60,12 @@ $(function() {
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
-  <div class="summary">
-<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">InnerElExports.cpp File Reference</div>  </div>
+<div class="title">AdjG.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-
-<p>Export InnerEL functions to R.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;Rcpp.h&gt;</code><br />
-<code>#include &lt;RcppEigen.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="_inner_e_l_8h_source.html">InnerEL.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_mean_reg_model_8h_source.html">MeanRegModel.h</a>&quot;</code><br />
-</div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a4fb54e9f7df3850d769b8c98704222e6"><td class="memItemLeft" align="right" valign="top"><a id="a4fb54e9f7df3850d769b8c98704222e6"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>lambdaNR</b> (Eigen::MatrixXd G, int maxIter, double relTol, bool support, bool verbose)</td></tr>
-<tr class="separator:a4fb54e9f7df3850d769b8c98704222e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0906e141fa2acd06406d4ee4238ed263"><td class="memItemLeft" align="right" valign="top"><a id="a0906e141fa2acd06406d4ee4238ed263"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>omegaHat</b> (Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support)</td></tr>
-<tr class="separator:a0906e141fa2acd06406d4ee4238ed263"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae041bc1408a163fb9e2d39d94dc1095e"><td class="memItemLeft" align="right" valign="top"><a id="ae041bc1408a163fb9e2d39d94dc1095e"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>logEL</b> (Eigen::VectorXd omegas, bool support)</td></tr>
-<tr class="separator:ae041bc1408a163fb9e2d39d94dc1095e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p class="">Export InnerEL functions to R. </p>
-</div></div><!-- contents -->
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef ADJG_h</span></div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define ADJG_h</span></div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;RcppEigen.h&gt;</span></div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">// returns the adjusted G matrix given a G matrix of dimension nEqs x nObs+1</span></div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">// Note: it modifies the last row to be the artificial obs rather than adding one row</span></div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span> adj_G(Eigen::MatrixXd &amp;G, <span class="keywordtype">double</span> a) {</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  <span class="comment">// std::cout &lt;&lt; &quot;adj_G: G = \n&quot; &lt;&lt; G &lt;&lt; std::endl;</span></div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  <span class="keywordtype">int</span> nObs = G.cols()-1;</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;  Eigen::VectorXd gbar = 1.0/nObs*G.rowwise().sum();</div><div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;  <span class="comment">// std::cout &lt;&lt; &quot;gbar = &quot; &lt;&lt; gbar.transpose() &lt;&lt; std::endl;</span></div><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;  G.rightCols(1) = -a*gbar;</div><div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;}</div><div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div><div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#endif</span></div></div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

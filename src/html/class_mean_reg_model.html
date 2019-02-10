@@ -70,7 +70,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>A base class for template classes <a class="el" href="class_inner_e_l.html">InnerEL</a> and <a class="el" href="class_inner_e_l_c.html">InnerELC</a> to calculate estimating equations for mean regressions.  
+<p>A base class for template classes InnerEL and InnerELC to calculate estimating equations for mean regressions.  
  <a href="class_mean_reg_model.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_mean_reg_model_8h_source.html">MeanRegModel.h</a>&gt;</code></p>
@@ -81,7 +81,7 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a9da764a960878870246307423be969e5">MeanRegModel</a> ()</td></tr>
 <tr class="memdesc:a9da764a960878870246307423be969e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for <a class="el" href="class_mean_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for mean reg...">MeanRegModel</a>. <br /></td></tr>
 <tr class="separator:a9da764a960878870246307423be969e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2423278e5f47c09de84fc5a9c54e9b5f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a2423278e5f47c09de84fc5a9c54e9b5f">MeanRegModel</a> (int <a class="el" href="class_mean_reg_model.html#a6b3c8482ec1ebdeb0a038d168492e904">nObs</a>, int <a class="el" href="class_mean_reg_model.html#a87658d2e0b1e2b43fb030d7328cb6de1">nEqs</a>)</td></tr>
+<tr class="memitem:a2423278e5f47c09de84fc5a9c54e9b5f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a2423278e5f47c09de84fc5a9c54e9b5f">MeanRegModel</a> (int nObs, int nEqs)</td></tr>
 <tr class="memdesc:a2423278e5f47c09de84fc5a9c54e9b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="class_mean_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for mean reg...">MeanRegModel</a> with dimensions as inputs.  <a href="#a2423278e5f47c09de84fc5a9c54e9b5f">More...</a><br /></td></tr>
 <tr class="separator:a2423278e5f47c09de84fc5a9c54e9b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee3806ff2f8de91bbeda53c19a620a97"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#aee3806ff2f8de91bbeda53c19a620a97">setData</a> (const Ref&lt; const VectorXd &gt; &amp;y, const Ref&lt; const MatrixXd &gt; &amp;X)</td></tr>
@@ -90,24 +90,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a321d60fda5b3d8ba7e4becaf52832442"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a321d60fda5b3d8ba7e4becaf52832442">setData</a> (const Ref&lt; const VectorXd &gt; &amp;y, const Ref&lt; const MatrixXd &gt; &amp;X, const Ref&lt; const MatrixXd &gt; &amp;Z)</td></tr>
 <tr class="memdesc:a321d60fda5b3d8ba7e4becaf52832442"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set data for mean regression location-scale model.  <a href="#a321d60fda5b3d8ba7e4becaf52832442">More...</a><br /></td></tr>
 <tr class="separator:a321d60fda5b3d8ba7e4becaf52832442"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15d300bf64327129b4bc4292a6c51ce3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a15d300bf64327129b4bc4292a6c51ce3">evalG</a> (const Ref&lt; const VectorXd &gt; &amp;beta)</td></tr>
-<tr class="memdesc:a15d300bf64327129b4bc4292a6c51ce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for mean regression location model.  <a href="#a15d300bf64327129b4bc4292a6c51ce3">More...</a><br /></td></tr>
-<tr class="separator:a15d300bf64327129b4bc4292a6c51ce3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a401b8819eae4776c50fce378d8e47b68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a401b8819eae4776c50fce378d8e47b68">evalG</a> (const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2)</td></tr>
-<tr class="memdesc:a401b8819eae4776c50fce378d8e47b68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for mean regression location-scale model.  <a href="#a401b8819eae4776c50fce378d8e47b68">More...</a><br /></td></tr>
-<tr class="separator:a401b8819eae4776c50fce378d8e47b68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40d412de6016d45b940f81dc76fc782e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a40d412de6016d45b940f81dc76fc782e">evalG</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta)</td></tr>
+<tr class="memdesc:a40d412de6016d45b940f81dc76fc782e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for mean regression location model.  <a href="#a40d412de6016d45b940f81dc76fc782e">More...</a><br /></td></tr>
+<tr class="separator:a40d412de6016d45b940f81dc76fc782e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48d0c00a3d0dfaf33fee5f0fdb581ae7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a48d0c00a3d0dfaf33fee5f0fdb581ae7">evalG</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2)</td></tr>
+<tr class="memdesc:a48d0c00a3d0dfaf33fee5f0fdb581ae7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for mean regression location-scale model.  <a href="#a48d0c00a3d0dfaf33fee5f0fdb581ae7">More...</a><br /></td></tr>
+<tr class="separator:a48d0c00a3d0dfaf33fee5f0fdb581ae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a6b3c8482ec1ebdeb0a038d168492e904"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a6b3c8482ec1ebdeb0a038d168492e904">nObs</a></td></tr>
-<tr class="separator:a6b3c8482ec1ebdeb0a038d168492e904"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87658d2e0b1e2b43fb030d7328cb6de1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a87658d2e0b1e2b43fb030d7328cb6de1">nEqs</a></td></tr>
-<tr class="separator:a87658d2e0b1e2b43fb030d7328cb6de1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae4b497393c0175a9f867bd832638134b"><td class="memItemLeft" align="right" valign="top">MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#ae4b497393c0175a9f867bd832638134b">G</a></td></tr>
-<tr class="separator:ae4b497393c0175a9f867bd832638134b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50ecdd292afbaaa203ee4e0d6984f92b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#a50ecdd292afbaaa203ee4e0d6984f92b">nObs_</a></td></tr>
+<tr class="separator:a50ecdd292afbaaa203ee4e0d6984f92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae35eb4c7b1ee0f43dc270b5113cecf27"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mean_reg_model.html#ae35eb4c7b1ee0f43dc270b5113cecf27">nEqs_</a></td></tr>
+<tr class="separator:ae35eb4c7b1ee0f43dc270b5113cecf27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p class="">A base class for template classes <a class="el" href="class_inner_e_l.html">InnerEL</a> and <a class="el" href="class_inner_e_l_c.html">InnerELC</a> to calculate estimating equations for mean regressions. </p>
+<div class="textblock"><p class="">A base class for template classes InnerEL and InnerELC to calculate estimating equations for mean regressions. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2423278e5f47c09de84fc5a9c54e9b5f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2423278e5f47c09de84fc5a9c54e9b5f">&#9670;&nbsp;</a></span>MeanRegModel()</h2>
@@ -155,8 +153,8 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a15d300bf64327129b4bc4292a6c51ce3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15d300bf64327129b4bc4292a6c51ce3">&#9670;&nbsp;</a></span>evalG() <span class="overload">[1/2]</span></h2>
+<a id="a40d412de6016d45b940f81dc76fc782e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40d412de6016d45b940f81dc76fc782e">&#9670;&nbsp;</a></span>evalG() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -167,9 +165,19 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">void MeanRegModel::evalG </td>
           <td>(</td>
-          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
-          <td class="paramname"><em>beta</em></td><td>)</td>
+          <td class="paramtype">Ref&lt; MatrixXd &gt;&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>beta</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -189,8 +197,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a401b8819eae4776c50fce378d8e47b68"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a401b8819eae4776c50fce378d8e47b68">&#9670;&nbsp;</a></span>evalG() <span class="overload">[2/2]</span></h2>
+<a id="a48d0c00a3d0dfaf33fee5f0fdb581ae7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48d0c00a3d0dfaf33fee5f0fdb581ae7">&#9670;&nbsp;</a></span>evalG() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -201,6 +209,12 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">void MeanRegModel::evalG </td>
           <td>(</td>
+          <td class="paramtype">Ref&lt; MatrixXd &gt;&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Ref&lt; const VectorXd &gt; &amp;&#160;</td>
           <td class="paramname"><em>beta</em>, </td>
         </tr>
@@ -339,8 +353,8 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="ae4b497393c0175a9f867bd832638134b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4b497393c0175a9f867bd832638134b">&#9670;&nbsp;</a></span>G</h2>
+<a id="ae35eb4c7b1ee0f43dc270b5113cecf27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae35eb4c7b1ee0f43dc270b5113cecf27">&#9670;&nbsp;</a></span>nEqs_</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -349,30 +363,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">MatrixXd MeanRegModel::G</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p class="">matrix of estimating equations of dimension <code>nEqs</code> x <code>nObs</code> </p>
-
-</div>
-</div>
-<a id="a87658d2e0b1e2b43fb030d7328cb6de1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a87658d2e0b1e2b43fb030d7328cb6de1">&#9670;&nbsp;</a></span>nEqs</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int MeanRegModel::nEqs</td>
+          <td class="memname">int MeanRegModel::nEqs_</td>
         </tr>
       </table>
   </td>
@@ -385,8 +376,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a6b3c8482ec1ebdeb0a038d168492e904"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b3c8482ec1ebdeb0a038d168492e904">&#9670;&nbsp;</a></span>nObs</h2>
+<a id="a50ecdd292afbaaa203ee4e0d6984f92b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50ecdd292afbaaa203ee4e0d6984f92b">&#9670;&nbsp;</a></span>nObs_</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -395,7 +386,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int MeanRegModel::nObs</td>
+          <td class="memname">int MeanRegModel::nObs_</td>
         </tr>
       </table>
   </td>

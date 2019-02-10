@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['innerel',['InnerEL',['../class_inner_e_l.html#a575fea0c38476adc15078ac1e5c155c9',1,'InnerEL::InnerEL()'],['../class_inner_e_l.html#abb9ba80f8b5eb4a1344c89ef95f08177',1,'InnerEL::InnerEL(int nObs, int nEqs)']]],
-  ['innerelc',['InnerELC',['../class_inner_e_l_c.html#a95c8ec530a52369edb84efd4e40e7272',1,'InnerELC::InnerELC()'],['../class_inner_e_l_c.html#a3fca0c61da80e9a228c6a9602171a636',1,'InnerELC::InnerELC(int nObs)'],['../class_inner_e_l_c.html#a5200751ac59259d8783e9d89d0ed5fce',1,'InnerELC::InnerELC(int nObs, int nEqs)']]]
+  ['getg',['getG',['../classel_1_1_inner_e_l.html#a163a21af3b6ad2b57ff6a9515ed93a5e',1,'el::InnerEL']]],
+  ['getlambda',['getLambda',['../classel_1_1_inner_e_l.html#aeddb7b3917ca2e6cc6de0d738cd9e166',1,'el::InnerEL']]],
+  ['getomegas',['getOmegas',['../classel_1_1_inner_e_l.html#ab8ae8871ce144c97ed5072fa46b8afc8',1,'el::InnerEL']]]
 ];
