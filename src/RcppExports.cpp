@@ -105,21 +105,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// evalPsosSmooth
-double evalPsosSmooth(int ii, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, double s, bool support);
-RcppExport SEXP _flexEL_evalPsosSmooth(SEXP iiSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP sSEXP, SEXP supportSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type ii(iiSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< bool >::type support(supportSEXP);
-    rcpp_result_gen = Rcpp::wrap(evalPsosSmooth(ii, omegas, epsilons, s, support));
-    return rcpp_result_gen;
-END_RCPP
-}
 // logELSmooth
 double logELSmooth(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, double s, bool support);
 RcppExport SEXP _flexEL_logELSmooth(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP, SEXP sSEXP, SEXP supportSEXP) {
@@ -312,7 +297,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_lambdaNRC", (DL_FUNC) &_flexEL_lambdaNRC, 6},
     {"_flexEL_omegaHatEM", (DL_FUNC) &_flexEL_omegaHatEM, 9},
     {"_flexEL_logELC", (DL_FUNC) &_flexEL_logELC, 4},
-    {"_flexEL_evalPsosSmooth", (DL_FUNC) &_flexEL_evalPsosSmooth, 5},
     {"_flexEL_logELSmooth", (DL_FUNC) &_flexEL_logELSmooth, 5},
     {"_flexEL_evalWeightsSmooth", (DL_FUNC) &_flexEL_evalWeightsSmooth, 5},
     {"_flexEL_omegaHatEMSmooth", (DL_FUNC) &_flexEL_omegaHatEMSmooth, 10},

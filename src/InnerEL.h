@@ -82,7 +82,7 @@ namespace el {
     InnerEL();
     InnerEL(int nObs, int nEqs);
     
-    // Set options functions
+    // set options functions
     void setOpts(const int& maxIter, const double& relTol,
                  const bool& support, const double& supa, 
                  const Ref<const VectorXd>& lambda0);
@@ -97,14 +97,10 @@ namespace el {
     void setOpts(const bool& support);
     // void setTol(const int& maxIter, const double& relTol);
     
-    // dual solution by Newton-Raphson algorithm
+    // core caculations
     void lambdaNR(int& nIter, double& maxErr); // Note: relTol and maxIter must be set before calling
-    
-    // empirical distribution
-    void evalOmegas();
-    
-    // log empirical likelihood
-    double logEL();
+    void evalOmegas(); // empirical distribution
+    double logEL(); // log empirical likelihood
     
     // set and get functions 
     void setLambda(const Ref<const VectorXd>& lambda); // assigned to lambdaNew
@@ -132,6 +128,16 @@ namespace el {
 /* --------------------------------------------------------------------------- */
 
 // private functions
+
+// maximum relative error in lambda
+template<typename ELModel>
+inline double el::InnerEL<ELModel>::maxRelErr() {
+  // TODO: added for numerical stability, what is a good tolerance to use ?
+  if ((lambdaNew_ - lambdaOld_).array().abs().maxCoeff() < 1e-10) return(0);
+  
+  relErr_ = ((lambdaNew_ - lambdaOld_).array() / (lambdaNew_ + lambdaOld_).array()).abs();
+  return(relErr_.maxCoeff());
+}
 
 // logstar
 template<typename ELModel>
@@ -210,7 +216,8 @@ inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
   Q2ldlt_.compute(MatrixXd::Identity(nEqs_,nEqs_));
 }
 
-// set options
+// set options functions
+
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
@@ -311,31 +318,6 @@ inline void el::InnerEL<ELModel>::setOpts(const bool& support) {
   nObs2_ = nObs_+support_;
 }
 
-// maximum relative error in lambda
-/**
- * @brief      Calculating the maximum relative error between \p lambdaNew and \p lambdaOld.
- * 
- * @return     maximum relative error.
- */
-template<typename ELModel>
-inline double el::InnerEL<ELModel>::maxRelErr() {
-  // TODO: added for numerical stability, what is a good tolerance to use ?
-  if ((lambdaNew_ - lambdaOld_).array().abs().maxCoeff() < 1e-10) return(0);
-  
-  relErr_ = ((lambdaNew_ - lambdaOld_).array() / (lambdaNew_ + lambdaOld_).array()).abs();
-  return(relErr_.maxCoeff());
-}
-
-// set tolerance values for lambdaNR
-// /**
-//  * @brief Set tolerance values for NR.
-//  */
-// template<typename ELModel>
-// inline void el::InnerEL<ELModel>::setTol(const int& maxIter, const double& relTol) {
-//   maxIter_ = maxIter;
-//   relTol_ = relTol;
-// }
-
 /**
  * @brief Find the optimal lambda by a Newton-Raphson algorithm.
  * 
@@ -365,11 +347,10 @@ inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
       rho_(jj) = logstar1(Glambda_(jj));
       Q2_ += logstar2(Glambda_(jj)) * GGtUsed_.block(0,jj*nEqs_,nEqs_,nEqs_);
     }
-    Q1_ = -GUsed_ * rho_;
     // update lambda
+    Q1_ = -GUsed_ * rho_;
     Q2ldlt_.compute(Q2_);
     lambdaNew_.noalias() = lambdaOld_ - Q2ldlt_.solve(Q1_);
-    // maxErr = maxRelErr(lambdaNew_, lambdaOld_); // maximum relative error
     maxErr = maxRelErr();
     if (maxErr < relTol_) {
       break;
@@ -412,7 +393,8 @@ inline double el::InnerEL<ELModel>::logEL() {
   else return(omegas_.head(nObs2_).array().log().sum());
 }
 
-// setter for lamba
+// setters
+
 /**
  * @brief Set the value of lambda (e.g. to be used directly to calculate omegas).
  */
@@ -422,7 +404,6 @@ inline void el::InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& lambda) {
   lambdaNew_ = lambda;
 }
 
-// setter for omegas
 /**
  * @brief Set the value of omegas (e.g. to be used directly to calculate log EL).
  */
@@ -431,7 +412,17 @@ inline void el::InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) {
   omegas_.head(nObs2_) = omegas; 
 }
 
-// getter for lamba
+/**
+ * @brief Set the value of G (e.g. to be used directly to calculate lambda or log EL).
+ */
+template<typename ELModel>
+inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
+  G_.block(0,0,nEqs_,nObs_) = G;
+  if (support_) adj_G(G_,supa_);
+}
+
+// getters
+
 /**
  * @brief Get the value of lambda.
  */
@@ -440,17 +431,6 @@ inline VectorXd el::InnerEL<ELModel>::getLambda() {
   return(lambdaNew_);
 }
 
-// set function for G matrix
-/**
-* @brief Set the value of G (e.g. to be used directly to calculate lambda or log EL).
-*/
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
-  G_.block(0,0,nEqs_,nObs_) = G;
-  if (support_) adj_G(G_,supa_);
-}
-
-// getter for omegas
 /**
  * @brief Get the value of omegas.
  */

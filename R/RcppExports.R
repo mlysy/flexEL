@@ -29,10 +29,6 @@
     .Call(`_flexEL_logELC`, omegas, epsilons, deltas, support)
 }
 
-.evalPsos.smooth <- function(ii, omegas, epsilons, s, support) {
-    .Call(`_flexEL_evalPsosSmooth`, ii, omegas, epsilons, s, support)
-}
-
 .logEL.smooth <- function(omegas, epsilons, deltas, s, support) {
     .Call(`_flexEL_logELSmooth`, omegas, epsilons, deltas, s, support)
 }
