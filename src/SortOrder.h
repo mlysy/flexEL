@@ -1,3 +1,9 @@
+/**
+ * @file SortOrder.h
+ * 
+ * @brief Find the order of elements if a vector is sorted (ascendingly).
+ */
+
 #ifndef SORTORDER_h
 #define SORTORDER_h
 
@@ -13,7 +19,7 @@ using namespace Eigen;
  *
  * @class      compare_acc_vec
  *
- * @brief      A helper class for obtaining indices according to sorted values in a vector
+ * @brief      A helper class for obtaining indices corresponding to ascendingly sorted values in a vector
  */
 template <typename T>
 class compare_acc_vec {

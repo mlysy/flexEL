@@ -1,9 +1,10 @@
 var searchData=
 [
-  ['mainpage_2eh',['mainpage.h',['../mainpage_8h.html',1,'']]],
-  ['meanregexports_2ecpp',['MeanRegExports.cpp',['../_mean_reg_exports_8cpp.html',1,'']]],
-  ['meanregmodel',['MeanRegModel',['../class_mean_reg_model.html',1,'MeanRegModel'],['../class_mean_reg_model.html#a9da764a960878870246307423be969e5',1,'MeanRegModel::MeanRegModel()'],['../class_mean_reg_model.html#a2423278e5f47c09de84fc5a9c54e9b5f',1,'MeanRegModel::MeanRegModel(int nObs, int nEqs)']]],
-  ['meanregmodel_2eh',['MeanRegModel.h',['../_mean_reg_model_8h.html',1,'']]],
-  ['mwgadapt',['MwgAdapt',['../class_mwg_adapt.html',1,'']]],
-  ['mwgadapt_2eh',['MwgAdapt.h',['../_mwg_adapt_8h.html',1,'']]]
+  ['indsmooth_2eh',['IndSmooth.h',['../_ind_smooth_8h.html',1,'']]],
+  ['innerel',['InnerEL',['../classel_1_1_inner_e_l.html',1,'el::InnerEL&lt; ELModel &gt;'],['../classel_1_1_inner_e_l.html#ad86ef45085afb2b9014219f1f0fa680d',1,'el::InnerEL::InnerEL()'],['../classel_1_1_inner_e_l.html#acd47ea6001f61ba4847be6a641ed303d',1,'el::InnerEL::InnerEL(int nObs, int nEqs)']]],
+  ['innerel_2eh',['InnerEL.h',['../_inner_e_l_8h.html',1,'']]],
+  ['innerelc',['InnerELC',['../classel_1_1_inner_e_l_c.html',1,'el::InnerELC&lt; ELModel &gt;'],['../classel_1_1_inner_e_l_c.html#a4b6d4afaf860ecd85d09eace2ab22d30',1,'el::InnerELC::InnerELC()'],['../classel_1_1_inner_e_l_c.html#af87ecd2a11577532db3ba18fb9e15533',1,'el::InnerELC::InnerELC(int nObs)'],['../classel_1_1_inner_e_l_c.html#a89f72573ab002378f53353d2f2e16947',1,'el::InnerELC::InnerELC(int nObs, int nEqs)']]],
+  ['innerelc_2eh',['InnerELC.h',['../_inner_e_l_c_8h.html',1,'']]],
+  ['innerelcexports_2ecpp',['InnerElcExports.cpp',['../_inner_elc_exports_8cpp.html',1,'']]],
+  ['innerelexports_2ecpp',['InnerElExports.cpp',['../_inner_el_exports_8cpp.html',1,'']]]
 ];

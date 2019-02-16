@@ -1,3 +1,9 @@
+/**
+ * @file dVecTobArr.h
+ * 
+ * @brief Convert Eigen VectorXd to C++ bool array.
+ */
+
 #ifndef DVECTOBARR_h
 #define DVECTOBARR_h
 

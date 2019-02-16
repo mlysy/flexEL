@@ -1,3 +1,9 @@
+/**
+ * @file AdjG.h
+ * 
+ * @brief Calculate the adjusted G matrix.
+ */
+
 #ifndef ADJG_h
 #define ADJG_h
 

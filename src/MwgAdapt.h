@@ -38,6 +38,11 @@ for(int ii=0; ii<number_of_iterations; ii++) {
 */
 
 // -----------------------------------------------------------------------------
+/**
+ * @file MwgAdapt.h
+ * 
+ * @brief Adaptive Metropolis-Within-Gibbs MCMC sampler.
+ */
 
 #ifndef MwgAdapt_h
 #define MwgAdapt_h
@@ -47,7 +52,7 @@ for(int ii=0; ii<number_of_iterations; ii++) {
  *
  * @class      MwgAdapt
  *
- * @brief      Adaptive Metropolis-Within_Gibbs MCMC sampler (Note: currently not used).
+ * @brief      Adaptive Metropolis-Within-Gibbs MCMC sampler (Note: currently not used).
  */
 class MwgAdapt {
  private:

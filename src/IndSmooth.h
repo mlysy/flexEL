@@ -1,3 +1,9 @@
+/**
+ * @file IndSmooth.h
+ * 
+ * @brief Smoothed indicator function.
+ */
+
 #ifndef INDSMOOTH_h
 #define INDSMOOTH_h
 
