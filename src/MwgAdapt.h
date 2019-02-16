@@ -42,6 +42,13 @@ for(int ii=0; ii<number_of_iterations; ii++) {
 #ifndef MwgAdapt_h
 #define MwgAdapt_h
 
+/**
+ * @file       MwgAdapt.h
+ *
+ * @class      MwgAdapt
+ *
+ * @brief      Adaptive Metropolis-Within_Gibbs MCMC sampler (Note: currently not used).
+ */
 class MwgAdapt {
  private:
   int nRV; // number of components

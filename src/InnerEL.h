@@ -21,12 +21,19 @@ using namespace Eigen;
 /* --------------------------------------------------------------------------- */
 
 /**
- * @brief el namespace
+ * @brief EL namespace
  * 
  * Wrap the exported library components into a namespace called \b el to avoid potential naming conflicts with other libraries or user-defined headers.
  */
 namespace el {
   
+  /**
+   * @file       InnerEL.h
+   *
+   * @class      InnerEL
+   *
+   * @brief      A template class for empirical likelihood inner optimization calculation with fully observed responses.
+   */
   template <typename ELModel>
   class InnerEL : public ELModel {
     

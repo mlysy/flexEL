@@ -7,7 +7,14 @@ using namespace Eigen;
 
 // Modifed from: https://stackoverflow.com/a/12399290/5186269
 
-// helper function for getting indices according to sorted values in a vector
+// 
+/**
+ * @file       SortOrder.h
+ *
+ * @class      compare_acc_vec
+ *
+ * @brief      A helper class for obtaining indices according to sorted values in a vector
+ */
 template <typename T>
 class compare_acc_vec {
     const T& vec;

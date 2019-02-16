@@ -72,6 +72,11 @@ $(function() {
 <div class="title">el::InnerELC&lt; ELModel &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A template class for empirical likelihood inner optimization calculation with right-censored responses.  
+ <a href="classel_1_1_inner_e_l_c.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_inner_e_l_c_8h_source.html">InnerELC.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for el::InnerELC&lt; ELModel &gt;:</div>
 <div class="dyncontent">
@@ -85,13 +90,13 @@ Inheritance diagram for el::InnerELC&lt; ELModel &gt;:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a4b6d4afaf860ecd85d09eace2ab22d30"><td class="memItemLeft" align="right" valign="top"><a id="a4b6d4afaf860ecd85d09eace2ab22d30"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classel_1_1_inner_e_l_c.html#a4b6d4afaf860ecd85d09eace2ab22d30">InnerELC</a> ()</td></tr>
-<tr class="memdesc:a4b6d4afaf860ecd85d09eace2ab22d30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for <a class="el" href="classel_1_1_inner_e_l_c.html">InnerELC</a>. <br /></td></tr>
+<tr class="memdesc:a4b6d4afaf860ecd85d09eace2ab22d30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for <a class="el" href="classel_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a>. <br /></td></tr>
 <tr class="separator:a4b6d4afaf860ecd85d09eace2ab22d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af87ecd2a11577532db3ba18fb9e15533"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classel_1_1_inner_e_l_c.html#af87ecd2a11577532db3ba18fb9e15533">InnerELC</a> (int nObs)</td></tr>
-<tr class="memdesc:af87ecd2a11577532db3ba18fb9e15533"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html">InnerELC</a> with number of observations only as input for memory allocation.  <a href="#af87ecd2a11577532db3ba18fb9e15533">More...</a><br /></td></tr>
+<tr class="memdesc:af87ecd2a11577532db3ba18fb9e15533"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a> with number of observations only as input for memory allocation.  <a href="#af87ecd2a11577532db3ba18fb9e15533">More...</a><br /></td></tr>
 <tr class="separator:af87ecd2a11577532db3ba18fb9e15533"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89f72573ab002378f53353d2f2e16947"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classel_1_1_inner_e_l_c.html#a89f72573ab002378f53353d2f2e16947">InnerELC</a> (int nObs, int nEqs)</td></tr>
-<tr class="memdesc:a89f72573ab002378f53353d2f2e16947"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html">InnerELC</a> with dimensions of G matrix as inputs for memory allocation.  <a href="#a89f72573ab002378f53353d2f2e16947">More...</a><br /></td></tr>
+<tr class="memdesc:a89f72573ab002378f53353d2f2e16947"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a> with dimensions of G matrix as inputs for memory allocation.  <a href="#a89f72573ab002378f53353d2f2e16947">More...</a><br /></td></tr>
 <tr class="separator:a89f72573ab002378f53353d2f2e16947"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c1359fbccb578638941a1d16438f3a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classel_1_1_inner_e_l_c.html#a6c1359fbccb578638941a1d16438f3a7">setOpts</a> (const int &amp;maxIter, const double &amp;relTol, const double &amp;absTol, const bool &amp;support, const double &amp;supa, const Ref&lt; const VectorXd &gt; &amp;lambda0)</td></tr>
 <tr class="memdesc:a6c1359fbccb578638941a1d16438f3a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.  <a href="#a6c1359fbccb578638941a1d16438f3a7">More...</a><br /></td></tr>
@@ -183,7 +188,12 @@ MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="memdesc:a04189b7874d6d80e40f7e43637712344"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value of G. <br /></td></tr>
 <tr class="separator:a04189b7874d6d80e40f7e43637712344"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><h3>template&lt;typename ELModel&gt;<br />
+class el::InnerELC&lt; ELModel &gt;</h3>
+
+<p class="">A template class for empirical likelihood inner optimization calculation with right-censored responses. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af87ecd2a11577532db3ba18fb9e15533"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af87ecd2a11577532db3ba18fb9e15533">&#9670;&nbsp;</a></span>InnerELC() <span class="overload">[1/2]</span></h2>
 
@@ -210,7 +220,7 @@ template&lt;typename ELModel &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html">InnerELC</a> with number of observations only as input for memory allocation. </p>
+<p>Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a> with number of observations only as input for memory allocation. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">nObs</td><td>Number of observations. </td></tr>
@@ -256,7 +266,7 @@ template&lt;typename ELModel &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html">InnerELC</a> with dimensions of G matrix as inputs for memory allocation. </p>
+<p>Constructor for <a class="el" href="classel_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a> with dimensions of G matrix as inputs for memory allocation. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">nObs</td><td>Number of observations. </td></tr>
