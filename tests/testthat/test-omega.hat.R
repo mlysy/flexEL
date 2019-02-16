@@ -1,5 +1,5 @@
 # ---- testing R and C++ implementations of omega.hat are equal and optimality ----
-# library(bayesEL) # always load the package (with library)
+# library(flexEL) # always load the package (with library)
 library(optimCheck)
 source("el-utils.R")
 source("el-rfuns.R")

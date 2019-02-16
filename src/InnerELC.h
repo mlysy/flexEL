@@ -48,9 +48,9 @@ namespace el {
     VectorXd omegasps_; // partial sum of omegas
     VectorXd epsilons_; // residuals used for ordering in EM
     VectorXi epsOrd_; // order of epsilons
-    VectorXd psots_; //partial sum of omegatildas
-    VectorXd psoss_; // Note: not pre-allocated
-    ArrayXd logels_; // Note: not pre-allocated
+    VectorXd psots_; // partial sum of omegatildas
+    VectorXd psoss_; // partial sum of omegas (another s just to distinguish with the name of another double variable)
+    ArrayXd logels_; // logel values
   
     // placeholders for lambdaNR
     MatrixXd G_; // G matrix for the estimating equations
@@ -62,7 +62,7 @@ namespace el {
     MatrixXd GGtUsed_;
     VectorXd Glambda_;
     ArrayXd Gl11_;
-    VectorXd lGq;
+    VectorXd lGq_;
     VectorXd Q1_;
     MatrixXd Q2_;
     LDLT<MatrixXd> Q2ldlt_;
@@ -247,11 +247,11 @@ inline el::InnerELC<ELModel>::InnerELC() {}
 template<typename ELModel>
 inline el::InnerELC<ELModel>::InnerELC(int nObs) {
   nObs_ = nObs;
-  omegas_ = VectorXd::Zero(nObs_).array() + 1.0/(double)nObs_; // Initialize omegas to 1/nObs
   // support correction
   support_ = false;
   nObs1_ = nObs_+1;
   nObs2_ = nObs_+support_;
+  omegas_ = VectorXd::Zero(nObs1_).array() + 1.0/(double)nObs1_; // Initialize omegas to 1/nObs?
 }
 
 // ctor with dimensions as input
@@ -286,6 +286,9 @@ inline el::InnerELC<ELModel>::InnerELC(int nObs, int nEqs): ELModel(nObs, nEqs){
   weights_ = VectorXd::Zero(nObs1_);
   epsilons_ = VectorXd::Zero(nObs1_);
   epsOrd_ = VectorXi::Zero(nObs1_);
+  psoss_ = VectorXd::Zero(nObs1_);
+  logels_ = ArrayXd::Zero(nObs1_);
+  lGq_ = VectorXd::Zero(nObs1_);
 }
 
 // set options
@@ -465,6 +468,7 @@ inline void el::InnerELC<ELModel>::lambdaNR(int& nIter, double& maxErr) {
   lambdaNew_.fill(0.0);
   
   // Note: these two cannot be preallocate untill `support` is set
+  // but has to do it this way since .block does not return a MatrixXd (TODO: alternative way?)
   GGtUsed_ = GGt_.block(0,0,nEqs_,nObs2_*nEqs_);
   GUsed_ = G_.block(0,0,nEqs_,nObs2_);
   
@@ -550,7 +554,7 @@ inline void el::InnerELC<ELModel>::evalOmegas() {
   }
   int nIter;
   double maxErr;
-  lGq(nObs2_);
+  // lGq_(nObs2_);
   double logelOld = logEL();
   double logel = logelOld;
   int ii;
@@ -559,8 +563,8 @@ inline void el::InnerELC<ELModel>::evalOmegas() {
     evalWeights(); // assigns weights according to epsilons
     // M-step:
     lambdaNR(nIter, maxErr);
-    lGq = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
-    omegas_.head(nObs2_).array() = weights_.head(nObs2_).array() / lGq.array();
+    lGq_.head(nObs2_) = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
+    omegas_.head(nObs2_).array() = weights_.head(nObs2_).array() / lGq_.head(nObs2_).array();
     omegas_.head(nObs2_).array() = omegas_.head(nObs2_).array() / (omegas_.head(nObs2_).array().sum()); // normalize
     logel = logEL();
     maxErr = abs(logel-logelOld); // absolute error in log EL
@@ -587,16 +591,14 @@ inline double el::InnerELC<ELModel>::logEL() {
   else if ((omegas_.head(nObs_).array() < -1e-10/nObs2_).any()) return -INFINITY;
   else {
     omegas_ = omegas_.array().abs();
-    psoss_ = VectorXd::Zero(nObs2_); // Note: this cannot be pre-allocated before `support` is set
     for (int ii=0; ii<nObs2_; ii++) {
       psoss_(ii) = evalPsos(ii);
     }
-    logels_ = ArrayXd::Zero(nObs2_); // Note: this cannot be pre-allocated before `support` is set
     for (int jj=0; jj<nObs2_; jj++) {
       if (deltas_(jj) == 1) logels_(jj) = log(omegas_(jj));
       else  logels_(jj) = log(psoss_(jj));
     }
-    return(logels_.sum());
+    return(logels_.head(nObs2_).sum());
   }
 }
 
@@ -608,7 +610,6 @@ inline double el::InnerELC<ELModel>::logEL() {
 template<typename ELModel>
 inline void el::InnerELC<ELModel>::evalWeightsSmooth(const double s) {
   psots_.fill(0.0); // TODO initialize psots somewhere else???
-  psoss_ = VectorXd::Zero(nObs2_); // Note: this cannot be pre-allocated before `support` is set
   for (int ii=0; ii<nObs2_; ii++) {
     psoss_(ii) = evalPsosSmooth(ii,s);
   }
@@ -645,7 +646,6 @@ inline void el::InnerELC<ELModel>::evalOmegasSmooth(const double s) {
   }
   int nIter;
   double maxErr;
-  lGq(nObs2_); // Note: cannot be pre-allocated before `support` is set
   double logelOld = logELSmooth(s);
   double logel = logelOld;
   int ii;
@@ -654,8 +654,8 @@ inline void el::InnerELC<ELModel>::evalOmegasSmooth(const double s) {
     evalWeightsSmooth(s); // assigns weights according to epsilons
     // M-step:
     lambdaNR(nIter, maxErr);
-    lGq = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
-    omegas_.head(nObs2_).array() = weights_.head(nObs2_).array() / lGq.array();
+    lGq_.head(nObs2_) = ((lambdaNew_.transpose() * G_.block(0,0,nEqs_,nObs2_)).array() + weights_.head(nObs2_).sum()).transpose();
+    omegas_.head(nObs2_).array() = weights_.head(nObs2_).array() / lGq_.head(nObs2_).array();
     omegas_.head(nObs2_).array() = omegas_.head(nObs2_).array() / (omegas_.head(nObs2_).array().sum()); // normalize
     logel = logELSmooth(s);
     absErr_ = abs(logel-logelOld);
@@ -683,16 +683,16 @@ inline double el::InnerELC<ELModel>::logELSmooth(const double s) {
   else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
   else {
     omegas_ = omegas_.array().abs();
-    psoss_ = VectorXd::Zero(nObs2_);
+    // psoss_ = VectorXd::Zero(nObs2_);
     for (int ii=0; ii<nObs2_; ii++) {
       psoss_(ii) = evalPsosSmooth(ii,s);
     }
-    logels_ = ArrayXd::Zero(nObs2_);
+    // logels_ = ArrayXd::Zero(nObs2_);
     for (int jj=0; jj<nObs2_; jj++) {
       if (deltas_(jj) == 1) logels_(jj) = log(omegas_(jj));
       else  logels_(jj) = log(psoss_(jj));
     }
-    return(logels_.sum());
+    return(logels_.head(nObs2_).sum());
   }
 }
 
