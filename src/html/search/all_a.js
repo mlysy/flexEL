@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['phi_5ftau_5fsmooth',['phi_tau_smooth',['../class_quant_reg_model.html#a1dd27239b95e923011dd095c5209f55e',1,'QuantRegModel']]]
+  ['quantregexports_2ecpp',['QuantRegExports.cpp',['../_quant_reg_exports_8cpp.html',1,'']]],
+  ['quantregmodel',['QuantRegModel',['../class_quant_reg_model.html',1,'QuantRegModel'],['../class_quant_reg_model.html#a5c2516cd1b3b19c21f03683f802ef6ed',1,'QuantRegModel::QuantRegModel()'],['../class_quant_reg_model.html#a8b04dfbbf2abe42fada14f3272de5883',1,'QuantRegModel::QuantRegModel(int nObs, int nEqs)']]],
+  ['quantregmodel_2eh',['QuantRegModel.h',['../_quant_reg_model_8h.html',1,'']]]
 ];

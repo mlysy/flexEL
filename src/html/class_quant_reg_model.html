@@ -96,20 +96,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad15efef7b197dd11daae70b12a6c3c5e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#ad15efef7b197dd11daae70b12a6c3c5e">evalG</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu)</td></tr>
 <tr class="memdesc:ad15efef7b197dd11daae70b12a6c3c5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location-scale model.  <a href="#ad15efef7b197dd11daae70b12a6c3c5e">More...</a><br /></td></tr>
 <tr class="separator:ad15efef7b197dd11daae70b12a6c3c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1dd27239b95e923011dd095c5209f55e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a1dd27239b95e923011dd095c5209f55e">phi_tau_smooth</a> (double u, double tau, double s)</td></tr>
-<tr class="memdesc:a1dd27239b95e923011dd095c5209f55e"><td class="mdescLeft">&#160;</td><td class="mdescRight">First derivative of the smoothed check function.  <a href="#a1dd27239b95e923011dd095c5209f55e">More...</a><br /></td></tr>
-<tr class="separator:a1dd27239b95e923011dd095c5209f55e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12969cd403f88c9ea02b3b3304804269"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a12969cd403f88c9ea02b3b3304804269">evalGSmooth</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu, const double s)</td></tr>
-<tr class="memdesc:a12969cd403f88c9ea02b3b3304804269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for smoothed quantile regression location-scale model.  <a href="#a12969cd403f88c9ea02b3b3304804269">More...</a><br /></td></tr>
+<tr class="memdesc:a12969cd403f88c9ea02b3b3304804269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location-scale model with smoothing.  <a href="#a12969cd403f88c9ea02b3b3304804269">More...</a><br /></td></tr>
 <tr class="separator:a12969cd403f88c9ea02b3b3304804269"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a0a3f54f7c1d53c04f9440ecf76cfcb14"><td class="memItemLeft" align="right" valign="top"><a id="a0a3f54f7c1d53c04f9440ecf76cfcb14"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>nObs_</b></td></tr>
+<tr class="memitem:a0a3f54f7c1d53c04f9440ecf76cfcb14"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#a0a3f54f7c1d53c04f9440ecf76cfcb14">nObs_</a></td></tr>
 <tr class="separator:a0a3f54f7c1d53c04f9440ecf76cfcb14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af86e3098916156eee67cf436d2a0c18a"><td class="memItemLeft" align="right" valign="top"><a id="af86e3098916156eee67cf436d2a0c18a"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>nEqs_</b></td></tr>
+<tr class="memitem:af86e3098916156eee67cf436d2a0c18a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_quant_reg_model.html#af86e3098916156eee67cf436d2a0c18a">nEqs_</a></td></tr>
 <tr class="separator:af86e3098916156eee67cf436d2a0c18a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -198,7 +193,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>nEqs_</b></td></tr>
 <p>Evaluate G matrix for quantile regression location model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nObs</code> in linear location function. </td></tr>
+    <tr><td class="paramname">Beta</td><td>Matrix of dimension <code>nEqs_ x nQts_</code>, each column is a coefficient vector of length <code>nEqs_</code> in linear location function. </td></tr>
   </table>
   </dd>
 </dl>
@@ -328,61 +323,13 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>nEqs_</b></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Evaluate G matrix for smoothed quantile regression location-scale model. </p>
+<p>Evaluate G matrix for quantile regression location-scale model with smoothing. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nObs</code> in linear location function. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a1dd27239b95e923011dd095c5209f55e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1dd27239b95e923011dd095c5209f55e">&#9670;&nbsp;</a></span>phi_tau_smooth()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">double QuantRegModel::phi_tau_smooth </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>u</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>tau</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>s</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>First derivative of the smoothed check function. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">u</td><td>Argument of check function. </td></tr>
-    <tr><td class="paramname">tau</td><td>Quantile level (0 &lt; tau &lt; 1). </td></tr>
+    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+    <tr><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
+    <tr><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
+    <tr><td class="paramname">Nu</td><td>Quantile parameters for each quantile level. </td></tr>
     <tr><td class="paramname">s</td><td>Smoothing parameter (s &gt; 0). </td></tr>
   </table>
   </dd>
@@ -498,6 +445,53 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>nEqs_</b></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="af86e3098916156eee67cf436d2a0c18a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af86e3098916156eee67cf436d2a0c18a">&#9670;&nbsp;</a></span>nEqs_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int QuantRegModel::nEqs_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p class="">number of estimating equations (number of rows of G) </p>
+
+</div>
+</div>
+<a id="a0a3f54f7c1d53c04f9440ecf76cfcb14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a3f54f7c1d53c04f9440ecf76cfcb14">&#9670;&nbsp;</a></span>nObs_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int QuantRegModel::nObs_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p class="">number of observations (number of columns of G) </p>
 
 </div>
 </div>

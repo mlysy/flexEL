@@ -275,19 +275,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rho1Smooth
-double rho1Smooth(double u, double tau, double s);
-RcppExport SEXP _flexEL_rho1Smooth(SEXP uSEXP, SEXP tauSEXP, SEXP sSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type u(uSEXP);
-    Rcpp::traits::input_parameter< double >::type tau(tauSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(rho1Smooth(u, tau, s));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
@@ -308,7 +295,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_QuantReg_evalG", (DL_FUNC) &_flexEL_QuantReg_evalG, 4},
     {"_flexEL_QuantRegLS_evalG", (DL_FUNC) &_flexEL_QuantRegLS_evalG, 8},
     {"_flexEL_QuantRegLS_evalGSmooth", (DL_FUNC) &_flexEL_QuantRegLS_evalGSmooth, 9},
-    {"_flexEL_rho1Smooth", (DL_FUNC) &_flexEL_rho1Smooth, 3},
     {NULL, NULL, 0}
 };
 

@@ -30,16 +30,6 @@ Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
   QR.evalG(G,beta);
   return(G); 
 }
-// Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
-//                                Eigen::VectorXd tauArr, Eigen::VectorXd beta) {
-//   // InnerEL<QuantRegModel> QR(y, X, &tau); // instantiate
-//   el::InnerEL<QuantRegModel> QR;
-//   // QR.setData(y,X,&tau); 
-//   QR.setData(y,X,tauArr.data());
-//   QR.evalG(beta);
-//   Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-//   return(G); 
-// }
 
 // [[Rcpp::export(".QuantRegLS_evalG")]]
 Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
@@ -55,17 +45,6 @@ Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::Ma
   QR.evalG(G,beta,gamma,sig2,Nu);
   return(G); 
 }
-// Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
-//                                  Eigen::VectorXd tauArr, Eigen::VectorXd beta, 
-//                                  Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu) {
-//   // InnerEL<QuantRegModel> QR(y, X, &tau); // instantiate
-//   el::InnerEL<QuantRegModel> QR;
-//   // QR.setData(y,X,Z,&tau); 
-//   QR.setData(y,X,Z,tauArr.data());
-//   QR.evalG(beta,gamma,sig2,Nu);
-//   Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-//   return(G); 
-// }
 
 // [[Rcpp::export(".QuantRegLS_evalGSmooth")]]
 Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
@@ -79,18 +58,12 @@ Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eig
   QR.evalGSmooth(G,beta,gamma,sig2,Nu,s);
   return(G); 
 }
-// Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
-//                                        Eigen::VectorXd tauArr, Eigen::VectorXd beta, 
-//                                        Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s) {
-//   // InnerEL<QuantRegModel> QR(y, X, &tau); // instantiate
-//   el::InnerEL<QuantRegModel> QR;
-//   // QR.setData(y,X,Z,&tau); 
-//   QR.setData(y,X,Z,tauArr.data());
-//   QR.evalGSmooth(beta,gamma,sig2,Nu,s);
-//   Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-//   return(G); 
-// }
 
+// // [[Rcpp::export(".rho1.smooth")]]
+// double rho1Smooth(double u, double tau, double s) {
+//   el::InnerELC<QuantRegModel> QRC;
+//   return(QRC.phi_tau_smooth(u,tau,s));
+// }
 
 /*
 // [[Rcpp::export(".QuantReg_post")]]
@@ -299,9 +272,3 @@ Rcpp::List QuantRegCensLS_post_adapt(Eigen::VectorXd omegasInit,
   return(retlst);
 }
 */
-
-// [[Rcpp::export(".rho1.smooth")]]
-double rho1Smooth(double u, double tau, double s) {
-  el::InnerELC<QuantRegModel> QRC;
-  return(QRC.phi_tau_smooth(u,tau,s));
-}
