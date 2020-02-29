@@ -1,5 +1,5 @@
 # tests for mean regression postSampler 
-library(bayesEL)
+library(flexEL)
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")
@@ -61,7 +61,8 @@ for (ii in 1:numpoints) {
     logel.seq[ii] <- logEL(omegas,epsilons,deltas)
   }
 }
-logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), expression(mu))
+logelmode <- plotEL(mu.seq, logel.seq, mu0, mean(y), mu.name = expression(mu),
+                    legend.loc = 'topright')
 
 # Acceleration with fitted lm
 logel_acc.seq <- rep(NA,numpoints) 
@@ -69,9 +70,10 @@ for (ii in 1:numpoints) {
   if (ii %% 10 == 0) message("ii = ", ii)
   G <- mr.evalG(y,X,mu.seq[ii])
   epsilons <- y - c(X * mu.seq[ii])
-  logel_acc.seq[ii] <- logEL_EMAC_R(G,epsilons,deltas)
+  logel_acc.seq[ii] <- logEL_EMAC_R(G,epsilons,deltas,verbose = TRUE)
 }
-logelmode_acc <- plotEL(mu.seq, logel_acc.seq, mu0, mean(y), expression(mu))
+logelmode_acc <- plotEL(mu.seq, logel_acc.seq, mu0, mean(y), mu.name = expression(mu),
+                        legend.loc = 'topright')
 
 nsamples <- 10000
 nburn <- 2000

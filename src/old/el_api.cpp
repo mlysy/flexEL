@@ -1,7 +1,11 @@
 /// @file el_api.cpp
 
+// Usage 1: no support adjustment
 MeanRegModel mrG(X, y); // X = MatrixXd, y = VectorXd
 InnerEL el(mrG.get_nObs(), mrG.get_nEq()); // memory allocation
+
+bool support = true; // if does support adjustment
+el.setOpts(support);
 // el contains G_, which has nObs + 1 rows (columns?) for support adjustment
 
 for(int ii=0; ii<nTheta; ii++) {

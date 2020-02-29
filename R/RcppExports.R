@@ -73,7 +73,3 @@
     .Call(`_flexEL_QuantRegLS_evalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
 }
 
-.rho1.smooth <- function(u, tau, s) {
-    .Call(`_flexEL_rho1Smooth`, u, tau, s)
-}
-
