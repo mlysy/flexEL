@@ -34,14 +34,12 @@ namespace el {
    *
    * @brief      A template class for empirical likelihood inner optimization calculation with fully observed responses.
    */
-  template <typename ELModel>
-  class InnerEL : public ELModel {
+  class InnerEL {
     
   private:
     
-    // required members in ELModel
-    using ELModel::nObs_; 
-    using ELModel::nEqs_;
+    int nObs_; 
+    int nEqs_;
     
     // constants for logstar
     double trunc_, aa_, bb_, cc_; //constants in logstar functions
@@ -116,6 +114,7 @@ namespace el {
     VectorXd getLambda(); 
     VectorXd getOmegas();
     MatrixXd getG(); // TODO: is it better to return a reference?..
+    Ref<MatrixXd> getGref();
     
     // nBet, nGam and nQts are FOR THE MCMC SAMPELERS
     // using ELModel::nBet;
@@ -137,8 +136,7 @@ namespace el {
 // private functions
 
 // maximum relative error in lambda
-template<typename ELModel>
-inline double el::InnerEL<ELModel>::maxRelErr() {
+inline double el::InnerEL::maxRelErr() {
   // TODO: added for numerical stability, what is a good tolerance to use ?
   if ((lambdaNew_ - lambdaOld_).array().abs().maxCoeff() < 1e-10) return(0);
   
@@ -147,8 +145,7 @@ inline double el::InnerEL<ELModel>::maxRelErr() {
 }
 
 // logstar
-template<typename ELModel>
-inline double el::InnerEL<ELModel>::logstar(double x) {
+inline double el::InnerEL::logstar(double x) {
   if(x >= trunc_) {
     return(log(x));
   } else {
@@ -157,8 +154,7 @@ inline double el::InnerEL<ELModel>::logstar(double x) {
 }
 
 // d logstar(x)/dx
-template<typename ELModel>
-inline double el::InnerEL<ELModel>::logstar1(double x) {
+inline double el::InnerEL::logstar1(double x) {
   if(x >= trunc_) {
     return(1.0/x);
   } 
@@ -169,8 +165,7 @@ inline double el::InnerEL<ELModel>::logstar1(double x) {
 }
 
 // d^2 logstar(x)/dx^2
-template<typename ELModel>
-inline double el::InnerEL<ELModel>::logstar2(double x) {
+inline double el::InnerEL::logstar2(double x) {
   if(x >= trunc_) {
     return(-1.0/(x*x));
   } else {
@@ -187,8 +182,7 @@ inline double el::InnerEL<ELModel>::logstar2(double x) {
 /**
  * @brief Default constructor for InnerEL.
  */
-template<typename ELModel>
-inline el::InnerEL<ELModel>::InnerEL(){}
+inline el::InnerEL::InnerEL(){}
 
 /**
  * @brief Constructor for InnerEL with dimensions of G matrix as inputs for memory allocation.
@@ -196,8 +190,7 @@ inline el::InnerEL<ELModel>::InnerEL(){}
  * @param nObs    Number of observations.
  * @param nEqs    Number of estimating equations.
  */
-template<typename ELModel>
-inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
+inline el::InnerEL::InnerEL(int nObs, int nEqs) {
   // support correction
   support_ = false;
   nObs1_ = nObs_+1;
@@ -234,8 +227,7 @@ inline el::InnerEL<ELModel>::InnerEL(int nObs, int nEqs): ELModel(nObs, nEqs) {
  * @param supa       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  * @param lambda0    Initial value for lambda.
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
                                           const bool& support, const double& supa, 
                                           const Ref<const VectorXd>& lambda0) {
   maxIter_ = maxIter;
@@ -253,8 +245,7 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
  * @param relTol     Relative tolerance.
  * @param lambda0    Initial value for lambda.
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
                                           const bool& support, 
                                           const Ref<const VectorXd>& lambda0) {
   maxIter_ = maxIter;
@@ -273,8 +264,7 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
  * @param support    Whether to have support correction.
  * @param supa       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
                                           const bool& support, const double& supa) {
   maxIter_ = maxIter;
   relTol_ = relTol;
@@ -290,8 +280,7 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
  * @param relTol     Relative tolerance.
  * @param support    Whether to have support correction.
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relTol, 
+inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
                                           const bool& support) {
   maxIter_ = maxIter;
   relTol_ = relTol;
@@ -306,8 +295,7 @@ inline void el::InnerEL<ELModel>::setOpts(const int& maxIter, const double& relT
  * @param support    Whether to have support correction.
  * @param supa       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOpts(const bool& support, const double& supa) {
+inline void el::InnerEL::setOpts(const bool& support, const double& supa) {
   support_ = support;
   supa_ = supa;
   nObs2_ = nObs_+support_;
@@ -318,8 +306,7 @@ inline void el::InnerEL<ELModel>::setOpts(const bool& support, const double& sup
  * 
  * @param support    Whether to have support correction.
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOpts(const bool& support) {
+inline void el::InnerEL::setOpts(const bool& support) {
   support_ = support;
   supa_ = std::max(1.0,0.5*log(nObs_));
   nObs2_ = nObs_+support_;
@@ -331,8 +318,7 @@ inline void el::InnerEL<ELModel>::setOpts(const bool& support) {
  * @param[out] nIter    Number of iterations to achieve convergence.
  * @param[out] maxErr   Maximum relative error among entires in lambda at the last step.
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
+inline void el::InnerEL::lambdaNR(int& nIter, double& maxErr) {
   
   lambdaOld_ = lambda0_; // set to initial value
   lambdaNew_.fill(0.0); // may not be needed here..
@@ -371,8 +357,7 @@ inline void el::InnerEL<ELModel>::lambdaNR(int& nIter, double& maxErr) {
 /**
  * @brief Evaluate omegas based on G and lambdaNew.
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::evalOmegas() {
+inline void el::InnerEL::evalOmegas() {
   // G and lambdaNew must have been assigned
   if (lambdaNew_ != lambdaNew_) { // if lambdaNew is NaN 
     for (int ii=0; ii<nObs2_; ii++) {
@@ -393,8 +378,7 @@ inline void el::InnerEL<ELModel>::evalOmegas() {
  * 
  * @return log empirical likelihood.
  */
-template<typename ELModel>
-inline double el::InnerEL<ELModel>::logEL() {
+inline double el::InnerEL::logEL() {
   // if omegas are NaN, return -Inf
   if (omegas_.head(nObs2_) != omegas_.head(nObs2_)) return -INFINITY;
   else return(omegas_.head(nObs2_).array().log().sum());
@@ -405,8 +389,7 @@ inline double el::InnerEL<ELModel>::logEL() {
 /**
  * @brief Set the value of lambda (e.g. to be used directly to calculate omegas).
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& lambda) {
+inline void el::InnerEL::setLambda(const Ref<const VectorXd>& lambda) {
   // lambdaOld_ = lambda;
   lambdaNew_ = lambda;
 }
@@ -414,16 +397,14 @@ inline void el::InnerEL<ELModel>::setLambda(const Ref<const VectorXd>& lambda) {
 /**
  * @brief Set the value of omegas (e.g. to be used directly to calculate log EL).
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setOmegas(const Ref<const VectorXd>& omegas) {
+inline void el::InnerEL::setOmegas(const Ref<const VectorXd>& omegas) {
   omegas_.head(nObs2_) = omegas; 
 }
 
 /**
  * @brief Set the value of G (e.g. to be used directly to calculate lambda or log EL).
  */
-template<typename ELModel>
-inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
+inline void el::InnerEL::setG(const Ref<const MatrixXd>& G) {
   G_.block(0,0,nEqs_,nObs_) = G;
   if (support_) adj_G(G_,supa_);
 }
@@ -433,24 +414,28 @@ inline void el::InnerEL<ELModel>::setG(const Ref<const MatrixXd>& G) {
 /**
  * @brief Get the value of lambda.
  */
-template<typename ELModel>
-inline VectorXd el::InnerEL<ELModel>::getLambda() {
+inline VectorXd el::InnerEL::getLambda() {
   return(lambdaNew_);
 }
 
 /**
  * @brief Get the value of omegas.
  */
-template<typename ELModel>
-inline VectorXd el::InnerEL<ELModel>::getOmegas() {
+inline VectorXd el::InnerEL::getOmegas() {
     return(omegas_.head(nObs2_));
 }
 
 /**
  * @brief Get the value of G.
  */
-template<typename ELModel>
-inline MatrixXd el::InnerEL<ELModel>::getG() {
+inline MatrixXd el::InnerEL::getG() {
+  return(G_.block(0,0,nEqs_,nObs2_));
+}
+
+/**
+ * @brief Get the reference of G.
+ */
+inline Ref<MatrixXd> el::InnerEL::getGref() {
   return(G_.block(0,0,nEqs_,nObs2_));
 }
 

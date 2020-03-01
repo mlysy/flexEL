@@ -39,6 +39,11 @@ public:
   // constructors
   MeanRegModel();
   MeanRegModel(int nObs, int nEqs);
+  MeanRegModel(const Ref<const VectorXd>& y,
+               const Ref<const MatrixXd>& X);
+  MeanRegModel(const Ref<const VectorXd>& y,
+               const Ref<const MatrixXd>& X,
+               const Ref<const MatrixXd>& Z);
 
   // set data functions
   void setData(const Ref<const VectorXd>& y,
@@ -54,6 +59,10 @@ public:
              const Ref<const VectorXd>& beta,
              const Ref<const VectorXd>& gamma,
              const double& sig2);
+  
+  // get functions
+  int getnObs();
+  int getnEqs();
 };
 
 /* --------------------------------------------------------------------------- */
@@ -77,6 +86,28 @@ inline MeanRegModel::MeanRegModel(int nObs, int nEqs) {
   nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
   // TODO: pre-allocate space for data?
   // y_ = VectorXd::Zero(nObs_);
+}
+
+inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
+                                  const Ref<const MatrixXd>& X) {
+  y_ = y;
+  X_ = X;
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = 0;
+  nEqs_ = nBet_;
+}
+
+inline MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
+                                  const Ref<const MatrixXd>& X,
+                                  const Ref<const MatrixXd>& Z) {
+  y_ = y;
+  X_ = X;
+  Z_ = Z;
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = Z.rows(); // Z gets passed as nGam x nObs matrix
+  nEqs_ = nBet_+nGam_+1;
 }
 
 // setData location model (with default ctor)
@@ -152,6 +183,14 @@ inline void MeanRegModel::evalG(Ref<MatrixXd> G,
   tG_.block(0,nBet_,nObs_,nGam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array());
   tG_.rightCols(1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
   G = tG_.transpose();
+}
+
+inline int MeanRegModel::getnObs() {
+  return nObs_;
+}
+
+inline int MeanRegModel::getnEqs() {
+  return nEqs_;
 }
 
 #endif
