@@ -7,7 +7,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "InnerEL.h"
-#include "InnerELC.h"
+// #include "InnerELC.h"
 #include "MeanRegModel.h"
 #include "dVecTobArr.h"
 

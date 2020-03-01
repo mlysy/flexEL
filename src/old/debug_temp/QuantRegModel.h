@@ -45,6 +45,13 @@ public:
   // constructors
   QuantRegModel();
   QuantRegModel(int nObs, int nEqs);
+  QuantRegModel(const Ref<const VectorXd>& y,
+                const Ref<const MatrixXd>& X,
+                void* params);
+  QuantRegModel(const Ref<const VectorXd>& y,
+                const Ref<const MatrixXd>& X,
+                const Ref<const MatrixXd>& Z,
+                void* params);
   
   // set data functions
   void setData(const Ref<const VectorXd>& y, 
@@ -68,6 +75,10 @@ public:
                    const double& sig2, // sig2 should be a scalar
                    const Ref<const VectorXd>& Nu,
                    const double s);
+  
+  // get functions
+  int getnObs();
+  int getnEqs();
 };
 
 /* --------------------------------------------------------------------------- */
@@ -116,6 +127,38 @@ inline QuantRegModel::QuantRegModel(){}
 inline QuantRegModel::QuantRegModel(int nObs, int nEqs) {
   nObs_ = nObs;
   nEqs_ = nEqs; // X gets passed as nBet x nObs matrix
+}
+
+inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& y,
+                                    const Ref<const MatrixXd>& X,
+                                    void* params) {
+  y_ = y;
+  X_ = X;
+  double *tauArr = (double*)(params);
+  nQts_ = tauArr[0]; // first entry must be the number of quantile levels
+  tau = &(tauArr[1]); // rest are the quantile levels
+  
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = 0; 
+  nEqs_ = nBet_*nQts_; // Total number of equations
+}
+
+inline QuantRegModel::QuantRegModel(const Ref<const VectorXd>& y,
+                                    const Ref<const MatrixXd>& X,
+                                    const Ref<const MatrixXd>& Z,
+                                    void* params) {
+  y_ = y;
+  X_ = X;
+  Z_ = Z;
+  double *tauArr = (double*)(params);
+  nQts_ = tauArr[0]; // first entry must be the number of quantile levels
+  tau = &(tauArr[1]); // rest are the quantile levels
+  
+  nObs_ = y.size();
+  nBet_ = X.rows(); // X gets passed as nBet x nObs matrix
+  nGam_ = Z.rows(); // Z gets passed as nGam x nObs matrix
+  nEqs_ = nBet_+nGam_+1+nQts_; 
 }
 
 // setData (with default ctor)
@@ -258,6 +301,14 @@ inline void QuantRegModel::evalGSmooth(Ref<MatrixXd> G,
     }
   }
   G = tG_.transpose();
+}
+
+inline int QuantRegModel::getnObs() {
+  return nObs_;
+}
+
+inline int QuantRegModel::getnEqs() {
+  return nEqs_;
 }
 
 #endif

@@ -191,6 +191,9 @@ inline el::InnerEL::InnerEL(){}
  * @param nEqs    Number of estimating equations.
  */
 inline el::InnerEL::InnerEL(int nObs, int nEqs) {
+  // assign internal values
+  nObs_ = nObs;
+  nEqs_ = nEqs;
   // support correction
   support_ = false;
   nObs1_ = nObs_+1;

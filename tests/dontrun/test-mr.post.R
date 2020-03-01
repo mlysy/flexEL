@@ -1,5 +1,5 @@
 # tests for mean regression postSampler 
-library(bayesEL)
+library(flexEL)
 source("../testthat/el-utils.R")
 source("../testthat/el-rfuns.R")
 source("../testthat/el-model.R")

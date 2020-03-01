@@ -7,7 +7,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "InnerEL.h"
-#include "MeanRegModel.h"
+// #include "MeanRegModel.h"
 
 //[[Rcpp::depends("RcppEigen")]]
 
@@ -18,7 +18,7 @@ using namespace Rcpp;
 Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool support, bool verbose) {
   int nObs = G.cols();
   int nEqs = G.rows();
-  el::InnerEL<MeanRegModel> IL(nObs,nEqs);
+  el::InnerEL IL(nObs,nEqs);
   IL.setOpts(maxIter,relTol,support);
   IL.setG(G); // assign the given G
   
@@ -53,7 +53,7 @@ Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool sup
 Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support) {
   int nObs = G.cols();
   int nEqs = G.rows();
-  el::InnerEL<MeanRegModel> IL(nObs,nEqs);
+  el::InnerEL IL(nObs,nEqs);
   IL.setOpts(support);
   IL.setG(G); // assign the given G
   IL.setLambda(lambda); 
@@ -66,7 +66,7 @@ Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support
 // [[Rcpp::export(".logEL")]]
 double logEL(Eigen::VectorXd omegas, bool support) {
   int nObs = omegas.size();
-  el::InnerEL<MeanRegModel> IL(nObs,1);
+  el::InnerEL IL(nObs,1);
   IL.setOpts(support);
   IL.setOmegas(omegas); 
   double logel = IL.logEL();

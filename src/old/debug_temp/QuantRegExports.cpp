@@ -7,7 +7,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "InnerEL.h"
-#include "InnerELC.h"
+// #include "InnerELC.h"
 #include "QuantRegModel.h"
 #include "dVecTobArr.h"
 
@@ -20,43 +20,30 @@ using namespace Eigen;
 // [[Rcpp::export(".QuantReg_evalG")]]
 Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
                                Eigen::VectorXd tauArr, Eigen::VectorXd beta) {
-  // InnerEL<QuantRegModel> QR(y, X, &tau); // instantiate
-  int nObs = X.cols();
-  int nEqs = X.rows();
-  el::InnerEL<QuantRegModel> QR(nObs,nEqs);
-  // QR.setData(y,X,&tau); 
-  QR.setData(y,X,tauArr.data());
-  Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-  QR.evalG(G,beta);
-  return(G); 
+  QuantRegModel QR(y,X,tauArr.data());
+  el::InnerEL EL(QR.getnObs(), QR.getnEqs());
+  QR.evalG(EL.getGref(), beta);
+  return(EL.getG()); 
 }
 
 // [[Rcpp::export(".QuantRegLS_evalG")]]
 Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                                  Eigen::VectorXd tauArr, Eigen::VectorXd beta, 
                                  Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu) {
-  // InnerEL<QuantRegModel> QR(y, X, &tau); // instantiate
-  int nObs = X.cols();
-  int nEqs = X.rows()+Z.rows()+2; // TODO: +2 only applies to when there is one quantile level
-  el::InnerEL<QuantRegModel> QR(nObs,nEqs);
-  // QR.setData(y,X,Z,&tau); 
-  QR.setData(y,X,Z,tauArr.data());
-  Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-  QR.evalG(G,beta,gamma,sig2,Nu);
-  return(G); 
+  QuantRegModel QR(y,X,Z,tauArr.data());
+  el::InnerEL EL(QR.getnObs(), QR.getnEqs());
+  QR.evalG(EL.getGref(),beta,gamma,sig2,Nu);
+  return(EL.getG()); 
 }
 
 // [[Rcpp::export(".QuantRegLS_evalGSmooth")]]
 Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                                        Eigen::VectorXd tauArr, Eigen::VectorXd beta, 
                                        Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s) {
-  int nObs = X.cols();
-  int nEqs = X.rows()+Z.rows()+2; // TODO: +2 only applies to when there is one quantile level
-  el::InnerEL<QuantRegModel> QR(nObs,nEqs);
-  QR.setData(y,X,Z,tauArr.data());
-  Eigen::MatrixXd G = QR.getG(); // G is nEqs x nObs
-  QR.evalGSmooth(G,beta,gamma,sig2,Nu,s);
-  return(G); 
+  QuantRegModel QR(y,X,Z,tauArr.data());
+  el::InnerEL EL(QR.getnObs(), QR.getnEqs());
+  QR.evalGSmooth(EL.getGref(),beta,gamma,sig2,Nu,s);
+  return(EL.getG()); 
 }
 
 // // [[Rcpp::export(".rho1.smooth")]]
