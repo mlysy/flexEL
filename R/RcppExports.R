@@ -5,6 +5,14 @@
     .Call(`_flexEL_adjG`, G, a)
 }
 
+.ind.smooth <- function(x, s) {
+    .Call(`_flexEL_indSmooth`, x, s)
+}
+
+.ind1.smooth <- function(x, s) {
+    .Call(`_flexEL_ind1Smooth`, x, s)
+}
+
 .lambdaNR <- function(G, maxIter, relTol, support, verbose) {
     .Call(`_flexEL_lambdaNR`, G, maxIter, relTol, support, verbose)
 }
@@ -23,5 +31,17 @@
 
 .MeanRegLS_evalG <- function(y, X, Z, beta, gamma, sig2) {
     .Call(`_flexEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
+}
+
+.QuantReg_evalG <- function(y, X, tauArr, beta) {
+    .Call(`_flexEL_QuantReg_evalG`, y, X, tauArr, beta)
+}
+
+.QuantRegLS_evalG <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu) {
+    .Call(`_flexEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
+}
+
+.QuantRegLS_evalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu, s) {
+    .Call(`_flexEL_QuantRegLS_evalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
 }
 

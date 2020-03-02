@@ -7,7 +7,7 @@ source("el-model.R")
 source("../dontrun/mode-functions.R")
 # library(testthat)
 
-context("mrls.evalG")
+context("qrls.evalG.smooth")
 
 ntest <- 50
 
