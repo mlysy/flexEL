@@ -773,7 +773,7 @@ inline MatrixXd el::InnerELC::getG() {
  * @brief Get the reference of G.
  */
 inline Ref<MatrixXd> el::InnerELC::getGref() {
-  return(G_.block(0,0,nEqs_,nObs2_));
+  return Ref<MatrixXd>(G_.block(0,0,nEqs_,nObs2_));
 }
 
 /* TAKE OUT ALL MCMC SAMPLERS FOR NOW:
