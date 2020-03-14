@@ -12,10 +12,10 @@
 #include <math.h>
 #include <Rmath.h> // for random number 
 #include <cmath>  // for abs on scalars
-#include "SortOrder.h"
-#include "IndSmooth.h" // for smoothed indicator function
-#include "BlockOuter.h"
-#include "AdjG.h" // for support correction
+#include "sort_order.h"
+#include "ind_smooth.h" // for smoothed indicator function
+#include "block_outer.h"
+#include "adj_G.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]

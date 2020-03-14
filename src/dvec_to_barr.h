@@ -1,7 +1,7 @@
 /**
  * @file dVecTobArr.h
  * 
- * @brief Convert Eigen VectorXd to C++ bool array.
+ * @brief Convert Eigen VectorXd (double vector) to C++ bool array.
  */
 
 #ifndef DVECTOBARR_h

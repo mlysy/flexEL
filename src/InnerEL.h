@@ -9,8 +9,8 @@
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include "BlockOuter.h" // columnwise outer product
-#include "AdjG.h" // for support correction
+#include "block_outer.h" // columnwise outer product
+#include "adj_G.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
@@ -228,7 +228,7 @@ inline el::InnerEL::InnerEL(int n_obs, int n_eqs) {
  * 
  * @param max_iter    Maximum number of iterations.
  * @param rel_tol     Relative tolerance.
- * @param support    Whether to have support correction.
+ * @param supp    Whether to have support correction.
  * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  * @param lambda0    Initial value for lambda.
  */
@@ -266,7 +266,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
  * 
  * @param max_iter    Maximum number of iterations.
  * @param rel_tol     Relative tolerance.
- * @param support    Whether to have support correction.
+ * @param supp    Whether to have support correction.
  * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
 inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
@@ -283,7 +283,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
  * 
  * @param max_iter    Maximum number of iterations.
  * @param rel_tol     Relative tolerance.
- * @param support    Whether to have support correction.
+ * @param supp    Whether to have support correction.
  */
 inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
                                           const bool& supp) {
@@ -297,7 +297,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
 /**
  * @brief Set support correction option and tuning parameter only. 
  * 
- * @param support    Whether to have support correction.
+ * @param supp    Whether to have support correction.
  * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
 inline void el::InnerEL::set_opts(const bool& supp, const double& supp_a) {
@@ -309,7 +309,7 @@ inline void el::InnerEL::set_opts(const bool& supp, const double& supp_a) {
 /**
  * @brief Set support correction option only. 
  * 
- * @param support    Whether to have support correction.
+ * @param supp    Whether to have support correction.
  */
 inline void el::InnerEL::set_opts(const bool& supp) {
   supp_ = supp;
@@ -328,7 +328,7 @@ inline void el::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
   lambda_old_ = lambda0_; // set to initial value
   lambda_new_.fill(0.0); // may not be needed here..
   
-  // Note: these two cannot be preallocate untill `support` is set
+  // Note: these two cannot be preallocate untill `supp` is set
   GGt_used_ = GGt_.block(0,0,n_eqs_,n_obs2_*n_eqs_);
   G_used_ = G_.block(0,0,n_eqs_,n_obs2_);
   

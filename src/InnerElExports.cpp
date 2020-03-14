@@ -14,25 +14,25 @@
 using namespace Eigen;
 using namespace Rcpp;
 
-// [[Rcpp::export(".lambdaNR")]]
-Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool support, bool verbose) {
-  int nObs = G.cols();
-  int nEqs = G.rows();
-  el::InnerEL IL(nObs,nEqs);
-  IL.setOpts(maxIter,relTol,support);
-  IL.setG(G); // assign the given G
+// [[Rcpp::export(".LambdaNR")]]
+Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose) {
+  int n_obs = G.cols();
+  int n_eqs = G.rows();
+  el::InnerEL IL(n_obs,n_eqs);
+  IL.set_opts(max_iter,rel_tol,support);
+  IL.set_G(G); // assign the given G
   
   // initialize variables for output here 
-  int nIter;
-  double maxErr;
+  int n_iter;
+  double max_err;
   bool not_conv;
-  // IL.setTol(maxIter, relTol);
-  IL.lambdaNR(nIter, maxErr);
+  // IL.setTol(max_iter, rel_tol);
+  IL.LambdaNR(n_iter, max_err);
   VectorXd lambda = IL.getLambda(); // output (could be not converged)
   // check convergence
-  not_conv = (nIter == maxIter) && (maxErr > relTol);
+  not_conv = (n_iter == max_iter) && (max_err > rel_tol);
   if(verbose) {
-    Rprintf("nIter = %i, maxErr = %f\n", nIter, maxErr);
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
   }
   
   // fill in NaN if not converged
@@ -49,27 +49,27 @@ Eigen::VectorXd lambdaNR(Eigen::MatrixXd G, int maxIter, double relTol, bool sup
 
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
 // as in the censored case 
-// [[Rcpp::export(".omega.hat")]]
-Eigen::VectorXd omegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support) {
-  int nObs = G.cols();
-  int nEqs = G.rows();
-  el::InnerEL IL(nObs,nEqs);
-  IL.setOpts(support);
-  IL.setG(G); // assign the given G
-  IL.setLambda(lambda); 
-  IL.evalOmegas(); // calculate omegas
-  VectorXd omegasnew = IL.getOmegas(); // get omegas
+// [[Rcpp::export(".OmegaHat")]]
+Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support) {
+  int n_obs = G.cols();
+  int n_eqs = G.rows();
+  el::InnerEL IL(n_obs,n_eqs);
+  IL.set_opts(support);
+  IL.set_G(G); // assign the given G
+  IL.set_lambda(lambda); 
+  IL.EvalOmegas(); // calculate omegas
+  VectorXd omegasnew = IL.get_omegas(); // get omegas
   return omegasnew;
 }
 
 // Calculate logEL given omegas
-// [[Rcpp::export(".logEL")]]
-double logEL(Eigen::VectorXd omegas, bool support) {
-  int nObs = omegas.size();
-  el::InnerEL IL(nObs,1);
-  IL.setOpts(support);
-  IL.setOmegas(omegas); 
-  double logel = IL.logEL();
-  return logel; 
+// [[Rcpp::export(".LogEL")]]
+double LogEL(Eigen::VectorXd omegas, bool support) {
+  int n_obs = omegas.size();
+  el::InnerEL IL(n_obs,1);
+  IL.set_opts(support);
+  IL.set_omegas(omegas); 
+  double log_el = IL.LogEL();
+  return log_el; 
 }
 
