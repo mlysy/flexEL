@@ -38,83 +38,84 @@ namespace el {
     
   private:
     
-    int nObs_; 
-    int nEqs_;
+    // dim of G_ matrix
+    int n_obs_; // number of columns
+    int n_eqs_; // number of rows
     
-    // constants for logstar
-    double trunc_, aa_, bb_, cc_; //constants in logstar functions
+    // constants for LogStar
+    double trunc_, aa_, bb_, cc_; //constants in LogStar functions
   
-    // placeholders for lambdaNR
+    // placeholders for LambdaNR
     MatrixXd G_; // G matrix for the estimating equations
-    MatrixXd GUsed_;
+    MatrixXd G_used_;
     VectorXd lambda0_; // initial lambda in Newton-Raphson iterations
-    VectorXd lambdaOld_; // old lambda in Newton-Raphson iterations
-    VectorXd lambdaNew_; // new lambda in Newton-Raphson iterations
+    VectorXd lambda_old_; // old lambda in Newton-Raphson iterations
+    VectorXd lambda_new_; // new lambda in Newton-Raphson iterations
     VectorXd omegas_; //  empirical distribution
     MatrixXd GGt_; //  G times G transpose
-    MatrixXd GGtUsed_;
+    MatrixXd GGt_used_;
     VectorXd Glambda_; // G times lambda
     ArrayXd Gl11_; // values of omegas before standardization
     VectorXd Q1_; // 1st derivative of the objective function
     MatrixXd Q2_; // 2nd derivative of the objective function
     LDLT<MatrixXd> Q2ldlt_; // robust Cholesky decomposition of Q2
-    VectorXd rho_; // placeholder in lambdaNR
-    VectorXd relErr_; //relative error
+    VectorXd rho_; // placeholder in LambdaNR
+    VectorXd rel_err_; //relative error
     
-    // tolerance values for lambdaNR and support correction
-    int maxIter_; // maximum number of iterations
-    double relTol_; // relative tolerance
-    bool support_; // whether do support correction or not
-    double supa_; // tuning parameter for support currection
+    // tolerance values for LambdaNR and support correction
+    int max_iter_; // maximum number of iterations
+    double rel_tol_; // relative tolerance
+    bool supp_; // whether do support correction or not
+    double supp_a_; // tuning parameter for support currection
 
     // for support modification
-    int nObs1_; // nObs1_ = nObs_+1: for initial space allocation
-    int nObs2_; // nObs2_ = nObs_+support: used nObs_ in calculation
+    int n_obs1_; // n_obs1_ = n_obs_+1: for initial space allocation
+    int n_obs2_; // n_obs2_ = n_obs_+support: used n_obs_ in calculation
     
     // maximum relative error in lambda
-    double maxRelErr();
-    // double maxRelErr(const Ref<const VectorXd>& lambdaNew,
+    double MaxRelErr();
+    // double MaxRelErr(const Ref<const VectorXd>& lambdaNew,
     //                  const Ref<const VectorXd>& lambdaOld);
     
-    // logstar and its derivatives for the EL dual problem
-    double logstar(double x); // A support-refined log function
-    double logstar1(double x); // First derivative of logstar
-    double logstar2(double x); // Second derivative of logstar
+    // LogStar and its derivatives for the EL dual problem
+    double LogStar(double x); // A support-refined log function
+    double LogStar1(double x); // First derivative of LogStar
+    double LogStar2(double x); // Second derivative of LogStar
     
   public:
     
     // constructors
     InnerEL();
-    InnerEL(int nObs, int nEqs);
+    InnerEL(int n_obs, int n_eqs);
     
     // set options functions
-    void setOpts(const int& maxIter, const double& relTol,
-                 const bool& support, const double& supa, 
+    void set_opts(const int& max_iter, const double& rel_tol,
+                 const bool& supp, const double& supp_a, 
                  const Ref<const VectorXd>& lambda0);
-    void setOpts(const int& maxIter, const double& relTol,
-                 const bool& support, 
+    void set_opts(const int& max_iter, const double& rel_tol,
+                 const bool& supp, 
                  const Ref<const VectorXd>& lambda0);
-    void setOpts(const int& maxIter, const double& relTol,
-                 const bool& support);
-    void setOpts(const int& maxIter, const double& relTol,
-                 const bool& support, const double& supa);
-    void setOpts(const bool& support, const double& supa);
-    void setOpts(const bool& support);
-    // void setTol(const int& maxIter, const double& relTol);
+    void set_opts(const int& max_iter, const double& rel_tol,
+                 const bool& supp);
+    void set_opts(const int& max_iter, const double& rel_tol,
+                 const bool& supp, const double& supp_a);
+    void set_opts(const bool& supp, const double& supp_a);
+    void set_opts(const bool& supp);
+    // void setTol(const int& max_iter, const double& rel_tol);
     
     // core caculations
-    void lambdaNR(int& nIter, double& maxErr); // Note: relTol and maxIter must be set before calling
-    void evalOmegas(); // empirical distribution
-    double logEL(); // log empirical likelihood
+    void LambdaNR(int& n_iter, double& max_iter); // Note: rel_tol and max_iter must be set before calling
+    void EvalOmegas(); // empirical distribution
+    double LogEL(); // log empirical likelihood
     
     // set and get functions 
-    void setLambda(const Ref<const VectorXd>& lambda); // assigned to lambdaNew
-    void setOmegas(const Ref<const VectorXd>& omegas); 
-    void setG(const Ref<const MatrixXd>& G);
-    VectorXd getLambda(); 
-    VectorXd getOmegas();
-    MatrixXd getG(); // TODO: is it better to return a reference?..
-    Ref<MatrixXd> getGref();
+    void set_lambda(const Ref<const VectorXd>& lambda); // assigned to lambdaNew
+    void set_omegas(const Ref<const VectorXd>& omegas); 
+    void set_G(const Ref<const MatrixXd>& G);
+    VectorXd get_lambda(); 
+    VectorXd get_omegas();
+    MatrixXd get_G(); // TODO: is it better to return a reference?..
+    Ref<MatrixXd> get_ref_G();
     
     // nBet, nGam and nQts are FOR THE MCMC SAMPELERS
     // using ELModel::nBet;
@@ -122,30 +123,31 @@ namespace el {
     // using ELModel::nQts;
     // // posterior samplers:
     // void mwgStep(VectorXd &thetaCur, const int &idx, const double &mwgsd,
-    //              bool &accept, double &logELCur);
+    //              bool &accept, double &LogELCur);
     // MatrixXd postSample(int nsamples, int nburn, MatrixXd ThetaInit,
     //                     const Ref<const MatrixXd>& MwgSds, 
     //                     MatrixXd &RvDoMcmc, MatrixXd &Paccept);
     // MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit,
     //                          double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
   };
-}
+
+} // namespace el
 
 /* --------------------------------------------------------------------------- */
 
 // private functions
 
 // maximum relative error in lambda
-inline double el::InnerEL::maxRelErr() {
+inline double el::InnerEL::MaxRelErr() {
   // TODO: added for numerical stability, what is a good tolerance to use ?
-  if ((lambdaNew_ - lambdaOld_).array().abs().maxCoeff() < 1e-10) return(0);
+  if ((lambda_new_ - lambda_old_).array().abs().maxCoeff() < 1e-10) return(0);
   
-  relErr_ = ((lambdaNew_ - lambdaOld_).array() / (lambdaNew_ + lambdaOld_).array()).abs();
-  return(relErr_.maxCoeff());
+  rel_err_ = ((lambda_new_ - lambda_old_).array() / (lambda_new_ + lambda_old_).array()).abs();
+  return(rel_err_.maxCoeff());
 }
 
-// logstar
-inline double el::InnerEL::logstar(double x) {
+// LogStar
+inline double el::InnerEL::LogStar(double x) {
   if(x >= trunc_) {
     return(log(x));
   } else {
@@ -153,8 +155,8 @@ inline double el::InnerEL::logstar(double x) {
   }
 }
 
-// d logstar(x)/dx
-inline double el::InnerEL::logstar1(double x) {
+// d LogStar(x)/dx
+inline double el::InnerEL::LogStar1(double x) {
   if(x >= trunc_) {
     return(1.0/x);
   } 
@@ -164,8 +166,8 @@ inline double el::InnerEL::logstar1(double x) {
   }
 }
 
-// d^2 logstar(x)/dx^2
-inline double el::InnerEL::logstar2(double x) {
+// d^2 LogStar(x)/dx^2
+inline double el::InnerEL::LogStar2(double x) {
   if(x >= trunc_) {
     return(-1.0/(x*x));
   } else {
@@ -187,36 +189,36 @@ inline el::InnerEL::InnerEL(){}
 /**
  * @brief Constructor for InnerEL with dimensions of G matrix as inputs for memory allocation.
  * 
- * @param nObs    Number of observations.
- * @param nEqs    Number of estimating equations.
+ * @param n_obs    Number of observations.
+ * @param n_eqs    Number of estimating equations.
  */
-inline el::InnerEL::InnerEL(int nObs, int nEqs) {
+inline el::InnerEL::InnerEL(int n_obs, int n_eqs) {
   // assign internal values
-  nObs_ = nObs;
-  nEqs_ = nEqs;
+  n_obs_ = n_obs;
+  n_eqs_ = n_eqs;
   // support correction
-  support_ = false;
-  nObs1_ = nObs_+1;
-  nObs2_ = nObs_+support_;
+  supp_ = false;
+  n_obs1_ = n_obs_+1;
+  n_obs2_ = n_obs_+supp_;
   // initialization of constants
-  trunc_ = 1.0 / nObs_;
-  aa_ = -.5 * nObs_*nObs_;
-  bb_ = 2.0 * nObs_;
-  cc_ = -1.5 - log(nObs_);
+  trunc_ = 1.0 / n_obs_;
+  aa_ = -.5 * n_obs_*n_obs_;
+  bb_ = 2.0 * n_obs_;
+  cc_ = -1.5 - log(n_obs_);
   // space allocation
-  omegas_ = VectorXd::Zero(nObs1_).array() + 1.0/(double)nObs1_; // Initialize to 1/nObs_
-  G_ = MatrixXd::Zero(nEqs_,nObs1_); // NEW: JAN 1
-  GGt_ = MatrixXd::Zero(nEqs_,nObs1_*nEqs_);
-  lambda0_ = VectorXd::Zero(nEqs_); // default initial value of lambda
-  lambdaOld_ = VectorXd::Zero(nEqs_); // Initialize to all 0's
-  lambdaNew_ = VectorXd::Zero(nEqs_);
-  Q1_ = VectorXd::Zero(nEqs_);
-  Q2_ = MatrixXd::Zero(nEqs_,nEqs_);
-  Glambda_ = VectorXd::Zero(nObs1_);
-  Gl11_ = ArrayXd::Zero(nObs1_);
-  rho_ = VectorXd::Zero(nObs1_);
-  relErr_ = VectorXd::Zero(nEqs_);
-  Q2ldlt_.compute(MatrixXd::Identity(nEqs_,nEqs_));
+  omegas_ = VectorXd::Zero(n_obs1_).array() + 1.0/(double)n_obs1_; // Initialize to 1/n_obs_
+  G_ = MatrixXd::Zero(n_eqs_,n_obs1_); // NEW: JAN 1
+  GGt_ = MatrixXd::Zero(n_eqs_,n_obs1_*n_eqs_);
+  lambda0_ = VectorXd::Zero(n_eqs_); // default initial value of lambda
+  lambda_old_ = VectorXd::Zero(n_eqs_); // Initialize to all 0's
+  lambda_new_ = VectorXd::Zero(n_eqs_);
+  Q1_ = VectorXd::Zero(n_eqs_);
+  Q2_ = MatrixXd::Zero(n_eqs_,n_eqs_);
+  Glambda_ = VectorXd::Zero(n_obs1_);
+  Gl11_ = ArrayXd::Zero(n_obs1_);
+  rho_ = VectorXd::Zero(n_obs1_);
+  rel_err_ = VectorXd::Zero(n_eqs_);
+  Q2ldlt_.compute(MatrixXd::Identity(n_eqs_,n_eqs_));
 }
 
 // set options functions
@@ -224,84 +226,84 @@ inline el::InnerEL::InnerEL(int nObs, int nEqs) {
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param maxIter    Maximum number of iterations.
- * @param relTol     Relative tolerance.
+ * @param max_iter    Maximum number of iterations.
+ * @param rel_tol     Relative tolerance.
  * @param support    Whether to have support correction.
- * @param supa       Tuning parameter for support correction (referred as "a" in chen-et-al08).
+ * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  * @param lambda0    Initial value for lambda.
  */
-inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
-                                          const bool& support, const double& supa, 
+inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+                                          const bool& supp, const double& supp_a, 
                                           const Ref<const VectorXd>& lambda0) {
-  maxIter_ = maxIter;
-  relTol_ = relTol;
-  support_ = support;
-  supa_ = supa;
-  nObs2_ = nObs_+support_;
+  max_iter_ = max_iter;
+  rel_tol_ = rel_tol;
+  supp_ = supp;
+  supp_a_ = supp_a;
+  n_obs2_ = n_obs_+supp_;
   lambda0_ = lambda0;
 }
 
 /**
  * @brief Set tolerance values for NR, support correction option, and initial value of lambda.
  * 
- * @param maxIter    Maximum number of iterations.
- * @param relTol     Relative tolerance.
+ * @param max_iter    Maximum number of iterations.
+ * @param rel_tol     Relative tolerance.
  * @param lambda0    Initial value for lambda.
  */
-inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
-                                          const bool& support, 
+inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+                                          const bool& supp, 
                                           const Ref<const VectorXd>& lambda0) {
-  maxIter_ = maxIter;
-  relTol_ = relTol;
-  support_ = support;
-  supa_ = std::max(1.0,0.5*log(nObs_));
-  nObs2_ = nObs_+support_;
+  max_iter_ = max_iter;
+  rel_tol_ = rel_tol;
+  supp_ = supp;
+  supp_a_ = std::max(1.0,0.5*log(n_obs_));
+  n_obs2_ = n_obs_+supp_;
   lambda0_ = lambda0;
 }
 
 /**
  * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
  * 
- * @param maxIter    Maximum number of iterations.
- * @param relTol     Relative tolerance.
+ * @param max_iter    Maximum number of iterations.
+ * @param rel_tol     Relative tolerance.
  * @param support    Whether to have support correction.
- * @param supa       Tuning parameter for support correction (referred as "a" in chen-et-al08).
+ * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
-                                          const bool& support, const double& supa) {
-  maxIter_ = maxIter;
-  relTol_ = relTol;
-  support_ = support;
-  supa_ = supa;
-  nObs2_ = nObs_+support_;
+inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+                                          const bool& supp, const double& supp_a) {
+  max_iter_ = max_iter;
+  rel_tol_ = rel_tol;
+  supp_ = supp;
+  supp_a_ = supp_a;
+  n_obs2_ = n_obs_+supp_;
 }
 
 /**
  * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
  * 
- * @param maxIter    Maximum number of iterations.
- * @param relTol     Relative tolerance.
+ * @param max_iter    Maximum number of iterations.
+ * @param rel_tol     Relative tolerance.
  * @param support    Whether to have support correction.
  */
-inline void el::InnerEL::setOpts(const int& maxIter, const double& relTol, 
-                                          const bool& support) {
-  maxIter_ = maxIter;
-  relTol_ = relTol;
-  support_ = support;
-  supa_ = std::max(1.0,0.5*log(nObs_));
-  nObs2_ = nObs_+support_;
+inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+                                          const bool& supp) {
+  max_iter_ = max_iter;
+  rel_tol_ = rel_tol;
+  supp_ = supp;
+  supp_a_ = std::max(1.0,0.5*log(n_obs_));
+  n_obs2_ = n_obs_+supp_;
 }
 
 /**
  * @brief Set support correction option and tuning parameter only. 
  * 
  * @param support    Whether to have support correction.
- * @param supa       Tuning parameter for support correction (referred as "a" in chen-et-al08).
+ * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-inline void el::InnerEL::setOpts(const bool& support, const double& supa) {
-  support_ = support;
-  supa_ = supa;
-  nObs2_ = nObs_+support_;
+inline void el::InnerEL::set_opts(const bool& supp, const double& supp_a) {
+  supp_ = supp;
+  supp_a_ = supp_a;
+  n_obs2_ = n_obs_+supp_;
 }
 
 /**
@@ -309,82 +311,82 @@ inline void el::InnerEL::setOpts(const bool& support, const double& supa) {
  * 
  * @param support    Whether to have support correction.
  */
-inline void el::InnerEL::setOpts(const bool& support) {
-  support_ = support;
-  supa_ = std::max(1.0,0.5*log(nObs_));
-  nObs2_ = nObs_+support_;
+inline void el::InnerEL::set_opts(const bool& supp) {
+  supp_ = supp;
+  supp_a_ = std::max(1.0,0.5*log(n_obs_));
+  n_obs2_ = n_obs_+supp_;
 }
 
 /**
  * @brief Find the optimal lambda by a Newton-Raphson algorithm.
  * 
- * @param[out] nIter    Number of iterations to achieve convergence.
- * @param[out] maxErr   Maximum relative error among entires in lambda at the last step.
+ * @param[out] n_iter    Number of iterations to achieve convergence.
+ * @param[out] max_iter   Maximum relative error among entires in lambda at the last step.
  */
-inline void el::InnerEL::lambdaNR(int& nIter, double& maxErr) {
+inline void el::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
   
-  lambdaOld_ = lambda0_; // set to initial value
-  lambdaNew_.fill(0.0); // may not be needed here..
+  lambda_old_ = lambda0_; // set to initial value
+  lambda_new_.fill(0.0); // may not be needed here..
   
   // Note: these two cannot be preallocate untill `support` is set
-  GGtUsed_ = GGt_.block(0,0,nEqs_,nObs2_*nEqs_);
-  GUsed_ = G_.block(0,0,nEqs_,nObs2_);
+  GGt_used_ = GGt_.block(0,0,n_eqs_,n_obs2_*n_eqs_);
+  G_used_ = G_.block(0,0,n_eqs_,n_obs2_);
   
-  block_outer(GGtUsed_,GUsed_);
+  block_outer(GGt_used_,G_used_);
   
   // newton-raphson loop
   int ii, jj;
-  for(ii=0; ii<maxIter_; ii++) {
+  for(ii=0; ii<max_iter_; ii++) {
     // Q1 and Q2
-    Glambda_.noalias() = lambdaOld_.transpose() * GUsed_;
+    Glambda_.noalias() = lambda_old_.transpose() * G_used_;
     Glambda_= 1.0 - Glambda_.array();
     Q2_.fill(0.0);
-    for(jj=0; jj<nObs2_; jj++) {
-      rho_(jj) = logstar1(Glambda_(jj));
-      Q2_ += logstar2(Glambda_(jj)) * GGtUsed_.block(0,jj*nEqs_,nEqs_,nEqs_);
+    for(jj=0; jj<n_obs2_; jj++) {
+      rho_(jj) = LogStar1(Glambda_(jj));
+      Q2_ += LogStar2(Glambda_(jj)) * GGt_used_.block(0,jj*n_eqs_,n_eqs_,n_eqs_);
     }
     // update lambda
-    Q1_ = -GUsed_ * rho_;
+    Q1_ = -G_used_ * rho_;
     Q2ldlt_.compute(Q2_);
-    lambdaNew_.noalias() = lambdaOld_ - Q2ldlt_.solve(Q1_);
-    maxErr = maxRelErr();
-    if (maxErr < relTol_) {
+    lambda_new_.noalias() = lambda_old_ - Q2ldlt_.solve(Q1_);
+    max_iter = MaxRelErr();
+    if (max_iter < rel_tol_) {
       break;
     }
-    lambdaOld_ = lambdaNew_; // complete cycle
+    lambda_old_ = lambda_new_; // complete cycle
   }
-  nIter = ii; // output lambda and also nIter and maxErr
+  n_iter = ii; // output lambda and also n_iter and max_iter
   return;
 }
 
 /**
  * @brief Evaluate omegas based on G and lambdaNew.
  */
-inline void el::InnerEL::evalOmegas() {
+inline void el::InnerEL::EvalOmegas() {
   // G and lambdaNew must have been assigned
-  if (lambdaNew_ != lambdaNew_) { // if lambdaNew is NaN 
-    for (int ii=0; ii<nObs2_; ii++) {
+  if (lambda_new_ != lambda_new_) { // if lambdaNew is NaN 
+    for (int ii=0; ii<n_obs2_; ii++) {
       omegas_(ii) = std::numeric_limits<double>::quiet_NaN();
     }
   }
   else {
-    // if (support_) adj_G(G_,supa_);
-    MatrixXd GUsed_ = G_.block(0,0,nEqs_,nObs2_); // TODO: new allocation right now..
-    Glambda_.head(nObs2_).noalias() = lambdaNew_.transpose() * GUsed_;
-    Gl11_.head(nObs2_) = 1.0/(1.0-Glambda_.head(nObs2_).array());
-    omegas_.head(nObs2_).array() = Gl11_.head(nObs2_).array() / Gl11_.head(nObs2_).sum(); // in fact, Gl11.sum() should be equal to nObs
+    // if (supp_) adj_G(G_,supp_a_);
+    MatrixXd G_used_ = G_.block(0,0,n_eqs_,n_obs2_); // TODO: new allocation right now..
+    Glambda_.head(n_obs2_).noalias() = lambda_new_.transpose() * G_used_;
+    Gl11_.head(n_obs2_) = 1.0/(1.0-Glambda_.head(n_obs2_).array());
+    omegas_.head(n_obs2_).array() = Gl11_.head(n_obs2_).array() / Gl11_.head(n_obs2_).sum(); // in fact, Gl11.sum() should be equal to n_obs
   }
 }
 
 /**
- * @brief Calculate logEL using omegas.
+ * @brief Calculate LogEL using omegas.
  * 
  * @return log empirical likelihood.
  */
-inline double el::InnerEL::logEL() {
+inline double el::InnerEL::LogEL() {
   // if omegas are NaN, return -Inf
-  if (omegas_.head(nObs2_) != omegas_.head(nObs2_)) return -INFINITY;
-  else return(omegas_.head(nObs2_).array().log().sum());
+  if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) return -INFINITY;
+  else return(omegas_.head(n_obs2_).array().log().sum());
 }
 
 // setters
@@ -392,24 +394,24 @@ inline double el::InnerEL::logEL() {
 /**
  * @brief Set the value of lambda (e.g. to be used directly to calculate omegas).
  */
-inline void el::InnerEL::setLambda(const Ref<const VectorXd>& lambda) {
-  // lambdaOld_ = lambda;
-  lambdaNew_ = lambda;
+inline void el::InnerEL::set_lambda(const Ref<const VectorXd>& lambda) {
+  // lambda_old_ = lambda;
+  lambda_new_ = lambda;
 }
 
 /**
  * @brief Set the value of omegas (e.g. to be used directly to calculate log EL).
  */
-inline void el::InnerEL::setOmegas(const Ref<const VectorXd>& omegas) {
-  omegas_.head(nObs2_) = omegas; 
+inline void el::InnerEL::set_omegas(const Ref<const VectorXd>& omegas) {
+  omegas_.head(n_obs2_) = omegas; 
 }
 
 /**
  * @brief Set the value of G (e.g. to be used directly to calculate lambda or log EL).
  */
-inline void el::InnerEL::setG(const Ref<const MatrixXd>& G) {
-  G_.block(0,0,nEqs_,nObs_) = G;
-  if (support_) adj_G(G_,supa_);
+inline void el::InnerEL::set_G(const Ref<const MatrixXd>& G) {
+  G_.block(0,0,n_eqs_,n_obs_) = G;
+  if (supp_) adj_G(G_,supp_a_);
 }
 
 // getters
@@ -417,29 +419,29 @@ inline void el::InnerEL::setG(const Ref<const MatrixXd>& G) {
 /**
  * @brief Get the value of lambda.
  */
-inline VectorXd el::InnerEL::getLambda() {
-  return(lambdaNew_);
+inline VectorXd el::InnerEL::get_lambda() {
+  return(lambda_new_);
 }
 
 /**
  * @brief Get the value of omegas.
  */
-inline VectorXd el::InnerEL::getOmegas() {
-    return(omegas_.head(nObs2_));
+inline VectorXd el::InnerEL::get_omegas() {
+    return(omegas_.head(n_obs2_));
 }
 
 /**
  * @brief Get the value of G.
  */
-inline MatrixXd el::InnerEL::getG() {
-  return(G_.block(0,0,nEqs_,nObs2_));
+inline MatrixXd el::InnerEL::get_G() {
+  return(G_.block(0,0,n_eqs_,n_obs2_));
 }
 
 /**
  * @brief Get the reference of G.
  */
-inline Ref<MatrixXd> el::InnerEL::getGref() {
-  return Ref<MatrixXd>(G_.block(0,0,nEqs_,nObs2_));
+inline Ref<MatrixXd> el::InnerEL::get_ref_G() {
+  return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_));
 }
 
 /* TAKE OUT ALL MCMC SAMPLERS FOR NOW:
@@ -456,16 +458,16 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
   MatrixXd ThetaNew = ThetaOld;
   MatrixXd ThetaProp = ThetaOld;
   ELModel::evalG(ThetaOld);
-  int nIter;
-  double maxErr;
-  lambdaNR(nIter, maxErr);
+  int n_iter;
+  double max_iter;
+  LambdaNR(n_iter, max_iter);
   // TODO: what if not converged ?
-  if (nIter == maxIter && maxErr > relTol) {
+  if (n_iter == max_iter && max_iter > rel_tol) {
     std::cout << "ThetaInit not valid." << std::endl;
     // return NULL;
   }
-  evalOmegas();
-  double logELOld = logEL(); 
+  EvalOmegas();
+  double logELOld = LogEL(); 
   double logELProp;
   bool satisfy;
   double u;
@@ -485,8 +487,8 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
           // check if proposed Theta satisfies the constraint
           satisfy = false;
           ELModel::evalG(ThetaProp); // NEW: change G with ThetaProp
-          lambdaNR(nIter, maxErr);
-          if (nIter < maxIter) satisfy = true;
+          LambdaNR(n_iter, max_iter);
+          if (n_iter < max_iter) satisfy = true;
           // if does not satisfy, keep the old Theta
           if (satisfy == false) {
             go_next = true; // break out two loops
@@ -495,7 +497,7 @@ inline MatrixXd InnerEL<ELModel>::postSample(int nsamples, int nburn,
           // if does satisfy
           u = R::unif_rand();
           // use the lambda calculate just now to get the logEL for Prop
-          // to avoid an extra call of lambdaNR
+          // to avoid an extra call of LambdaNR
           VectorXd logomegahat = 1/(1-(lambdaNew.transpose()*G).array());
           logomegahat = log(logomegahat.array()) - log(logomegahat.sum());
           // VectorXd logomegahat = log(1/(1-(lambdaNew.transpose()*ELModel::G).array())) -
@@ -554,11 +556,11 @@ inline void InnerEL<ELModel>::mwgStep(VectorXd &thetaCur,
                    thetaProp.segment(nBet+nGam,1)(0),
                    thetaProp.tail(nQts));
   }
-  int nIter;
-  double maxErr;
-  lambdaNR(nIter, maxErr);
+  int n_iter;
+  double max_iter;
+  LambdaNR(n_iter, max_iter);
   bool satisfy = false;
-  if (nIter < maxIter || maxErr <= relTol) satisfy = true;
+  if (n_iter < max_iter || max_iter <= rel_tol) satisfy = true;
   // if does not satisfy, keep the old theta
   if (satisfy == false) return;
   // if does satisfy, might accept new theta
@@ -607,15 +609,15 @@ inline MatrixXd InnerEL<ELModel>::postSampleAdapt(int nsamples, int nburn,
                    thetaCur.tail(nQts));
     // std::cout << "G = \n" << G << std::endl;
   }
-  int nIter;
-  double maxErr;
-  lambdaNR(nIter, maxErr);
+  int n_iter;
+  double max_iter;
+  LambdaNR(n_iter, max_iter);
   // TODO: throw an error ??
-  if (nIter == maxIter && maxErr > relTol) {
+  if (n_iter == max_iter && max_iter > rel_tol) {
     std::cout << "thetaInit not valid." << std::endl;
   }
-  evalOmegas();
-  double logELCur = logEL();
+  EvalOmegas();
+  double logELCur = LogEL();
   // MCMC loop
   for(int ii=-nburn; ii<nsamples; ii++) {
     for(int jj=0; jj<nThe; jj++) {
