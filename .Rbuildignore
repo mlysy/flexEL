@@ -1,0 +1,3 @@
+^man-roxygen$      # Templates used in roxygen documentation
+^examples$         # Examples used in roxygen documentation
+src/.gitignore
