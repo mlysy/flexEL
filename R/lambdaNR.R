@@ -8,19 +8,19 @@
 #' @details The inner-loop optimization of EL is ...
 #' @export lambdaNR
 lambdaNR <- function(G, max_iter = 100, rel_tol = 1e-7, support = FALSE, verbose = FALSE) { 
-  lambda <- .lambdaNR(G = t(G), 
-                      maxIter = max_iter, relTol = rel_tol, support = support, 
+  lambda <- .LambdaNR(G = t(G), 
+                      max_iter = max_iter, relTol = rel_tol, support = support, 
                       verbose = verbose)
   return(lambda)
 }
 
-# lambdaNR <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
+# LambdaNR <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
 #     # check whether weights is given and call the corresponding NR funciton
 #     if (missing(weights)) {
-#         ans <- .lambdaNR(G = t(G), maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+#         ans <- .LambdaNR(G = t(G), max_iter = max_iter, relTol = rel_tol, verbose = verbose)
 #     }
 #     else {
-#         ans <- .lambdaNRC(G = t(G), weights, maxIter = max_iter, relTol = rel_tol, verbose = verbose)
+#         ans <- .LambdaNRC(G = t(G), weights, max_iter = max_iter, relTol = rel_tol, verbose = verbose)
 #     }
 #     # check convergence of NR
 #     if(ans$convergence) {

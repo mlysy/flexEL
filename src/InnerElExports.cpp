@@ -28,7 +28,7 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   bool not_conv;
   // IL.setTol(max_iter, rel_tol);
   IL.LambdaNR(n_iter, max_err);
-  VectorXd lambda = IL.getLambda(); // output (could be not converged)
+  VectorXd lambda = IL.get_lambda(); // output (could be not converged)
   // check convergence
   not_conv = (n_iter == max_iter) && (max_err > rel_tol);
   if(verbose) {
