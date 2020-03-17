@@ -1,16 +1,16 @@
 #' Evaluate the G matrix for smoothed quantile regression location-scale model
 #'
-#' @param y Length-\code{nObs} vector of responses.
-#' @param X \code{nObs x nBet} matrix of covariates.
-#' @param Z \code{nObs x nGam} matrix of covariates.
+#' @param y Length-\code{n_obs} vector of responses.
+#' @param X \code{n_obs x n_bet} matrix of covariates.
+#' @param Z \code{n_obs x n_gam} matrix of covariates.
 #' @param alphas a vector of quantile levels.
-#' @param Beta \code{nBet x nQts} matrix, each column is a vector of coefficients in location function.
-#' @param Gamma \code{nGam x nQts} matrix, each column is a vector of coefficients in scale function.
+#' @param Beta \code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.
+#' @param Gamma \code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.
 #' @param Nu Length-\code{numNu} vector of initial value for the chain.
 #' @param s A positive scalar as smoothing parameter.
 #' @return G matrix for location-scale quantile regression model. 
-#' @export qrls.evalG.smooth
-qrls.evalG.smooth <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 10) { 
+#' @export qrls_evalG_smooth
+qrls_evalG_smooth <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 10) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
@@ -21,6 +21,6 @@ qrls.evalG.smooth <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 10) {
     stop("Parameters must be in matrix form when alphas has more than one entry.")
   }
   alpha <- c(length(alphas), alphas) 
-  G <- .QuantRegLS_evalGSmooth(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu, sp)
+  G <- .QuantRegLSEvalGSmooth(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu, sp)
   return(t(G))
 }

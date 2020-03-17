@@ -6,7 +6,7 @@
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param abs_tol Absolute tolerance of Newton-Raphson convergence.
 #' @param verbose Display number of steps and tolerance criterion when algorithm terminates.
-#' @return Length-\code{nEq} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.
+#' @return Length-\code{n_eqs} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.
 #' @details The inner-loop optimization of EL is ...
 #' @export omega_hat_EM_smooth
 omega_hat_EM_smooth <- function(G, deltas, epsilons, sp=10, max_iter = 100, 

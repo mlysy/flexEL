@@ -9,7 +9,7 @@
 #include "InnerEL.h"
 // #include "InnerELC.h"
 #include "QuantRegModel.h"
-#include "dVecTobArr.h"
+#include "dvec_to_barr.h"
 
 //[[Rcpp::depends("RcppEigen")]]
 
@@ -17,33 +17,33 @@ using namespace Rcpp;
 using namespace Eigen;
 
 // double tau
-// [[Rcpp::export(".QuantReg_evalG")]]
-Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X,
+// [[Rcpp::export(".QuantRegEvalG")]]
+Eigen::MatrixXd QuantRegEvalG(Eigen::VectorXd y, Eigen::MatrixXd X,
                                Eigen::VectorXd tauArr, Eigen::VectorXd beta) {
   QuantRegModel QR(y,X,tauArr.data());
-  el::InnerEL EL(QR.getnObs(), QR.getnEqs());
-  QR.evalG(EL.getGref(), beta);
-  return(EL.getG()); 
+  el::InnerEL EL(QR.get_n_obs(), QR.get_n_eqs());
+  QR.EvalG(EL.get_ref_G(), beta);
+  return(EL.get_G()); 
 }
 
-// [[Rcpp::export(".QuantRegLS_evalG")]]
-Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
+// [[Rcpp::export(".QuantRegLSEvalG")]]
+Eigen::MatrixXd QuantRegLSEvalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                                  Eigen::VectorXd tauArr, Eigen::VectorXd beta, 
                                  Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu) {
   QuantRegModel QR(y,X,Z,tauArr.data());
-  el::InnerEL EL(QR.getnObs(), QR.getnEqs());
-  QR.evalG(EL.getGref(),beta,gamma,sig2,Nu);
-  return(EL.getG()); 
+  el::InnerEL EL(QR.get_n_obs(), QR.get_n_eqs());
+  QR.EvalG(EL.get_ref_G(),beta,gamma,sig2,Nu);
+  return(EL.get_G()); 
 }
 
-// [[Rcpp::export(".QuantRegLS_evalGSmooth")]]
-Eigen::MatrixXd QuantRegLS_evalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
+// [[Rcpp::export(".QuantRegLSEvalGSmooth")]]
+Eigen::MatrixXd QuantRegLSEvalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, 
                                        Eigen::VectorXd tauArr, Eigen::VectorXd beta, 
                                        Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s) {
   QuantRegModel QR(y,X,Z,tauArr.data());
-  el::InnerEL EL(QR.getnObs(), QR.getnEqs());
-  QR.evalGSmooth(EL.getGref(),beta,gamma,sig2,Nu,s);
-  return(EL.getG()); 
+  el::InnerEL EL(QR.get_n_obs(), QR.get_n_eqs());
+  QR.EvalGSmooth(EL.get_ref_G(),beta,gamma,sig2,Nu,s);
+  return(EL.get_G()); 
 }
 
 // // [[Rcpp::export(".rho1.smooth")]]

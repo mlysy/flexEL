@@ -9,7 +9,7 @@
 #include "InnerEL.h"
 // #include "InnerELC.h"
 #include "MeanRegModel.h"
-#include "dVecTobArr.h"
+#include "dvec_to_barr.h"
 
 //[[Rcpp::depends("RcppEigen")]]
 
@@ -18,24 +18,24 @@ using namespace Eigen;
 
 /* ------ G matrix construction ------ */
 
-// [[Rcpp::export(".MeanReg_evalG")]]
+// [[Rcpp::export(".MeanRegEvalG")]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
   MeanRegModel MR(y, X);
-  el::InnerEL EL(MR.getnObs(), MR.getnEqs());
-  MR.evalG(EL.getGref(), beta);
-  return(EL.getG());
+  el::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs());
+  MR.EvalG(EL.get_ref_G(), beta);
+  return(EL.get_G());
 }
 
-// [[Rcpp::export(".MeanRegLS_evalG")]]
-Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
+// [[Rcpp::export(".MeanRegLSEvalG")]]
+Eigen::MatrixXd MeanRegLS_EvalG(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, Eigen::MatrixXd Z,
                                 Eigen::VectorXd beta, Eigen::VectorXd gamma, 
                                 double sig2) {
   MeanRegModel MR(y, X, Z);
-  el::InnerEL EL(MR.getnObs(), MR.getnEqs());
-  MR.evalG(EL.getGref(), beta, gamma, sig2);
-  return(EL.getG());
+  el::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs());
+  MR.EvalG(EL.get_ref_G(), beta, gamma, sig2);
+  return(EL.get_G());
 }
 
 /* ------ posterior samplers ------ */
