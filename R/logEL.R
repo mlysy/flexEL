@@ -8,10 +8,10 @@
 #' @export logEL
 logEL <- function(omega, eps, delta, support = FALSE) {
   if (missing(eps) && missing(delta)) {
-    logel <- .logEL(omega, support)
+    logel <- .LogEL(omega, support)
   }
   else {
-    logel <- .logELC(omega,eps,delta,support)
+    logel <- .LogELC(omega,eps,delta,support)
   }
   return(logel)
 }

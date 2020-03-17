@@ -9,7 +9,7 @@
 #' @export lambdaNR
 lambdaNR <- function(G, max_iter = 100, rel_tol = 1e-7, support = FALSE, verbose = FALSE) { 
   lambda <- .LambdaNR(G = t(G), 
-                      max_iter = max_iter, relTol = rel_tol, support = support, 
+                      max_iter = max_iter, rel_tol = rel_tol, support = support, 
                       verbose = verbose)
   return(lambda)
 }
@@ -17,10 +17,10 @@ lambdaNR <- function(G, max_iter = 100, rel_tol = 1e-7, support = FALSE, verbose
 # LambdaNR <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) { 
 #     # check whether weights is given and call the corresponding NR funciton
 #     if (missing(weights)) {
-#         ans <- .LambdaNR(G = t(G), max_iter = max_iter, relTol = rel_tol, verbose = verbose)
+#         ans <- .LambdaNR(G = t(G), max_iter = max_iter, rel_tol = rel_tol, verbose = verbose)
 #     }
 #     else {
-#         ans <- .LambdaNRC(G = t(G), weights, max_iter = max_iter, relTol = rel_tol, verbose = verbose)
+#         ans <- .LambdaNRC(G = t(G), weights, max_iter = max_iter, rel_tol = rel_tol, verbose = verbose)
 #     }
 #     # check convergence of NR
 #     if(ans$convergence) {
