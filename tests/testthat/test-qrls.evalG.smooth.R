@@ -28,7 +28,7 @@ test_that("qrls.evalG.smooth.R == qrls.evalG.smooth.cpp", {
     y <- c(X %*% beta + sqrt(sig2)*exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
     # checking G matrix from cpp and R
     sp <- sample(100,1)
-    G.cpp <- qrls.evalG.smooth(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
+    G.cpp <- qrls_evalG_smooth(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
     G.R <- qrls.evalG.smooth_R(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
     expect_equal(G.cpp, G.R)
   }

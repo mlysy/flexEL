@@ -15,7 +15,7 @@
 #include "sort_order.h"
 #include "ind_smooth.h" // for smoothed indicator function
 #include "block_outer.h"
-#include "adj_G.h" // for support correction
+#include "AdjG.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
@@ -288,7 +288,7 @@ inline el::InnerELC::InnerELC(int n_obs, int n_eqs) {
   epsilons_ = VectorXd::Zero(n_obs1_);
   eps_ord_ = VectorXi::Zero(n_obs1_);
   psoss_ = VectorXd::Zero(n_obs1_);
-  LogELs_ = ArrayXd::Zero(n_obs1_);
+  logels_ = ArrayXd::Zero(n_obs1_);
   lGq_ = VectorXd::Zero(n_obs1_);
 }
 
@@ -634,7 +634,7 @@ inline void el::InnerELC::EvalOmegasSmooth(const double s) {
   }
   int n_iter;
   double max_err;
-  double logelOld = logELSmooth(s);
+  double logelOld = LogELSmooth(s);
   double logel = logelOld;
   int ii;
   for(ii=0; ii<max_iter_; ii++) {
@@ -645,7 +645,7 @@ inline void el::InnerELC::EvalOmegasSmooth(const double s) {
     lGq_.head(n_obs2_) = ((lambda_new_.transpose() * G_.block(0,0,n_eqs_,n_obs2_)).array() + weights_.head(n_obs2_).sum()).transpose();
     omegas_.head(n_obs2_).array() = weights_.head(n_obs2_).array() / lGq_.head(n_obs2_).array();
     omegas_.head(n_obs2_).array() = omegas_.head(n_obs2_).array() / (omegas_.head(n_obs2_).array().sum()); // normalize
-    logel = logELSmooth(s);
+    logel = LogELSmooth(s);
     abs_err_ = abs(logel-logelOld);
     if (abs_err_ < abs_tol_) break;
     logelOld = logel;
@@ -665,7 +665,7 @@ inline void el::InnerELC::EvalOmegasSmooth(const double s) {
  * 
  * @param s        Tuning parameter for smoothing.
  */
-inline double el::InnerELC::logELSmooth(const double s) {
+inline double el::InnerELC::LogELSmooth(const double s) {
   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
   else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
   else {

@@ -25,7 +25,7 @@ test_that("mrls.evalG.R == mrls.evalG.cpp", {
     max_iter <- sample(c(2, 10, 100), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     # checking G matrix from cpp and R
-    G.cpp <- mrls.evalG(y,X,Z,beta,gamma,sig2)
+    G.cpp <- mrls_evalG(y,X,Z,beta,gamma,sig2)
     G.R <- mrls.evalG_R(y,X,Z,beta,gamma,sig2)
     expect_equal(G.R, G.cpp)
   }

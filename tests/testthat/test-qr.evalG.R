@@ -19,7 +19,7 @@ test_that("qr.evalG.R == qr.evalG.cpp", {
         alpha <- runif(1)
         y <- c(X %*% beta) + rnorm(n) # with N(0,1) error term
         # checking G matrix from cpp and R
-        G.cpp <- qr.evalG(y, X, alpha, beta)
+        G.cpp <- qr_evalG(y, X, alpha, beta)
         G.R <- qr.evalG_R(y, X, alpha, beta)
         expect_equal(G.cpp,G.R)
     }

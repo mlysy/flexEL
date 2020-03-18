@@ -5,71 +5,63 @@
     .Call(`_flexEL_adjG`, G, a)
 }
 
-.ind.smooth <- function(x, s) {
-    .Call(`_flexEL_indSmooth`, x, s)
+.EvalWeights <- function(deltas, omegas, epsilons, support) {
+    .Call(`_flexEL_EvalWeights`, deltas, omegas, epsilons, support)
 }
 
-.ind1.smooth <- function(x, s) {
-    .Call(`_flexEL_ind1Smooth`, x, s)
+.LambdaNRC <- function(G, weights, max_iter, rel_tol, support, verbose) {
+    .Call(`_flexEL_LambdaNRC`, G, weights, max_iter, rel_tol, support, verbose)
 }
 
-.evalWeights <- function(deltas, omegas, epsilons, support) {
-    .Call(`_flexEL_evalWeights`, deltas, omegas, epsilons, support)
+.OmegaHatEM <- function(omegas_init, G, deltas, epsilons, max_iter, rel_tol, abs_tol, support, verbose) {
+    .Call(`_flexEL_OmegaHatEM`, omegas_init, G, deltas, epsilons, max_iter, rel_tol, abs_tol, support, verbose)
 }
 
-.lambdaNRC <- function(G, weights, maxIter, relTol, support, verbose) {
-    .Call(`_flexEL_lambdaNRC`, G, weights, maxIter, relTol, support, verbose)
+.LogELC <- function(omegas, epsilons, deltas, support) {
+    .Call(`_flexEL_LogELC`, omegas, epsilons, deltas, support)
 }
 
-.omega.hat.EM <- function(omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, support, verbose) {
-    .Call(`_flexEL_omegaHatEM`, omegasInit, G, deltas, epsilons, maxIter, relTol, absTol, support, verbose)
+.LogELSmooth <- function(omegas, epsilons, deltas, s, support) {
+    .Call(`_flexEL_LogELSmooth`, omegas, epsilons, deltas, s, support)
 }
 
-.logELC <- function(omegas, epsilons, deltas, support) {
-    .Call(`_flexEL_logELC`, omegas, epsilons, deltas, support)
+.EvalWeightsSmooth <- function(deltas, omegas, epsilons, s, support) {
+    .Call(`_flexEL_EvalWeightsSmooth`, deltas, omegas, epsilons, s, support)
 }
 
-.logEL.smooth <- function(omegas, epsilons, deltas, s, support) {
-    .Call(`_flexEL_logELSmooth`, omegas, epsilons, deltas, s, support)
+.OmegaHatEMSmooth <- function(omegas_init, G, deltas, epsilons, s, max_iter, rel_tol, abs_tol, support, verbose) {
+    .Call(`_flexEL_OmegaHatEMSmooth`, omegas_init, G, deltas, epsilons, s, max_iter, rel_tol, abs_tol, support, verbose)
 }
 
-.evalWeights.smooth <- function(deltas, omegas, epsilons, s, support) {
-    .Call(`_flexEL_evalWeightsSmooth`, deltas, omegas, epsilons, s, support)
+.LambdaNR <- function(G, max_iter, rel_tol, support, verbose) {
+    .Call(`_flexEL_LambdaNR`, G, max_iter, rel_tol, support, verbose)
 }
 
-.omega.hat.EM.smooth <- function(omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, support, verbose) {
-    .Call(`_flexEL_omegaHatEMSmooth`, omegasInit, G, deltas, epsilons, s, maxIter, relTol, absTol, support, verbose)
+.OmegaHat <- function(G, lambda, support) {
+    .Call(`_flexEL_OmegaHat`, G, lambda, support)
 }
 
-.lambdaNR <- function(G, maxIter, relTol, support, verbose) {
-    .Call(`_flexEL_lambdaNR`, G, maxIter, relTol, support, verbose)
+.LogEL <- function(omegas, support) {
+    .Call(`_flexEL_LogEL`, omegas, support)
 }
 
-.omega.hat <- function(G, lambda, support) {
-    .Call(`_flexEL_omegaHat`, G, lambda, support)
-}
-
-.logEL <- function(omegas, support) {
-    .Call(`_flexEL_logEL`, omegas, support)
-}
-
-.MeanReg_evalG <- function(y, X, beta) {
+.MeanRegEvalG <- function(y, X, beta) {
     .Call(`_flexEL_MeanReg_evalG`, y, X, beta)
 }
 
-.MeanRegLS_evalG <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_flexEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
+.MeanRegLSEvalG <- function(y, X, Z, beta, gamma, sig2) {
+    .Call(`_flexEL_MeanRegLS_EvalG`, y, X, Z, beta, gamma, sig2)
 }
 
-.QuantReg_evalG <- function(y, X, tauArr, beta) {
-    .Call(`_flexEL_QuantReg_evalG`, y, X, tauArr, beta)
+.QuantRegEvalG <- function(y, X, tauArr, beta) {
+    .Call(`_flexEL_QuantRegEvalG`, y, X, tauArr, beta)
 }
 
-.QuantRegLS_evalG <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu) {
-    .Call(`_flexEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
+.QuantRegLSEvalG <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu) {
+    .Call(`_flexEL_QuantRegLSEvalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
 }
 
-.QuantRegLS_evalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu, s) {
-    .Call(`_flexEL_QuantRegLS_evalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
+.QuantRegLSEvalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu, s) {
+    .Call(`_flexEL_QuantRegLSEvalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
 }
 

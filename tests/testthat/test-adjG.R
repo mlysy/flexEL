@@ -12,8 +12,8 @@ test_that("adjG.R == adjR.cpp", {
     p <- sample(1:100,1)
     G <- matrix(rnorm(n*p), n, p)
     a <- abs(rnorm(1))
-    aG.R <- adjG_R(G,a)
     aG.cpp <- adjG(G,a)
+    aG.R <- adjG_R(G,a)
     expect_equal(aG.R, aG.cpp)
   }
 })

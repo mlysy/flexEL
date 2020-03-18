@@ -26,7 +26,7 @@ test_that("qrls.evalG.R == qrls.evalG.cpp", {
     # sig2 <- 1
     y <- c(X %*% beta + sqrt(sig2)*exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
     # checking G matrix from cpp and R
-    G.cpp <- qrls.evalG(y,X,Z,alpha,beta,gamma,sig2,nu)
+    G.cpp <- qrls_evalG(y,X,Z,alpha,beta,gamma,sig2,nu)
     G.R <- qrls.evalG_R(y,X,Z,alpha,beta,gamma,sig2,nu)
     expect_equal(G.cpp, G.R)
   }

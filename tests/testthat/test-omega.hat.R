@@ -21,7 +21,7 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     omegahat.R <- omega.hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     expect_equal(omegahat.cpp, omegahat.R)
   }
@@ -36,7 +36,7 @@ test_that("no censoring: omegahat.cpp is optimal", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+    omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
                               support = FALSE, verbose = FALSE)
     # check optimality by optim_proj if converged
     if (!any(is.nan(omegahat.cpp))) {
@@ -60,7 +60,7 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+    omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
                               support = TRUE, verbose = FALSE)
     omegahat.R <- omega.hat_R(G = adjG_R(G), max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     expect_equal(omegahat.cpp, omegahat.R)
@@ -100,7 +100,7 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat.cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
     omegahat.R <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
@@ -127,7 +127,7 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp (with support correctio
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat.cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, support = TRUE, verbose = FALSE)
     omegahat.R <- omega.hat.EM_R(adjG_R(G), deltas, epsilons, adjust = TRUE, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
@@ -165,7 +165,7 @@ test_that("under censoring: omegahat.cpp is optimal", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega.hat(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat.cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
     if (!any(is.nan(omegahat.cpp))) {
       idx0 <- (abs(omegahat.cpp) < 1e-5 & !deltas)
@@ -220,7 +220,7 @@ test_that("under censoring: omegahatCS.R == omegahatCS.cpp", {
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
     support <- FALSE
-    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, 
+    omegahat.cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, 
                                         max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
                                         support = support, verbose = FALSE)
     omegahat.R <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, verbose = FALSE)$omegas
@@ -248,7 +248,7 @@ test_that("under censoring: omegahatCS.R == omegahatCS.cpp (with support correct
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
     support <- TRUE
-    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, 
+    omegahat.cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, 
                                         max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
                                         support = support, verbose = FALSE)
     omegahat.R <- omega.hat.EM.smooth_R(adjG_R(G), deltas, epsilons, s, 
@@ -283,7 +283,7 @@ test_that("under censoring: omegahat.cpp is optimal", {
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
     support <- FALSE
-    omegahat.cpp <- omega.hat.EM.smooth(G, deltas, epsilons, s, max_iter = max_iter, 
+    omegahat.cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, max_iter = max_iter, 
                                           rel_tol = 1e-5, abs_tol = 1e-5, support = support, verbose = FALSE)
     # omegahat.cpp <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter,
     #                                       rel_tol = 1e-3, verbose = FALSE)$omegas

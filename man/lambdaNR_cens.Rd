@@ -10,7 +10,7 @@ lambdaNR_cens(G, weights, max_iter = 100, rel_tol = 1e-07,
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
 
-\item{weights}{Length-\code{nObs} vector of weights for weighted Newton-Raphson algorithm.}
+\item{weights}{Length-\code{n_obs} vector of weights for weighted Newton-Raphson algorithm.}
 
 \item{max_iter}{Integer scalar for maximum number of Newton-Raphson steps.}
 
@@ -19,7 +19,7 @@ lambdaNR_cens(G, weights, max_iter = 100, rel_tol = 1e-07,
 \item{verbose}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
 }
 \value{
-Length-\code{nEq} vector corresponding to the solution of the optimization problem.
+Length-\code{n_eqs} vector corresponding to the solution of the optimization problem.
 }
 \description{
 Solve the inner loop optimization of a censored EL function

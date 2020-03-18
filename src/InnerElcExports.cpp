@@ -42,7 +42,7 @@ Eigen::VectorXd EvalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
   ILC.set_opts(support);
   ILC.set_deltas(deltas);
   ILC.set_omegas(omegas);
-  ILC.ste_epsilons(epsilons); 
+  ILC.set_epsilons(epsilons); 
   ILC.EvalWeights(); 
   Eigen::VectorXd weights = ILC.get_weights(); 
   return(weights);
@@ -97,7 +97,7 @@ Eigen::VectorXd OmegaHatEM(Eigen::VectorXd omegas_init,
   ILC.set_opts(max_iter, rel_tol, abs_tol, support);
   ILC.set_deltas(deltas);
   ILC.set_G(G); // assign a given G
-  ILC.ste_epsilons(epsilons);
+  ILC.set_epsilons(epsilons);
   // ILC.setTol(max_iter, rel_tol, abs_tol);
   ILC.set_omegas(omegas_init); // set initial omegas from uncensored omega.hat
   ILC.EvalOmegas();
@@ -113,9 +113,9 @@ double LogELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
   el::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);
   ILC.set_deltas(deltas);
-  ILC.ste_epsilons(epsilons); 
+  ILC.set_epsilons(epsilons); 
   ILC.set_omegas(omegas);
-  double logel = ILC.logEL();
+  double logel = ILC.LogEL();
   return logel; 
 }
 
@@ -125,7 +125,7 @@ double LogELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
 //   int n_obs = epsilons.size();
 //   el::InnerELC<MeanRegModel> ILC(n_obs,1);
 //   ILC.set_opts(support);
-//   ILC.ste_epsilons(epsilons);
+//   ILC.set_epsilons(epsilons);
 //   ILC.set_omegas(omegas);
 //   return ILC.EvalPsosSmooth(ii-1,s); // ii is 1 larger in R than in C++
 // }
@@ -138,7 +138,7 @@ double LogELSmooth(Eigen::VectorXd omegas,
   el::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);
   ILC.set_omegas(omegas);
-  ILC.ste_epsilons(epsilons);
+  ILC.set_epsilons(epsilons);
   ILC.set_deltas(deltas);
   return ILC.LogELSmooth(s);
 }
@@ -151,14 +151,14 @@ Eigen::VectorXd EvalWeightsSmooth(Eigen::VectorXd deltas,
   el::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);
   ILC.set_omegas(omegas);
-  ILC.ste_epsilons(epsilons);
+  ILC.set_epsilons(epsilons);
   ILC.set_deltas(deltas);
   ILC.EvalWeightsSmooth(s);
   Eigen::VectorXd weights = ILC.get_weights(); 
   return(weights);
 }
 
-// [[Rcpp::export(".OmegaHatEMSmoothh")]]
+// [[Rcpp::export(".OmegaHatEMSmooth")]]
 Eigen::VectorXd OmegaHatEMSmooth(Eigen::VectorXd omegas_init,
                                  Eigen::MatrixXd G, Eigen::VectorXd deltas,
                                  Eigen::VectorXd epsilons, double s, 
@@ -170,7 +170,7 @@ Eigen::VectorXd OmegaHatEMSmooth(Eigen::VectorXd omegas_init,
   ILC.set_opts(max_iter, rel_tol, abs_tol, support);
   ILC.set_deltas(deltas);
   ILC.set_G(G); // assign a given G
-  ILC.ste_epsilons(epsilons); 
+  ILC.set_epsilons(epsilons); 
   // ILC.setTol(max_iter, rel_tol, abs_tol);
   ILC.set_omegas(omegas_init); // set initial omegas from uncensored omega.hat
   ILC.EvalOmegasSmooth(s);

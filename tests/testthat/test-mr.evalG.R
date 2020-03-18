@@ -21,7 +21,7 @@ test_that("mr.evalG.R == mr.evalG.cpp", {
     max_iter <- sample(c(2, 10, 100), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     # checking G matrix from cpp and R
-    G.cpp <- mr.evalG(y, X, beta0)
+    G.cpp <- mr_evalG(y, X, beta0)
     G.R <- mr.evalG_R(y, X, beta0)
     expect_equal(G.R, G.cpp)
   }

@@ -3,6 +3,7 @@
 #' @template args-omega
 #' @template args-eps
 #' @template args-delta
+#' @example examples/logEL.R
 #' @return Log empirical likelihood of the input beta
 #' @details ...
 #' @export logEL

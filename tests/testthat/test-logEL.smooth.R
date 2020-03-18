@@ -17,7 +17,7 @@ test_that("logEL.smooth.R == logEL.smooth.cpp", {
     deltas <- rep(1,n)
     numcens <- sample(1:round(n/2),1)
     deltas[sample(1:n,numcens)] <- 0
-    val.cpp <- logEL.smooth(omegas,epsilons,deltas,s)
+    val.cpp <- logEL_smooth(omegas,epsilons,deltas,s)
     val.R <- logEL.smooth_R(omegas,epsilons,deltas,s)
     expect_equal(val.R, val.cpp)
   }

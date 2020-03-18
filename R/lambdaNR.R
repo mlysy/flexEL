@@ -4,6 +4,7 @@
 #' @template args-max_iter
 #' @template args-rel_tol
 #' @template args-verbose
+#' @example examples/lambdaNR.R
 #' @return Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 #' @details The inner-loop optimization of EL is ...
 #' @export lambdaNR

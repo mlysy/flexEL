@@ -10,7 +10,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "block_outer.h" // columnwise outer product
-#include "adj_G.h" // for support correction
+#include "AdjG.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
