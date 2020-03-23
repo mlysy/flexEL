@@ -2,7 +2,7 @@
 % Please edit documentation in R/lambdaNR.R
 \name{lambdaNR}
 \alias{lambdaNR}
-\title{Solve the inner loop optimization of an EL function}
+\title{Solves the inner optimization problem of an EL maximization.}
 \usage{
 lambdaNR(G, max_iter = 100, rel_tol = 1e-07, support = FALSE,
   verbose = FALSE)
@@ -20,10 +20,7 @@ lambdaNR(G, max_iter = 100, rel_tol = 1e-07, support = FALSE,
 Length-\code{nEq} vector corresponding to the solution of the optimization problem.
 }
 \description{
-Solve the inner loop optimization of an EL function
-}
-\details{
-The inner-loop optimization of EL is ...
+Solves the inner optimization problem of an EL maximization.
 }
 \examples{
 n <- 20

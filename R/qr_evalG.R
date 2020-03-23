@@ -1,11 +1,11 @@
-#' Evaluate the G matrix for quantile regression (location model)
+#' Evaluates the G matrix for quantile regression (location model)
 #'
 #' @param y Length-\code{n_obs} vector of responses.
 #' @param X \code{n_obs x n_eqs} matrix of covariates.
 #' @param alphas a vector of quantile levels.
 #' @param Beta \code{n_eqs x n_qts} matrix, each column is a vector of coefficients in location model.
+#' @example examples/qr_evalG.R
 #' @return G matrix for location quantile regression model. 
-#' @details ...
 #' @export qr_evalG
 qr_evalG <- function(y, X, alphas, Beta) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too

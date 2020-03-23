@@ -2,7 +2,7 @@
 % Please edit documentation in R/mr_evalG.R
 \name{mr_evalG}
 \alias{mr_evalG}
-\title{Evaluate the G matrix for mean regression (location model)}
+\title{Evaluates the G matrix for a mean regression problem (location model)}
 \usage{
 mr_evalG(y, X, beta)
 }
@@ -17,8 +17,13 @@ mr_evalG(y, X, beta)
 G matrix for location mean regression model.
 }
 \description{
-Evaluate the G matrix for mean regression (location model)
+Evaluates the G matrix for a mean regression problem (location model)
 }
-\details{
-...
+\examples{
+n <- 20
+p <- 4
+X <- replicate(p, rnorm(n))
+beta0 <- rnorm(p)
+y <- c(X \%*\% beta0) + rnorm(n) # with N(0,1) error term
+mr_evalG(y, X, beta0)
 }

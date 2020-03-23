@@ -2,7 +2,7 @@
 % Please edit documentation in R/qr_evalG.R
 \name{qr_evalG}
 \alias{qr_evalG}
-\title{Evaluate the G matrix for quantile regression (location model)}
+\title{Evaluates the G matrix for quantile regression (location model)}
 \usage{
 qr_evalG(y, X, alphas, Beta)
 }
@@ -19,8 +19,15 @@ qr_evalG(y, X, alphas, Beta)
 G matrix for location quantile regression model.
 }
 \description{
-Evaluate the G matrix for quantile regression (location model)
+Evaluates the G matrix for quantile regression (location model)
 }
-\details{
-...
+\examples{
+n <- 20
+p <- 4
+X <- replicate(p, rnorm(n))
+X[1,] <- rep(1,p)
+beta <- rnorm(p)
+alpha <- runif(1)
+y <- c(X \%*\% beta) + rnorm(n) # with N(0,1) error term
+qr_evalG(y, X, alpha, beta)
 }

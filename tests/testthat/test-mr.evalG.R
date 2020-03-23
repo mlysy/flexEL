@@ -18,8 +18,6 @@ test_that("mr.evalG.R == mr.evalG.cpp", {
     X <- replicate(p, rnorm(n))
     beta0 <- rnorm(p)
     y <- c(X %*% beta0) + rnorm(n) # with N(0,1) error term
-    max_iter <- sample(c(2, 10, 100), 1)
-    rel_tol <- runif(1, 1e-6, 1e-5)
     # checking G matrix from cpp and R
     G.cpp <- mr_evalG(y, X, beta0)
     G.R <- mr.evalG_R(y, X, beta0)

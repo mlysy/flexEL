@@ -2,7 +2,7 @@
 % Please edit documentation in R/logEL.R
 \name{logEL}
 \alias{logEL}
-\title{log empirical likelihood}
+\title{Calculates log empirical likelihood given fully observed or right-censored observations.}
 \usage{
 logEL(omega, eps, delta, support = FALSE)
 }
@@ -17,13 +17,9 @@ logEL(omega, eps, delta, support = FALSE)
 Log empirical likelihood of the input beta
 }
 \description{
-log empirical likelihood
-}
-\details{
-...
+Calculates log empirical likelihood given fully observed or right-censored observations.
 }
 \examples{
-
 # no censoring
 n <- 20
 omegas <- abs(rnorm(n))

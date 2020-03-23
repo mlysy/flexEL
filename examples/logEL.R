@@ -1,4 +1,3 @@
-
 # no censoring
 n <- 20
 omegas <- abs(rnorm(n))

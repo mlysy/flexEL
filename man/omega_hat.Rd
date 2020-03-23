@@ -26,6 +26,3 @@ Length-\code{n_eqs} vector for the resulting empirical distribution, omegas, if 
 \description{
 Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
 }
-\details{
-The inner-loop optimization of EL is ...
-}

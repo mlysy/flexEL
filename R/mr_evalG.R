@@ -1,10 +1,10 @@
-#' Evaluate the G matrix for mean regression (location model)
+#' Evaluates the G matrix for a mean regression problem (location model)
 #'
 #' @param y Length-\code{n_obs} vector of responses.
 #' @param X \code{n_obs x n_eqs} matrix of covariates.
 #' @param beta Length-\code{n_eqs} vector of coefficients in location model.
+#' @example examples/mr_evalG.R
 #' @return G matrix for location mean regression model. 
-#' @details ...
 #' @export mr_evalG
 mr_evalG <- function(y, X, beta) { 
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
