@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2018-12-02" />
+<meta name="date" content="2020-03-29" />
 
 <title>flexEL: A Flexible Package for Empirical Likelihood Regression Models</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore"><code>flexEL</code>: A Flexible Package for Empirical Likelihood Regression Models</h1>
-<h4 class="date"><em>2018-12-02</em></h4>
+<h4 class="date"><em>2020-03-29</em></h4>
 
 
 <div id="TOC">
@@ -82,9 +82,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#usage-in-r">Usage in R</a></li>
 <li><a href="#usage-in-c">Usage in C++</a></li>
 </ul></li>
-<li><a href="#models-included-in-the-package">Models Included in the Package</a></li>
+<li><a href="#models-included-in-the-package">Models Included in the Package</a><ul>
+<li><a href="#location-scale-mean-regression-model">Location-Scale Mean Regression Model</a></li>
+<li><a href="#location-scale-quantile-regression-model">Location-Scale Quantile Regression Model</a></li>
+</ul></li>
 <li><a href="#other-optimization-modification-methods-included-in-the-package">Other Optimization / Modification Methods Included in the Package</a></li>
-<li><a href="#todo">TODO</a></li>
+<li><a href="#future-works">Future Works</a></li>
 </ul>
 </div>
 
@@ -95,7 +98,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="basic-el-framework" class="section level3">
 <h3>Basic EL framework</h3>
 <p>Suppose we observe covariates <span class="math inline">\(x_i\in{\mathbb R}^d\)</span> and responses <span class="math inline">\(y_i\in{\mathbb R}\)</span> for <span class="math inline">\(i=1,\cdots,n\)</span>. Let’s denote the vector containing all regression parameters by <span class="math inline">\({{{\boldsymbol{\theta}}}}\in{\mathbb R}^p\)</span>.</p>
-<p>The <strong>log EL function</strong> is defined by <span class="math display">\[
+<p>The log empirical likelihood function (<strong>log EL function</strong>) is defined by <span class="math display">\[
   \ell_{{\textrm{EL}}}({{{\boldsymbol{\theta}}}}) := \log{\textrm{EL}}({{{\boldsymbol{\theta}}}}) = \sum_{i=1}^n \log\hat{{{\omega}}_i}({{{\boldsymbol{\theta}}}}),
 \]</span> where for any given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>, the <span class="math inline">\(n\)</span>-dimensional probability weights vector <span class="math inline">\(\hat{{{\omega}}}({{{\boldsymbol{\theta}}}})\)</span> associated with the observations is the solution of the optimization problem <span class="math display">\[
 \begin{split}
@@ -107,15 +110,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 \]</span> In the above, <span class="math inline">\(g\)</span> is a real-valued function whose range is in <span class="math inline">\({\mathbb R}^m\)</span> that satisfies <span class="math display">\[
   {\textrm{E}}[g(x,y;{{{\boldsymbol{\theta}}}})] = 0.
 \]</span> This function provides all information about the parameter <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> of interest and is often called the estimating fucntion for <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>.</p>
-<p>The above inner optimization problem to find <span class="math inline">\(\hat{{{\omega}}}\)</span> given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> can be solved efficiently through a Newton-Raphoson algorithm, more detailed explanation can be found here (TODO: link to another document?).</p>
+<p>The above inner optimization problem to find <span class="math inline">\(\hat{{{\omega}}}\)</span> given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> can be solved efficiently through solving the dual problem via a Newton-Raphoson algorithm.</p>
 <p>An important element for EL inference is the matrix constructed by the values of this function evaluated at each of the observed values for a given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>. Let’s denote this matrix of dimension <span class="math inline">\(n\times m\)</span> by <span class="math inline">\(G\)</span>, whose rows correspoind to the observations: <span class="math display">\[
   G := [g(x_1,y_1;{{{\boldsymbol{\theta}}}})^T,\cdots,g(x_n,y_n;{{{\boldsymbol{\theta}}}})^T]
 \]</span></p>
-<p>In later section explaining the usage of this package, we will see that specifying the <span class="math inline">\(G\)</span> matrix according to the problem one would like to solve is the only requirement to use this package.</p>
+<p>In fact, specifying the <span class="math inline">\(G\)</span> matrix according to your regression model is the only requirement to use this package.</p>
 </div>
 <div id="el-for-right-censored-responses" class="section level3">
 <h3>EL for Right-censored Responses</h3>
-<p>When the response is time-to-event data such as survial time in many medical studies, one situation that often occurs is right-censoring, one type of length-bias problems. That is, instead of observing the true survival time for each individual, what being observed is either the true survival time, or the time this person dropped out of the study. To be precise, instead of observing <span class="math inline">\(y_i\)</span>, we observe <span class="math inline">\(u_i = \min(y_i,c_i)\)</span> and <span class="math inline">\(\delta_i=\mathfrak 1(y_i\leq c_i)\)</span>, where <span class="math inline">\(c_i\)</span> is a censoring variable that is assumed to be independent of <span class="math inline">\(y_i\)</span> given covariate <span class="math inline">\(x_i\)</span>.</p>
+<p>When the response is time-to-event data such as survial time in many medical studies, one situation that often occurs is right-censoring, one type of length-bias problem. That is, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. Specifially, instead of observing <span class="math inline">\(y_i\)</span>, we observe <span class="math inline">\(u_i = \min(y_i,c_i)\)</span> and <span class="math inline">\(\delta_i=\mathfrak 1(y_i\leq c_i)\)</span>, where <span class="math inline">\(c_i\)</span> is a censoring variable that is assumed to be independent of <span class="math inline">\(y_i\)</span> given covariate <span class="math inline">\(x_i\)</span>.</p>
 <p>The log EL function under right-censoring (CEL) is defined as <span class="math display">\[
   \ell_{{\textrm{CEL}}} := \log{\textrm{CEL}}({{{\boldsymbol{\theta}}}}) = \sum_{i=1}^n \delta_i\cdot\log\hat w_i({{{\boldsymbol{\theta}}}}) + (1-\delta_i)\cdot\log(\sum_{j: e_j \geq e_i}\hat w_i({{{\boldsymbol{\theta}}}}))
 \]</span></p>
@@ -128,22 +131,32 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 \end{split}
 \]</span></p>
 <p>Notice that the same <span class="math inline">\(G\)</span> matrix as in the fully-observed data case is supplied to this optimization.</p>
-<p>Due to right-censoring, this inner optimization problem turns out to be difficult to solve directly. Instead, we use an EM algorithm to solve it. However, the EL function in this case is not continous with respect to <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>, to deal with this problem, we introduce a continuity-correction in the following subsection.</p>
+<p>Due to right-censoring, this inner optimization problem turns out to be difficult to solve directly as in the previous case. Instead, the solution can be obtained through an EM algorithm.</p>
+<p>Notice that the EL function in this case is not continous with respect to <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>, which brings more difficulties to obtain an optimal solution. To deal with this problem, we introduce a continuity-correction method in the following subsection.</p>
 </div>
 <div id="continuity-correction-of-el-under-right-censoring" class="section level3">
 <h3>Continuity-Correction of EL under right-censoring</h3>
+<p>Let <span class="math inline">\(S\)</span> be a transformed sigmoid function, i.e., <span class="math display">\[
+S_{ij}({{{\boldsymbol{\theta}}}};s) := S(e_i({{{\boldsymbol{\theta}}}})-e_j({{{\boldsymbol{\theta}}}});s)
+  = \frac{1}{1+\exp(s\cdot(e_i({{{\boldsymbol{\theta}}}})-e_j({{{\boldsymbol{\theta}}}})))}.
+\]</span> where <span class="math inline">\(s &gt; 0\)</span> is a smoothing parameter and <span class="math inline">\(e_i({{{\boldsymbol{\theta}}}})\)</span> is residual <span class="math inline">\(i\)</span> given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>.</p>
+<p>The log smoothed censored EL <strong>(log SCEL)</strong> is then defined as <span class="math display">\[
+  \ell_{{\textrm{SCEL}}}({{{\boldsymbol{\theta}}}}) = \sum_{i=1}^n \Bigl[\delta_i\log(w_i({{{\boldsymbol{\theta}}}})) +
+    (1-\delta_i)\log(\sum_{j=1}^n S_{ij}({{{\boldsymbol{\theta}}}};s)\cdot w_j({{{\boldsymbol{\theta}}}}))\Bigr].
+\]</span></p>
+<p>This log SCEL function is then continuous in <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> given <span class="math inline">\(w({{{\boldsymbol{\theta}}}})\)</span> is continous in <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> and <span class="math inline">\(e({{{\boldsymbol{\theta}}}})\)</span> is continuous in <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>. The continuity of these two depend on the construction of the regression model.</p>
 </div>
 </div>
 <div id="usage-of-flexel-explained-by-examples" class="section level2">
 <h2>Usage of <code>flexEL</code> Explained by Examples</h2>
-<p>Upon observing data, the purpose is to find the estimates of the parameters of your semi-parametric regression model. To achieve this, two steps needed to be done:</p>
+<p>Upon observing data, the purpose is to find the estimates of the parameters of your semi-parametric regression model. To achieve this, two steps are required:</p>
 <ol style="list-style-type: decimal">
 <li>Construct the log EL function according to your model</li>
 <li>Obtain an estimate based on the log EL function</li>
 </ol>
 <p>In the first step, the only key element required from the user a function evaluating the <span class="math inline">\(G\)</span> matrix which is explained in the previous section.</p>
 <p>In the second step, depending on your purpose and the property of the resulting log EL function, you may choose to use an optimization algorithm to find the maximum EL estimate, or to use a Markov Chain Monte Carlo sampler to obtain your estimate.</p>
-<p>One thing that has to be noticed is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem (TODO: a link to quantile regression), for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate.</p>
+<p>One thing to notice is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem, for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate.</p>
 <p>Let’s use a simple two-parameter linear regression model as an example. Suppose we assume the following model <span class="math display">\[
   y_i = \beta_0 + \beta_1x_i + \epsilon_i, \quad i=1,\cdots,n, 
 \]</span> where <span class="math inline">\(\epsilon_i {\stackrel {\textrm{iid}}{\sim}}{\textrm{F}}(\epsilon)\)</span> such that <span class="math inline">\({\textrm{E}}(\epsilon_i) = 0\)</span> and <span class="math inline">\({\textrm{var}}(\epsilon_i) = 1\)</span>. Notice that the distribution of <span class="math inline">\(\epsilon_i\)</span> is unkown, and no distribution assumption is made except for its mean and variance here.</p>
@@ -157,7 +170,7 @@ y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> <
 <p>We explain how to use this package to conduct inference for your regression model through some implementations either in R or in C++ in the following two sections.</p>
 <div id="usage-in-r" class="section level3">
 <h3>Usage in R</h3>
-<p>As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (<code>evalG</code>) to return the corresponding <span class="math inline">\(G\)</span> matrix of dimension <span class="math inline">\(n\times m\)</span>, where <span class="math inline">\(n\)</span> is the number of observations, and <span class="math inline">\(m\)</span> is the dimension of the range of the estimating equation. This function can be directly implemented in R.</p>
+<p>As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (<code>evalG</code>) to calculate the corresponding <span class="math inline">\(G\)</span> matrix of dimension <span class="math inline">\(n\times m\)</span>, where <span class="math inline">\(n\)</span> is the number of observations, and <span class="math inline">\(m\)</span> is the dimension of the range of the estimating equation. This function can be directly implemented in R.</p>
 <p>For example, for a linear regression model, the following estimating equation is used, which has a range of dimension <span class="math inline">\(m=p\)</span>, same as the dimension of the parameter vector <span class="math inline">\(\beta\)</span>: <span class="math display">\[
   {\textrm{E}}[(y-x^T\beta)\cdot x] = 0,
 \]</span> which in its a sample form <span class="math display">\[
@@ -165,8 +178,8 @@ y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> <
 \]</span> In other words, the <span class="math inline">\(g\)</span> function is specified as <span class="math display">\[
   g(x,y;\beta) = (y-x^T\beta)\cdot x.
 \]</span></p>
-<p>This can be implemented in R (<code>mr.evalG_R</code>) which returns the <span class="math inline">\(G\)</span> matrix:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mr.evalG_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
+<p>This can be implemented in R (<code>mr_evalG_R</code>) which returns the <span class="math inline">\(G\)</span> matrix:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mr_evalG_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
   tX &lt;-<span class="st"> </span><span class="kw">t</span>(X)
   yXb &lt;-<span class="st"> </span>y <span class="op">-</span><span class="st"> </span><span class="kw">c</span>(X <span class="op">%*%</span><span class="st"> </span>beta)
   G &lt;-<span class="st"> </span><span class="kw">sweep</span>(tX, <span class="dt">MARGIN =</span> <span class="dv">2</span>, yXb, <span class="st">`</span><span class="dt">*</span><span class="st">`</span>)
@@ -175,27 +188,27 @@ y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> <
 <p>With <code>evalG</code> we can obtain a <span class="math inline">\(G\)</span> matrix for any given <span class="math inline">\(\beta\)</span>. This function can then be used to construct the log EL function, which is a function of the parameter <span class="math inline">\(\beta\)</span>.</p>
 <p>To find the estimate, we can use optimization algorithms in R such as <code>nlm</code> or <code>optim</code>. These functions require a starting value of the parameters to be optimized. In the above linear regression case, we can use <code>lm</code> in R to obtain it, which assumes <span class="math inline">\(\epsilon_i{\stackrel {\textrm{iid}}{\sim}}{\mathcal N}(0,1)\)</span> but nonetheless should be able to provide a good starting point.</p>
 <p>Here, for the convience of using the minimization algorithm <code>nlm</code>, let’s implement the negative log EL:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mr.neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
-  G &lt;-<span class="st"> </span><span class="kw">mr.evalG_R</span>(y, X, beta) <span class="co"># G matrix based on your regression problem</span>
-  omegas &lt;-<span class="st"> </span><span class="kw">omega.hat</span>(G) <span class="co"># the empirical distribution provided by flexEL</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
+  G &lt;-<span class="st"> </span><span class="kw">mr_evalG_R</span>(y, X, beta) <span class="co"># G matrix based on your regression problem</span>
+  omegas &lt;-<span class="st"> </span><span class="kw">omega_hat</span>(G) <span class="co"># the empirical distribution provided by flexEL</span>
   <span class="cf">if</span> (<span class="op">!</span><span class="kw">anyNA</span>(omegas)) <span class="kw">return</span>(<span class="op">-</span><span class="kw">logEL</span>(omegas)) <span class="co"># returns the negative log EL, if optimal omegas is found</span>
   <span class="cf">else</span> <span class="kw">return</span>(<span class="ot">Inf</span>) <span class="co"># otherwise, returns Inf</span>
 }</code></pre></div>
 <p>With the <code>neglogEL</code> function, we can then obtain the estimate using <code>nlm</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(flexEL)
 beta.init &lt;-<span class="st"> </span><span class="kw">coef</span>(<span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>X<span class="op">-</span><span class="dv">1</span>)) <span class="co"># obtain initial value</span>
-nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f=</span>mr.neglogEL_R, <span class="dt">p=</span>beta.init, <span class="dt">y=</span>y, <span class="dt">X=</span>X)
+nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f=</span>mr_neglogEL_R, <span class="dt">p=</span>beta.init, <span class="dt">y=</span>y, <span class="dt">X=</span>X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.4645749 0.9954246</code></pre>
-<p>You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization. (TODO: gradient requires lamba, needs more explanations)</p>
+<pre><code>## [1] 0.5456578 0.9632994</code></pre>
+<p>You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;../tests/dontrun/mode-functions.R&quot;</span>)
-mr.neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
-  G &lt;-<span class="st"> </span><span class="kw">mr.evalG_R</span>(y, X, beta)
+mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
+  G &lt;-<span class="st"> </span><span class="kw">mr_evalG_R</span>(y, X, beta)
   lambda &lt;-<span class="st"> </span><span class="kw">lambdaNR</span>(G)
   <span class="cf">if</span> (<span class="op">!</span><span class="kw">anyNA</span>(lambda)) {
     omegas &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">-</span><span class="kw">t</span>(lambda) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(G)) <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(<span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">-</span><span class="kw">t</span>(lambda) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(G))))
     res &lt;-<span class="st"> </span><span class="op">-</span><span class="kw">sum</span>(<span class="kw">log</span>(omegas)) <span class="co"># negative logEL</span>
-    gradlist &lt;-<span class="st"> </span><span class="kw">mr.deltaG_R</span>(y, X, beta)
+    gradlist &lt;-<span class="st"> </span><span class="kw">mr_deltaG_R</span>(y, X, beta)
     grad &lt;-<span class="st"> </span><span class="op">-</span><span class="kw">logELgrad_R</span>(omegas, lambda, gradlist) <span class="co"># negative gradient</span>
     <span class="kw">attr</span>(res, <span class="st">&quot;gradient&quot;</span>) &lt;-<span class="st"> </span>grad
   }
@@ -205,9 +218,9 @@ mr.neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, 
   }
   <span class="kw">return</span>(res)
 }</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f=</span>mr.neglogEL_R, <span class="dt">p=</span>beta.init, <span class="dt">y=</span>y, <span class="dt">X=</span>X)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f=</span>mr_neglogEL_R, <span class="dt">p=</span>beta.init, <span class="dt">y=</span>y, <span class="dt">X=</span>X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.4645749 0.9954246</code></pre>
+<pre><code>## [1] 0.5456578 0.9632994</code></pre>
 </div>
 <div id="usage-in-c" class="section level3">
 <h3>Usage in C++</h3>
@@ -216,14 +229,19 @@ nlmout<span class="op">$</span>estimate</code></pre></div>
 </div>
 <div id="models-included-in-the-package" class="section level2">
 <h2>Models Included in the Package</h2>
-<p>TODO: Talk about the mean and quantile regression included in this pacakge. Explain smoothing</p>
+<div id="location-scale-mean-regression-model" class="section level3">
+<h3>Location-Scale Mean Regression Model</h3>
+</div>
+<div id="location-scale-quantile-regression-model" class="section level3">
+<h3>Location-Scale Quantile Regression Model</h3>
+</div>
 </div>
 <div id="other-optimization-modification-methods-included-in-the-package" class="section level2">
 <h2>Other Optimization / Modification Methods Included in the Package</h2>
 <p>TODO: If Aitken acceleration for EM and adjusted G matrix for support modification are included, talk about them here.</p>
 </div>
-<div id="todo" class="section level2">
-<h2>TODO</h2>
+<div id="future-works" class="section level2">
+<h2>Future Works</h2>
 <p>TODO: Describe ongoing and to-be-done works.</p>
 </div>
 

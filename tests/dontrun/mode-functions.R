@@ -43,7 +43,7 @@ logELgrad_R <- function(omegas, lambda, gradlist) {
 #'@param theta is length-\cote{p} vector
 #'@details ...
 #'@return a list of gradient values of length \code{nObs}
-mr.deltaG_R <- function(y, X, theta) {
+mr_deltaG_R <- function(y, X, theta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) tcrossprod(x,x))
   return(dg)
@@ -55,14 +55,14 @@ mr.deltaG_R <- function(y, X, theta) {
 #'@param beta is length-\cote{p} vector
 #'@details ...
 #'@return
-mr.neglogEL_R <- function(y, X, beta) {
-  G <- mr.evalG_R(y, X, beta)
+mr_neglogEL_R <- function(y, X, beta) {
+  G <- mr_evalG_R(y, X, beta)
   lout <- lambdaNR_R(G)
   if (lout$conv) {
     lambda <- lout$lambda
     omegas <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
     res <- -sum(log(omegas)) # negative logEL
-    gradlist <- mr.deltaG_R(y, X, beta)
+    gradlist <- mr_deltaG_R(y, X, beta)
     grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
     attr(res, "gradient") <- grad
   }
@@ -265,9 +265,9 @@ qrls.neglogEL.smooth_R <- function(y, X, Z, tau, theta, s=10, ret_grad=TRUE) {
   return(res)
 }
 
-# ---- mr.cens functions ----
+# ---- mr_cens functions ----
 mr_cens.neglogEL.smooth_R <- function(y, X, deltas, beta, s=10) {
-  G <- mr.evalG_R(y, X, beta)
+  G <- mr_evalG_R(y, X, beta)
   epsilons <- evalEpsilons_R(y,X,beta)
   oout <- omega.hat.EM.smooth_R(G,deltas,epsilons,s)
   if (oout$conv) {
@@ -275,7 +275,7 @@ mr_cens.neglogEL.smooth_R <- function(y, X, deltas, beta, s=10) {
     omegas <- oout$omegas
     weights <- oout$weights
     res <- -logEL.smooth_R(omegas,epsilons,deltas)
-    # gradlist <- mr.deltaG_R(y, X, beta)
+    # gradlist <- mr_deltaG_R(y, X, beta)
     # grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
     # attr(res, "gradient") <- grad
     # attr(res, "gradient") <- grad(-logEL.smooth_R,)
@@ -308,7 +308,7 @@ qrls_cens.neglogEL.smooth_R <- function(y, X, Z, deltas, tau, theta, s=10) {
     omegas <- oout$omegas
     weights <- oout$weights
     res <- -logEL.smooth_R(omegas,epsilons,deltas)
-    # gradlist <- mr.deltaG_R(y, X, beta)
+    # gradlist <- mr_deltaG_R(y, X, beta)
     # grad <- -logELCensgrad_R(omegas, deltas, epsilons, lambda, gradlist, weights) # negative gradient
     # attr(res, "gradient") <- grad
     # attr(res, "gradient") <- grad(-logEL.smooth_R,)

@@ -6,7 +6,7 @@ source("el-model.R")
 ## source("~/bayesEL/tests/testthat/el-utils.R")
 
 # library(testthat) # not loaded automatically
-context("mr.evalG")
+context("mr_evalG")
 
 ntest <- 50
 
@@ -19,9 +19,9 @@ test_that("mr.evalG.R == mr.evalG.cpp", {
     beta0 <- rnorm(p)
     y <- c(X %*% beta0) + rnorm(n) # with N(0,1) error term
     # checking G matrix from cpp and R
-    G.cpp <- mr_evalG(y, X, beta0)
-    G.R <- mr.evalG_R(y, X, beta0)
-    expect_equal(G.R, G.cpp)
+    G_cpp <- mr_evalG(y, X, beta0)
+    G_R <- mr_evalG_R(y, X, beta0)
+    expect_equal(G_R, G_cpp)
   }
 })
 

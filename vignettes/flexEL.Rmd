@@ -24,6 +24,7 @@ rmarkdown::render("R_model_object.Rmd")
 \newcommand{\F}{\textrm{F}}
 \newcommand{\EL}{\textrm{EL}}
 \newcommand{\CEL}{\textrm{CEL}}
+\newcommand{\SCEL}{\textrm{SCEL}}
 \newcommand{\R}{\mathbb R}
 \newcommand{\var}{\textrm{var}}
 \newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
@@ -39,7 +40,7 @@ In the following two subsections, more details about the basic EL framwork and a
 
 Suppose we observe covariates $x_i\in\R^d$ and responses $y_i\in\R$ for $i=1,\cdots,n$. Let's denote the vector containing all regression parameters by $\tth\in\R^p$.
 
-The **log EL function** is defined by
+The log empirical likelihood function (**log EL function**) is defined by
 \[
   \ell_{\EL}(\tth) := \log\EL(\tth) = \sum_{i=1}^n \log\hat{\w_i}(\tth),
 \]
@@ -58,18 +59,18 @@ In the above, $g$ is a real-valued function whose range is in $\R^m$ that satisf
 \]
 This function provides all information about the parameter $\tth$ of interest and is often called the estimating fucntion for $\tth$. 
 
-The above inner optimization problem to find $\hat{\w}$ given $\tth$ can be solved efficiently through a Newton-Raphoson algorithm, more detailed explanation can be found here (TODO: link to another document?).
+The above inner optimization problem to find $\hat{\w}$ given $\tth$ can be solved efficiently through solving the dual problem via a Newton-Raphoson algorithm.
 
 An important element for EL inference is the matrix constructed by the values of this function evaluated at each of the observed values for a given $\tth$. Let's denote this matrix of dimension $n\times m$ by $G$, whose rows correspoind to the observations:
 \[
   G := [g(x_1,y_1;\tth)^T,\cdots,g(x_n,y_n;\tth)^T]
 \]
 
-In later section explaining the usage of this package, we will see that specifying the $G$ matrix according to the problem one would like to solve is the only requirement to use this package.
+In fact, specifying the $G$ matrix according to your regression model is the only requirement to use this package.
 
 ### EL for Right-censored Responses
 
-When the response is time-to-event data such as survial time in many medical studies, one situation that often occurs is right-censoring, one type of length-bias problems. That is, instead of observing the true survival time for each individual, what being observed is either the true survival time, or the time this person dropped out of the study. To be precise, instead of observing $y_i$, we observe $u_i = \min(y_i,c_i)$ and $\delta_i=\mathfrak 1(y_i\leq c_i)$, where $c_i$ is a censoring variable that is assumed to be independent of $y_i$ given covariate $x_i$. 
+When the response is time-to-event data such as survial time in many medical studies, one situation that often occurs is right-censoring, one type of length-bias problem. That is, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. Specifially, instead of observing $y_i$, we observe $u_i = \min(y_i,c_i)$ and $\delta_i=\mathfrak 1(y_i\leq c_i)$, where $c_i$ is a censoring variable that is assumed to be independent of $y_i$ given covariate $x_i$. 
 
 The log EL function under right-censoring (CEL) is defined as
 \[
@@ -88,10 +89,26 @@ Given a specific $\tth$, let $e_i$ be the residual of the $i$-th observation for
 
 Notice that the same $G$ matrix as in the fully-observed data case is supplied to this optimization.
 
-Due to right-censoring, this inner optimization problem turns out to be difficult to solve directly. Instead, we use an EM algorithm to solve it. However, the EL function in this case is not continous with respect to $\tth$, to deal with this problem, we introduce a continuity-correction in the following subsection.
+Due to right-censoring, this inner optimization problem turns out to be difficult to solve directly as in the previous case. Instead, the solution can be obtained through an EM algorithm. 
+
+Notice that the EL function in this case is not continous with respect to $\tth$, which brings more difficulties to obtain an optimal solution. To deal with this problem, we introduce a continuity-correction method in the following subsection.
 
 ### Continuity-Correction of EL under right-censoring
 
+Let $S$ be a transformed sigmoid function, i.e.,
+\[
+S_{ij}(\tth;s) := S(e_i(\tth)-e_j(\tth);s)
+  = \frac{1}{1+\exp(s\cdot(e_i(\tth)-e_j(\tth)))}.
+\]
+where $s > 0$ is a smoothing parameter and $e_i(\tth)$ is residual $i$ given $\tth$.
+
+The log smoothed censored EL **(log SCEL)** is then defined as
+\[
+  \ell_{\SCEL}(\tth) = \sum_{i=1}^n \Bigl[\delta_i\log(w_i(\tth)) +
+    (1-\delta_i)\log(\sum_{j=1}^n S_{ij}(\tth;s)\cdot w_j(\tth))\Bigr].
+\]
+
+This log SCEL function is then continuous in $\tth$ given $w(\tth)$ is continous in $\tth$ and $e(\tth)$ is continuous in $\tth$. The continuity of these two depend on the construction of the regression model.
 
 
 ## Usage of <code>flexEL</code> Explained by Examples
@@ -105,7 +122,7 @@ In the first step, the only key element required from the user a function evalua
 
 In the second step, depending on your purpose and the property of the resulting log EL function, you may choose to use an optimization algorithm to find the maximum EL estimate, or to use a Markov Chain Monte Carlo sampler to obtain your estimate.
 
-One thing that has to be noticed is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem (TODO: a link to quantile regression), for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate. 
+One thing to notice is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem, for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate. 
 
 Let's use a simple two-parameter linear regression model as an example. Suppose we assume the following model
 \[
@@ -126,7 +143,7 @@ We explain how to use this package to conduct inference for your regression mode
 
 ### Usage in R
 
-As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (`evalG`) to return the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. This function can be directly implemented in R.
+As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (`evalG`) to calculate the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. This function can be directly implemented in R.
 
 For example, for a linear regression model, the following estimating equation is used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
 \[
@@ -141,9 +158,9 @@ In other words, the $g$ function is specified as
   g(x,y;\beta) = (y-x^T\beta)\cdot x.
 \]
 
-This can be implemented in R (`mr.evalG_R`) which returns the $G$ matrix: 
+This can be implemented in R (`mr_evalG_R`) which returns the $G$ matrix: 
 ```{r, echo=TRUE, eval=TRUE}
-mr.evalG_R <- function(y, X, beta) {
+mr_evalG_R <- function(y, X, beta) {
   tX <- t(X)
   yXb <- y - c(X %*% beta)
   G <- sweep(tX, MARGIN = 2, yXb, `*`)
@@ -157,9 +174,9 @@ To find the estimate, we can use optimization algorithms in R such as `nlm` or `
 
 Here, for the convience of using the minimization algorithm `nlm`, let's implement the negative log EL:
 ```{r, echo=TRUE, eval=TRUE}
-mr.neglogEL_R <- function(y, X, beta) {
-  G <- mr.evalG_R(y, X, beta) # G matrix based on your regression problem
-  omegas <- omega.hat(G) # the empirical distribution provided by flexEL
+mr_neglogEL_R <- function(y, X, beta) {
+  G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
+  omegas <- omega_hat(G) # the empirical distribution provided by flexEL
   if (!anyNA(omegas)) return(-logEL(omegas)) # returns the negative log EL, if optimal omegas is found
   else return(Inf) # otherwise, returns Inf
 }
@@ -169,21 +186,20 @@ With the `neglogEL` function, we can then obtain the estimate using `nlm`:
 ```{r, echo=TRUE, eval=TRUE}
 library(flexEL)
 beta.init <- coef(lm(y ~ X-1)) # obtain initial value
-nlmout <- nlm(f=mr.neglogEL_R, p=beta.init, y=y, X=X)
+nlmout <- nlm(f=mr_neglogEL_R, p=beta.init, y=y, X=X)
 nlmout$estimate
 ```
 
-
-You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization. (TODO: gradient requires lamba, needs more explanations)
+You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.
 ```{r, echo=TRUE, eval=TRUE}
 source("../tests/dontrun/mode-functions.R")
-mr.neglogEL_R <- function(y, X, beta) {
-  G <- mr.evalG_R(y, X, beta)
+mr_neglogEL_R <- function(y, X, beta) {
+  G <- mr_evalG_R(y, X, beta)
   lambda <- lambdaNR(G)
   if (!anyNA(lambda)) {
     omegas <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
     res <- -sum(log(omegas)) # negative logEL
-    gradlist <- mr.deltaG_R(y, X, beta)
+    gradlist <- mr_deltaG_R(y, X, beta)
     grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
     attr(res, "gradient") <- grad
   }
@@ -196,7 +212,7 @@ mr.neglogEL_R <- function(y, X, beta) {
 ```
 
 ```{r, echo=TRUE, eval=TRUE}
-nlmout <- nlm(f=mr.neglogEL_R, p=beta.init, y=y, X=X)
+nlmout <- nlm(f=mr_neglogEL_R, p=beta.init, y=y, X=X)
 nlmout$estimate
 ```
 
@@ -206,13 +222,15 @@ TODO: Talk about how user can supply a C++ header file to construct $G$ matrix e
 
 ## Models Included in the Package
 
-TODO: Talk about the mean and quantile regression included in this pacakge. Explain smoothing 
+### Location-Scale Mean Regression Model
+
+### Location-Scale Quantile Regression Model
 
 ## Other Optimization / Modification Methods Included in the Package
 
 TODO: If Aitken acceleration for EM and adjusted G matrix for support modification are included, talk about them here.
 
-## TODO
+## Future Works
 
 TODO: Describe ongoing and to-be-done works. 
 
