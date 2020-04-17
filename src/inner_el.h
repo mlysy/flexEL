@@ -10,7 +10,7 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "block_outer.h" // columnwise outer product
-#include "AdjG.h" // for support correction
+#include "adj_G.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
@@ -25,7 +25,7 @@ using namespace Eigen;
  * 
  * Wrap the exported library components into a namespace called \b el to avoid potential naming conflicts with other libraries or user-defined headers.
  */
-namespace el {
+namespace flexEL {
   
   /**
    * @file       InnerEL.h
@@ -131,14 +131,14 @@ namespace el {
     //                          double *mwgSd, bool *rvDoMcmc, VectorXd &paccept);
   };
 
-} // namespace el
+} // namespace flexEL
 
 /* --------------------------------------------------------------------------- */
 
 // private functions
 
 // maximum relative error in lambda
-inline double el::InnerEL::MaxRelErr() {
+inline double flexEL::InnerEL::MaxRelErr() {
   // TODO: added for numerical stability, what is a good tolerance to use ?
   if ((lambda_new_ - lambda_old_).array().abs().maxCoeff() < 1e-10) return(0);
   
@@ -147,7 +147,7 @@ inline double el::InnerEL::MaxRelErr() {
 }
 
 // LogStar
-inline double el::InnerEL::LogStar(double x) {
+inline double flexEL::InnerEL::LogStar(double x) {
   if(x >= trunc_) {
     return(log(x));
   } else {
@@ -156,7 +156,7 @@ inline double el::InnerEL::LogStar(double x) {
 }
 
 // d LogStar(x)/dx
-inline double el::InnerEL::LogStar1(double x) {
+inline double flexEL::InnerEL::LogStar1(double x) {
   if(x >= trunc_) {
     return(1.0/x);
   } 
@@ -167,7 +167,7 @@ inline double el::InnerEL::LogStar1(double x) {
 }
 
 // d^2 LogStar(x)/dx^2
-inline double el::InnerEL::LogStar2(double x) {
+inline double flexEL::InnerEL::LogStar2(double x) {
   if(x >= trunc_) {
     return(-1.0/(x*x));
   } else {
@@ -184,7 +184,7 @@ inline double el::InnerEL::LogStar2(double x) {
 /**
  * @brief Default constructor for InnerEL.
  */
-inline el::InnerEL::InnerEL(){}
+inline flexEL::InnerEL::InnerEL(){}
 
 /**
  * @brief Constructor for InnerEL with dimensions of G matrix as inputs for memory allocation.
@@ -192,7 +192,7 @@ inline el::InnerEL::InnerEL(){}
  * @param n_obs    Number of observations.
  * @param n_eqs    Number of estimating equations.
  */
-inline el::InnerEL::InnerEL(int n_obs, int n_eqs) {
+inline flexEL::InnerEL::InnerEL(int n_obs, int n_eqs) {
   // assign internal values
   n_obs_ = n_obs;
   n_eqs_ = n_eqs;
@@ -232,7 +232,7 @@ inline el::InnerEL::InnerEL(int n_obs, int n_eqs) {
  * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  * @param lambda0    Initial value for lambda.
  */
-inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
                                           const bool& supp, const double& supp_a, 
                                           const Ref<const VectorXd>& lambda0) {
   max_iter_ = max_iter;
@@ -250,7 +250,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
  * @param rel_tol     Relative tolerance.
  * @param lambda0    Initial value for lambda.
  */
-inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
                                           const bool& supp, 
                                           const Ref<const VectorXd>& lambda0) {
   max_iter_ = max_iter;
@@ -269,7 +269,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
  * @param supp    Whether to have support correction.
  * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
                                           const bool& supp, const double& supp_a) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
@@ -285,7 +285,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
  * @param rel_tol     Relative tolerance.
  * @param supp    Whether to have support correction.
  */
-inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
+inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
                                           const bool& supp) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
@@ -300,7 +300,7 @@ inline void el::InnerEL::set_opts(const int& max_iter, const double& rel_tol,
  * @param supp    Whether to have support correction.
  * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-inline void el::InnerEL::set_opts(const bool& supp, const double& supp_a) {
+inline void flexEL::InnerEL::set_opts(const bool& supp, const double& supp_a) {
   supp_ = supp;
   supp_a_ = supp_a;
   n_obs2_ = n_obs_+supp_;
@@ -311,7 +311,7 @@ inline void el::InnerEL::set_opts(const bool& supp, const double& supp_a) {
  * 
  * @param supp    Whether to have support correction.
  */
-inline void el::InnerEL::set_opts(const bool& supp) {
+inline void flexEL::InnerEL::set_opts(const bool& supp) {
   supp_ = supp;
   supp_a_ = std::max(1.0,0.5*log(n_obs_));
   n_obs2_ = n_obs_+supp_;
@@ -323,7 +323,7 @@ inline void el::InnerEL::set_opts(const bool& supp) {
  * @param[out] n_iter    Number of iterations to achieve convergence.
  * @param[out] max_iter   Maximum relative error among entires in lambda at the last step.
  */
-inline void el::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
+inline void flexEL::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
   
   lambda_old_ = lambda0_; // set to initial value
   lambda_new_.fill(0.0); // may not be needed here..
@@ -362,7 +362,7 @@ inline void el::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
 /**
  * @brief Evaluate omegas based on G and lambdaNew.
  */
-inline void el::InnerEL::EvalOmegas() {
+inline void flexEL::InnerEL::EvalOmegas() {
   // G and lambdaNew must have been assigned
   if (lambda_new_ != lambda_new_) { // if lambdaNew is NaN 
     for (int ii=0; ii<n_obs2_; ii++) {
@@ -383,7 +383,7 @@ inline void el::InnerEL::EvalOmegas() {
  * 
  * @return log empirical likelihood.
  */
-inline double el::InnerEL::LogEL() {
+inline double flexEL::InnerEL::LogEL() {
   // if omegas are NaN, return -Inf
   if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) return -INFINITY;
   else return(omegas_.head(n_obs2_).array().log().sum());
@@ -394,7 +394,7 @@ inline double el::InnerEL::LogEL() {
 /**
  * @brief Set the value of lambda (e.g. to be used directly to calculate omegas).
  */
-inline void el::InnerEL::set_lambda(const Ref<const VectorXd>& lambda) {
+inline void flexEL::InnerEL::set_lambda(const Ref<const VectorXd>& lambda) {
   // lambda_old_ = lambda;
   lambda_new_ = lambda;
 }
@@ -402,14 +402,14 @@ inline void el::InnerEL::set_lambda(const Ref<const VectorXd>& lambda) {
 /**
  * @brief Set the value of omegas (e.g. to be used directly to calculate log EL).
  */
-inline void el::InnerEL::set_omegas(const Ref<const VectorXd>& omegas) {
+inline void flexEL::InnerEL::set_omegas(const Ref<const VectorXd>& omegas) {
   omegas_.head(n_obs2_) = omegas; 
 }
 
 /**
  * @brief Set the value of G (e.g. to be used directly to calculate lambda or log EL).
  */
-inline void el::InnerEL::set_G(const Ref<const MatrixXd>& G) {
+inline void flexEL::InnerEL::set_G(const Ref<const MatrixXd>& G) {
   G_.block(0,0,n_eqs_,n_obs_) = G;
   if (supp_) adj_G(G_,supp_a_);
 }
@@ -419,28 +419,28 @@ inline void el::InnerEL::set_G(const Ref<const MatrixXd>& G) {
 /**
  * @brief Get the value of lambda.
  */
-inline VectorXd el::InnerEL::get_lambda() {
+inline VectorXd flexEL::InnerEL::get_lambda() {
   return(lambda_new_);
 }
 
 /**
  * @brief Get the value of omegas.
  */
-inline VectorXd el::InnerEL::get_omegas() {
+inline VectorXd flexEL::InnerEL::get_omegas() {
     return(omegas_.head(n_obs2_));
 }
 
 /**
  * @brief Get the value of G.
  */
-inline MatrixXd el::InnerEL::get_G() {
+inline MatrixXd flexEL::InnerEL::get_G() {
   return(G_.block(0,0,n_eqs_,n_obs2_));
 }
 
 /**
  * @brief Get the reference of G.
  */
-inline Ref<MatrixXd> el::InnerEL::get_ref_G() {
+inline Ref<MatrixXd> flexEL::InnerEL::get_ref_G() {
   return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_));
 }
 

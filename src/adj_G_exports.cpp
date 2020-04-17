@@ -3,7 +3,7 @@ using namespace Rcpp;
 //[[Rcpp::depends("RcppEigen")]]
 #include <RcppEigen.h>
 using namespace Eigen;
-#include "AdjG.h"
+#include "adj_G.h"
 
 // [[Rcpp::export(".adjG")]]
 Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a) {
@@ -11,6 +11,6 @@ Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a) {
   int nEqs = G.rows();
   Eigen::MatrixXd aG = Eigen::MatrixXd::Zero(nEqs,nObs+1);
   aG.leftCols(nObs) = G;
-  adj_G(aG,a);
+  flexEL::adj_G(aG,a);
   return aG;
 }

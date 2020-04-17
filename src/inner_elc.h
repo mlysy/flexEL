@@ -15,7 +15,7 @@
 #include "sort_order.h"
 #include "ind_smooth.h" // for smoothed indicator function
 #include "block_outer.h"
-#include "AdjG.h" // for support correction
+#include "adj_G.h" // for support correction
 // #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
@@ -30,7 +30,7 @@ using namespace Eigen;
  * 
  * Wrap the exported library components into a namespace called \b el to avoid potential naming conflicts with other libraries or user-defined headers.
  */
-namespace el {
+namespace flexEL {
   
   /**
    * @file       InnerELC.h
@@ -165,7 +165,7 @@ namespace el {
 // private functions 
 
 // maximum relative error in lambda
-inline double el::InnerELC::MaxRelErr() {
+inline double flexEL::InnerELC::MaxRelErr() {
   // TODO: added for numerical stability, what is a good tolerance to use ?
   if ((lambda_new_ - lambda_old_).array().abs().maxCoeff() < 1e-10) return(0);
   rel_err_ = ((lambda_new_ - lambda_old_).array() / (lambda_new_ + lambda_old_).array()).abs();
@@ -173,7 +173,7 @@ inline double el::InnerELC::MaxRelErr() {
 }
 
 // LogSharp
-inline double el::InnerELC::LogSharp(double x, double q) {
+inline double flexEL::InnerELC::LogSharp(double x, double q) {
   double xq;
   if(x >= q) {
     return(log(x));
@@ -184,7 +184,7 @@ inline double el::InnerELC::LogSharp(double x, double q) {
 }
 
 // d LogSharp(x)/dx
-inline double el::InnerELC::LogSharp1(double x, double q) {
+inline double flexEL::InnerELC::LogSharp1(double x, double q) {
   if(x >= q) {
     return(1.0/x);
   } else {
@@ -193,7 +193,7 @@ inline double el::InnerELC::LogSharp1(double x, double q) {
 }
 
 // d^2 LogSharp(x)/dx^2
-inline double el::InnerELC::LogSharp2(double x, double q) {
+inline double flexEL::InnerELC::LogSharp2(double x, double q) {
   if(x >= q) {
     return(-1.0/(x*x));
   } else {
@@ -201,7 +201,7 @@ inline double el::InnerELC::LogSharp2(double x, double q) {
   }
 }
 
-inline double el::InnerELC::EvalPSO(const int ii) {
+inline double flexEL::InnerELC::EvalPSO(const int ii) {
   double psos = 0;
   int kk;
   for (int jj=n_obs2_-1; jj>=0; jj--) {
@@ -213,7 +213,7 @@ inline double el::InnerELC::EvalPSO(const int ii) {
   return psos;
 }
 
-inline double el::InnerELC::EvalPSOSmooth(const int ii, const double s) {
+inline double flexEL::InnerELC::EvalPSOSmooth(const int ii, const double s) {
   double psos_smooth = 0;
   if (supp_ && ii == (n_obs2_-1)) {
     psos_smooth = omegas_.head(n_obs2_-1).sum() + 0.5*omegas_(n_obs2_-1);
@@ -236,7 +236,7 @@ inline double el::InnerELC::EvalPSOSmooth(const int ii, const double s) {
 /**
  * @brief Default constructor for InnerELC.
  */
-inline el::InnerELC::InnerELC() {}
+inline flexEL::InnerELC::InnerELC() {}
 
 // ctor with dimensions as input
 /**
@@ -244,7 +244,7 @@ inline el::InnerELC::InnerELC() {}
  * 
  * @param n_obs    Number of observations.
  */
-inline el::InnerELC::InnerELC(int n_obs) {
+inline flexEL::InnerELC::InnerELC(int n_obs) {
   n_obs_ = n_obs;
   // support correction
   supp_ = false;
@@ -260,7 +260,7 @@ inline el::InnerELC::InnerELC(int n_obs) {
  * @param n_obs    Number of observations.
  * @param n_eqs    Number of estimating equations.
  */
-inline el::InnerELC::InnerELC(int n_obs, int n_eqs) {
+inline flexEL::InnerELC::InnerELC(int n_obs, int n_eqs) {
   // set internal values
   n_obs_ = n_obs;
   n_eqs_ = n_eqs;
@@ -303,7 +303,7 @@ inline el::InnerELC::InnerELC(int n_obs, int n_eqs) {
  * @param supp_a      Tuning parameter for support correction (referred as "a" in chen-et-al08).
  * @param lambda0     Initial value for lambda.
  */
-inline void el::InnerELC::set_opts(const int& max_iter, 
+inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                   const double& rel_tol, const double& abs_tol, 
                                   const bool& supp, const double& supp_a,
                                   const Ref<const VectorXd>& lambda0) {
@@ -329,7 +329,7 @@ inline void el::InnerELC::set_opts(const int& max_iter,
  * @param supp        Whether to have support correction.
  * @param lambda0     Initial value for lambda.
  */
-inline void el::InnerELC::set_opts(const int& max_iter, 
+inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                   const double& rel_tol, const double& abs_tol, 
                                   const bool& supp, 
                                   const Ref<const VectorXd>& lambda0) {
@@ -355,7 +355,7 @@ inline void el::InnerELC::set_opts(const int& max_iter,
  * @param supp        Whether to have support correction.
  * @param supp_a      Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-inline void el::InnerELC::set_opts(const int& max_iter, 
+inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                   const double& rel_tol, const double& abs_tol, 
                                   const bool& supp, const double& supp_a) {
   max_iter_ = max_iter;
@@ -378,7 +378,7 @@ inline void el::InnerELC::set_opts(const int& max_iter,
  * @param abs_tol     Absolute tolerance (for EM algorithm).
  * @param supp    Whether to have support correction.
  */
-inline void el::InnerELC::set_opts(const int& max_iter, 
+inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                   const double& rel_tol, const double& abs_tol, 
                                   const bool& supp) {
   max_iter_ = max_iter;
@@ -401,7 +401,7 @@ inline void el::InnerELC::set_opts(const int& max_iter,
  * @param supp        Whether to have support correction.
  * @param supp_a      Tuning parameter for support correction (referred as "a" in chen-et-al08).
  */
-inline void el::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
+inline void flexEL::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
                                   const bool& supp, const double& supp_a) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
@@ -421,7 +421,7 @@ inline void el::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
  * @param rel_tol     Relative tolerance (for Newton-Raphson algorithm).
  * @param supp    Whether to have support correction.
  */
-inline void el::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
+inline void flexEL::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
                                   const bool& supp) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
@@ -439,7 +439,7 @@ inline void el::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
  * 
  * @param supp    Whether to have support correction.
  */
-inline void el::InnerELC::set_opts(const bool& supp) {
+inline void flexEL::InnerELC::set_opts(const bool& supp) {
   supp_ = supp;
   supp_a_ = std::min((double)n_obs_,0.5*log(n_obs_));
   n_obs2_ = n_obs_+supp_;
@@ -455,7 +455,7 @@ inline void el::InnerELC::set_opts(const bool& supp) {
  * @param[out] n_iter    Number of iterations to achieve convergence.
  * @param[out] max_err   Maximum relative error among entires in lambda at the last step.
  */
-inline void el::InnerELC::LambdaNR(int& n_iter, double& max_err) {
+inline void flexEL::InnerELC::LambdaNR(int& n_iter, double& max_err) {
 
   lambda_old_ = lambda0_;
   lambda_new_.fill(0.0);
@@ -510,7 +510,7 @@ inline void el::InnerELC::LambdaNR(int& n_iter, double& max_err) {
 /**
  * @brief Calculate weights for weighted log EL in EM according to epsilons.
  */
-inline void el::InnerELC::EvalWeights() {
+inline void flexEL::InnerELC::EvalWeights() {
   // find the indices for increasing order of epsilons 
   psots_.fill(0.0);
   int kk;
@@ -537,7 +537,7 @@ inline void el::InnerELC::EvalWeights() {
 /**
 * @brief Evaluate omegas using an EM algorithm.
 */
-inline void el::InnerELC::EvalOmegas() {
+inline void flexEL::InnerELC::EvalOmegas() {
   // Need to have a valid starting value if the last one is not valid in MCMC
   if (omegas_ != omegas_) {
     // std::cout << "EvalOmegas: resetting omegas_." << std::endl;
@@ -575,7 +575,7 @@ inline void el::InnerELC::EvalOmegas() {
 /**
 * @brief Calculate logEL using omegas and deltas.
 */
-inline double el::InnerELC::LogEL() {
+inline double flexEL::InnerELC::LogEL() {
   // EvalOmegas(max_iter,rel_tol); 
   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
   else if ((omegas_.head(n_obs_).array() < -1e-10/n_obs2_).any()) return -INFINITY;
@@ -597,7 +597,7 @@ inline double el::InnerELC::LogEL() {
  * 
  * @param s        Tuning parameter for smoothing.
  */
-inline void el::InnerELC::EvalWeightsSmooth(const double s) {
+inline void flexEL::InnerELC::EvalWeightsSmooth(const double s) {
   psots_.fill(0.0); // TODO initialize psots somewhere else???
   for (int ii=0; ii<n_obs2_; ii++) {
     psoss_(ii) = EvalPSOSmooth(ii,s);
@@ -627,7 +627,7 @@ inline void el::InnerELC::EvalWeightsSmooth(const double s) {
  * 
  * @param s        Tuning parameter for smoothing.
  */
-inline void el::InnerELC::EvalOmegasSmooth(const double s) {
+inline void flexEL::InnerELC::EvalOmegasSmooth(const double s) {
   if (omegas_ != omegas_) {
     // std::cout << "EvalOmegas: resetting omegas." << std::endl;
     omegas_ = omegas_init_;
@@ -665,7 +665,7 @@ inline void el::InnerELC::EvalOmegasSmooth(const double s) {
  * 
  * @param s        Tuning parameter for smoothing.
  */
-inline double el::InnerELC::LogELSmooth(const double s) {
+inline double flexEL::InnerELC::LogELSmooth(const double s) {
   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
   else if ((omegas_.array() < -1e-10/omegas_.size()).any()) return -INFINITY;
   else {
@@ -688,7 +688,7 @@ inline double el::InnerELC::LogELSmooth(const double s) {
 /**
  * @brief Set the value of epsilons.
  */
-inline void el::InnerELC::set_epsilons(const Ref<const VectorXd>& epsilons) {
+inline void flexEL::InnerELC::set_epsilons(const Ref<const VectorXd>& epsilons) {
   epsilons_.head(n_obs_) = epsilons;
   eps_ord_.head(n_obs2_) = sort_inds(epsilons_.head(n_obs2_)); 
 }
@@ -696,21 +696,21 @@ inline void el::InnerELC::set_epsilons(const Ref<const VectorXd>& epsilons) {
 /**
  * @brief Set the value of lambda.
  */
-inline void el::InnerELC::set_lambda(const Ref<const VectorXd>& lambda) {
+inline void flexEL::InnerELC::set_lambda(const Ref<const VectorXd>& lambda) {
   lambda_new_ = lambda;
 }
 
 /**
  * @brief Set the value of weights.
  */
-inline void el::InnerELC::set_weights(const Ref<const VectorXd>& weights) {
+inline void flexEL::InnerELC::set_weights(const Ref<const VectorXd>& weights) {
   weights_.head(n_obs_) = weights; 
 }
 
 /**
  * @brief Set the value of omegas.
  */
-inline void el::InnerELC::set_omegas(const Ref<const VectorXd>& omegas) {
+inline void flexEL::InnerELC::set_omegas(const Ref<const VectorXd>& omegas) {
   // n_obs = _omegas.size(); // TODO: where to set n_obs
   omegas_init_.head(n_obs2_) = omegas; // new
   omegas_.head(n_obs2_) = omegas; 
@@ -719,7 +719,7 @@ inline void el::InnerELC::set_omegas(const Ref<const VectorXd>& omegas) {
 /**
  * @brief Set the value of deltas.
  */
-inline void el::InnerELC::set_deltas(const Ref<const VectorXd>& deltas) {
+inline void flexEL::InnerELC::set_deltas(const Ref<const VectorXd>& deltas) {
   psots_ = VectorXd::Zero(n_obs2_); // TODO: initialization maybe should be done at better places
   deltas_.head(n_obs_) = deltas;
 }
@@ -727,7 +727,7 @@ inline void el::InnerELC::set_deltas(const Ref<const VectorXd>& deltas) {
 /**
  * @brief Set the value of G.
  */
-inline void el::InnerELC::set_G(const Ref<const MatrixXd>& G) {
+inline void flexEL::InnerELC::set_G(const Ref<const MatrixXd>& G) {
   G_.block(0,0,n_eqs_,n_obs_) = G;
   if (supp_) adj_G(G_,supp_a_);
 }
@@ -737,42 +737,42 @@ inline void el::InnerELC::set_G(const Ref<const MatrixXd>& G) {
 /**
  * @brief Get the value of lambda.
  */
-inline VectorXd el::InnerELC::get_lambda() {
+inline VectorXd flexEL::InnerELC::get_lambda() {
   return(lambda_new_);
 }
 
 /**
  * @brief Get the value of weights.
  */
-inline VectorXd el::InnerELC::get_weights() {
+inline VectorXd flexEL::InnerELC::get_weights() {
   return(weights_.head(n_obs2_));
 }
 
 /**
  * @brief Get the value of omegas.
  */
-inline VectorXd el::InnerELC::get_omegas() {
+inline VectorXd flexEL::InnerELC::get_omegas() {
   return(omegas_.head(n_obs2_));
 }
 
 /**
  * @brief Get the value of epsilons.
  */
-inline VectorXd el::InnerELC::get_epsilons() {
+inline VectorXd flexEL::InnerELC::get_epsilons() {
   return(epsilons_.head(n_obs2_));
 }
 
 /**
  * @brief Get the value of G.
  */
-inline MatrixXd el::InnerELC::get_G() {
+inline MatrixXd flexEL::InnerELC::get_G() {
   return(G_.block(0,0,n_eqs_,n_obs2_));
 }
 
 /**
  * @brief Get the reference of G.
  */
-inline Ref<MatrixXd> el::InnerELC::get_ref_G() {
+inline Ref<MatrixXd> flexEL::InnerELC::get_ref_G() {
   return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_));
 }
 
