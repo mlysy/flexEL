@@ -35,7 +35,7 @@ numcens <- sample(round(n/2),1)
 censinds <- sample(n,numcens)
 deltas[censinds] <- 0
 epsilons <- rnorm(n)
-s <- 10
+s <- 10 # parameter for continuity correction
 max_iter <- 500
 rel_tol <- 1e-5
 omega_hat_EM_smooth(G, deltas, epsilons, s, 

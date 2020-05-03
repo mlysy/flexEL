@@ -19,7 +19,7 @@ qrls_evalG_smooth(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 10)
 
 \item{Gamma}{\code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
 
-\item{Nu}{Length-\code{numNu} vector of initial value for the chain.}
+\item{Nu}{A vector of quantile values of the same length as alpha.}
 
 \item{s}{A positive scalar as smoothing parameter.}
 }
@@ -28,4 +28,19 @@ G matrix for location-scale quantile regression model.
 }
 \description{
 Evaluate the G matrix for smoothed quantile regression location-scale model
+}
+\examples{
+n <- 20
+p <- 5
+q <- 3
+X <- replicate(p, rnorm(n))
+Z <- replicate(q, rnorm(n))
+alpha <- 0.5
+beta <- rnorm(p)
+gamma <- rnorm(q)
+nu <- 0.5
+sig2 <- 1.5
+y <- c(X \%*\% beta + sqrt(sig2)*exp(Z \%*\% gamma)*rnorm(n)) # with multiplicative N(0,1) error
+sp <- 10
+qrls_evalG_smooth(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
 }

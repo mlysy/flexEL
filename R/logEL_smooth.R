@@ -3,8 +3,8 @@
 #' @template args-omega
 #' @template args-eps
 #' @template args-sp
-#' @return Log empirical likelihood with continuity correction
 #' @example examples/logEL_smooth.R
+#' @return Log empirical likelihood with continuity correction
 #' @export logEL_smooth
 logEL_smooth <- function(omega, eps, deltas, sp=10, support = FALSE) {
   # input check here

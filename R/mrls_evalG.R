@@ -6,10 +6,9 @@
 #' @param beta Length-\code{n_bet} vector of coefficients in location model.
 #' @param gamma Length-\code{n_gam} vector of coefficients in location model.
 #' @param sig2 A scalar where sqrt(sig2) is the scale parameter for the error term.
-#' @details Returns the G matrix for location-scale mean regression model. 
+#' @example examples/mrls_evalG.R
 #' @return G matrix for location-scale mean regression model. 
 #' @export mrls_evalG 
-# mrls.evalG <- function(y, X, Z, beta, gamma) {
 mrls_evalG <- function(y, X, Z, beta, gamma, sig2) {
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")

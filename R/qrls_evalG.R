@@ -7,6 +7,7 @@
 #' @param Beta \code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.
 #' @param Gamma \code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.
 #' @param Nu Length-\code{numNu} vector of initial value for the chain.
+#' @example examples/qrls_evalG.R
 #' @return G matrix for location-scale quantile regression model. 
 #' @export qrls_evalG
 qrls_evalG <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu) { 
