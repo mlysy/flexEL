@@ -2,7 +2,7 @@
 % Please edit documentation in R/omega_hat_EM_smooth.R
 \name{omega_hat_EM_smooth}
 \alias{omega_hat_EM_smooth}
-\title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.}
+\title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization using an EM algorithm with discontinuitu correction.}
 \usage{
 omega_hat_EM_smooth(G, deltas, epsilons, sp = 10, max_iter = 100,
   rel_tol = 1e-05, abs_tol = 0.001, support = FALSE, verbose = FALSE)
@@ -24,8 +24,24 @@ omega_hat_EM_smooth(G, deltas, epsilons, sp = 10, max_iter = 100,
 Length-\code{n_eqs} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.
 }
 \description{
-Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
+Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization using an EM algorithm with discontinuitu correction.
 }
-\details{
-The inner-loop optimization of EL is ...
+\examples{
+n <- 20
+p <- 7
+G <- matrix(rnorm(n*p), n, p)
+deltas <- rep(1,n)
+numcens <- sample(round(n/2),1)
+censinds <- sample(n,numcens)
+deltas[censinds] <- 0
+epsilons <- rnorm(n)
+s <- 10
+max_iter <- 500
+rel_tol <- 1e-5
+omega_hat_EM_smooth(G, deltas, epsilons, s, 
+                    max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
+                    support = FALSE, verbose = FALSE) # without support correction
+omega_hat_EM_smooth(G, deltas, epsilons, s, 
+                    max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
+                    support = TRUE, verbose = FALSE) # with support correction
 }
