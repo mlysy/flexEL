@@ -4,7 +4,7 @@
 #' @template args-eps
 #' @template args-delta
 #' @example examples/logEL.R
-#' @return Log empirical likelihood of the input beta
+#' @return Log empirical likelihood
 #' @export logEL
 logEL <- function(omega, eps, delta, support = FALSE) {
   if (missing(eps) && missing(delta)) {

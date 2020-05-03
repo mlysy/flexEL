@@ -14,7 +14,7 @@ logEL(omega, eps, delta, support = FALSE)
 \item{delta}{Length-\code{nObs} vector of censoring indicators.}
 }
 \value{
-Log empirical likelihood of the input beta
+Log empirical likelihood
 }
 \description{
 Calculates log empirical likelihood given fully observed or right-censored observations.

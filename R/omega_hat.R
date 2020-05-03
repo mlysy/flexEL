@@ -6,6 +6,7 @@
 #' @param max_iter Maximum number of Newton-Raphson steps.
 #' @param rel_tol Relative tolerance of Newton-Raphson convergence.
 #' @param verbose Display number of steps and tolerance criterion when algorithm terminates.
+#' @example examples/omega_hat.R
 #' @return Length-\code{n_eqs} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.
 #' @export omega_hat
 omega_hat <- function(G, deltas, epsilons, 
@@ -36,12 +37,3 @@ omega_hat <- function(G, deltas, epsilons,
   }
   return(omegahat)
 }
-
-# omega.hat <- function(G, lambda, deltas, epsilons) {
-#   if (missing(deltas) && missing(epsilons)) {
-#     omegahat <- .omega.hat(t(G), lambda)
-#   }
-#   else {
-#     ...
-#   }
-# }
