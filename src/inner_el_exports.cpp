@@ -41,9 +41,6 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
     }
   }
   return lambda;
-  // return the status and value
-  // return Rcpp::List::create(_["lambda"] = lambda,
-  //                           _["convergence"] = !not_conv);
 }
 
 // Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 

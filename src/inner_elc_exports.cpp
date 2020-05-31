@@ -11,25 +11,7 @@
 //[[Rcpp::depends("RcppEigen")]]
 
 using namespace Rcpp;
-using namespace Eigen;
-
-/*
-// Note: for testing purpose only
-// [[Rcpp::export(".EvalEpsilonsLS")]]
-Eigen::VectorXd EvalEpsilonsLS(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z,
-                               Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2) {
-  // InnerELC<MeanRegModel> ILC;
-  int n_obs = G.cols();
-  int n_eqs = G.rows();
-  InnerELC<MeanRegModel> ILC(n_obs,n_eqs);
-  Eigen::VectorXd deltas = VectorXd::Zero(y.size()).array()+1.0;
-  // ILC.setData(y,X,Z,deltas,NULL);
-  ILC.setData(y,X,Z,deltas);
-  ILC.EvalEpsilons(beta,gamma,sig2);
-  Eigen::VectorXd epsilons = ILC.getEpsilons();
-  return(epsilons);
-}
-*/
+using namespace Eigen
 
 // returns weights for the weighted maximum log EL
 // Note: for testing purpose only
@@ -56,8 +38,7 @@ Eigen::VectorXd LambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
   ILC.set_opts(max_iter, rel_tol, support);
   ILC.set_G(G); // assign a given G
   ILC.set_weights(weights);
-  // ILC.setTol(max_iter, rel_tol);
-  
+
   // initialize variables for output here 
   int n_iter;
   double max_err;
@@ -77,10 +58,6 @@ Eigen::VectorXd LambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights,
     }
   }
   return lambda;
-  
-  // return the status and value
-  // return Rcpp::List::create(_["lambda"] = lambda,
-  //                           _["convergence"] = !not_conv);
 }
 
 // G: m x N matrix
@@ -117,17 +94,6 @@ double LogELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
   double logel = ILC.LogEL();
   return logel; 
 }
-
-// // [[Rcpp::export(".EvalPsos.smooth")]]
-// double EvalPsosSmooth(int ii, Eigen::VectorXd omegas, 
-//                       Eigen::VectorXd epsilons, double s, bool support) {
-//   int n_obs = epsilons.size();
-//   flexEL::InnerELC<MeanRegModel> ILC(n_obs,1);
-//   ILC.set_opts(support);
-//   ILC.set_epsilons(epsilons);
-//   ILC.set_omegas(omegas);
-//   return ILC.EvalPsosSmooth(ii-1,s); // ii is 1 larger in R than in C++
-// }
 
 // [[Rcpp::export(".LogELSmooth")]]
 double LogELSmooth(Eigen::VectorXd omegas, 
