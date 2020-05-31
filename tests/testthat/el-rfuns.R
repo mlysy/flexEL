@@ -1,14 +1,6 @@
 # ---- common functions ---- 
 
 MaxRelErr <- function(lambdaNew, lambdaOld) {
-  # lambdaSum <- abs(lambdaNew) + abs(lambdaOld)
-  # inds <- (lambdaSum < 1e-10) # indices of entires that are very close to 0
-  # relErr <- rep(NA,length(lambdaNew))
-  # # those entires that are very close to 0 use abs err
-  # relErr[inds] <- abs(lambdaNew - lambdaOld)[inds]
-  # # other entires use relative err
-  # relErr[!inds] <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))[!inds]
-  
   # TODO: added for numerical stability, what is a good tolerance ?
   if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
   relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))

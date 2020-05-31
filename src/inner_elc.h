@@ -1,5 +1,5 @@
 /**
- * @file InnerELC.h
+ * @file inner_elc.h
  * 
  * @brief Inner optimization routine for empirial likelihood problems under right-censoring.
  */
@@ -16,7 +16,6 @@
 #include "ind_smooth.h" // for smoothed indicator function
 #include "block_outer.h"
 #include "adj_G.h" // for support correction
-// #include "MwgAdapt.h" // for adaptive mcmc
 
 // [[Rcpp::depends(RcppEigen)]]
 
@@ -33,7 +32,7 @@ using namespace Eigen;
 namespace flexEL {
   
   /**
-   * @file       InnerELC.h
+   * @file       inner_elc.h
    *
    * @class      InnerELC
    *
@@ -122,8 +121,6 @@ namespace flexEL {
     void set_opts(const int& max_iter, const double& rel_tol, 
                  const bool& supp);
     void set_opts(const bool& supp);
-    // void setTol(const int& max_iter, const double& rel_tol, const double& abs_tol);
-    // void setTol(const int& max_iter, const double& rel_tol);
     
     // core calculations
     void LambdaNR(int& n_iter, double& max_err); // dual solution by Newton-Raphson algorithm
@@ -147,16 +144,7 @@ namespace flexEL {
     VectorXd get_epsilons();
     MatrixXd get_G();
     Ref<MatrixXd> get_ref_G();
-
-    // // posterior sampler
-    // MatrixXd postSample(int nsamples,int nburn, VectorXd betaInit, 
-    //                     const Ref<const VectorXd>& sigs, 
-    //                     VectorXd &RvDoMcmc,VectorXd &paccept);
-    // void mwgStep(VectorXd &thetaCur, const int &idx, const double &mwgsd,
-    //              bool &accept, double &LogELCur);
-    // MatrixXd postSampleAdapt(int nsamples, int nburn, VectorXd thetaInit,
-    //                          double *mwgSd, VectorXd &rvDoMcmc, bool *doAdapt, 
-    //                          VectorXd &paccept);
+    
   };
 }
 
@@ -224,8 +212,6 @@ inline double flexEL::InnerELC::EvalPSOSmooth(const int ii, const double s) {
     }
   }
   return(psos_smooth);
-  // VectorXd ss = ArrayXd::Zero(omegas.size()) + s;
-  // return (ind_smooth(epsilons[ii]-epsilons.array(),ss).array()*omegas.array()).sum();
 }
 
 /* --------------------------------------------------------------------------- */
@@ -775,264 +761,5 @@ inline MatrixXd flexEL::InnerELC::get_G() {
 inline Ref<MatrixXd> flexEL::InnerELC::get_ref_G() {
   return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_));
 }
-
-/* TAKE OUT ALL MCMC SAMPLERS FOR NOW:
-// posterior sampler: location model, single quantile case
-// Note: omegasInit needed as the starting value for EM?
-template<typename ELModel>
-inline MatrixXd InnerELC<ELModel>::postSample(int nsamples, int nburn,
-                                              VectorXd betaInit, 
-                                              const Ref<const VectorXd>& sigs,
-                                              VectorXd &RvDoMcmc, VectorXd &paccept) {
-  std::cout << "--------------------------- ELC postSample ----------------------------" << std::endl;
-  VectorXd betaOld = betaInit;
-  VectorXd betaNew = betaInit;
-  VectorXd betaProp = betaInit;
-  int betalen = betaInit.size();
-  MatrixXd beta_chain(betalen,nsamples); 
-  // beta_chain.fill(0.0); // debug
-  ELModel::evalG(betaInit);
-  evalEpsilons(betaInit);
-  EvalOmegas(); // omegasInit should have been assigned
-  double logELOld = LogEL();
-  // std::cout << "after calling LogEL()." << std::endl;
-  double logELProp;
-  bool satisfy;
-  double u;
-  double a;
-  double ratio;
-  int n_iter;
-  double max_err;
-  // paccept.fill(0.0);
-  paccept = VectorXd::Zero(betalen);
-  // std::cout << "sigs = " << sigs.transpose() << std::endl;
-  // std::cout << "paccept = " << paccept.transpose() << std::endl;
-  // std::cout << "RvDoMcmc = " << RvDoMcmc.transpose() << std::endl;
-
-  for (int ii=-nburn; ii<nsamples; ii++) {
-    if (ii % 200 == 0) {
-      std::cout << "ii = " << ii << std::endl;
-    }
-    for (int jj=0; jj<betalen; jj++) {
-      if (RvDoMcmc(jj)) {
-        betaProp = betaOld;
-        betaProp(jj) += sigs(jj)*R::norm_rand();
-        // std::cout << "betaProp = " << betaProp.transpose() << std::endl;
-        // check if proposed beta satisfies the constraint
-        satisfy = false;
-        ELModel::EvalG(betaProp);
-        EvalEpsilons(betaProp);
-        EvalWeights();
-        // std::cout << "weights = " << weights.transpose() << std::endl;
-        // check whether the constrains are satisfied or not
-        // std::cout << "old lambdaNew = " << lambdaNew.transpose() << std::endl;
-        LambdaNR(n_iter, max_err);
-        // std::cout << "new lambdaNew = " << lambdaNew << std::endl;
-        if (n_iter < max_iter) satisfy = true;
-        // if does not satisfy, keep the old beta
-        if (satisfy == false) break;
-        // if does satisfy, decide whether to accept
-        u = R::unif_rand();
-        // use the lambda calculate just now to get the logEL for Prop
-        // to avoid an extra call of LambdaNR
-        // VectorXd logomegahat = log(weights.array() /
-        //   (weights.transpose() + lambdaNew.transpose() * G).array().sum());
-        // logELProp = (weights.array()*logomegahat.array()).sum();
-        EvalOmegas(); // LambdaNR is in here as well
-        // std::cout << "omegas = " << omegas.transpose() << std::endl;
-        logELProp = LogEL();
-        // std::cout << "logELOld = " << logELOld << std::endl;
-        // std::cout << "logELProp = " << logELProp << std::endl;
-        ratio = exp(logELProp-logELOld);
-        // std::cout << "ratio = " << ratio << std::endl;
-        a = std::min(1.0,ratio);
-        if (u < a) { // accepted
-          paccept(jj) += 1;
-          betaNew = betaProp;
-          betaOld = betaNew;
-          // betaOld = betaProp;
-          logELOld = logELProp; // store the new one
-        }
-      }
-    }
-    if (ii >= 0) {
-      beta_chain.col(ii) = betaNew;
-      // beta_chain.col(ii) = betaProp;
-    }
-  }
-  paccept /= (nsamples+nburn);
-  return(beta_chain);
-}
-
-template<typename ELModel>
-inline void InnerELC<ELModel>::mwgStep(VectorXd &thetaCur,
-                                       const int &idx,
-                                       const double &mwgsd,
-                                       bool &accept, 
-                                       double &logELCur) {
-  // std::cout << "in mwgStep: logELCur = " << logELCur << std::endl;
-  int nTheta = thetaCur.size();
-  accept = false;
-  VectorXd thetaProp = thetaCur;
-  thetaProp(idx) += mwgsd*R::norm_rand();
-  // sig2 has to be positive
-  if (idx == nBet+nGam && thetaProp(idx) < 0) {
-    // std::cout << "negative sig2 = " << thetaProp(idx) << std::endl;
-    return;
-  }
-  
-  if (nTheta == nBet) {
-    ELModel::EvalG(thetaProp);
-    EvalEpsilons(thetaProp);
-  }
-  else {
-    if (nTheta == nBet + nGam + 1){
-      ELModel::EvalG(thetaProp.head(nBet), 
-                     thetaProp.segment(nBet,nGam), 
-                     thetaProp.tail(1)(0),
-                     VectorXd::Zero(0));
-    }
-    else {
-      ELModel::EvalG(thetaProp.head(nBet), 
-                     thetaProp.segment(nBet,nGam), 
-                     thetaProp.segment(nBet+nGam,1)(0),
-                     thetaProp.tail(nQts));
-    }
-    EvalEpsilons(thetaProp.head(nBet),
-                 thetaProp.segment(nBet,nGam),
-                 thetaProp.segment(nBet+nGam,1)(0));
-  }
-  int n_iter;
-  double max_err;
-  EvalWeights();
-  LambdaNR(n_iter, max_err);
-  bool satisfy = false;
-  if (n_iter < max_iter || max_err <= rel_tol) satisfy = true;
-  // if does not satisfy, keep the old theta
-  if (satisfy == false) {
-    // std::cout << "LambdaNR not converged so keep the old one."<< std::endl;
-    // std::cout << "n_iter = " << n_iter << std::endl;
-    // std::cout << "max_err = " << max_err << std::endl;
-    return;
-  }
-  // if does satisfy, flip a coin
-  double u = R::unif_rand();
-  // std::cout << "before EvalOmegas" << std::endl;
-  EvalOmegas();
-  // std::cout << "omegas = " << omegas.transpose() << std::endl;
-  double logELProp = LogEL();
-  // std::cout << "logELProp = " << logELProp << std::endl;
-  double ratio = exp(logELProp-logELCur);
-  double a = std::min(1.0,ratio);
-  if (u < a) { // accepted
-    accept = true;
-    thetaCur = thetaProp;
-    logELCur = logELProp;
-  }
-}
-
-// template<typename ELModel>
-// inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn, 
-//                                                    VectorXd thetaInit,
-//                                                    double *mwgSd, bool *rvDoMcmc, 
-//                                                    VectorXd &paccept) {
-template<typename ELModel>
-inline MatrixXd InnerELC<ELModel>::postSampleAdapt(int nsamples, int nburn, 
-                                                   VectorXd thetaInit,
-                                                   double *mwgSd,
-                                                   VectorXd &rvDoMcmc,
-                                                   bool *doAdapt, 
-                                                   VectorXd &paccept) {
-  int nTheta = thetaInit.size();
-  MatrixXd theta_chain(nTheta,nsamples);
-  paccept = VectorXd::Zero(nTheta);
-  // theta_chain.fill(0.0); // debug
-  // paccept.fill(0.0);
-  MwgAdapt tuneMCMC(nTheta, doAdapt);
-  bool *isAccepted = new bool[nTheta];
-  for (int ii=0; ii<nTheta; ii++) {
-    isAccepted[ii] = false;
-  }
-  VectorXd thetaCur = thetaInit;
-  if (nTheta == nBet) {
-    std::cout << "location model." << std::endl;
-    ELModel::EvalG(thetaCur);
-    EvalEpsilons(thetaCur);
-  }
-  else {
-    if (nTheta == nBet + nGam + 1) {
-      std::cout << "location-scale model for mean regression." << std::endl;
-      ELModel::EvalG(thetaCur.head(nBet),
-                     thetaCur.segment(nBet,nGam),
-                     thetaCur.tail(1)(0),
-                     VectorXd::Zero(0));
-    }
-    else {
-      std::cout << "location-scale model for quantile regression." << std::endl;
-      ELModel::EvalG(thetaCur.head(nBet),
-                     thetaCur.segment(nBet,nGam),
-                     thetaCur.segment(nBet+nGam,1)(0),
-                     thetaCur.tail(nQts));
-    }
-    EvalEpsilons(thetaCur.head(nBet),
-                 thetaCur.segment(nBet,nGam),
-                 thetaCur.segment(nBet+nGam,1)(0)); // Note: have to take the element here
-  }
-  EvalOmegas();
-  // std::cout << "initial omegas = " << omegas.transpose() << std::endl;
-  double logELCur = LogEL();
-  // MCMC loop
-  for(int ii=-nburn; ii<nsamples; ii++) {
-    // if (ii % 200 == 0) {
-    //   std::cout << "ii = " << ii << std::endl;
-    //   
-    //   // DEBUG begins
-    //   std::cout << "mwgSd = ";
-    //   for (int ll=0; ll<nTheta; ll++) {
-    //     std::cout << mwgSd[ll] << ' ';
-    //   }
-    //   std::cout << std::endl;
-    // 
-    //   std::cout << "isAccepted = ";
-    //   for (int ll=0; ll<nTheta; ll++) {
-    //     std::cout << isAccepted[ll] << ' ';
-    //   }
-    //   std::cout << std::endl;
-    //   // DEBUG ends
-    // }
-    for(int jj=0; jj<nTheta; jj++) {
-      if(rvDoMcmc[jj]) {
-        // modifies thetaCur's jj-th entry
-        mwgStep(thetaCur,jj,mwgSd[jj],isAccepted[jj],logELCur);
-        // std::cout << "in sampler loop: thetaCur = " << thetaCur.transpose() << std::endl;
-        // std::cout << "mwgSd[jj] = " << mwgSd[jj] << std::endl;
-        if (isAccepted[jj]) paccept(jj) += 1; // add 1 to paccept if accepted
-      }
-    }
-    if (ii >= 0) {
-      theta_chain.col(ii) = thetaCur;
-    }
-    tuneMCMC.adapt(mwgSd, isAccepted);
-    // TODO: temp to check if the chain is converging..
-    if (ii > 0 && ii % 1000 == 0) {
-      int noconv = 0;
-      VectorXd pacctemp = paccept.array() / (nburn+ii);
-      std::cout << "pactemp = "; 
-      for (int kk=0; kk<nTheta; kk++) {
-        std::cout << pacctemp(kk) << ' ';
-        if (pacctemp(kk) < 0.4) noconv += 1;
-      }
-      std::cout << std::endl;
-      if (noconv == nTheta) {
-        theta_chain.fill(0.0);
-        break;
-      }
-    }
-  }
-  paccept /= (nsamples+nburn);
-  delete[] isAccepted; // deallocate memory
-  return(theta_chain);
-}
-*/
 
 #endif
