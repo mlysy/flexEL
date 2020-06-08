@@ -1,11 +1,7 @@
 # ---- testing qrls.evalG implementations in R and C++ are equal ----
 
-# library(bayesEL)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
-source("../dontrun/mode-functions.R")
-# library(testthat)
+source("el_funs.R")
+source("reg_models.R")
 
 context("qrls.evalG.smooth")
 
@@ -29,7 +25,7 @@ test_that("qrls.evalG.smooth.R == qrls.evalG.smooth.cpp", {
     # checking G matrix from cpp and R
     sp <- sample(100,1)
     G.cpp <- qrls_evalG_smooth(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
-    G.R <- qrls.evalG.smooth_R(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
+    G.R <- qrls_evalG_smooth_R(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
     expect_equal(G.cpp, G.R)
   }
 })

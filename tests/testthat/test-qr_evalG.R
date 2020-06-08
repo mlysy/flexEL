@@ -1,8 +1,7 @@
 #---- testing qr.eval.G (location model) ----
-# library(flexEL) # always load the package (with library)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
+
+source("el_funs.R")
+source("reg_models.R")
 
 # library(testthat) # not loaded automatically
 context("qr.evalG")
@@ -20,7 +19,7 @@ test_that("qr.evalG.R == qr.evalG.cpp", {
         y <- c(X %*% beta) + rnorm(n) # with N(0,1) error term
         # checking G matrix from cpp and R
         G.cpp <- qr_evalG(y, X, alpha, beta)
-        G.R <- qr.evalG_R(y, X, alpha, beta)
+        G.R <- qr_evalG_R(y, X, alpha, beta)
         expect_equal(G.cpp,G.R)
     }
 })

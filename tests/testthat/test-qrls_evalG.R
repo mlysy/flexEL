@@ -1,10 +1,7 @@
 # ---- testing qrls.evalG implementations in R and C++ are equal ----
 
-# library(bayesEL)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
-# library(testthat)
+source("el_funs.R")
+source("reg_models.R")
 
 context("qrls.evalG")
 
@@ -27,7 +24,7 @@ test_that("qrls.evalG.R == qrls.evalG.cpp", {
     y <- c(X %*% beta + sqrt(sig2)*exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
     # checking G matrix from cpp and R
     G.cpp <- qrls_evalG(y,X,Z,alpha,beta,gamma,sig2,nu)
-    G.R <- qrls.evalG_R(y,X,Z,alpha,beta,gamma,sig2,nu)
+    G.R <- qrls_evalG_R(y,X,Z,alpha,beta,gamma,sig2,nu)
     expect_equal(G.cpp, G.R)
   }
 })

@@ -11,7 +11,7 @@
 //[[Rcpp::depends("RcppEigen")]]
 
 using namespace Rcpp;
-using namespace Eigen
+using namespace Eigen;
 
 // returns weights for the weighted maximum log EL
 // Note: for testing purpose only

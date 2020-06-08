@@ -22,7 +22,7 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
     omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-    omegahat.R <- omega.hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat.R <- omega_hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     expect_equal(omegahat.cpp, omegahat.R)
   }
 })
@@ -62,28 +62,10 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
     G <- matrix(rnorm(n*p),n,p) # random G here
     omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
                               support = TRUE, verbose = FALSE)
-    omegahat.R <- omega.hat_R(G = adjG_R(G), max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat.R <- omega_hat_R(G = adjG_R(G), max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     expect_equal(omegahat.cpp, omegahat.R)
   }
 })
-
-# test_that("no censoring: omegahat.cpp is optimal", {
-#   for(ii in 1:ntest) {
-#     n <- sample(10:20,1)
-#     p <- sample(1:(n-2), 1)
-#     # max_iter <- sample(c(5, 10, 100), 1)
-#     max_iter <- sample(c(10, 100, 500), 1)
-#     rel_tol <- runif(1, 1e-6, 1e-5)
-#     G <- matrix(rnorm(n*p),n,p) # random G here
-#     omegahat.cpp <- omega.hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
-#                               support = TRUE, verbose = FALSE)
-#     ocheck <- optim_proj(xsol = rep(1,n-p+1),
-#                          xrng = 0.05,
-#                          fun = function(x) {omega.check(x, omegahat.cpp, G)},
-#                          plot = FALSE)
-#     expect_lt(max.xdiff(ocheck),0.01)
-#   }
-# })
 
 # Censored case:
 test_that("under censoring: omegahatC.R == omegahatC.cpp", {
@@ -140,14 +122,6 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp (with support correctio
   }
 })
 
-# save.ome <- list()
-# save.del <- list()
-# save.G <- list()
-# save.eps <- list()
-# save.ite <- list()
-# save.tol <- list()
-# count <- 0
-
 # checking optimality of the solution from C++
 test_that("under censoring: omegahat.cpp is optimal", {
   for(ii in 1:ntest) {
@@ -180,29 +154,6 @@ test_that("under censoring: omegahat.cpp is optimal", {
     }
   }
 })
-
-# smoothed censored EL
-# checking optimality of the solution (TODO: the following is in R)
-# n <- 25
-# p <- 5
-# max_iter <- 200
-# rel_tol <- 1e-5
-# G <- matrix(rnorm(n*p), n, p)
-# deltas <- rep(1,n)
-# numcens <- sample(round(n/3),1)
-# censinds <- sample(n,numcens)
-# deltas[censinds] <- 0
-# 1-sum(deltas)/n
-# epsilons <- rnorm(n)
-# oout <- omega.hat.EM.smooth_R(G, deltas, epsilons, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-# oout$conv
-# omegahat <- oout$omegas
-# ocheck <- optim_proj(xsol = rep(1,n-p),
-#                      xrng = 0.0001,
-#                      npts = 201,
-#                      fun = function(x) {omega.smooth.check(x, omegahat, G, deltas, epsilons)},
-#                      plot = FALSE)
-# expect_lt(max.xdiff(ocheck),0.01)
 
 # Censored case + smooth:
 test_that("under censoring: omegahatCS.R == omegahatCS.cpp", {
@@ -307,13 +258,3 @@ test_that("under censoring: omegahat.cpp is optimal", {
   }
 })
 
-# --------------------------------------------------------------------------- 
-
-## omega.hat <- function(G, deltas, lambda) {
-## }
-
-## # method 1:
-## omega <- omega.hat(G, deltas, ...)
-## # method 2:
-## lambda <- lambdaNR(G, deltas, ...)
-## omega <- omega.hat(G, lambda)
