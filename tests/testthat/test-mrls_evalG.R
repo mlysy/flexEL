@@ -1,16 +1,13 @@
-# ---- testing qrls.evalG implementations in R and C++ are equal ----
+# ---- testing qrls_evalG implementations in R and C++ are equal ----
 
-# library(bayesEL)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
-# library(testthat)
+source("el_rfuns.R")
+source("reg_models.R")
 
-context("mrls.evalG")
+context("mrls_evalG")
 
 ntest <- 50
 
-test_that("mrls.evalG.R == mrls.evalG.cpp", {
+test_that("mrls_evalG_R == mrls_evalG_cpp", {
   for(ii in 1:ntest) {
     # Location-scale model + mean regression
     n <- sample(10:20,1)
@@ -25,9 +22,9 @@ test_that("mrls.evalG.R == mrls.evalG.cpp", {
     max_iter <- sample(c(2, 10, 100), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     # checking G matrix from cpp and R
-    G.cpp <- mrls_evalG(y,X,Z,beta,gamma,sig2)
-    G.R <- mrls.evalG_R(y,X,Z,beta,gamma,sig2)
-    expect_equal(G.R, G.cpp)
+    G_cpp <- mrls_evalG(y,X,Z,beta,gamma,sig2)
+    G_R <- mrls_evalG_R(y,X,Z,beta,gamma,sig2)
+    expect_equal(G_R, G_cpp)
   }
 })
 

@@ -1,9 +1,7 @@
 # ---- testing lambdaNR ----
-# library(bayesEL) # always load the package (with library)
-library(optimCheck)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
+
+source("test_utils.R")
+source("el_rfuns.R")
 
 # library(testthat) # not loaded automatically
 context("lambdaNR_cens")
@@ -12,7 +10,7 @@ ntest <- 50
 
 # Censored case:
 # checking R and C++ implementations are equal
-test_that("under censoring: lambda.R == lambda.cpp", {
+test_that("under censoring: lambda_R == lambda_cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -21,17 +19,17 @@ test_that("under censoring: lambda.R == lambda.cpp", {
     rel_tol <- runif(1, 1e-6, 1e-5)
     weights <- abs(rnorm(n))
     weights <- weights / sum(weights) * n # sum(weights) == n
-    lambda.cpp <- lambdaNR_cens(G = G, weights = weights, 
+    lambda_cpp <- lambdaNR_cens(G = G, weights = weights, 
                                 max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     nrout <- lambdaNRC_R(G = G, weights, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-    lambda.R <- nrout$lambda
+    lambda_R <- nrout$lambda
     # check R and C++ are equal
-    expect_equal(lambda.cpp, lambda.R)
+    expect_equal(lambda_cpp, lambda_R)
   }
 })
 
 # checking optimality of the solution from C++
-test_that("under censoring: lambda.cpp is optimal", {
+test_that("under censoring: lambda_cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -40,14 +38,14 @@ test_that("under censoring: lambda.cpp is optimal", {
     rel_tol <- runif(1, 1e-6, 1e-5)
     weights <- abs(rnorm(n))
     weights <- weights / sum(weights) * n # sum(weights) == n
-    lambda.cpp <- lambdaNR_cens(G = G, weights = weights, 
+    lambda_cpp <- lambdaNR_cens(G = G, weights = weights, 
                                 max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
     # check optimality by optim_proj if converged
-    if (!any(is.na(lambda.cpp))) {
-      ocheck <- optim_proj(xsol = lambda.cpp,
+    if (!any(is.na(lambda_cpp))) {
+      ocheck <- optim_proj(xsol = lambda_cpp,
                            fun = function(lambda) QfunCens(lambda, G, weights),
                            plot = FALSE)
-      expect_lt(max.xdiff(ocheck),0.01)
+      expect_lt(max_xdiff(ocheck),0.01)
     }
   }
 })

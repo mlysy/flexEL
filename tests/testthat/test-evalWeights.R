@@ -1,14 +1,12 @@
-# test evalWeights is working properly
-# library(bayesEL) # always load the package (with library)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
+# ---- test evalWeights is working properly ----
+
+source("el_rfuns.R")
 
 # library(testthat) # not loaded automatically
 context("evalWeights")
 
 ntest <- 50
-test_that("weights.R == weights.cpp", {
+test_that("weights_R == weights_cpp", {
   for(ii in 1:ntest) {
     nObs <- sample(10:50,1)
     nEqs <- sample(2:5,1)
@@ -20,16 +18,16 @@ test_that("weights.R == weights.cpp", {
     omegas <- omegas / sum(omegas) # prob vector
     epsilons <- rnorm(nObs)
     support <- FALSE
-    weights.cpp <- .EvalWeights(deltas, omegas, epsilons, support)
-    expect_equal(sum(weights.cpp),nObs)
-    weights.R <- evalWeights_R(deltas, omegas, epsilons)
-    expect_equal(sum(weights.R),nObs)
-    expect_equal(weights.cpp, weights.R)
+    weights_cpp <- flexEL:::.EvalWeights(deltas, omegas, epsilons, support)
+    expect_equal(sum(weights_cpp),nObs)
+    weights_R <- evalWeights_R(deltas, omegas, epsilons)
+    expect_equal(sum(weights_R),nObs)
+    expect_equal(weights_cpp, weights_R)
   }
 })
 
 ntest <- 50
-test_that("weights.R == weights.cpp (with support correction)", {
+test_that("weights_R == weights_cpp (with support correction)", {
   for(ii in 1:ntest) {
     nObs <- sample(10:50,1)
     nEqs <- sample(2:5,1)
@@ -41,11 +39,11 @@ test_that("weights.R == weights.cpp (with support correction)", {
     omegas <- omegas / sum(omegas) # prob vector
     epsilons <- rnorm(nObs)
     support <- TRUE
-    weights.cpp <- .EvalWeights(deltas, omegas, epsilons, support)
-    expect_equal(sum(weights.cpp),nObs+1)
-    weights.R <- evalWeights_R(c(deltas,0), omegas, c(epsilons,-Inf))
-    expect_equal(sum(weights.R),nObs+1)
-    expect_equal(weights.cpp, weights.R)
+    weights_cpp <- flexEL:::.EvalWeights(deltas, omegas, epsilons, support)
+    expect_equal(sum(weights_cpp),nObs+1)
+    weights_R <- evalWeights_R(c(deltas,0), omegas, c(epsilons,-Inf))
+    expect_equal(sum(weights_R),nObs+1)
+    expect_equal(weights_cpp, weights_R)
   }
 })
 

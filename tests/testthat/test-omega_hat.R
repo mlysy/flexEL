@@ -1,19 +1,17 @@
-# ---- testing R and C++ implementations of omega.hat are equal and optimality ----
-# library(flexEL) # always load the package (with library)
-library(optimCheck)
-source("el-utils.R")
-source("el-rfuns.R")
-source("el-model.R")
-source("../dontrun/smoothEL.R")
+# ---- testing R and C++ implementations of omega_hat are equal and optimality ----
+
+source("test_utils.R")
+source("el_rfuns.R")
+source("reg_models.R")
 
 # library(testthat) # not loaded automatically
-context("omega.hat")
+context("omega_hat")
 
 ntest <- 50
 
 # Non-censored case:
 # checking R and C++ implementations are equal
-test_that("no censoring: omegahat.R == omegahat.cpp", {
+test_that("no censoring: omegahat_R == omegahat_cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -21,14 +19,14 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-    omegahat.R <- omega_hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-    expect_equal(omegahat.cpp, omegahat.R)
+    omegahat_cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    omegahat_R <- omega_hat_R(G = G, max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    expect_equal(omegahat_cpp, omegahat_R)
   }
 })
 
 # checking optimality of the solution from C++
-test_that("no censoring: omegahat.cpp is optimal", {
+test_that("no censoring: omegahat_cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -36,23 +34,22 @@ test_that("no censoring: omegahat.cpp is optimal", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+    omegahat_cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
                               support = FALSE, verbose = FALSE)
     # check optimality by optim_proj if converged
-    if (!any(is.nan(omegahat.cpp))) {
-      # optimal of omega.check should be at xsol = 1s if omegahat is optimal
+    if (!any(is.nan(omegahat_cpp))) {
+      # optimal of omega_check should be at xsol = 1s if omegahat is optimal
       ocheck <- optim_proj(xsol = rep(1,n-p),
                            xrng = 0.05,
-                           fun = function(x) {omega.check(x, omegahat.cpp, G)},
+                           fun = function(x) {omega_check(x, omegahat_cpp, G)},
                            plot = FALSE)
-      expect_lt(max.xdiff(ocheck),0.01)
+      expect_lt(max_xdiff(ocheck),0.01)
     }
   }
 })
 
 # checking optimality of the solution from C++ (with support correction) 
-# (TODO: make adjG internal..)
-test_that("no censoring: omegahat.R == omegahat.cpp", {
+test_that("no censoring: omegahat_R == omegahat_cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -60,15 +57,15 @@ test_that("no censoring: omegahat.R == omegahat.cpp", {
     max_iter <- sample(c(10, 100, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     G <- matrix(rnorm(n*p),n,p) # random G here
-    omegahat.cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
+    omegahat_cpp <- omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, 
                               support = TRUE, verbose = FALSE)
-    omegahat.R <- omega_hat_R(G = adjG_R(G), max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
-    expect_equal(omegahat.cpp, omegahat.R)
+    omegahat_R <- omega_hat_R(G = adjG_R(G), max_iter = max_iter, rel_tol = rel_tol, verbose = FALSE)
+    expect_equal(omegahat_cpp, omegahat_R)
   }
 })
 
 # Censored case:
-test_that("under censoring: omegahatC.R == omegahatC.cpp", {
+test_that("under censoring: omegahatC_R == omegahatC_cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -82,20 +79,20 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat_cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
-    omegahat.R <- omega.hat_R(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat_R <- omega_hat_R(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
-    if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
+    if (!any(is.nan(omegahat_cpp)) && any(is.nan(omegahat_R))) {
       message("R version did not converge but C++ does.")
     }
     else {
-      expect_equal(omegahat.cpp, omegahat.R)
+      expect_equal(omegahat_cpp, omegahat_R)
     }
   }
 })
 
-test_that("under censoring: omegahatC.R == omegahatC.cpp (with support correction) ", {
+test_that("under censoring: omegahatC_R == omegahatC_cpp (with support correction) ", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -109,21 +106,21 @@ test_that("under censoring: omegahatC.R == omegahatC.cpp (with support correctio
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat_cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, support = TRUE, verbose = FALSE)
-    omegahat.R <- omega.hat.EM_R(adjG_R(G), deltas, epsilons, adjust = TRUE, max_iter = max_iter, 
+    omegahat_R <- omega_hat_EM_R(adjG_R(G), deltas, epsilons, adjust = TRUE, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
-    if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
+    if (!any(is.nan(omegahat_cpp)) && any(is.nan(omegahat_R))) {
       message("R version did not converge but C++ does.")
     }
     else {
-      expect_equal(omegahat.cpp, omegahat.R, tolerance = 1e-4) # TODO: is this tolerance ok??
+      expect_equal(omegahat_cpp, omegahat_R, tolerance = 1e-4) # TODO: is this tolerance ok??
     }
   }
 })
 
 # checking optimality of the solution from C++
-test_that("under censoring: omegahat.cpp is optimal", {
+test_that("under censoring: omegahat_cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:30,1)
     p <- sample(1:(n-2), 1)
@@ -139,24 +136,24 @@ test_that("under censoring: omegahat.cpp is optimal", {
     censinds <- sample(n,numcens)
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
-    omegahat.cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
+    omegahat_cpp <- omega_hat(G, deltas, epsilons, max_iter = max_iter, 
                               rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
-    if (!any(is.nan(omegahat.cpp))) {
-      idx0 <- (abs(omegahat.cpp) < 1e-5 & !deltas)
+    if (!any(is.nan(omegahat_cpp))) {
+      idx0 <- (abs(omegahat_cpp) < 1e-5 & !deltas)
       if (n-p-sum(idx0) > 0) {
         ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
                              xrng = 0.01,
                              npts = 201, 
-                             fun = function(x) {omega.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, rel_tol)},
+                             fun = function(x) {omega_pcheck(x, omegahat_cpp, G, deltas, epsilons, idx0, rel_tol)},
                              plot = FALSE)
-        expect_lt(max.xdiff(ocheck), 0.01)
+        expect_lt(max_xdiff(ocheck), 0.01)
       }
     }
   }
 })
 
 # Censored case + smooth:
-test_that("under censoring: omegahatCS.R == omegahatCS.cpp", {
+test_that("under censoring: omegahatCS_R == omegahatCS_cpp", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -171,20 +168,20 @@ test_that("under censoring: omegahatCS.R == omegahatCS.cpp", {
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
     support <- FALSE
-    omegahat.cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, 
+    omegahat_cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, 
                                         max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
                                         support = support, verbose = FALSE)
-    omegahat.R <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, verbose = FALSE)$omegas
-    if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
+    omegahat_R <- omega_hat_EM_smooth_R(G, deltas, epsilons, s, max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, verbose = FALSE)$omegas
+    if (!any(is.nan(omegahat_cpp)) && any(is.nan(omegahat_R))) {
       message("R version did not converge but C++ does.")
     }
     else {
-      expect_equal(omegahat.cpp, omegahat.R)
+      expect_equal(omegahat_cpp, omegahat_R)
     }
   }
 })
 
-test_that("under censoring: omegahatCS.R == omegahatCS.cpp (with support correction)", {
+test_that("under censoring: omegahatCS_R == omegahatCS_cpp (with support correction)", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -199,24 +196,24 @@ test_that("under censoring: omegahatCS.R == omegahatCS.cpp (with support correct
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
     support <- TRUE
-    omegahat.cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, 
+    omegahat_cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, 
                                         max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol, 
                                         support = support, verbose = FALSE)
-    omegahat.R <- omega.hat.EM.smooth_R(adjG_R(G), deltas, epsilons, s, 
+    omegahat_R <- omega_hat_EM_smooth_R(adjG_R(G), deltas, epsilons, s, 
                                         max_iter = max_iter, rel_tol = rel_tol, abs_tol = rel_tol,
                                         adjust = support, verbose = FALSE)$omegas
     
-    if (!any(is.nan(omegahat.cpp)) && any(is.nan(omegahat.R))) {
+    if (!any(is.nan(omegahat_cpp)) && any(is.nan(omegahat_R))) {
       message("R version did not converge but C++ does.")
     }
     else {
-      expect_equal(omegahat.cpp, omegahat.R, tolerance = 1e-4)
+      expect_equal(omegahat_cpp, omegahat_R, tolerance = 1e-4)
     }
   }
 })
 
 # checking optimality of the solution from C++
-test_that("under censoring: omegahat.cpp is optimal", {
+test_that("under censoring: omegahat_cpp is optimal", {
   for(ii in 1:ntest) {
     n <- sample(10:30,1)
     p <- sample(1:(n-2), 1)
@@ -234,25 +231,25 @@ test_that("under censoring: omegahat.cpp is optimal", {
     epsilons <- rnorm(n)
     s <- sample(1:100,1)
     support <- FALSE
-    omegahat.cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, max_iter = max_iter, 
+    omegahat_cpp <- omega_hat_EM_smooth(G, deltas, epsilons, s, max_iter = max_iter, 
                                           rel_tol = 1e-5, abs_tol = 1e-5, support = support, verbose = FALSE)
-    # omegahat.cpp <- omega.hat.EM.smooth_R(G, deltas, epsilons, s, max_iter = max_iter,
+    # omegahat_cpp <- omega_hat_EM_smooth_R(G, deltas, epsilons, s, max_iter = max_iter,
     #                                       rel_tol = 1e-3, verbose = FALSE)$omegas
-    if (!any(is.nan(omegahat.cpp))) {
-      idx0 <- (abs(omegahat.cpp) < 1e-5 & !deltas)
+    if (!any(is.nan(omegahat_cpp))) {
+      idx0 <- (abs(omegahat_cpp) < 1e-5 & !deltas)
       if (n-p-sum(idx0) > 0) {
         ocheck <- optim_proj(xsol = rep(1,n-p-sum(idx0)),
                              xrng = 0.01,
                              npts = 201,
-                             fun = function(x) {omega.smooth.pcheck(x, omegahat.cpp, G, deltas, epsilons, idx0, s)},
+                             fun = function(x) {omega_smooth_pcheck(x, omegahat_cpp, G, deltas, epsilons, idx0, s)},
                              plot = FALSE)
         # ocheck <- optim_proj(xsol = rep(1,n-p),
         #                      xrng = 0.001,
         #                      npts = 201, 
-        #                      fun = function(x) {omega.smooth.check(x, omegahat.cpp, G, deltas, epsilons, s)},
+        #                      fun = function(x) {omega_smooth_check(x, omegahat_cpp, G, deltas, epsilons, s)},
         #                      plot = FALSE)
         # print(ocheck)
-        expect_lt(max.xdiff(ocheck), 0.01)
+        expect_lt(max_xdiff(ocheck), 0.01)
       }
     }
   }
