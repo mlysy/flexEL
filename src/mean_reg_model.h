@@ -40,7 +40,7 @@ class MeanRegModel {
   protected:
     
     int n_obs_; /**< number of observations (number of columns of G) */
-  int n_eqs_; /**< number of estimating equations (number of rows of G) */
+    int n_eqs_; /**< number of estimating equations (number of rows of G) */
   
   public:
     
@@ -161,7 +161,7 @@ inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
 /**
 * @brief Evaluate G matrix for mean regression location model.
 * 
-* @param beta     Coefficient vector of length <code>n_obs</code> in linear location function.
+* @param beta     Coefficient vector of length <code>n_bet_</code> in linear location function.
 */
 inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G, const Ref<const VectorXd>& beta) {
   yXb_ = y_.transpose() - beta.transpose() * X_;

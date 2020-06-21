@@ -9,8 +9,8 @@
 #' @example examples/omega_hat.R
 #' @return Length-\code{n_eqs} vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.
 #' @export omega_hat
-omega_hat <- function(G, deltas, epsilons, 
-                      max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, support = FALSE, verbose = FALSE) {
+omega_hat <- function(G, deltas, epsilons, max_iter = 100, rel_tol = 1e-7, 
+                      abs_tol = 1e-3, support = FALSE, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
     lambda <- .LambdaNR(t(G), 
                         max_iter = max_iter, 

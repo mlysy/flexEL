@@ -45,7 +45,7 @@ namespace flexEL {
   protected:
     
     int n_obs_; /**< number of observations (number of columns of G) */
-  int n_eqs_; /**< number of estimating equations (number of rows of G) */
+    int n_eqs_; /**< number of estimating equations (number of rows of G) */
   
   public:
     

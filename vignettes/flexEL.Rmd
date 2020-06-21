@@ -9,6 +9,7 @@ vignette: >
   %\VignetteIndexEntry{flexEL}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: flexEL.bib
 ---
 
 ```{r, echo = FALSE, eval = FALSE}
@@ -18,7 +19,11 @@ rmarkdown::render("R_model_object.Rmd")
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\XX}{{\bm{X}}}
 \newcommand{\xx}{{\bm{x}}}
+\newcommand{\zz}{{\bm{z}}}
+\newcommand{\bbe}{{\bm{\beta}}}
+\newcommand{\bga}{{\bm{\gamma}}}
 \newcommand{\w}{{\omega}}
+\newcommand{\e}{{\epsilon}}
 \newcommand{\tth}{{\bm{\theta}}}
 \newcommand{\E}{\textrm{E}}
 \newcommand{\F}{\textrm{F}}
@@ -74,7 +79,7 @@ When the response is time-to-event data such as survial time in many medical stu
 
 The log EL function under right-censoring (CEL) is defined as
 \[
-  \ell_{\CEL} := \log\CEL(\tth) = \sum_{i=1}^n \delta_i\cdot\log\hat w_i(\tth) + (1-\delta_i)\cdot\log(\sum_{j: e_j \geq e_i}\hat w_i(\tth))
+  \ell_{\CEL} := \log\CEL(\tth) = \sum_{i=1}^n \delta_i\cdot\log\hat{w_i}(\tth) + (1-\delta_i)\cdot\log(\sum_{j: e_j \geq e_i}\hat{w_i}(\tth))
 \]
 
 Given a specific $\tth$, let $e_i$ be the residual of the $i$-th observation for $i=1,\cdots,n$. Similar as before, $\hat\w(\tth)$ is the solution of
@@ -126,20 +131,24 @@ One thing to notice is that the log EL function may not be continuous and differ
 
 Let's use a simple two-parameter linear regression model as an example. Suppose we assume the following model
 \[
-  y_i = \beta_0 + \beta_1x_i + \epsilon_i, \quad i=1,\cdots,n, 
+  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
 \]
 where $\epsilon_i \iid \F(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\var(\epsilon_i) = 1$. Notice that the distribution of $\epsilon_i$ is unkown, and no distribution assumption is made except for its mean and variance here. 
 
 Let's start by simulating some data:
 ```{r, echo=TRUE, eval=TRUE}
-source("../tests/dontrun/gen_eps.R")
+gen_nct_eps <- function(n, df, ncp) {
+  m <- ncp*sqrt(df/2)*gamma((df-1)/2)/gamma(df/2)
+  v <- df*(1+ncp^2)/(df-2)-ncp^2*df/2*(gamma((df-1)/2)/gamma(df/2))^2
+  eps <- (rt(n, df = df, ncp = ncp)-m)/sqrt(v)
+}
 n <- 500 # number of observations
 b <- c(0.5,1) # beta_0 = 0.5, beta_1 = 1
-eps <- gen_eps(n, dist="nct", df=20, ncp=1) # a re-centered right-skewed non-central t distribution
-X <- cbind(1,rnorm(n)) # n x 2 covariate matrix (intercept included)
+eps <- gen_nct_eps(n, df = 20, ncp = 1) # a re-centered right-skewed non-central t distribution
+X <- cbind(1, rnorm(n)) # n x 2 covariate matrix (intercept included)
 y <- X %*% b + eps # length n response vector
 ```
-We explain how to use this package to conduct inference for your regression model through some implementations either in R or in C++ in the following two sections.
+We explain how to use this package to conduct inference for your regression model either in R or in C++ in the following two sections.
 
 ### Usage in R
 
@@ -176,31 +185,40 @@ Here, for the convience of using the minimization algorithm `nlm`, let's impleme
 ```{r, echo=TRUE, eval=TRUE}
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
-  omegas <- omega_hat(G) # the empirical distribution provided by flexEL
-  if (!anyNA(omegas)) return(-logEL(omegas)) # returns the negative log EL, if optimal omegas is found
+  omegas <- flexEL::omega_hat(G) # the empirical distribution provided by flexEL
+  if (!anyNA(omegas)) return(-flexEL::logEL(omegas)) # returns the negative log EL, if optimal omegas is found
   else return(Inf) # otherwise, returns Inf
 }
 ```
 
 With the `neglogEL` function, we can then obtain the estimate using `nlm`:
 ```{r, echo=TRUE, eval=TRUE}
-library(flexEL)
-beta.init <- coef(lm(y ~ X-1)) # obtain initial value
-nlmout <- nlm(f=mr_neglogEL_R, p=beta.init, y=y, X=X)
+beta_init <- coef(lm(y ~ X-1)) # obtain initial value
+nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
 nlmout$estimate
 ```
 
 You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.
 ```{r, echo=TRUE, eval=TRUE}
-source("../tests/dontrun/mode-functions.R")
+logEL_grad_R <- function(omegas, lambda, gradlist) {
+  grad <- sapply(gradlist, function(x) lambda %*% x)
+  return(c(-grad %*% omegas))
+}
+
+mr_deltaG_R <- function(y, X, theta) {
+  lx <- split(X, row(X))
+  dg <- lapply(lx, function(x) tcrossprod(x,x))
+  return(dg)
+}
+
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
-  lambda <- lambdaNR(G)
+  lambda <- flexEL::lambdaNR(G, support = FALSE)
   if (!anyNA(lambda)) {
     omegas <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
     res <- -sum(log(omegas)) # negative logEL
     gradlist <- mr_deltaG_R(y, X, beta)
-    grad <- -logELgrad_R(omegas, lambda, gradlist) # negative gradient
+    grad <- -logEL_grad_R(omegas, lambda, gradlist) # negative gradient
     attr(res, "gradient") <- grad
   }
   else {
@@ -212,23 +230,60 @@ mr_neglogEL_R <- function(y, X, beta) {
 ```
 
 ```{r, echo=TRUE, eval=TRUE}
-nlmout <- nlm(f=mr_neglogEL_R, p=beta.init, y=y, X=X)
+nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
 nlmout$estimate
 ```
 
 ### Usage in C++
 
-TODO: Talk about how user can supply a C++ header file to construct $G$ matrix efficiently and exported as R function to solve their EL problem. Use the above mean regression example. 
+One can also implement a regression model in C++ following the header file `mean_reg_model.h`. The key element of this is once again the `EvalG` method which defines the regression model. 
+
+```{c, echo=TRUE, eval=FALSE}
+#include <Rcpp.h>
+#include <RcppEigen.h>
+#include <random>
+#include "inner_el.h"
+#include "mean_reg_model.h"
+
+// simulate some data
+Eigen::VectorXd X = Eigen::VectorXd::Random(2,20);
+Eigen::VectorXd beta(2);
+beta << 1, 2;
+static default_random_engine e(time(0));
+static normal_distribution<double> n(0,1);
+Eigen::VectorXd eps(20);
+for (int ii=0; i<20; i++) {
+  eps << n(e);
+}
+Eigen::VectorXd y = beta.transpose() * X + eps;
+
+// calculate EL for a particular beta
+flexEL::MeanRegModel MR(y, X); // instantiate a mean regression object
+flexEL::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs()); // instantiate an EL object with dimention of G matrix
+EL.set_opts(support = true); // set support correction
+
+Eigen::VectorXd beta = Eigen::VectorXd::Random(2);
+MR.EvalG(EL.get_ref_G(), beta);
+int n_iter;
+double max_err;
+EL.LambdaNR(n_iter, max_err);
+EL.EvalOmegas();
+EL.LogEL();
+```
 
 ## Models Included in the Package
 
-### Location-Scale Mean Regression Model
+1. Mean and quantile regression models
 
-### Location-Scale Quantile Regression Model
+\[
+  y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.
+\]
 
-## Other Optimization / Modification Methods Included in the Package
+3. Location-Scale Mean and Quantile Regression Model
 
-TODO: If Aitken acceleration for EM and adjusted G matrix for support modification are included, talk about them here.
+\[
+  y_i = \xx_i'\bbe + \sigma\cdot\exp(\zz_i'\bga)\cdot\e_i, \quad i=1,\cdots,n.
+\]
 
 ## Future Works
 

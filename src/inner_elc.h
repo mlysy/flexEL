@@ -529,6 +529,7 @@ inline void flexEL::InnerELC::EvalOmegas() {
     // std::cout << "EvalOmegas: resetting omegas_." << std::endl;
     omegas_ = omegas_init_;
   }
+  if (supp_) adj_G(G_,supp_a_); // calculate base on adjusted G
   int n_iter;
   double max_err;
   // lGq_(n_obs2_);
@@ -756,10 +757,10 @@ inline MatrixXd flexEL::InnerELC::get_G() {
 }
 
 /**
- * @brief Get the reference of G.
+ * @brief Get the reference of original dimension G (not including the adjusted row).
  */
 inline Ref<MatrixXd> flexEL::InnerELC::get_ref_G() {
-  return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_));
+  return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_-supp_));
 }
 
 #endif
