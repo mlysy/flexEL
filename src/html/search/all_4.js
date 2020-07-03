@@ -1,10 +1,9 @@
 var searchData=
 [
-  ['el',['el',['../namespaceel.html',1,'']]],
-  ['evalg',['evalG',['../class_mean_reg_model.html#a40d412de6016d45b940f81dc76fc782e',1,'MeanRegModel::evalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta)'],['../class_mean_reg_model.html#a48d0c00a3d0dfaf33fee5f0fdb581ae7',1,'MeanRegModel::evalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2)'],['../class_quant_reg_model.html#adf112863c3c2baf03ae5be76204e5e19',1,'QuantRegModel::evalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const MatrixXd &gt; &amp;Beta)'],['../class_quant_reg_model.html#ad15efef7b197dd11daae70b12a6c3c5e',1,'QuantRegModel::evalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;Nu)']]],
-  ['evalgsmooth',['evalGSmooth',['../class_quant_reg_model.html#a12969cd403f88c9ea02b3b3304804269',1,'QuantRegModel']]],
-  ['evalomegas',['evalOmegas',['../classel_1_1_inner_e_l.html#ab2b46e7fa5e0479dba5715f93ab855a1',1,'el::InnerEL::evalOmegas()'],['../classel_1_1_inner_e_l_c.html#a9fb572a5108fe64058e5c69134071154',1,'el::InnerELC::evalOmegas()']]],
-  ['evalomegassmooth',['evalOmegasSmooth',['../classel_1_1_inner_e_l_c.html#af3add6f8070b5ce7a82e7a18cb991ec8',1,'el::InnerELC']]],
-  ['evalweights',['evalWeights',['../classel_1_1_inner_e_l_c.html#a4722e47cd2ed2f720081537d759d048a',1,'el::InnerELC']]],
-  ['evalweightssmooth',['evalWeightsSmooth',['../classel_1_1_inner_e_l_c.html#a64c57a1c171bf25e7c796e012976d93e',1,'el::InnerELC']]]
+  ['get_5fepsilons',['get_epsilons',['../classflex_e_l_1_1_inner_e_l_c.html#abd246325eda0e3a4fb58fd6b804f2453',1,'flexEL::InnerELC']]],
+  ['get_5fg',['get_G',['../classflex_e_l_1_1_inner_e_l.html#a8c90ca32188f07f0b587ef1b97799a0e',1,'flexEL::InnerEL::get_G()'],['../classflex_e_l_1_1_inner_e_l_c.html#a1d411fd5495cf100631818ac33c85ddf',1,'flexEL::InnerELC::get_G()']]],
+  ['get_5flambda',['get_lambda',['../classflex_e_l_1_1_inner_e_l.html#a81331fa9116247e9ef86f8f0d1f88309',1,'flexEL::InnerEL::get_lambda()'],['../classflex_e_l_1_1_inner_e_l_c.html#a8ba840bb436142a4629151d2a44321ff',1,'flexEL::InnerELC::get_lambda()']]],
+  ['get_5fomegas',['get_omegas',['../classflex_e_l_1_1_inner_e_l.html#a010e19b1ea5503f5fd0ac33f9ea6d0b8',1,'flexEL::InnerEL::get_omegas()'],['../classflex_e_l_1_1_inner_e_l_c.html#a7401ecb02d6eb080f3eddc7bdc951dcd',1,'flexEL::InnerELC::get_omegas()']]],
+  ['get_5fref_5fg',['get_ref_G',['../classflex_e_l_1_1_inner_e_l.html#a963eba621b4eb6837555fdd6efe797bd',1,'flexEL::InnerEL::get_ref_G()'],['../classflex_e_l_1_1_inner_e_l_c.html#aecf253c138108cb68087206c202f52d0',1,'flexEL::InnerELC::get_ref_G()']]],
+  ['get_5fweights',['get_weights',['../classflex_e_l_1_1_inner_e_l_c.html#a5517c80cad6706a90be6968a94be3185',1,'flexEL::InnerELC']]]
 ];

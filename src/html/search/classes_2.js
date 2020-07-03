@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['meanregmodel',['MeanRegModel',['../class_mean_reg_model.html',1,'']]],
-  ['mwgadapt',['MwgAdapt',['../class_mwg_adapt.html',1,'']]]
+  ['meanregmodel',['MeanRegModel',['../classflex_e_l_1_1_mean_reg_model.html',1,'flexEL']]]
 ];

@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2020-06-20" />
+<meta name="date" content="2020-07-03" />
 
 <title>flexEL: A Flexible Package for Empirical Likelihood Regression Models</title>
 
@@ -68,7 +68,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore"><code>flexEL</code>: A Flexible Package for Empirical Likelihood Regression Models</h1>
-<h4 class="date"><em>2020-06-20</em></h4>
+<h4 class="date"><em>2020-07-03</em></h4>
 
 
 <div id="TOC">
@@ -84,6 +84,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li><a href="#models-included-in-the-package">Models Included in the Package</a></li>
 <li><a href="#future-works">Future Works</a></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -94,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="basic-el-framework" class="section level3">
 <h3>Basic EL framework</h3>
 <p>Suppose we observe covariates <span class="math inline">\(x_i\in{\mathbb R}^d\)</span> and responses <span class="math inline">\(y_i\in{\mathbb R}\)</span> for <span class="math inline">\(i=1,\cdots,n\)</span>. Let’s denote the vector containing all regression parameters by <span class="math inline">\({{{\boldsymbol{\theta}}}}\in{\mathbb R}^p\)</span>.</p>
-<p>The log empirical likelihood function (<strong>log EL function</strong>) is defined by <span class="math display">\[
+<p>The log empirical likelihood function (<strong>log EL</strong> function) is defined by <span class="math display">\[
   \ell_{{\textrm{EL}}}({{{\boldsymbol{\theta}}}}) := \log{\textrm{EL}}({{{\boldsymbol{\theta}}}}) = \sum_{i=1}^n \log\hat{{{\omega}}_i}({{{\boldsymbol{\theta}}}}),
 \]</span> where for any given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>, the <span class="math inline">\(n\)</span>-dimensional probability weights vector <span class="math inline">\(\hat{{{\omega}}}({{{\boldsymbol{\theta}}}})\)</span> associated with the observations is the solution of the optimization problem <span class="math display">\[
 \begin{split}
@@ -105,17 +106,18 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 \end{split}
 \]</span> In the above, <span class="math inline">\(g\)</span> is a real-valued function whose range is in <span class="math inline">\({\mathbb R}^m\)</span> that satisfies <span class="math display">\[
   {\textrm{E}}[g(x,y;{{{\boldsymbol{\theta}}}})] = 0.
-\]</span> This function provides all information about the parameter <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> of interest and is often called the estimating fucntion for <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>.</p>
+\]</span> This function provides all information about the parameter <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> of interest and is often called the estimating equation for <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>.</p>
 <p>The above inner optimization problem to find <span class="math inline">\(\hat{{{\omega}}}\)</span> given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> can be solved efficiently through solving the dual problem via a Newton-Raphoson algorithm.</p>
 <p>An important element for EL inference is the matrix constructed by the values of this function evaluated at each of the observed values for a given <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>. Let’s denote this matrix of dimension <span class="math inline">\(n\times m\)</span> by <span class="math inline">\(G\)</span>, whose rows correspoind to the observations: <span class="math display">\[
   G := [g(x_1,y_1;{{{\boldsymbol{\theta}}}})^T,\cdots,g(x_n,y_n;{{{\boldsymbol{\theta}}}})^T]
 \]</span></p>
-<p>In fact, specifying the <span class="math inline">\(G\)</span> matrix according to your regression model is the only requirement to use this package.</p>
+<p>To use this package, specifying the <span class="math inline">\(G\)</span> matrix according to your regression model is the only requirement.</p>
+<p>We also include the <strong>support adjustment</strong> introduced by <span class="citation">Chen, Variyath, and Abraham (2008)</span> in this package, which addresses the issue when the numerical problem (the above constrained optimization) has no solution.</p>
 </div>
 <div id="el-for-right-censored-responses" class="section level3">
 <h3>EL for Right-censored Responses</h3>
-<p>When the response is time-to-event data such as survial time in many medical studies, one situation that often occurs is right-censoring, one type of length-bias problem. That is, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. Specifially, instead of observing <span class="math inline">\(y_i\)</span>, we observe <span class="math inline">\(u_i = \min(y_i,c_i)\)</span> and <span class="math inline">\(\delta_i=\mathfrak 1(y_i\leq c_i)\)</span>, where <span class="math inline">\(c_i\)</span> is a censoring variable that is assumed to be independent of <span class="math inline">\(y_i\)</span> given covariate <span class="math inline">\(x_i\)</span>.</p>
-<p>The log EL function under right-censoring (CEL) is defined as <span class="math display">\[
+<p>When the response is time-to-event data such as survial time in many clinical studies, one situation that often occurs is right-censoring, one type of length-bias problem. Specifically, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. That is, instead of observing <span class="math inline">\(y_i\)</span>, we observe <span class="math inline">\(u_i = \min(y_i,c_i)\)</span> and <span class="math inline">\(\delta_i=\mathfrak 1(y_i\leq c_i)\)</span>, where <span class="math inline">\(c_i\)</span> is a censoring variable that is assumed to be independent of <span class="math inline">\(y_i\)</span> given covariate <span class="math inline">\(x_i\)</span>.</p>
+<p>The log EL function under right-censoring (<strong>log CEL</strong>) is defined as <span class="math display">\[
   \ell_{{\textrm{CEL}}} := \log{\textrm{CEL}}({{{\boldsymbol{\theta}}}}) = \sum_{i=1}^n \delta_i\cdot\log\hat{w_i}({{{\boldsymbol{\theta}}}}) + (1-\delta_i)\cdot\log(\sum_{j: e_j \geq e_i}\hat{w_i}({{{\boldsymbol{\theta}}}}))
 \]</span></p>
 <p>Given a specific <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>, let <span class="math inline">\(e_i\)</span> be the residual of the <span class="math inline">\(i\)</span>-th observation for <span class="math inline">\(i=1,\cdots,n\)</span>. Similar as before, <span class="math inline">\(\hat{{\omega}}({{{\boldsymbol{\theta}}}})\)</span> is the solution of <span class="math display">\[
@@ -150,7 +152,7 @@ S_{ij}({{{\boldsymbol{\theta}}}};s) := S(e_i({{{\boldsymbol{\theta}}}})-e_j({{{\
 <li>Construct the log EL function according to your model</li>
 <li>Obtain an estimate based on the log EL function</li>
 </ol>
-<p>In the first step, the only key element required from the user a function evaluating the <span class="math inline">\(G\)</span> matrix which is explained in the previous section.</p>
+<p>In the first step, the only key element required from the user is a function evaluating the <span class="math inline">\(G\)</span> matrix that was explained in the previous section.</p>
 <p>In the second step, depending on your purpose and the property of the resulting log EL function, you may choose to use an optimization algorithm to find the maximum EL estimate, or to use a Markov Chain Monte Carlo sampler to obtain your estimate.</p>
 <p>One thing to notice is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem, for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate.</p>
 <p>Let’s use a simple two-parameter linear regression model as an example. Suppose we assume the following model <span class="math display">\[
@@ -198,7 +200,7 @@ y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> <
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">beta_init &lt;-<span class="st"> </span><span class="kw">coef</span>(<span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>X<span class="op">-</span><span class="dv">1</span>)) <span class="co"># obtain initial value</span>
 nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.5203828 0.9793496</code></pre>
+<pre><code>## [1] 0.4586805 1.0150659</code></pre>
 <p>You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logEL_grad_R &lt;-<span class="st"> </span><span class="cf">function</span>(omegas, lambda, gradlist) {
   grad &lt;-<span class="st"> </span><span class="kw">sapply</span>(gradlist, <span class="cf">function</span>(x) lambda <span class="op">%*%</span><span class="st"> </span>x)
@@ -211,6 +213,7 @@ mr_deltaG_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X,
   <span class="kw">return</span>(dg)
 }
 
+<span class="co"># negative log likelihood since `nlm` does minimization</span>
 mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
   G &lt;-<span class="st"> </span><span class="kw">mr_evalG_R</span>(y, X, beta)
   lambda &lt;-<span class="st"> </span>flexEL<span class="op">::</span><span class="kw">lambdaNR</span>(G, <span class="dt">support =</span> <span class="ot">FALSE</span>)
@@ -229,16 +232,17 @@ mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, 
 }</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.5203828 0.9793496</code></pre>
+<pre><code>## [1] 0.4586805 1.0150659</code></pre>
 </div>
 <div id="usage-in-c" class="section level3">
 <h3>Usage in C++</h3>
-<p>One can also implement a regression model in C++ following the header file <code>mean_reg_model.h</code>. The key element of this is once again the <code>EvalG</code> method which defines the regression model.</p>
+<p>One can also implement a regression model in C++ following the header file <code>mean_reg_model.h</code>. The key element of this is once again the <code>EvalG</code> method which defines the regression model. Then one can export this method as in <code>mean_reg_model_exports.cpp</code>.</p>
+<p>Or, if one wish to use the C++ api directly, the steps are as below:</p>
 <div class="sourceCode"><pre class="sourceCode c"><code class="sourceCode c"><span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span>
 <span class="pp">#include </span><span class="im">&lt;RcppEigen.h&gt;</span>
-<span class="pp">#include </span><span class="im">&lt;random&gt;</span>
+<span class="pp">#include </span><span class="im">&lt;random&gt;</span><span class="pp"> </span><span class="co">// for simulating some data here</span>
 <span class="pp">#include </span><span class="im">&quot;inner_el.h&quot;</span>
-<span class="pp">#include </span><span class="im">&quot;mean_reg_model.h&quot;</span>
+<span class="pp">#include </span><span class="im">&quot;mean_reg_model.h&quot;</span><span class="pp"> </span><span class="co">// using mean regression as an example, this could be your model C++ header file</span>
 
 <span class="co">// simulate some data</span>
 Eigen::VectorXd X = Eigen::VectorXd::Random(<span class="dv">2</span>,<span class="dv">20</span>);
@@ -252,11 +256,12 @@ Eigen::VectorXd eps(<span class="dv">20</span>);
 }
 Eigen::VectorXd y = beta.transpose() * X + eps;
 
-<span class="co">// calculate EL for a particular beta</span>
+<span class="co">// instantiate the model and EL objects</span>
 flexEL::MeanRegModel MR(y, X); <span class="co">// instantiate a mean regression object</span>
 flexEL::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs()); <span class="co">// instantiate an EL object with dimention of G matrix</span>
 EL.set_opts(support = true); <span class="co">// set support correction</span>
 
+<span class="co">// evaluate EL for a particular beta</span>
 Eigen::VectorXd beta = Eigen::VectorXd::Random(<span class="dv">2</span>);
 MR.EvalG(EL.get_ref_G(), beta);
 <span class="dt">int</span> n_iter;
@@ -264,6 +269,7 @@ MR.EvalG(EL.get_ref_G(), beta);
 EL.LambdaNR(n_iter, max_err);
 EL.EvalOmegas();
 EL.LogEL();</code></pre></div>
+<p>There are more options that you can set for the InnerEL object via <code>set_opts</code> which you can look up in the doxygen documentation in the <code>src/html</code> folder.</p>
 </div>
 </div>
 <div id="models-included-in-the-package" class="section level2">
@@ -274,16 +280,29 @@ EL.LogEL();</code></pre></div>
 <p><span class="math display">\[
   y_i = {{{\boldsymbol{x}}}}_i'{{{\boldsymbol{\beta}}}}+ {{\epsilon}}_i, \quad i=1,\cdots,n.
 \]</span></p>
+<p>where <span class="math inline">\({{\epsilon}}_i, i=1,\cdots,n\)</span> are iid with mean 0 and variance 1.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Location-Scale Mean and Quantile Regression Model</li>
 </ol>
 <p><span class="math display">\[
   y_i = {{{\boldsymbol{x}}}}_i'{{{\boldsymbol{\beta}}}}+ \sigma\cdot\exp({{{\boldsymbol{z}}}}_i'{{{\boldsymbol{\gamma}}}})\cdot{{\epsilon}}_i, \quad i=1,\cdots,n.
 \]</span></p>
+<p>where <span class="math inline">\({{\epsilon}}_i, i=1,\cdots,n\)</span> are iid with mean 0 and variance 1.</p>
 </div>
 <div id="future-works" class="section level2">
 <h2>Future Works</h2>
-<p>TODO: Describe ongoing and to-be-done works.</p>
+<ol style="list-style-type: decimal">
+<li>The gradient approach has not been integrated in the C++ code</li>
+<li>Confidence intervals evaluation has not been included in the package</li>
+</ol>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-chen-et-al2008">
+<p>Chen, Jiahua, Asokan Mulayath Variyath, and Bovas Abraham. 2008. “Adjusted Empirical Likelihood and Its Properties.” <em>Journal of Computational and Graphical Statistics</em> 17 (2). Taylor &amp; Francis: 426–43.</p>
+</div>
+</div>
 </div>
 
 

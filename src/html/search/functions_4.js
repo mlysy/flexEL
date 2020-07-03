@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['meanregmodel',['MeanRegModel',['../class_mean_reg_model.html#a9da764a960878870246307423be969e5',1,'MeanRegModel::MeanRegModel()'],['../class_mean_reg_model.html#a2423278e5f47c09de84fc5a9c54e9b5f',1,'MeanRegModel::MeanRegModel(int nObs, int nEqs)']]]
+  ['meanregmodel',['MeanRegModel',['../classflex_e_l_1_1_mean_reg_model.html#a37760ff7e4cb4c38866b00c73d8c55a5',1,'flexEL::MeanRegModel::MeanRegModel()'],['../classflex_e_l_1_1_mean_reg_model.html#a5c181fa72761d9b69a8de6d58fcb16bd',1,'flexEL::MeanRegModel::MeanRegModel(int n_obs, int n_eqs)']]]
 ];

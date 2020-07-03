@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['el',['el',['../namespaceel.html',1,'']]]
+  ['flexel',['flexEL',['../namespaceflex_e_l.html',1,'']]]
 ];

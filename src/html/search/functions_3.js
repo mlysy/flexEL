@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['lambdanr',['lambdaNR',['../classel_1_1_inner_e_l.html#a0242ffa72a01f6814933c18043239d4a',1,'el::InnerEL::lambdaNR()'],['../classel_1_1_inner_e_l_c.html#a14b1e3653649b268e367672fd02c054f',1,'el::InnerELC::lambdaNR()']]],
-  ['logel',['logEL',['../classel_1_1_inner_e_l.html#a7dc1cac36a81c49e74f057ec6050d3cc',1,'el::InnerEL::logEL()'],['../classel_1_1_inner_e_l_c.html#af243a6ca497625b3bf2412805ca62eff',1,'el::InnerELC::logEL()']]],
-  ['logelsmooth',['logELSmooth',['../classel_1_1_inner_e_l_c.html#a8bb401347f5bcdff4061c833c25cb7c9',1,'el::InnerELC']]]
+  ['lambdanr',['LambdaNR',['../classflex_e_l_1_1_inner_e_l.html#ae8c58f92f9d8c37725c4594b0cbcdb86',1,'flexEL::InnerEL::LambdaNR()'],['../classflex_e_l_1_1_inner_e_l_c.html#a3fcdb407db47eb372b72b56de6120bd6',1,'flexEL::InnerELC::LambdaNR()']]],
+  ['logel',['LogEL',['../classflex_e_l_1_1_inner_e_l.html#a205112fea400b80d9418a0ffa8eff28c',1,'flexEL::InnerEL::LogEL()'],['../classflex_e_l_1_1_inner_e_l_c.html#a3f6fe4d03d4b3615002208576602ee3c',1,'flexEL::InnerELC::LogEL()']]],
+  ['logelsmooth',['LogELSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#a3c3f9ecebf8a476c75bfe0521dc6d923',1,'flexEL::InnerELC']]]
 ];

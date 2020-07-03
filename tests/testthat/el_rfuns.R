@@ -93,8 +93,7 @@ lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
 }
 
 # G is nObs x nEqs
-omega_hat_NC_R <- function(G, adjust = FALSE, 
-                           max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
+omega_hat_NC_R <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   lambdaOut <- lambdaNR_R(G = G, max_iter, rel_tol, verbose)
   conv <- lambdaOut$convergence # 1 if converged
   # message("lambda = ")
@@ -237,6 +236,7 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
 
 # G is nObs x nEqs 
 # TODO: rel_tol should be called abs_tol now -- using absolute error for diff in logEL
+# Note: if adjust G (using support adjustment), pass the adjusted G to this function and set adjust to TRUE
 omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
                            max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
@@ -246,7 +246,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   # lambdaNew <- rep(0,m)
   nIter <- 0
   # initialize omegas with uncensored solution 
-  omegas <- omega_hat_NC_R(G, adjust, max_iter, rel_tol, verbose=FALSE)
+  omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     # return(rep(NaN,length(deltas)))
@@ -415,7 +415,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
   err <- Inf
   nIter <- 0
   # initialize omegas with uncensored solution 
-  omegas <- omega_hat_NC_R(G, adjust, max_iter, rel_tol, verbose=FALSE)
+  omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     # return(rep(NaN,length(deltas)))
@@ -506,11 +506,10 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
 # ---- wrapper functions ----
 
 # wrapper function for censor and non-censor omega_hat
-omega_hat_R <- function(G, deltas, epsilons, adjust=FALSE,
+omega_hat_R <- function(G, deltas, epsilons, adjust = FALSE,
                         max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
-    omegas <- omega_hat_NC_R(G, adjust, 
-                             max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
+    omegas <- omega_hat_NC_R(G, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   else {
     omegas <- omega_hat_EM_R(G, deltas, epsilons, adjust, 

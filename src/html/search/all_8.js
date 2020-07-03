@@ -1,9 +1,5 @@
 var searchData=
 [
-  ['mainpage_2eh',['mainpage.h',['../mainpage_8h.html',1,'']]],
-  ['meanregexports_2ecpp',['MeanRegExports.cpp',['../_mean_reg_exports_8cpp.html',1,'']]],
-  ['meanregmodel',['MeanRegModel',['../class_mean_reg_model.html',1,'MeanRegModel'],['../class_mean_reg_model.html#a9da764a960878870246307423be969e5',1,'MeanRegModel::MeanRegModel()'],['../class_mean_reg_model.html#a2423278e5f47c09de84fc5a9c54e9b5f',1,'MeanRegModel::MeanRegModel(int nObs, int nEqs)']]],
-  ['meanregmodel_2eh',['MeanRegModel.h',['../_mean_reg_model_8h.html',1,'']]],
-  ['mwgadapt',['MwgAdapt',['../class_mwg_adapt.html',1,'']]],
-  ['mwgadapt_2eh',['MwgAdapt.h',['../_mwg_adapt_8h.html',1,'']]]
+  ['n_5feqs_5f',['n_eqs_',['../classflex_e_l_1_1_mean_reg_model.html#a374ed4ae05fdaff6e2872ed8bf25c367',1,'flexEL::MeanRegModel::n_eqs_()'],['../classflex_e_l_1_1_quant_reg_model.html#a217788036a93b67201733f6accbae445',1,'flexEL::QuantRegModel::n_eqs_()']]],
+  ['n_5fobs_5f',['n_obs_',['../classflex_e_l_1_1_mean_reg_model.html#a32e77dc0186b6e70b749c85ce7a27c67',1,'flexEL::MeanRegModel::n_obs_()'],['../classflex_e_l_1_1_quant_reg_model.html#a239a1c9812804c7c854b0daef7483475',1,'flexEL::QuantRegModel::n_obs_()']]]
 ];

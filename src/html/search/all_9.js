@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['neqs_5f',['nEqs_',['../class_mean_reg_model.html#ae35eb4c7b1ee0f43dc270b5113cecf27',1,'MeanRegModel::nEqs_()'],['../class_quant_reg_model.html#af86e3098916156eee67cf436d2a0c18a',1,'QuantRegModel::nEqs_()']]],
-  ['nobs_5f',['nObs_',['../class_mean_reg_model.html#a50ecdd292afbaaa203ee4e0d6984f92b',1,'MeanRegModel::nObs_()'],['../class_quant_reg_model.html#a0a3f54f7c1d53c04f9440ecf76cfcb14',1,'QuantRegModel::nObs_()']]]
+  ['quant_5freg_5fmodel_2eh',['quant_reg_model.h',['../quant__reg__model_8h.html',1,'']]],
+  ['quant_5freg_5fmodel_5fexports_2ecpp',['quant_reg_model_exports.cpp',['../quant__reg__model__exports_8cpp.html',1,'']]],
+  ['quantregmodel',['QuantRegModel',['../classflex_e_l_1_1_quant_reg_model.html',1,'flexEL::QuantRegModel'],['../classflex_e_l_1_1_quant_reg_model.html#afaa106e9a62440d1afc090e8f9543ad1',1,'flexEL::QuantRegModel::QuantRegModel()'],['../classflex_e_l_1_1_quant_reg_model.html#a1621f71616bf2f44b0340610b59252c5',1,'flexEL::QuantRegModel::QuantRegModel(int n_obs, int n_eqs)']]]
 ];

@@ -45,7 +45,7 @@ In the following two subsections, more details about the basic EL framwork and a
 
 Suppose we observe covariates $x_i\in\R^d$ and responses $y_i\in\R$ for $i=1,\cdots,n$. Let's denote the vector containing all regression parameters by $\tth\in\R^p$.
 
-The log empirical likelihood function (**log EL function**) is defined by
+The log empirical likelihood function (**log EL** function) is defined by
 \[
   \ell_{\EL}(\tth) := \log\EL(\tth) = \sum_{i=1}^n \log\hat{\w_i}(\tth),
 \]
@@ -62,7 +62,7 @@ In the above, $g$ is a real-valued function whose range is in $\R^m$ that satisf
 \[
   \E[g(x,y;\tth)] = 0.
 \]
-This function provides all information about the parameter $\tth$ of interest and is often called the estimating fucntion for $\tth$. 
+This function provides all information about the parameter $\tth$ of interest and is often called the estimating equation for $\tth$. 
 
 The above inner optimization problem to find $\hat{\w}$ given $\tth$ can be solved efficiently through solving the dual problem via a Newton-Raphoson algorithm.
 
@@ -71,13 +71,15 @@ An important element for EL inference is the matrix constructed by the values of
   G := [g(x_1,y_1;\tth)^T,\cdots,g(x_n,y_n;\tth)^T]
 \]
 
-In fact, specifying the $G$ matrix according to your regression model is the only requirement to use this package.
+To use this package, specifying the $G$ matrix according to your regression model is the only requirement. 
+
+We also include the **support adjustment** introduced by @chen-et-al2008 in this package, which addresses the issue when the numerical problem (the above constrained optimization) has no solution.
 
 ### EL for Right-censored Responses
 
-When the response is time-to-event data such as survial time in many medical studies, one situation that often occurs is right-censoring, one type of length-bias problem. That is, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. Specifially, instead of observing $y_i$, we observe $u_i = \min(y_i,c_i)$ and $\delta_i=\mathfrak 1(y_i\leq c_i)$, where $c_i$ is a censoring variable that is assumed to be independent of $y_i$ given covariate $x_i$. 
+When the response is time-to-event data such as survial time in many clinical studies, one situation that often occurs is right-censoring, one type of length-bias problem. Specifically, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. That is, instead of observing $y_i$, we observe $u_i = \min(y_i,c_i)$ and $\delta_i=\mathfrak 1(y_i\leq c_i)$, where $c_i$ is a censoring variable that is assumed to be independent of $y_i$ given covariate $x_i$. 
 
-The log EL function under right-censoring (CEL) is defined as
+The log EL function under right-censoring (**log CEL**) is defined as
 \[
   \ell_{\CEL} := \log\CEL(\tth) = \sum_{i=1}^n \delta_i\cdot\log\hat{w_i}(\tth) + (1-\delta_i)\cdot\log(\sum_{j: e_j \geq e_i}\hat{w_i}(\tth))
 \]
@@ -123,7 +125,7 @@ Upon observing data, the purpose is to find the estimates of the parameters of y
 1. Construct the log EL function according to your model
 2. Obtain an estimate based on the log EL function
 
-In the first step, the only key element required from the user a function evaluating the $G$ matrix which is explained in the previous section.
+In the first step, the only key element required from the user is a function evaluating the $G$ matrix that was explained in the previous section.
 
 In the second step, depending on your purpose and the property of the resulting log EL function, you may choose to use an optimization algorithm to find the maximum EL estimate, or to use a Markov Chain Monte Carlo sampler to obtain your estimate.
 
@@ -211,6 +213,7 @@ mr_deltaG_R <- function(y, X, theta) {
   return(dg)
 }
 
+# negative log likelihood since `nlm` does minimization
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
   lambda <- flexEL::lambdaNR(G, support = FALSE)
@@ -236,14 +239,16 @@ nlmout$estimate
 
 ### Usage in C++
 
-One can also implement a regression model in C++ following the header file `mean_reg_model.h`. The key element of this is once again the `EvalG` method which defines the regression model. 
+One can also implement a regression model in C++ following the header file `mean_reg_model.h`. The key element of this is once again the `EvalG` method which defines the regression model. Then one can export this method as in `mean_reg_model_exports.cpp`. 
+
+Or, if one wish to use the C++ api directly, the steps are as below:
 
 ```{c, echo=TRUE, eval=FALSE}
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <random>
+#include <random> // for simulating some data here
 #include "inner_el.h"
-#include "mean_reg_model.h"
+#include "mean_reg_model.h" // using mean regression as an example, this could be your model C++ header file
 
 // simulate some data
 Eigen::VectorXd X = Eigen::VectorXd::Random(2,20);
@@ -257,11 +262,12 @@ for (int ii=0; i<20; i++) {
 }
 Eigen::VectorXd y = beta.transpose() * X + eps;
 
-// calculate EL for a particular beta
+// instantiate the model and EL objects
 flexEL::MeanRegModel MR(y, X); // instantiate a mean regression object
 flexEL::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs()); // instantiate an EL object with dimention of G matrix
 EL.set_opts(support = true); // set support correction
 
+// evaluate EL for a particular beta
 Eigen::VectorXd beta = Eigen::VectorXd::Random(2);
 MR.EvalG(EL.get_ref_G(), beta);
 int n_iter;
@@ -271,6 +277,8 @@ EL.EvalOmegas();
 EL.LogEL();
 ```
 
+There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder.
+
 ## Models Included in the Package
 
 1. Mean and quantile regression models
@@ -279,13 +287,19 @@ EL.LogEL();
   y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.
 \]
 
+where $\e_i, i=1,\cdots,n$ are iid with mean 0 and variance 1.
+
 3. Location-Scale Mean and Quantile Regression Model
 
 \[
   y_i = \xx_i'\bbe + \sigma\cdot\exp(\zz_i'\bga)\cdot\e_i, \quad i=1,\cdots,n.
 \]
 
+where $\e_i, i=1,\cdots,n$ are iid with mean 0 and variance 1.
+
 ## Future Works
 
-TODO: Describe ongoing and to-be-done works. 
+1. The gradient approach has not been integrated in the C++ code
+2. Confidence intervals evaluation has not been included in the package
 
+## References
