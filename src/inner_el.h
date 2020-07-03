@@ -353,7 +353,7 @@ inline void flexEL::InnerEL::EvalOmegas() {
     }
   }
   else {
-    if (supp_) adj_G(G_,supp_a_); // calculate based on adjusted G
+    // if (supp_) adj_G(G_,supp_a_); // calculate based on adjusted G
     MatrixXd G_used_ = G_.block(0,0,n_eqs_,n_obs2_); // TODO: new allocation right now..
     Glambda_.head(n_obs2_).noalias() = lambda_new_.transpose() * G_used_;
     Gl11_.head(n_obs2_) = 1.0/(1.0-Glambda_.head(n_obs2_).array());
