@@ -2,30 +2,33 @@
 % Please edit documentation in R/qrls_evalG.R
 \name{qrls_evalG}
 \alias{qrls_evalG}
-\title{Evaluate the G matrix for quantile regression location-scale model}
+\title{Evaluate the G matrix for a location-scale quantile regression model.}
 \usage{
 qrls_evalG(y, X, Z, alphas, Beta, Gamma, Sig2, Nu)
 }
 \arguments{
-\item{y}{Length-\code{n_obs} vector of responses.}
+\item{y}{Response vector of length \code{n_obs}.}
 
-\item{X}{\code{n_obs x n_bet} matrix of covariates.}
+\item{X}{Location covariate matrix of size \verb{n_obs x n_bet}.}
 
-\item{Z}{\code{n_obs x n_gam} matrix of covariates.}
+\item{Z}{Scale covariate matrix of size \verb{n_obs x n_gam}.}
 
-\item{alphas}{a vector of quantile levels.}
+\item{alphas}{Vector of \code{n_qts} quantile levels.}
 
-\item{Beta}{\code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
+\item{Beta}{Matrix of \verb{n_bet x n_qts} location coefficients.}
 
-\item{Gamma}{\code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
+\item{Gamma}{Matrix of \verb{n_gam x n_qts} scale coefficients.}
 
-\item{Nu}{Length-\code{numNu} vector of initial value for the chain.}
+\item{Nu}{Vector of \code{n_nu} initial values for the chain.}
 }
 \value{
-G matrix for location-scale quantile regression model.
+G matrix of size `for location-scale quantile regression model.
 }
 \description{
-Evaluate the G matrix for quantile regression location-scale model
+Evaluate the G matrix for a location-scale quantile regression model.
+}
+\details{
+...
 }
 \examples{
 n <- 20

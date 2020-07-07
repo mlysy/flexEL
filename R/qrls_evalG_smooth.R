@@ -1,11 +1,11 @@
 #' Evaluate the G matrix for smoothed quantile regression location-scale model
 #'
-#' @param y Length-\code{n_obs} vector of responses.
-#' @param X \code{n_obs x n_bet} matrix of covariates.
-#' @param Z \code{n_obs x n_gam} matrix of covariates.
+#' @param y Length-`n_obs` vector of responses.
+#' @param X `n_obs x n_bet` matrix of covariates.
+#' @param Z `n_obs x n_gam` matrix of covariates.
 #' @param alphas a vector of quantile levels.
-#' @param Beta \code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.
-#' @param Gamma \code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.
+#' @param Beta `n_bet x n_qts` matrix, each column is a vector of coefficients in location function.
+#' @param Gamma `n_gam x n_qts` matrix, each column is a vector of coefficients in scale function.
 #' @param Nu A vector of quantile values of the same length as alpha.
 #' @param s A positive scalar as smoothing parameter.
 #' @example examples/qrls_evalG_smooth.R

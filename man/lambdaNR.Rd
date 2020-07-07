@@ -4,8 +4,7 @@
 \alias{lambdaNR}
 \title{Solves the inner optimization problem of an EL maximization.}
 \usage{
-lambdaNR(G, max_iter = 100, rel_tol = 1e-07, support = FALSE,
-  verbose = FALSE)
+lambdaNR(G, max_iter = 100, rel_tol = 1e-07, support = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
@@ -17,7 +16,7 @@ lambdaNR(G, max_iter = 100, rel_tol = 1e-07, support = FALSE,
 \item{verbose}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
 }
 \value{
-Length-\code{nEq} vector corresponding to the solution of the optimization problem.
+Vector of length \code{n_eq} corresponding to the solution of the optimization problem.
 }
 \description{
 Solves the inner optimization problem of an EL maximization.

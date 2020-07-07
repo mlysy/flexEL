@@ -2,7 +2,7 @@
 % Please edit documentation in R/logEL_smooth.R
 \name{logEL_smooth}
 \alias{logEL_smooth}
-\title{Calculate log empirical likelihood under censoring with continuity correction}
+\title{Calculate log empirical likelihood under censoring with continuity correction.}
 \usage{
 logEL_smooth(omega, eps, deltas, sp = 10, support = FALSE)
 }
@@ -14,10 +14,10 @@ logEL_smooth(omega, eps, deltas, sp = 10, support = FALSE)
 \item{sp}{Positive scalar as smoothing parameter.}
 }
 \value{
-Log empirical likelihood with continuity correction
+Log empirical likelihood with continuity correction.
 }
 \description{
-Calculate log empirical likelihood under censoring with continuity correction
+Calculate log empirical likelihood under censoring with continuity correction.
 }
 \examples{
 n <- 20 # total number of observations

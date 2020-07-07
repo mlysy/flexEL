@@ -9,15 +9,15 @@ qrls_evalG_smooth(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 10)
 \arguments{
 \item{y}{Length-\code{n_obs} vector of responses.}
 
-\item{X}{\code{n_obs x n_bet} matrix of covariates.}
+\item{X}{\verb{n_obs x n_bet} matrix of covariates.}
 
-\item{Z}{\code{n_obs x n_gam} matrix of covariates.}
+\item{Z}{\verb{n_obs x n_gam} matrix of covariates.}
 
 \item{alphas}{a vector of quantile levels.}
 
-\item{Beta}{\code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
+\item{Beta}{\verb{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
 
-\item{Gamma}{\code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
+\item{Gamma}{\verb{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
 
 \item{Nu}{A vector of quantile values of the same length as alpha.}
 

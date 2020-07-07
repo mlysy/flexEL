@@ -10,8 +10,10 @@ Description: A flexible framework for Empirical Likelihood methods for regressio
 License: GPL (>= 3)
 Imports: Rcpp (>= 0.12.13), numDeriv
 LinkingTo: Rcpp, RcppEigen
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.1
+Encoding: UTF-8
 Suggests: testthat, MASS, optimCheck,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)

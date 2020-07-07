@@ -2,10 +2,16 @@
 % Please edit documentation in R/lambdaNR_cens.R
 \name{lambdaNR_cens}
 \alias{lambdaNR_cens}
-\title{Solve the inner loop optimization of a censored EL function}
+\title{Solve the inner loop optimization of a censored EL function.}
 \usage{
-lambdaNR_cens(G, weights, max_iter = 100, rel_tol = 1e-07,
-  support = FALSE, verbose = FALSE)
+lambdaNR_cens(
+  G,
+  weights,
+  max_iter = 100,
+  rel_tol = 1e-07,
+  support = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
@@ -22,7 +28,7 @@ lambdaNR_cens(G, weights, max_iter = 100, rel_tol = 1e-07,
 Length-\code{n_eqs} vector corresponding to the solution of the optimization problem.
 }
 \description{
-Solve the inner loop optimization of a censored EL function
+Solve the inner loop optimization of a censored EL function.
 }
 \details{
 The inner-loop optimization of EL is ...

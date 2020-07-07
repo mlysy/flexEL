@@ -7,12 +7,12 @@
 adjG(G, a)
 }
 \arguments{
-\item{G}{A matrix of dimension \code{nObs} x \code{nEqs}.}
+\item{G}{A matrix of dimension \verb{n_obs x n_eq}.}
 
 \item{a}{A tuning parameter.}
 }
 \value{
-A matrix of dimension \code{nObs+1} x \code{nEqs}.
+A matrix of dimension \verb{(n_obs+1) x }n_eq`.
 }
 \description{
 Adjusted G matrix.

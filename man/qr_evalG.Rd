@@ -2,24 +2,24 @@
 % Please edit documentation in R/qr_evalG.R
 \name{qr_evalG}
 \alias{qr_evalG}
-\title{Evaluates the G matrix for quantile regression (location model)}
+\title{Evaluate the G matrix for the quantile regression model.}
 \usage{
 qr_evalG(y, X, alphas, Beta)
 }
 \arguments{
 \item{y}{Length-\code{n_obs} vector of responses.}
 
-\item{X}{\code{n_obs x n_eqs} matrix of covariates.}
+\item{X}{\verb{n_obs x n_eqs} matrix of covariates.}
 
 \item{alphas}{a vector of quantile levels.}
 
-\item{Beta}{\code{n_eqs x n_qts} matrix, each column is a vector of coefficients in location model.}
+\item{Beta}{\verb{n_eqs x n_qts} matrix, each column is a vector of coefficients in location model.}
 }
 \value{
 G matrix for location quantile regression model.
 }
 \description{
-Evaluates the G matrix for quantile regression (location model)
+Evaluate the G matrix for the quantile regression model.
 }
 \examples{
 n <- 20

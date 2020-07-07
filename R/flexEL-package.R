@@ -1,8 +1,8 @@
-#' Flexible Empirical Likelihood
+#' Fast and flexible empirical likelihood calculations.
 #'
-#' @details Some details here.
 #' @docType package
 #' @name flexEL
 #' @useDynLib flexEL, .registration = TRUE
 #' @importFrom Rcpp evalCpp
+#' @keywords internal
 NULL

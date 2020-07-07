@@ -1,10 +1,10 @@
-#' Calculate log empirical likelihood under censoring with continuity correction
+#' Calculate log empirical likelihood under censoring with continuity correction.
 #'
 #' @template args-omega
 #' @template args-eps
 #' @template args-sp
 #' @example examples/logEL_smooth.R
-#' @return Log empirical likelihood with continuity correction
+#' @return Log empirical likelihood with continuity correction.
 #' @export logEL_smooth
 logEL_smooth <- function(omega, eps, deltas, sp=10, support = FALSE) {
   # input check here

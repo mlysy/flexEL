@@ -1,16 +1,17 @@
-#' Evaluate the G matrix for quantile regression location-scale model
+#' Evaluate the G matrix for a location-scale quantile regression model.
 #'
-#' @param y Length-\code{n_obs} vector of responses.
-#' @param X \code{n_obs x n_bet} matrix of covariates.
-#' @param Z \code{n_obs x n_gam} matrix of covariates.
-#' @param alphas a vector of quantile levels.
-#' @param Beta \code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.
-#' @param Gamma \code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.
-#' @param Nu Length-\code{numNu} vector of initial value for the chain.
+#' @param y Response vector of length `n_obs`.
+#' @param X Location covariate matrix of size `n_obs x n_bet`.
+#' @param Z Scale covariate matrix of size `n_obs x n_gam`.
+#' @param alphas Vector of `n_qts` quantile levels.
+#' @param Beta Matrix of `n_bet x n_qts` location coefficients.
+#' @param Gamma Matrix of `n_gam x n_qts` scale coefficients.
+#' @param Nu Vector of `n_nu` initial values for the chain.
 #' @example examples/qrls_evalG.R
-#' @return G matrix for location-scale quantile regression model. 
-#' @export qrls_evalG
-qrls_evalG <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu) { 
+#' @details ...
+#' @return G matrix of size `for location-scale quantile regression model.
+#' @export
+qrls_evalG <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu) {
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
@@ -20,7 +21,7 @@ qrls_evalG <- function(y, X, Z, alphas, Beta, Gamma, Sig2, Nu) {
   if (length(alphas) > 1 && (is.vector(Beta) || is.vector(Gamma))) {
     stop("Parameters must be in matrix form when alphas has more than one entry.")
   }
-  alpha <- c(length(alphas), alphas) 
+  alpha <- c(length(alphas), alphas)
   G <- .QuantRegLSEvalG(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu)
   return(t(G))
 }

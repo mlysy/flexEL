@@ -2,14 +2,14 @@
 % Please edit documentation in R/mr_evalG.R
 \name{mr_evalG}
 \alias{mr_evalG}
-\title{Evaluates the G matrix for a mean regression problem (location model)}
+\title{Evaluate the G matrix for a mean regression model.}
 \usage{
 mr_evalG(y, X, beta)
 }
 \arguments{
 \item{y}{Length-\code{n_obs} vector of responses.}
 
-\item{X}{\code{n_obs x n_eqs} matrix of covariates.}
+\item{X}{\verb{n_obs x n_eqs} matrix of covariates.}
 
 \item{beta}{Length-\code{n_eqs} vector of coefficients in location model.}
 }
@@ -17,7 +17,7 @@ mr_evalG(y, X, beta)
 G matrix for location mean regression model.
 }
 \description{
-Evaluates the G matrix for a mean regression problem (location model)
+Evaluate the G matrix for a mean regression model.
 }
 \examples{
 n <- 20

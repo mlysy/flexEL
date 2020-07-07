@@ -1,6 +1,6 @@
 ---
-title: "<code>flexEL</code>: A Flexible Package for Empirical Likelihood Regression Models"
-author: ""
+title: "<code>flexEL</code>: A Fast and Flexible Framework for Empirical Likelihood Modeling"
+author: "Shimeng Huang, Martin Lysy"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -11,10 +11,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 bibliography: flexEL.bib
 ---
-
-```{r, echo = FALSE, eval = FALSE}
-rmarkdown::render("R_model_object.Rmd")
-```
 
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\XX}{{\bm{X}}}

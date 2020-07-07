@@ -2,16 +2,16 @@
 % Please edit documentation in R/mrls_evalG.R
 \name{mrls_evalG}
 \alias{mrls_evalG}
-\title{Evaluate the G matrix for mean regression (location-scale model)}
+\title{Evaluate the G matrix for a location-scale mean regression model.}
 \usage{
 mrls_evalG(y, X, Z, beta, gamma, sig2)
 }
 \arguments{
 \item{y}{Length-\code{n_obs} vector of responses.}
 
-\item{X}{\code{n_obs x n_bet} matrix of covariates.}
+\item{X}{\verb{n_obs x n_bet} matrix of covariates.}
 
-\item{Z}{\code{n_obs x n_gam} matrix of covariates.}
+\item{Z}{\verb{n_obs x n_gam} matrix of covariates.}
 
 \item{beta}{Length-\code{n_bet} vector of coefficients in location model.}
 
@@ -20,10 +20,10 @@ mrls_evalG(y, X, Z, beta, gamma, sig2)
 \item{sig2}{A scalar where sqrt(sig2) is the scale parameter for the error term.}
 }
 \value{
-G matrix for location-scale mean regression model.
+G matrix for location-scale model.
 }
 \description{
-Evaluate the G matrix for mean regression (location-scale model)
+Evaluate the G matrix for a location-scale mean regression model.
 }
 \examples{
 n <- 20
