@@ -29,9 +29,9 @@ Eigen::VectorXd EvalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas,
   return(weights);
 }
 
-// [[Rcpp::export(".LambdaNRC")]]
-Eigen::VectorXd LambdaNRC(Eigen::MatrixXd G, Eigen::VectorXd weights, 
-                          int max_iter, double rel_tol, bool support, bool verbose) {
+// [[Rcpp::export(".LambdaNRCens")]]
+Eigen::VectorXd LambdaNRCens(Eigen::MatrixXd G, Eigen::VectorXd weights, 
+                             int max_iter, double rel_tol, bool support, bool verbose) {
   int n_obs = G.cols();
   int n_eqs = G.rows();
   flexEL::InnerELC ILC(n_obs,n_eqs);
@@ -82,9 +82,9 @@ Eigen::VectorXd OmegaHatEM(Eigen::VectorXd omegas_init,
   // return Eigen::VectorXd::Zero(n_obs);
 }
 
-// [[Rcpp::export(".LogELC")]]
-double LogELC(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, 
-              Eigen::VectorXd deltas, bool support) {
+// [[Rcpp::export(".LogELCens")]]
+double LogELCens(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, 
+                 Eigen::VectorXd deltas, bool support) {
   int n_obs = omegas.size();
   flexEL::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);

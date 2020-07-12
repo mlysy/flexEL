@@ -12,7 +12,7 @@ test_that("adjG_R == adjR_cpp", {
     p <- sample(1:100,1)
     G <- matrix(rnorm(n*p), n, p)
     a <- abs(rnorm(1))
-    aG_cpp <- adjG(G,a)
+    aG_cpp <- flexEL:::adjG(G,a)
     aG_R <- adjG_R(G,a)
     expect_equal(aG_R, aG_cpp)
   }

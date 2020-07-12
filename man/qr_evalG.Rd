@@ -9,11 +9,11 @@ qr_evalG(y, X, alphas, Beta)
 \arguments{
 \item{y}{Length-\code{n_obs} vector of responses.}
 
-\item{X}{\verb{n_obs x n_eqs} matrix of covariates.}
+\item{X}{\code{n_obs x n_eqs} matrix of covariates.}
 
 \item{alphas}{a vector of quantile levels.}
 
-\item{Beta}{\verb{n_eqs x n_qts} matrix, each column is a vector of coefficients in location model.}
+\item{Beta}{\code{n_eqs x n_qts} matrix, each column is a vector of coefficients in location model.}
 }
 \value{
 G matrix for location quantile regression model.

@@ -2,22 +2,18 @@
 % Please edit documentation in R/logEL.R
 \name{logEL}
 \alias{logEL}
-\title{Calculates log empirical likelihood given fully observed or right-censored observations.}
+\title{Calculates log empirical likelihood given fully observed observations.}
 \usage{
-logEL(omega, eps, delta, support = FALSE)
+logEL(omega, support = FALSE)
 }
 \arguments{
 \item{omega}{Length-\code{nObs} probability vector.}
-
-\item{eps}{Length-\code{nObs} vector of residuals.}
-
-\item{delta}{Length-\code{nObs} vector of censoring indicators.}
 }
 \value{
-Log empirical likelihood
+Log empirical likelihood.
 }
 \description{
-Calculates log empirical likelihood given fully observed or right-censored observations.
+Calculates log empirical likelihood given fully observed observations.
 }
 \examples{
 # no censoring

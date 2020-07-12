@@ -21,16 +21,16 @@
     .Call(`_flexEL_EvalWeights`, deltas, omegas, epsilons, support)
 }
 
-.LambdaNRC <- function(G, weights, max_iter, rel_tol, support, verbose) {
-    .Call(`_flexEL_LambdaNRC`, G, weights, max_iter, rel_tol, support, verbose)
+.LambdaNRCens <- function(G, weights, max_iter, rel_tol, support, verbose) {
+    .Call(`_flexEL_LambdaNRCens`, G, weights, max_iter, rel_tol, support, verbose)
 }
 
 .OmegaHatEM <- function(omegas_init, G, deltas, epsilons, max_iter, rel_tol, abs_tol, support, verbose) {
     .Call(`_flexEL_OmegaHatEM`, omegas_init, G, deltas, epsilons, max_iter, rel_tol, abs_tol, support, verbose)
 }
 
-.LogELC <- function(omegas, epsilons, deltas, support) {
-    .Call(`_flexEL_LogELC`, omegas, epsilons, deltas, support)
+.LogELCens <- function(omegas, epsilons, deltas, support) {
+    .Call(`_flexEL_LogELCens`, omegas, epsilons, deltas, support)
 }
 
 .LogELSmooth <- function(omegas, epsilons, deltas, s, support) {

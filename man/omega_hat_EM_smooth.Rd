@@ -4,20 +4,11 @@
 \alias{omega_hat_EM_smooth}
 \title{Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization using an EM algorithm with discontinuitu correction.}
 \usage{
-omega_hat_EM_smooth(
-  G,
-  deltas,
-  epsilons,
-  sp = 10,
-  max_iter = 100,
-  rel_tol = 1e-05,
-  abs_tol = 0.001,
-  support = FALSE,
-  verbose = FALSE
-)
+omega_hat_EM_smooth(G, deltas, epsilons, sp = 10, max_iter = 100,
+  rel_tol = 1e-05, abs_tol = 0.001, support = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{G}{\verb{n_obs x n_eqs} matrix of constraints.}
+\item{G}{\code{n_obs x n_eqs} matrix of constraints.}
 
 \item{deltas}{Length-\code{n_obs} vector of censor indicators, omit if no censoring.}
 

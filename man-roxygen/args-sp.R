@@ -1,1 +1,1 @@
-#' @param sp Positive scalar as smoothing parameter.
+#' @param sp A positive scalar as smoothing parameter.

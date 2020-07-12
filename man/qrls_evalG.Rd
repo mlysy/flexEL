@@ -4,31 +4,30 @@
 \alias{qrls_evalG}
 \title{Evaluate the G matrix for a location-scale quantile regression model.}
 \usage{
-qrls_evalG(y, X, Z, alphas, Beta, Gamma, Sig2, Nu)
+qrls_evalG(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 0)
 }
 \arguments{
-\item{y}{Response vector of length \code{n_obs}.}
+\item{y}{Length-\code{nObs} vector of responses.}
 
-\item{X}{Location covariate matrix of size \verb{n_obs x n_bet}.}
+\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
 
-\item{Z}{Scale covariate matrix of size \verb{n_obs x n_gam}.}
+\item{Z}{\code{nObs x nGam} matrix of covariates in the scale function, where \code{nObs} is the number of observations and \code{nGam} is the dimension of coefficients in the scale function.}
 
-\item{alphas}{Vector of \code{n_qts} quantile levels.}
+\item{alphas}{A vector of quantile levels.}
 
-\item{Beta}{Matrix of \verb{n_bet x n_qts} location coefficients.}
+\item{Beta}{An \code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
 
-\item{Gamma}{Matrix of \verb{n_gam x n_qts} scale coefficients.}
+\item{Gamma}{An \code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
 
-\item{Nu}{Vector of \code{n_nu} initial values for the chain.}
+\item{Nu}{A vector of quantile values of the same length as alpha.}
+
+\item{sp}{A positive scalar as smoothing parameter.}
 }
 \value{
 G matrix of size `for location-scale quantile regression model.
 }
 \description{
 Evaluate the G matrix for a location-scale quantile regression model.
-}
-\details{
-...
 }
 \examples{
 n <- 20

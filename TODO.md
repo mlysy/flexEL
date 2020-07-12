@@ -10,11 +10,11 @@
 
 - [ ] `qrls_evalG_smooth`: Is a separate function really necessary?  How about only `qrls_evalG` but with an `sp = 10` default (probably better to smooth :), and explaining that `sp = 0` means no smoothing.  Inside the R function you can call the corresponding C++ function `.QuantRegLSEvalGSmooth` or `.QuantRegLSEvalG`.
 
-- [ ] `lambdaNR_cens`: Seems to me like this only relates to censoring indirectly through `weights`.  If so, I think it's better to have just `lambdaNR` with an optional `weights` argument.  Might also want to rename `.LambdaNRC` to something more informative.
+- [x] `lambdaNR_cens`: Seems to me like this only relates to censoring indirectly through `weights`.  If so, I think it's better to have just `lambdaNR` with an optional `weights` argument.  Might also want to rename `.LambdaNRC` to something more informative.
 
-- [ ] `logEL` and `logEL_smooth`: To me the distinction is not between smooth and unsmoothm, but between general EL and the specific case of EM with right censoring.  So I would drop the `delta` argument from `logEL`, and replace `logEL_smooth` by `logEL_cens`.  Where once again `sp = 0` means no smoothing.  Once again, please consider renaming C++ functions if necessary :)
+- [x] `logEL` and `logEL_smooth`: To me the distinction is not between smooth and unsmoothm, but between general EL and the specific case of EM with right censoring.  So I would drop the `delta` argument from `logEL`, and replace `logEL_smooth` by `logEL_cens`.  Where once again `sp = 0` means no smoothing.  Once again, please consider renaming C++ functions if necessary :)
 
-- [ ] `qrls_evalG` and `qrls_evalG_smooth`: Please combine into one function.
+- [x] `qrls_evalG` and `qrls_evalG_smooth`: Please combine into one function.
 
 - [ ] `omega_hat` and `omega_hat_EM_smooth`.  I would call the second `omega_hat_cens`, separating the general case from the censoring case which also includes smoothing.
 
