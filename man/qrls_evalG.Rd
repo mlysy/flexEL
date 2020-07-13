@@ -4,7 +4,7 @@
 \alias{qrls_evalG}
 \title{Evaluate the G matrix for a location-scale quantile regression model.}
 \usage{
-qrls_evalG(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 0)
+qrls_evalG(y, X, Z, alpha, Beta, Gamma, Sig2, Nu, sp = 0)
 }
 \arguments{
 \item{y}{Length-\code{nObs} vector of responses.}
@@ -13,11 +13,11 @@ qrls_evalG(y, X, Z, alphas, Beta, Gamma, Sig2, Nu, sp = 0)
 
 \item{Z}{\code{nObs x nGam} matrix of covariates in the scale function, where \code{nObs} is the number of observations and \code{nGam} is the dimension of coefficients in the scale function.}
 
-\item{alphas}{A vector of quantile levels.}
+\item{alpha}{A numeric vector of quantile levels.}
 
-\item{Beta}{An \code{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
+\item{Beta}{An \verb{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
 
-\item{Gamma}{An \code{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
+\item{Gamma}{An \verb{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
 
 \item{Nu}{A vector of quantile values of the same length as alpha.}
 
@@ -41,5 +41,11 @@ gamma <- rnorm(q)
 nu <- rnorm(1)
 sig2 <- 1.5
 y <- c(X \%*\% beta + sqrt(sig2)*exp(Z \%*\% gamma)*rnorm(n)) # with multiplicative N(0,1) error
-qrls_evalG(y,X,Z,alpha,beta,gamma,sig2,nu)
+
+# no continuity correction
+qrls_evalG(y, X, Z, alpha, beta, gamma, sig2, nu)
+
+# with continuity correction
+sp <- 10
+qrls_evalG(y, X, Z, alpha, beta, gamma, sig2, nu, sp)
 }

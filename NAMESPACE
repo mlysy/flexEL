@@ -2,11 +2,8 @@
 
 export(lambdaNR)
 export(logEL)
-export(logEL_cens)
 export(mr_evalG)
 export(mrls_evalG)
-export(omega_hat)
-export(omega_hat_EM_smooth)
 export(qr_evalG)
 export(qrls_evalG)
 importFrom(Rcpp,evalCpp)

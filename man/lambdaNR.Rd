@@ -2,21 +2,27 @@
 % Please edit documentation in R/lambdaNR.R
 \name{lambdaNR}
 \alias{lambdaNR}
-\title{Solves the inner optimization problem of an EL maximization.}
+\title{Solves the inner optimization problem of an EL maximization problem.}
 \usage{
-lambdaNR(G, weights = NULL, max_iter = 100, rel_tol = 1e-07,
-  support = FALSE, verbose = FALSE)
+lambdaNR(
+  G,
+  weights = NULL,
+  support = FALSE,
+  max_iter = 100,
+  rel_tol = 1e-07,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
 
 \item{weights}{Optional length-\code{n_obs} vector of weights for weighted Newton-Raphson algorithm for right-censored data.}
 
+\item{support}{A boolean indicating whether support correction should be conducted.}
+
 \item{max_iter}{Integer scalar for maximum number of Newton-Raphson steps.}
 
 \item{rel_tol}{Positive scalar for relative tolerance of Newton-Raphson steps.}
-
-\item{support}{A boolean indicating whether support correction should be conducted.}
 
 \item{verbose}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
 }
@@ -24,7 +30,7 @@ lambdaNR(G, weights = NULL, max_iter = 100, rel_tol = 1e-07,
 Vector of length \code{n_eq} corresponding to the solution of the optimization problem.
 }
 \description{
-Solves the inner optimization problem of an EL maximization.
+Solves the inner optimization problem of an EL maximization problem.
 }
 \examples{
 n <- 20

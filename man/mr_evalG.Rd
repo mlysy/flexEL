@@ -7,9 +7,9 @@
 mr_evalG(y, X, beta)
 }
 \arguments{
-\item{y}{Length-\code{n_obs} vector of responses.}
+\item{y}{Length-\code{nObs} vector of responses.}
 
-\item{X}{\code{n_obs x n_eqs} matrix of covariates.}
+\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
 
 \item{beta}{Length-\code{n_eqs} vector of coefficients in location model.}
 }

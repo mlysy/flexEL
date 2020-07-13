@@ -1,8 +1,7 @@
 #' Evaluate the G matrix for a location-scale mean regression model.
 #'
-#' @param y Length-`n_obs` vector of responses.
-#' @param X `n_obs x n_bet` matrix of covariates.
-#' @param Z `n_obs x n_gam` matrix of covariates.
+#' @template args-y_X
+#' @template arg-Z
 #' @param beta Length-`n_bet` vector of coefficients in location model.
 #' @param gamma Length-`n_gam` vector of coefficients in location model.
 #' @param sig2 A scalar where sqrt(sig2) is the scale parameter for the error term.

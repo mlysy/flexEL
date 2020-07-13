@@ -16,7 +16,7 @@
 
 - [x] `qrls_evalG` and `qrls_evalG_smooth`: Please combine into one function.
 
-- [ ] `omega_hat` and `omega_hat_EM_smooth`.  I would call the second `omega_hat_cens`, separating the general case from the censoring case which also includes smoothing.
+- [x] `omega_hat` and `omega_hat_EM_smooth`.  I would call the second `omega_hat_cens`, separating the general case from the censoring case which also includes smoothing.
 
 	In fact, what if instead the functions `logEL` and `logEL_cens` were parametrized wrt `G`, `delta`, `eps`, etc, and a new argument `omega_out = TRUE` returns a list with elements `logEL` and `omega_hat` (as opposed to just the scalar `logEL`)?  My reasoning is that users typically won't be using `omega_hat`, so having `logEL` compute it internally makes their parameter optimization routines 1-2 lines shorter/easier to write.  On the other hand, I'm not seeing a situation where they would want only `omega_hat` and the small overhead of computing `logEL` with it makes a real difference.  Or am I missing something?  
 	

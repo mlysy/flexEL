@@ -2,18 +2,34 @@
 % Please edit documentation in R/logEL.R
 \name{logEL}
 \alias{logEL}
-\title{Calculates log empirical likelihood given fully observed observations.}
+\title{Calculates log empirical likelihood.}
 \usage{
-logEL(omega, support = FALSE)
+logEL(
+  G,
+  delta = NULL,
+  eps = NULL,
+  support = FALSE,
+  max_iter = 100,
+  rel_tol = 1e-07,
+  abs_tol = 0.001,
+  return_omega = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{omega}{Length-\code{nObs} probability vector.}
+\item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
+
+\item{delta}{Length-\code{nObs} vector of censoring indicators (1 right-censord, 0 not-censored).}
+
+\item{eps}{Length-\code{nObs} vector of residuals.}
+
+\item{support}{A boolean indicating whether support correction should be conducted.}
 }
 \value{
-Log empirical likelihood.
+A list containing the log EL value and the probability vector omega, or only the log EL value as a scalar.
 }
 \description{
-Calculates log empirical likelihood given fully observed observations.
+Calculates log empirical likelihood.
 }
 \examples{
 # no censoring

@@ -9,4 +9,10 @@ gamma <- rnorm(q)
 nu <- rnorm(1)
 sig2 <- 1.5
 y <- c(X %*% beta + sqrt(sig2)*exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
-qrls_evalG(y,X,Z,alpha,beta,gamma,sig2,nu)
+
+# no continuity correction
+qrls_evalG(y, X, Z, alpha, beta, gamma, sig2, nu)
+
+# with continuity correction
+sp <- 10
+qrls_evalG(y, X, Z, alpha, beta, gamma, sig2, nu, sp)

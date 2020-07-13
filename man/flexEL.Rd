@@ -3,9 +3,5 @@
 \docType{package}
 \name{flexEL}
 \alias{flexEL}
-\alias{flexEL-package}
 \title{Fast and flexible empirical likelihood calculations.}
-\description{
-Fast and flexible empirical likelihood calculations.
-}
 \keyword{internal}

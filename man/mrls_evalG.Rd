@@ -7,11 +7,11 @@
 mrls_evalG(y, X, Z, beta, gamma, sig2)
 }
 \arguments{
-\item{y}{Length-\code{n_obs} vector of responses.}
+\item{y}{Length-\code{nObs} vector of responses.}
 
-\item{X}{\code{n_obs x n_bet} matrix of covariates.}
+\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
 
-\item{Z}{\code{n_obs x n_gam} matrix of covariates.}
+\item{Z}{\code{nObs x nGam} matrix of covariates in the scale function, where \code{nObs} is the number of observations and \code{nGam} is the dimension of coefficients in the scale function.}
 
 \item{beta}{Length-\code{n_bet} vector of coefficients in location model.}
 

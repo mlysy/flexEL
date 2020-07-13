@@ -1,7 +1,6 @@
 #' Evaluate the G matrix for a mean regression model.
 #'
-#' @param y Length-`n_obs` vector of responses.
-#' @param X `n_obs x n_eqs` matrix of covariates.
+#' @template args-y_X
 #' @param beta Length-`n_eqs` vector of coefficients in location model.
 #' @example examples/mr_evalG.R
 #' @return G matrix for location mean regression model.
