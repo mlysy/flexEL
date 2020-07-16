@@ -8,19 +8,44 @@ context("logEL")
 ntest <- 50
 
 # Non-censored case:
-test_that("logel_R == logel_cpp", {
+test_that("logel_R == logel_cpp no censoring, no support correction", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
-    omegas <- abs(rnorm(n))
-    omegas <- omegas/sum(omegas)
-    logopt_cpp <- logEL(omegas)
-    logopt_R <- logEL_R(omegas)
-    expect_equal(logopt_cpp,logopt_R)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    G <- matrix(rnorm(n*p),n,p) # random G here
+    support <- FALSE
+    logopt_cpp <- logEL(G = G, support = support, 
+                        max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, 
+                        return_omega = FALSE, verbose = FALSE)
+    omegahat_R <- omega_hat_R(G = G, adjust = support,
+                              max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
+    logopt_R <- logEL_R(omegahat_R, adjust = support)
+    expect_equal(logopt_cpp, logopt_R)
+  }
+})
+
+test_that("logel_R == logel_cpp no censoring, with support correction", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    G <- matrix(rnorm(n*p),n,p) # random G here
+    support <- TRUE
+    logopt_cpp <- logEL(G = G, support = support, 
+                        max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, 
+                        return_omega = FALSE, verbose = FALSE)
+    omegahat_R <- omega_hat_R(G = adjG_R(G), adjust = support,
+                              max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
+    logopt_R <- logEL_R(omegahat_R, adjust = support)
+    expect_equal(logopt_cpp, logopt_R)
   }
 })
 
 # Censored case:
-test_that("logelC_R == logelC_cpp", {
+test_that("logel_R == logel_cpp right-censored, no support correction", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     omegas <- abs(rnorm(n))

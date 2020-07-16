@@ -49,7 +49,7 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
 Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support) {
   int n_obs = G.cols();
   int n_eqs = G.rows();
-  flexEL::InnerEL IL(n_obs,n_eqs);
+  flexEL::InnerEL IL(n_obs, n_eqs);
   IL.set_opts(support);
   IL.set_G(G); // assign the given G
   IL.set_lambda(lambda); 
@@ -61,7 +61,7 @@ Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support
 // Calculate logEL given omegas
 // [[Rcpp::export(".LogEL")]]
 double LogEL(Eigen::VectorXd omegas, bool support) {
-  int n_obs = omegas.size();
+  int n_obs = omegas.size() - support;
   flexEL::InnerEL IL(n_obs,1);
   IL.set_opts(support);
   IL.set_omegas(omegas); 

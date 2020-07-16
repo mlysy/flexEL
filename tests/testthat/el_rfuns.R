@@ -100,7 +100,7 @@ omega_hat_NC_R <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   # print(lambdaOut$lambda)
   if (!conv) {
     nObs <- nrow(G)
-    omegahat <- rep(NaN,nObs)
+    omegahat <- rep(NaN, nObs)
   }
   else {
     lambdahat <- lambdaOut$lambda

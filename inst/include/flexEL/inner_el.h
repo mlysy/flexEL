@@ -410,7 +410,7 @@ inline VectorXd flexEL::InnerEL::get_lambda() {
  * @brief Get the value of omegas.
  */
 inline VectorXd flexEL::InnerEL::get_omegas() {
-    return(omegas_.head(n_obs2_));
+  return(omegas_.head(n_obs2_));
 }
 
 /**
