@@ -85,7 +85,7 @@ Eigen::VectorXd OmegaHatEM(Eigen::VectorXd omegas_init,
 // [[Rcpp::export(".LogELCens")]]
 double LogELCens(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, 
                  Eigen::VectorXd deltas, bool support) {
-  int n_obs = omegas.size();
+  int n_obs = omegas.size() - support;
   flexEL::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);
   ILC.set_deltas(deltas);
@@ -99,7 +99,7 @@ double LogELCens(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
 double LogELSmooth(Eigen::VectorXd omegas, 
                    Eigen::VectorXd epsilons, 
                    Eigen::VectorXd deltas, double s, bool support) {
-  int n_obs = omegas.size();
+  int n_obs = omegas.size() - support;
   flexEL::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);
   ILC.set_omegas(omegas);

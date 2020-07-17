@@ -9,6 +9,7 @@ logEL(
   delta = NULL,
   eps = NULL,
   support = FALSE,
+  sp = 0,
   max_iter = 100,
   rel_tol = 1e-07,
   abs_tol = 0.001,
@@ -24,6 +25,8 @@ logEL(
 \item{eps}{Length-\code{nObs} vector of residuals.}
 
 \item{support}{A boolean indicating whether support correction should be conducted.}
+
+\item{sp}{A positive scalar as smoothing parameter.}
 }
 \value{
 A list containing the log EL value and the probability vector omega, or only the log EL value as a scalar.
