@@ -17,6 +17,10 @@
     .Call(`_flexEL_LogEL`, omegas, support)
 }
 
+.LogELGrad <- function(G, max_iter, rel_tol, support = FALSE, verbose = FALSE) {
+    .Call(`_flexEL_LogELGrad`, G, max_iter, rel_tol, support, verbose)
+}
+
 .EvalWeights <- function(deltas, omegas, epsilons, support) {
     .Call(`_flexEL_EvalWeights`, deltas, omegas, epsilons, support)
 }
@@ -33,8 +37,8 @@
     .Call(`_flexEL_LogELCens`, omegas, epsilons, deltas, support)
 }
 
-.LogELSmooth <- function(omegas, epsilons, deltas, s, support) {
-    .Call(`_flexEL_LogELSmooth`, omegas, epsilons, deltas, s, support)
+.LogELSmooth <- function(omegas, epsilons, deltas, sp, support) {
+    .Call(`_flexEL_LogELSmooth`, omegas, epsilons, deltas, sp, support)
 }
 
 .EvalWeightsSmooth <- function(deltas, omegas, epsilons, s, support) {

@@ -98,14 +98,14 @@ double LogELCens(Eigen::VectorXd omegas, Eigen::VectorXd epsilons,
 // [[Rcpp::export(".LogELSmooth")]]
 double LogELSmooth(Eigen::VectorXd omegas, 
                    Eigen::VectorXd epsilons, 
-                   Eigen::VectorXd deltas, double s, bool support) {
+                   Eigen::VectorXd deltas, double sp, bool support) {
   int n_obs = omegas.size() - support;
   flexEL::InnerELC ILC(n_obs,1);
   ILC.set_opts(support);
   ILC.set_omegas(omegas);
   ILC.set_epsilons(epsilons);
   ILC.set_deltas(deltas);
-  return ILC.LogELSmooth(s);
+  return ILC.LogELSmooth(sp);
 }
 
 // [[Rcpp::export(".EvalWeightsSmooth")]]

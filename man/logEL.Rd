@@ -14,6 +14,7 @@ logEL(
   rel_tol = 1e-07,
   abs_tol = 0.001,
   return_omega = FALSE,
+  return_dldG = FALSE,
   verbose = FALSE
 )
 }

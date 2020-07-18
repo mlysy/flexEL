@@ -69,3 +69,36 @@ double LogEL(Eigen::VectorXd omegas, bool support) {
   return log_el; 
 }
 
+// Calculate logEL and gradient given omegas (no support correction)
+// [[Rcpp::export(".LogELGrad")]]
+List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = false, bool verbose = false) {
+  
+  int n_obs = G.cols();
+  int n_eqs = G.rows();
+  flexEL::InnerEL IL(n_obs,n_eqs);
+  IL.set_opts(max_iter, rel_tol, support);
+  IL.set_G(G); // assign the given G
+
+  int n_iter;
+  double max_err;
+  // bool not_conv;
+  double logel;
+  MatrixXd dldG;
+  
+  IL.LambdaNR(n_iter, max_err);
+  if(verbose) {
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
+  // not_conv = (n_iter == max_iter) && (max_err > rel_tol); // check convergence
+  // if (not_conv) {
+  //   
+  // }
+  
+  IL.EvalOmegas();
+  IL.LogELGrad(logel, dldG);
+  
+  return List::create(Named("logel") = logel,
+                      Named("dldG") = dldG,
+                      Named("omega") = IL.get_omegas());
+}
+

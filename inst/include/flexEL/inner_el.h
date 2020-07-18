@@ -103,6 +103,7 @@ namespace flexEL {
     void LambdaNR(int& n_iter, double& max_iter); // Note: rel_tol and max_iter must be set before calling
     void EvalOmegas(); // empirical distribution
     double LogEL(); // log empirical likelihood
+    void LogELGrad(double& logel, MatrixXd& dldG); // calculates log empirical likelihood and gradient
     
     // set and get functions 
     void set_lambda(const Ref<const VectorXd>& lambda); // assigned to lambdaNew
@@ -190,7 +191,7 @@ inline flexEL::InnerEL::InnerEL(int n_obs, int n_eqs) {
   cc_ = -1.5 - log(n_obs_);
   // space allocation
   omegas_ = VectorXd::Zero(n_obs1_).array() + 1.0/(double)n_obs1_; // Initialize to 1/n_obs_
-  G_ = MatrixXd::Zero(n_eqs_,n_obs1_); // NEW: JAN 1
+  G_ = MatrixXd::Zero(n_eqs_,n_obs1_); // augmented G
   GGt_ = MatrixXd::Zero(n_eqs_,n_obs1_*n_eqs_);
   lambda0_ = VectorXd::Zero(n_eqs_); // default initial value of lambda
   lambda_old_ = VectorXd::Zero(n_eqs_); // Initialize to all 0's
@@ -370,6 +371,25 @@ inline double flexEL::InnerEL::LogEL() {
   // if omegas are NaN, return -Inf
   if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) return -INFINITY;
   else return(omegas_.head(n_obs2_).array().log().sum());
+}
+
+/**
+ * @brief Calculate LogEL and gradient matrix dldG
+ */
+inline void flexEL::InnerEL::LogELGrad(double& logel, MatrixXd& dldG) {
+  if (supp_ == false) {
+    if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) {
+      logel = -INFINITY;
+      dldG = MatrixXd::Zero(n_eqs_,n_obs2_);
+    }
+    else {
+      logel = omegas_.head(n_obs2_).array().log().sum();
+      // std::cout << lambda_new_.transpose() << std::endl;
+      // std::cout << omegas_.head(n_obs2_).transpose() << std::endl;
+      dldG = lambda_new_ * omegas_.head(n_obs2_).transpose();
+    }
+  }
+  // TODO: with support correction
 }
 
 // setters

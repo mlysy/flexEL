@@ -58,6 +58,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LogELGrad
+List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose);
+RcppExport SEXP _flexEL_LogELGrad(SEXP GSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
+    Rcpp::traits::input_parameter< bool >::type support(supportSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(LogELGrad(G, max_iter, rel_tol, support, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // EvalWeights
 Eigen::VectorXd EvalWeights(Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, bool support);
 RcppExport SEXP _flexEL_EvalWeights(SEXP deltasSEXP, SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP supportSEXP) {
@@ -122,17 +137,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // LogELSmooth
-double LogELSmooth(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, double s, bool support);
-RcppExport SEXP _flexEL_LogELSmooth(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP, SEXP sSEXP, SEXP supportSEXP) {
+double LogELSmooth(Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, double sp, bool support);
+RcppExport SEXP _flexEL_LogELSmooth(SEXP omegasSEXP, SEXP epsilonsSEXP, SEXP deltasSEXP, SEXP spSEXP, SEXP supportSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type omegas(omegasSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilons(epsilonsSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type deltas(deltasSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type sp(spSEXP);
     Rcpp::traits::input_parameter< bool >::type support(supportSEXP);
-    rcpp_result_gen = Rcpp::wrap(LogELSmooth(omegas, epsilons, deltas, s, support));
+    rcpp_result_gen = Rcpp::wrap(LogELSmooth(omegas, epsilons, deltas, sp, support));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -257,6 +272,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 5},
     {"_flexEL_OmegaHat", (DL_FUNC) &_flexEL_OmegaHat, 3},
     {"_flexEL_LogEL", (DL_FUNC) &_flexEL_LogEL, 2},
+    {"_flexEL_LogELGrad", (DL_FUNC) &_flexEL_LogELGrad, 5},
     {"_flexEL_EvalWeights", (DL_FUNC) &_flexEL_EvalWeights, 4},
     {"_flexEL_LambdaNRCens", (DL_FUNC) &_flexEL_LambdaNRCens, 6},
     {"_flexEL_OmegaHatEM", (DL_FUNC) &_flexEL_OmegaHatEM, 9},

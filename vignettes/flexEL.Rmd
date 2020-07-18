@@ -183,9 +183,7 @@ Here, for the convience of using the minimization algorithm `nlm`, let's impleme
 ```{r, echo=TRUE, eval=TRUE}
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
-  omegas <- flexEL::omega_hat(G) # the empirical distribution provided by flexEL
-  if (!anyNA(omegas)) return(-flexEL::logEL(omegas)) # returns the negative log EL, if optimal omegas is found
-  else return(Inf) # otherwise, returns Inf
+  return(-flexEL::logEL(G = G))
 }
 ```
 
@@ -198,33 +196,25 @@ nlmout$estimate
 
 You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.
 ```{r, echo=TRUE, eval=TRUE}
-logEL_grad_R <- function(omegas, lambda, gradlist) {
-  grad <- sapply(gradlist, function(x) lambda %*% x)
-  return(c(-grad %*% omegas))
-}
-
-mr_deltaG_R <- function(y, X, theta) {
+mr_deltaG_R <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) tcrossprod(x,x))
   return(dg)
 }
 
-# negative log likelihood since `nlm` does minimization
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
-  lambda <- flexEL::lambdaNR(G, support = FALSE)
-  if (!anyNA(lambda)) {
-    omegas <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
-    res <- -sum(log(omegas)) # negative logEL
-    gradlist <- mr_deltaG_R(y, X, beta)
-    grad <- -logEL_grad_R(omegas, lambda, gradlist) # negative gradient
-    attr(res, "gradient") <- grad
+  res_lst <- flexEL::logEL(G, return_dldG = TRUE)
+  neglogel <- -res_lst$logel
+  dldG <- res_lst$dldG
+  dGdb <- mr_deltaG_R(y, X, beta)
+  grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
+  for (ii in 1:ncol(dldG)) {
+    grad_mat[,ii] <- dGdb[[ii]] %*% dldG[,ii]
   }
-  else {
-    res <- Inf
-    attr(res, "gradient") <- rep(Inf, length(beta))
-  }
-  return(res)
+  grad <- rowSums(grad_mat)
+  attr(neglogel, "gradient") <- grad
+  return(neglogel)
 }
 ```
 
