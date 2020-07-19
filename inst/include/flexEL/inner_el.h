@@ -4,8 +4,8 @@
  * @brief Inner optimization for empirial likelihood problems.
  */
 
-#ifndef INNEREL_h
-#define INNEREL_h
+#ifndef INNER_EL_H
+#define INNER_EL_H
 
 #include <Rcpp.h>
 #include <RcppEigen.h>

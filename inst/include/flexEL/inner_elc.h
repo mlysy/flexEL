@@ -4,8 +4,8 @@
  * @brief Inner optimization routine for empirial likelihood problems under right-censoring.
  */
 
-#ifndef INNERELC_h
-#define INNERELC_h
+#ifndef INNER_ELC_H
+#define INNER_ELC_H
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
@@ -144,7 +144,6 @@ namespace flexEL {
     VectorXd get_epsilons();
     MatrixXd get_G();
     Ref<MatrixXd> get_ref_G();
-    
   };
 }
 

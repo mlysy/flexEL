@@ -355,7 +355,7 @@ ind1_smooth_R <- function(x, s=10) {
 }
 
 # smoothed partial sum of omegas (vectorized version)
-evalPsos_smooth_R <- function(ii, omegas, epsilons, s=10, support = FALSE) {
+evalPsos_smooth_R <- function(ii, omegas, epsilons, s = 10, support = FALSE) {
   n <- length(epsilons)
   if (support == TRUE  && ii == n) {
     psos <- sum(omegas[1:(n-1)])+0.5*omegas[n]
@@ -365,11 +365,11 @@ evalPsos_smooth_R <- function(ii, omegas, epsilons, s=10, support = FALSE) {
 }
 
 # smoothed censored logEL
-logEL_smooth_R <- function(omegas,epsilons,deltas,s=10,adjust=FALSE) {
-  # if (adjust) {
-  #   epsilons <- c(epsilons,-Inf)
-  #   deltas <- c(deltas,0)
-  # }
+logEL_smooth_R <- function(omegas, epsilons, deltas, s = 10, adjust=FALSE) {
+  if (adjust) {
+    epsilons <- c(epsilons,-Inf)
+    deltas <- c(deltas,0)
+  }
   epsOrd <- order(epsilons) # ascending order of epsilons
   n <- length(omegas)
   psos <- rep(0,n)

@@ -16,7 +16,7 @@ test_that("mr_evalG_R == mr_evalG_cpp", {
     beta0 <- rnorm(p)
     y <- c(X %*% beta0) + rnorm(n) # with N(0,1) error term
     # checking G matrix from cpp and R
-    G_cpp <- mr_evalG(y, X, beta0)
+    G_cpp <- flexEL::mr_evalG(y, X, beta0)
     G_R <- mr_evalG_R(y, X, beta0)
     expect_equal(G_R, G_cpp)
   }

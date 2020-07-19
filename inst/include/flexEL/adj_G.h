@@ -4,8 +4,8 @@
  * @brief Calculate the adjusted G matrix.
  */
 
-#ifndef ADJG_h
-#define ADJG_h
+#ifndef ADJ_G_H
+#define ADJ_G_H
 
 #include <RcppEigen.h>
 

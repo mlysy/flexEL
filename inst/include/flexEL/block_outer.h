@@ -1,11 +1,11 @@
 /**
- * @file BlockOuter.h
+ * @file block_outer.h
  * 
  * @brief For an (m x N) matrix G = [g1 ... gN], calculates the (m x mN) matrix GGt = [g1 g1' ... gN gN'].
  */
 
-#ifndef BLOCKOUTER_h
-#define BLOCKOUTER_h
+#ifndef BLOCK_OUTER_H
+#define BLOCK_OUTER_H
 
 #include <RcppEigen.h>
 

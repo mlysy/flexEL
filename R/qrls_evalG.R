@@ -13,7 +13,7 @@
 qrls_evalG <- function(y, X, Z, alpha, Beta, Gamma, Sig2, Nu, sp = 0) {
   
   # checks
-  if (sp <= 0) stop("s must be positive.")
+  if (sp < 0) stop("s must be positive.")
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
@@ -28,9 +28,9 @@ qrls_evalG <- function(y, X, Z, alpha, Beta, Gamma, Sig2, Nu, sp = 0) {
   # the first entry of alpha passed to the C++ function is the number of quantile levels
   alpha <- c(length(alpha), alpha)
   if (sp == 0) {
-    return(.QuantRegLSEvalG(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu))
+    return(t(.QuantRegLSEvalG(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu)))
   }
   else {
-    return(.QuantRegLSEvalGSmooth(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu, sp))
+    return(t(.QuantRegLSEvalGSmooth(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu, sp)))
   }
 }

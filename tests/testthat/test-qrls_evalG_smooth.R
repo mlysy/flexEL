@@ -23,8 +23,8 @@ test_that("qrls_evalG_smooth_R == qrls_evalG_smooth_cpp", {
     # sig2 <- 1
     y <- c(X %*% beta + sqrt(sig2)*exp(Z %*% gamma)*rnorm(n)) # with multiplicative N(0,1) error
     # checking G matrix from cpp and R
-    sp <- sample(100,1)
-    G_cpp <- qrls_evalG_smooth(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
+    sp <- sample(100, 1)
+    G_cpp <- flexEL::qrls_evalG(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
     G_R <- qrls_evalG_smooth_R(y,X,Z,alpha,beta,gamma,sig2,nu,sp)
     expect_equal(G_cpp, G_R)
   }

@@ -1,3 +1,4 @@
 ^man-roxygen$      # Templates used in roxygen documentation
 ^examples$         # Examples used in roxygen documentation
 ^inst/doxygen$     # Doxygen documentation
+TODO.md

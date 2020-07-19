@@ -1,11 +1,11 @@
 /**
- * @file dVecTobArr.h
+ * @file dvec_to_barr.h
  * 
  * @brief Convert Eigen VectorXd (double vector) to C++ bool array.
  */
 
-#ifndef DVECTOBARR_h
-#define DVECTOBARR_h
+#ifndef DVEC_TO_BARR_H
+#define DVEC_TO_BARR_H
 
 // convert Eigen VectorXd dVec to C++ bool array bArr
 // bArr must have the same length as dVec

@@ -1,11 +1,11 @@
 /**
- * @file SortOrder.h
+ * @file sort_order.h
  * 
  * @brief Find the order of elements if a vector is sorted (ascendingly).
  */
 
-#ifndef SORTORDER_h
-#define SORTORDER_h
+#ifndef SORT_ORDER_H
+#define SORT_ORDER_H
 
 #include <RcppEigen.h>
 using namespace Eigen;
@@ -15,7 +15,7 @@ using namespace Eigen;
 
 // 
 /**
- * @file       SortOrder.h
+ * @file       sort_order.h
  *
  * @class      compare_acc_vec
  *

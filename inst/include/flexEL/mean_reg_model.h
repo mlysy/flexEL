@@ -4,8 +4,8 @@
  * @brief A base class for template classes InnerEL and InnerELC.
  */
 
-#ifndef MEANREGMODEL_h
-#define MEANREGMODEL_h
+#ifndef MEAN_REG_MODEL_h
+#define MEAN_REG_MODEL_h
 
 /* --------------------------------------------------------------------------- */
 
