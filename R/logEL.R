@@ -5,8 +5,15 @@
 #' @template arg-eps
 #' @template arg-support
 #' @template arg-sp
+#' @template args-lambda_precision
+#' @template arg-abs_tol
+#' @param return_omega A boolean indicating whether to return the progability vector omega used to evaluate log EL.
+#' @param return_dldG A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.
+#' @template arg-verbose
 #' @example examples/logEL.R
-#' @return A list containing the log EL value and the probability vector omega, or only the log EL value as a scalar.
+#' @return A list containing the log EL value, the probability vector omega, and a matrix 
+#'   containing the gradient of log EL function with respect to G matrix evaluated at G, 
+#'   or only the log EL value as a scalar.
 #' @export logEL
 logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0, 
                   max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, 
@@ -33,14 +40,18 @@ logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
     }
   }
   else if (!is.null(delta) & !is.null(eps)) {
+    
     if (return_dldG) {
       stop("Currently does not support gradient calculation for right-censored data.")
     }
+    
     omega <- flexEL:::omega_hat(G = G, delta = delta, eps = eps, support = support,
-                                max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = verbose)
+                                max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, 
+                                verbose = verbose)
     if (sp == 0) {
       if (return_omega) {
-        return(list(log_el = .LogELCens(omegas = omega, epsilons = eps, deltas = delta, support = support),
+        return(list(log_el = .LogELCens(omegas = omega, epsilons = eps, deltas = delta, 
+                                        support = support),
                     omega = omega))
       }
       else{

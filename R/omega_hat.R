@@ -4,7 +4,7 @@
 #' @template arg-delta
 #' @template arg-eps
 #' @template args-lambda_precision
-#' @param abs_tol Positive scalar for absolute tolerance of Newton-Raphson steps.
+#' @template arg-abs_tol
 #' @param verbose Display number of steps and tolerance criterion when algorithm terminates.
 #' @example examples/omega_hat.R
 #' @return Length-`n_eqs` vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.

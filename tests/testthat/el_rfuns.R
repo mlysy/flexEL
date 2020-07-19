@@ -541,3 +541,7 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
     return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
   }
 }
+
+logEL_dldG_R <- function(lambda, omega) {
+  return(lambda %*% t(omega))
+}

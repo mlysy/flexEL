@@ -28,9 +28,23 @@ logEL(
 \item{support}{A boolean indicating whether support correction should be conducted.}
 
 \item{sp}{A positive scalar as smoothing parameter.}
+
+\item{max_iter}{Integer scalar for maximum number of Newton-Raphson steps.}
+
+\item{rel_tol}{Positive scalar for relative tolerance of Newton-Raphson steps.}
+
+\item{abs_tol}{Positive scalar for absolute tolerance of Newton-Raphson steps.}
+
+\item{return_omega}{A boolean indicating whether to return the progability vector omega used to evaluate log EL.}
+
+\item{return_dldG}{A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.}
+
+\item{verbose}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
 }
 \value{
-A list containing the log EL value and the probability vector omega, or only the log EL value as a scalar.
+A list containing the log EL value, the probability vector omega, and a matrix
+containing the gradient of log EL function with respect to G matrix evaluated at G,
+or only the log EL value as a scalar.
 }
 \description{
 Calculates log empirical likelihood.
