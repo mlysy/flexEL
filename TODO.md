@@ -2,7 +2,7 @@
 
 - [x] Use Markdown in roxygen documentation. 
 
-- [ ] Please be consistent with roxygen punctuation!  The rule is: *everything* is sentence case, i.e., only(ish) first word is capitalized and ends with period.  This is the simplest rule to remember so it's easy to get it right :)
+- [x] Please be consistent with roxygen punctuation!  The rule is: *everything* is sentence case, i.e., only(ish) first word is capitalized and ends with period.  This is the simplest rule to remember so it's easy to get it right :)
 
 - [x] Don't export internal functions.  For example, it looks like `adjG` isn't used for anything except to test C++ code.  If this is the case, the test can be conducted by replacing `adjG` by `flexEL:::.adjG`.   If you do want to export `adjG` (and it might well be useful to do so), then please clean up its documentation.  Currently the `details` section is blank :)
 
@@ -10,7 +10,9 @@ Shimeng: Removed from exported for now.
 
 - [ ] `qrls_*`: What is the `nu` parameter?  I can't understand from the provided description.  In general, the models should be described in the `details` section.  Please use `\preformatted{}` (or with Markdown, triple backticks) to describe models rather than LaTeX with `\eqn{}` and `\deqn{}`.  The reason is that the latter formats differently depending on HTML or PDF output and takes a lot more work to get right.  If the model is too complicated to explain with `\preformatted{}`, then it should be documented somewhere in a vignette and the `details` section can provide a link to this.
 
-- [ ] `qrls_evalG_smooth`: Is a separate function really necessary?  How about only `qrls_evalG` but with an `sp = 10` default (probably better to smooth :), and explaining that `sp = 0` means no smoothing.  Inside the R function you can call the corresponding C++ function `.QuantRegLSEvalGSmooth` or `.QuantRegLSEvalG`.
+Shimeng: nu is the quantile value, documentation updated but not yet included model description, will do in the coming week.
+
+- [x] `qrls_evalG_smooth`: Is a separate function really necessary?  How about only `qrls_evalG` but with an `sp = 10` default (probably better to smooth :), and explaining that `sp = 0` means no smoothing.  Inside the R function you can call the corresponding C++ function `.QuantRegLSEvalGSmooth` or `.QuantRegLSEvalG`.
 
 - [x] `lambdaNR_cens`: Seems to me like this only relates to censoring indirectly through `weights`.  If so, I think it's better to have just `lambdaNR` with an optional `weights` argument.  Might also want to rename `.LambdaNRC` to something more informative.
 
@@ -31,6 +33,8 @@ Shimeng: Removed from exported for now.
 - [x] Move portable C++ code to `inst/include/flexEL`.  This way other R packages can easily include our C++ code (otherwise it's essentially impossible without copy-pasting).
 
 - [ ] Make sure build passes `devtools::check()`.  This catches all sorts of issues that need to be resolved before submitting to CRAN.  It should return zero warnings and errors.  Ideal zero notes as well, but some of these are benign (e.g., "first package submission").  After this passes, please test on CRAN's Windows machines as well by running `devtools::check_win_devel()`.  You will have to set yourself as the package maintainer in the DESCRIPTION (`role = "cre"`) to send the test output to your email, not mine.
+
+Shimeng: check passed, waiting for the win build.
 
 - [x] C++ naming conventions.  I suggest you use only one naming convention for methods (snake case :)  Also, please check include guards / doxygen `@filename`s and make them consistent with the current names of the files.  Please finish the Doxygen documentation with `@param` and `@return` arguments if needed (the more thoroughly documented, the better :) Also, you can Doxygen document Rcpp functions in `src` as well!
 
@@ -61,3 +65,5 @@ Shimeng: currently haven't changed all methods to snake case, was following Goog
 	And **Rcpp** will automatically know which file to use! (Prefixed by `flexEL` here because I put the source code in `inst/include/flexEL`.  The `inst` gets dropped when the package is installed.)
 
 	- Future Work.  Excellent.
+	
+Shimeng: I couldn't get the c++ code work in the rmarkdown, need to investigate.
