@@ -75,12 +75,12 @@ namespace flexEL {
                const Ref<const VectorXd>& beta, 
                const Ref<const VectorXd>& gamma,
                const double& sig2, // sig2 should be a scalar
-               const Ref<const VectorXd>& Nu);
+               const Ref<const VectorXd>& nu);
     void EvalGSmooth(Ref<MatrixXd> G,
                      const Ref<const VectorXd>& beta,
                      const Ref<const VectorXd>& gamma,
                      const double& sig2, // sig2 should be a scalar
-                     const Ref<const VectorXd>& Nu,
+                     const Ref<const VectorXd>& nu,
                      const double s);
     
     // get functions
@@ -242,15 +242,15 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, const Ref<const Matrix
 * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
 * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
 * @param sig2     Scale parameter in scale function.
-* @param Nu       Quantile parameters for each quantile level.
+* @param nu       Quantile parameters for each quantile level.
 */
 inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, 
                                          const Ref<const VectorXd>& beta,
                                          const Ref<const VectorXd>& gamma,
                                          const double& sig2,
-                                         const Ref<const VectorXd>& Nu) {
+                                         const Ref<const VectorXd>& nu) {
   // TODO: warning if negative sig2?
-  if (sig2 < 0) std::cout << "qrls.EvalG: negative variance." << std::endl;
+  // if (sig2 < 0) std::cout << "qrls.EvalG: negative variance." << std::endl;
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
@@ -267,7 +267,7 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G,
   // quantile param(s)
   for (int ii=0; ii<n_obs_; ii++) {
     for (int jj=0; jj<n_qts_; jj++) {
-      tG_.block(ii,n_bet_+n_gam_+1+jj,1,1).array() = phi_tau(yXbeZg_(ii)/sqrt(sig2)-Nu(jj), tau[jj]);
+      tG_.block(ii,n_bet_+n_gam_+1+jj,1,1).array() = phi_tau(yXbeZg_(ii)/sqrt(sig2)-nu(jj), tau[jj]);
     }
   }
   G = tG_.transpose();
@@ -279,17 +279,17 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G,
 * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
 * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
 * @param sig2     Scale parameter in scale function.
-* @param Nu       Quantile parameters for each quantile level.
+* @param nu       Quantile parameters for each quantile level.
 * @param s        Smoothing parameter (s > 0).
 */
 inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G, 
                                                const Ref<const VectorXd>& beta,
                                                const Ref<const VectorXd>& gamma,
                                                const double& sig2,
-                                               const Ref<const VectorXd>& Nu,
+                                               const Ref<const VectorXd>& nu,
                                                const double s) {
   // TODO: warning if negative sig2?
-  if (sig2 < 0) std::cout << "qrls.EvalG: negative variance." << std::endl;
+  // if (sig2 < 0) std::cout << "qrls.EvalG: negative variance." << std::endl;
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
@@ -306,7 +306,7 @@ inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G,
   // quantile param(s)
   for (int ii=0; ii<n_obs_; ii++) {
     for (int jj=0; jj<n_qts_; jj++) {
-      tG_.block(ii,n_bet_+n_gam_+1+jj,1,1).array() = phi_tau_smooth(yXbeZg_(ii)/sqrt(sig2)-Nu(jj),tau[jj],s);
+      tG_.block(ii,n_bet_+n_gam_+1+jj,1,1).array() = phi_tau_smooth(yXbeZg_(ii)/sqrt(sig2)-nu(jj),tau[jj],s);
     }
   }
   G = tG_.transpose();

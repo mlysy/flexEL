@@ -230,8 +230,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // QuantRegLSEvalG
-Eigen::MatrixXd QuantRegLSEvalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu);
-RcppExport SEXP _flexEL_QuantRegLSEvalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP) {
+Eigen::MatrixXd QuantRegLSEvalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu);
+RcppExport SEXP _flexEL_QuantRegLSEvalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP nuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -242,14 +242,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type Nu(NuSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLSEvalG(y, X, Z, tauArr, beta, gamma, sig2, Nu));
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type nu(nuSEXP);
+    rcpp_result_gen = Rcpp::wrap(QuantRegLSEvalG(y, X, Z, tauArr, beta, gamma, sig2, nu));
     return rcpp_result_gen;
 END_RCPP
 }
 // QuantRegLSEvalGSmooth
-Eigen::MatrixXd QuantRegLSEvalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd Nu, double s);
-RcppExport SEXP _flexEL_QuantRegLSEvalGSmooth(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP NuSEXP, SEXP sSEXP) {
+Eigen::MatrixXd QuantRegLSEvalGSmooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu, double s);
+RcppExport SEXP _flexEL_QuantRegLSEvalGSmooth(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP nuSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -260,9 +260,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type Nu(NuSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type nu(nuSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLSEvalGSmooth(y, X, Z, tauArr, beta, gamma, sig2, Nu, s));
+    rcpp_result_gen = Rcpp::wrap(QuantRegLSEvalGSmooth(y, X, Z, tauArr, beta, gamma, sig2, nu, s));
     return rcpp_result_gen;
 END_RCPP
 }

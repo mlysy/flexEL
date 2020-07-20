@@ -24,12 +24,12 @@ logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
       if (support) {
         stop("Currently does not support gradient calculation with support correction.")
       }
-      return(flexEL:::.LogELGrad(t(G), max_iter = max_iter, rel_tol = rel_tol, 
-                                 support = support, verbose = verbose))
+      return(.LogELGrad(t(G), max_iter = max_iter, rel_tol = rel_tol, 
+                        support = support, verbose = verbose))
     }
     else {
-      omega <- flexEL:::omega_hat(G = G, support = support, 
-                                  max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = verbose)
+      omega <- omega_hat(G = G, support = support, 
+                         max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = verbose)
       if (return_omega) {
         return(list(log_el = .LogEL(omegas = omega, support = support),
                     omega = omega))
@@ -45,9 +45,9 @@ logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
       stop("Currently does not support gradient calculation for right-censored data.")
     }
     
-    omega <- flexEL:::omega_hat(G = G, delta = delta, eps = eps, support = support,
-                                max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, 
-                                verbose = verbose)
+    omega <- omega_hat(G = G, delta = delta, eps = eps, support = support,
+                       max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, 
+                       verbose = verbose)
     if (sp == 0) {
       if (return_omega) {
         return(list(log_el = .LogELCens(omegas = omega, epsilons = eps, deltas = delta, 

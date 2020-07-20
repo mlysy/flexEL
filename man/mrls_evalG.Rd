@@ -17,7 +17,7 @@ mrls_evalG(y, X, Z, beta, gamma, sig2)
 
 \item{gamma}{Length-\code{n_gam} vector of coefficients in location model.}
 
-\item{sig2}{A scalar where sqrt(sig2) is the scale parameter for the error term.}
+\item{sig2}{A positive scalar whose square root is the scale parameter for the error term.}
 }
 \value{
 G matrix for location-scale model.

@@ -7,6 +7,11 @@ context("logEL")
 
 ntest <- 50
 
+# converged result
+check_res <- function(x) {
+  all(is.finite(x) & !is.na(x))
+}
+
 # Non-censored case:
 test_that("logel_cpp == logel_R no censoring, no support correction", {
   for(ii in 1:ntest) {
@@ -22,7 +27,7 @@ test_that("logel_cpp == logel_R no censoring, no support correction", {
     omegahat_R <- omega_hat_R(G = G, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
     logopt_R <- logEL_R(omegahat_R, adjust = support)
-    if (!is.infinite(logopt_cpp) & !is.infinite(logopt_R)) {
+    if (check_res(logopt_cpp) & check_res(logopt_R)) {
       expect_equal(logopt_cpp, logopt_R, tolerance = 1e-4)
     }
   }
@@ -43,7 +48,7 @@ test_that("logel_cpp == logel_R no censoring, with support correction", {
     omegahat_R <- omega_hat_R(G = adjG_R(G), adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
     logopt_R <- logEL_R(omegahat_R, adjust = support)
-    if (!is.infinite(logopt_cpp) & !is.infinite(logopt_R)) {
+    if (check_res(logopt_cpp) & check_res(logopt_R)) {
       expect_equal(logopt_cpp, logopt_R, tolerance = 1e-4)
     }
   }
@@ -65,7 +70,7 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
     lambda_R <- lambdaNR_R(G)$lambda
     dldG_R <- logEL_dldG_R(lambda_R, omegahat_R)
-    if (!any(is.na(lambda_R))) {
+    if (check_res(lambda_R)) {
       expect_equal(dldG_cpp, dldG_R, tolerance = 1e-4)
     }
   }
@@ -91,7 +96,7 @@ test_that("logel_cpp == logel_R right-censored, no support correction", {
     omegahat_R <- omega_hat_R(G = G, deltas = deltas, epsilons = epsilons, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
     logopt_R <- logEL_R(omegas = omegahat_R, epsilons = epsilons, deltas = deltas, adjust = support)
-    if (!is.infinite(logopt_cpp) & !is.infinite(logopt_R)) {
+    if (check_res(logopt_cpp) & check_res(logopt_R)) {
       expect_equal(logopt_cpp, logopt_R, tolerance = 1e-4)
     }
   }
@@ -118,7 +123,7 @@ test_that("logel_cpp == logel_R right-censored, with support correction", {
     omegahat_R <- omega_hat_R(G = adjG_R(G), deltas = deltas, epsilons = epsilons, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
     logopt_R <- logEL_R(omegas = omegahat_R, epsilons = epsilons, deltas = deltas, adjust = support)
-    if (!is.infinite(logopt_cpp) & !is.infinite(logopt_R)) {
+    if (check_res(logopt_cpp) & check_res(logopt_R)) {
       expect_equal(logopt_cpp, logopt_R, tolerance = 1e-4)
     }
     # else {
@@ -151,7 +156,7 @@ test_that("logEL_smooth_R == logEL_smooth_cpp, no support correction", {
     omegahat_R <- omega_hat_R(G = G, deltas = deltas, epsilons = epsilons, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
     logopt_R <- logEL_smooth_R(omegas = omegahat_R, epsilons = epsilons, deltas = deltas, s = sp, adjust = support)
-    if (!is.infinite(logopt_cpp) & !is.infinite(logopt_R)) {
+    if (check_res(logopt_cpp) & check_res(logopt_R)) {
       expect_equal(logopt_cpp, logopt_R, tolerance = 1e-4)
     }
     # else {
@@ -183,7 +188,7 @@ test_that("logEL_smooth_R == logEL_smooth_cpp, with support correction", {
     omegahat_R <- omega_hat_R(G = adjG_R(G), deltas = deltas, epsilons = epsilons, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
     logopt_R <- logEL_smooth_R(omegas = omegahat_R, epsilons = epsilons, deltas = deltas, s = sp, adjust = support)
-    if (!any(is.nan(omegahat_R))) {
+    if (check_res(logopt_cpp) & check_res(logopt_R)) {
       expect_equal(logopt_cpp, logopt_R, tolerance = 1e-4)
     }
     # else {

@@ -2,3 +2,4 @@
 ^examples$         # Examples used in roxygen documentation
 ^inst/doxygen$     # Doxygen documentation
 TODO.md
+summary.md

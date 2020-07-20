@@ -4,7 +4,7 @@
 #' @template arg-Z
 #' @param beta Length-`n_bet` vector of coefficients in location model.
 #' @param gamma Length-`n_gam` vector of coefficients in location model.
-#' @param sig2 A scalar where sqrt(sig2) is the scale parameter for the error term.
+#' @param sig2 A positive scalar whose square root is the scale parameter for the error term.
 #' @example examples/mrls_evalG.R
 #' @return G matrix for location-scale model.
 #' @export mrls_evalG

@@ -1,4 +1,3 @@
 library(testthat)
-library(bayesEL)
 
-test_check("bayesEL")
+test_check("flexEL")

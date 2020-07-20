@@ -13,13 +13,15 @@ qrls_evalG(y, X, Z, alpha, Beta, Gamma, Sig2, Nu, sp = 0)
 
 \item{Z}{\code{nObs x nGam} matrix of covariates in the scale function, where \code{nObs} is the number of observations and \code{nGam} is the dimension of coefficients in the scale function.}
 
-\item{alpha}{A numeric vector of quantile levels.}
+\item{alpha}{A length-\code{n_qts} numeric vector of quantile levels.}
 
 \item{Beta}{An \verb{n_bet x n_qts} matrix, each column is a vector of coefficients in location function.}
 
 \item{Gamma}{An \verb{n_gam x n_qts} matrix, each column is a vector of coefficients in scale function.}
 
-\item{Nu}{A vector of quantile values of the same length as alpha.}
+\item{Sig2}{A positive scalar whose square root is the scale parameter for the error term.}
+
+\item{Nu}{A length-\code{n_qts} numeric vector of quantile values corresponding to each alpha.}
 
 \item{sp}{A positive scalar as smoothing parameter.}
 }

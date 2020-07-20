@@ -61,11 +61,11 @@
     .Call(`_flexEL_QuantRegEvalG`, y, X, tauArr, beta)
 }
 
-.QuantRegLSEvalG <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu) {
-    .Call(`_flexEL_QuantRegLSEvalG`, y, X, Z, tauArr, beta, gamma, sig2, Nu)
+.QuantRegLSEvalG <- function(y, X, Z, tauArr, beta, gamma, sig2, nu) {
+    .Call(`_flexEL_QuantRegLSEvalG`, y, X, Z, tauArr, beta, gamma, sig2, nu)
 }
 
-.QuantRegLSEvalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, Nu, s) {
-    .Call(`_flexEL_QuantRegLSEvalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, Nu, s)
+.QuantRegLSEvalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, nu, s) {
+    .Call(`_flexEL_QuantRegLSEvalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, nu, s)
 }
 

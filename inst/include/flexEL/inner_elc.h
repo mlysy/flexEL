@@ -507,10 +507,10 @@ inline void flexEL::InnerELC::EvalWeights() {
         psos = EvalPSO(kk);
         // to prevent dividing by 0
         if (abs(psos) >= 1e-10) psots_(ii) += omegas_(ii)/psos;
-        else if (omegas_(ii) >= 1e-10 && EvalPSO(kk) < 1e-10) {
-          // TODO: this means a problem
-          std::cout << "EvalWeights: dividing by 0 problem." << std::endl;
-        }
+        // else if (omegas_(ii) >= 1e-10 && EvalPSO(kk) < 1e-10) {
+        //   // TODO: this means a problem
+        //   // std::cout << "EvalWeights: dividing by 0 problem." << std::endl;
+        // }
       }
       if (kk == ii) break;
     }

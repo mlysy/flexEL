@@ -2,10 +2,11 @@
 #'
 #' @template args-y_X
 #' @template arg-Z
-#' @param alpha A numeric vector of quantile levels.
+#' @param alpha A length-`n_qts` numeric vector of quantile levels.
 #' @param Beta An `n_bet x n_qts` matrix, each column is a vector of coefficients in location function.
 #' @param Gamma An `n_gam x n_qts` matrix, each column is a vector of coefficients in scale function.
-#' @param Nu A vector of quantile values of the same length as alpha.
+#' @param Sig2 A positive scalar whose square root is the scale parameter for the error term.
+#' @param Nu A length-`n_qts` numeric vector of quantile values corresponding to each alpha.
 #' @param sp A positive scalar as smoothing parameter.
 #' @example examples/qrls_evalG.R
 #' @return G matrix of size `for location-scale quantile regression model.
