@@ -70,7 +70,7 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
     lambda_R <- lambdaNR_R(G)$lambda
     dldG_R <- logEL_dldG_R(lambda_R, omegahat_R)
-    if (check_res(lambda_R)) {
+    if (check_res(lambda_R) & check_res(omegahat_R)) {
       expect_equal(dldG_cpp, dldG_R, tolerance = 1e-4)
     }
   }

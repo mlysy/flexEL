@@ -196,7 +196,7 @@ nlmout$estimate
 
 You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.
 ```{r, echo=TRUE, eval=TRUE}
-mr_deltaG_R <- function(y, X, beta) {
+mr_dGdt_R <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) tcrossprod(x,x))
   return(dg)
@@ -207,7 +207,7 @@ mr_neglogEL_R <- function(y, X, beta) {
   res_lst <- flexEL::logEL(G, return_dldG = TRUE)
   neglogel <- -res_lst$logel
   dldG <- res_lst$dldG
-  dGdb <- mr_deltaG_R(y, X, beta)
+  dGdb <- mr_dGdt_R(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:ncol(dldG)) {
     grad_mat[,ii] <- dGdb[[ii]] %*% dldG[,ii]

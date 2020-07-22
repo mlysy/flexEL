@@ -3,9 +3,9 @@ Type: Package
 Title: Flexible Empirical Likelihood Methods for Regression
 Version: 0.0.0.9000
 Date: 2017-10-03
-Authors@R: c(person("Shimeng", "Huang", role = c("aut"),
+Authors@R: c(person("Shimeng", "Huang", role = c("aut", "cre"),
                     email = "dora.huang.sunshine@gmail.com"),
-             person("Martin", "Lysy", role = c("aut", "cre"),
+             person("Martin", "Lysy", role = c("aut"),
                     email = "mlysy@uwaterloo.ca"))
 Description: A flexible framework for Empirical Likelihood methods for regression problems. The bulk of computations are done in C++ for speed considerations.  The C++ code is exposed as a header-only library.  The package provides mean and quantile regression with (optionally) right-censored responses using location and location-scale models, but users can added in any regression models as C++ header files or use the R interface directly to solve their problems.
 License: GPL (>= 3)
