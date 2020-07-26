@@ -22,15 +22,29 @@ G matrix for location quantile regression model.
 Evaluate the G matrix for a quantile regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
+Assuming data were generated from\preformatted{y_i = x_i \%*\% beta + eps_i, for i = 1, ..., n,
 }
 
 where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
-Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i) = x_i'beta, for i = 1, ..., n.
+Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i) = x_i \%*\% beta, for i = 1, ..., n.
 }
 
 where the 1st element of \code{x_i} is 1 and such that the 1st element of \code{beta} corresponds
 to the \code{alpha}-level quantile of \code{eps}.
+The estimating equation can be derived based on the minimizing "check function" introduced by
+Basset and Koenker (1978),\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
+}
+
+where \code{alpha} is the quantile level and \verb{1\{\}} is the indicator function which returns 1 if the
+condition is true and 0 otherwise. That is,\preformatted{min_beta rho(y - X \%*\% beta)
+}
+
+The above minimization problem is equavalent to setting it's first derivative
+w.r.t \code{beta} to 0, i.e.,\preformatted{phi(y - X \%*\% beta) = 0
+}
+
+where \code{phi} is the first derivative of \code{rho}.
+The left-hand-side of the above equation is the \code{G} matrix returned by this function.
 }
 \examples{
 n <- 20

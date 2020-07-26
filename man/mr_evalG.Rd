@@ -20,10 +20,19 @@ G matrix for location mean regression model.
 Evaluate the G matrix for a mean regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
+Assuming data were generated from\preformatted{y_i = x_i \%*\% beta + eps_i, for i = 1, ..., n,
 }
 
 where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+The estimating equations for \code{beta} can be derived based on the least squares method,
+that is,\preformatted{min_beta t(y - X \%*\% beta) \%*\% (y - X  \%*\% beta)
+}
+
+The above minimization problem is equavalent to setting it's first derivative
+w.r.t \code{beta} to 0, i.e.,\preformatted{t(X) \%*\% (y - X \%*\% beta) = 0
+}
+
+The left-hand-side of the above equation is the \code{G} matrix returned by this function.
 }
 \examples{
 n <- 20

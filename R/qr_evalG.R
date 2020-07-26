@@ -6,15 +6,32 @@
 #' @details 
 #' Assuming data were generated from 
 #' ```
-#' y_i = x_i'beta + eps_i, for i = 1, ..., n,
+#' y_i = x_i %*% beta + eps_i, for i = 1, ..., n,
 #' ```
 #' where `eps_i`'s are ~iid `eps`, with `E[eps] = 0` and `Var[eps] = 1`. 
 #' Quantile regression estimates the alpha-level quantile of the response variable, i.e., 
 #' ```
-#' Q_alpha(y | x_i) = x_i'beta, for i = 1, ..., n.
+#' Q_alpha(y | x_i) = x_i %*% beta, for i = 1, ..., n.
 #' ```
 #' where the 1st element of `x_i` is 1 and such that the 1st element of `beta` corresponds 
 #' to the `alpha`-level quantile of `eps`.
+#' The estimating equation can be derived based on the minimizing "check function" introduced by 
+#' Basset and Koenker (1978),
+#' ```
+#' rho_alpha(u) = u * (alpha - 1{u <= 0})
+#' ```
+#' where `alpha` is the quantile level and `1{}` is the indicator function which returns 1 if the
+#' condition is true and 0 otherwise. That is,
+#' ```
+#' min_beta rho(y - X %*% beta)
+#' ```
+#' The above minimization problem is equavalent to setting it's first derivative 
+#' w.r.t `beta` to 0, i.e.,
+#' ```
+#' phi(y - X %*% beta) = 0
+#' ```
+#' where `phi` is the first derivative of `rho`.
+#' The left-hand-side of the above equation is the `G` matrix returned by this function.
 #' @return G matrix for location quantile regression model.
 #' @example examples/qr_evalG.R
 #' @export qr_evalG
