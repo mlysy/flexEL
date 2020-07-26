@@ -31,9 +31,10 @@ source("./tests/testthat/el_rfuns.R")
 
 mr_neglogEL_R <- function(G) {
   lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = FALSE)
-  omega <- omegahat <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
+  # omega <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
+  omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
   neglogel <- -sum(log(omega))
-  dldG <- -t(logEL_dldG_R(lambda, omega))
+  dldG <- t(logEL_dldG_R(lambda, omega))
   attr(neglogel, "gradient") <- dldG
   return(neglogel)
 }
@@ -63,8 +64,8 @@ mr_neglogEL_adj_R <- function(G) {
   return(neglogel)
 }
 
-n_obs <- sample(10:30, 1)
-n_eq <- sample(2:4, 1)
+# n_obs <- 10
+# n_eq <- 2
 G <- matrix(rnorm(n_obs*n_eq), n_obs, n_eq)
 
 # G <- mr_evalG_R(y, X, b)

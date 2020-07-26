@@ -25,6 +25,12 @@ G matrix for location-scale model.
 \description{
 Evaluate the G matrix for a location-scale mean regression model.
 }
+\details{
+Assuming data were generated from\preformatted{y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
+}
+
+where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+}
 \examples{
 n <- 20
 p <- 5

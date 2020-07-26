@@ -3,3 +3,4 @@
 ^inst/doxygen$     # Doxygen documentation
 TODO.md
 summary.md
+try_grad.R

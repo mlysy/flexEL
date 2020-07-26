@@ -31,6 +31,18 @@ G matrix of size `for location-scale quantile regression model.
 \description{
 Evaluate the G matrix for a location-scale quantile regression model.
 }
+\details{
+Assuming data were generated from\preformatted{y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
+}
+
+where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i, z_i) = x_i'beta + sigma * exp(z_i'gamma) * nu_alpha,
+for i = 1, ..., n.
+}
+
+where \code{nu_alpha} is the alpha-level quantile value of \code{eps}.
+Neither \code{x_i} nor \code{z_i} should have a constant term.
+}
 \examples{
 n <- 20
 p <- 5

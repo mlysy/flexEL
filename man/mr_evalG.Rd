@@ -19,6 +19,12 @@ G matrix for location mean regression model.
 \description{
 Evaluate the G matrix for a mean regression model.
 }
+\details{
+Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
+}
+
+where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+}
 \examples{
 n <- 20
 p <- 4

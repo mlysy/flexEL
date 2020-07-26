@@ -8,9 +8,7 @@
 
 Shimeng: Removed from exported for now.
 
-- [ ] `qrls_*`: What is the `nu` parameter?  I can't understand from the provided description.  In general, the models should be described in the `details` section.  Please use `\preformatted{}` (or with Markdown, triple backticks) to describe models rather than LaTeX with `\eqn{}` and `\deqn{}`.  The reason is that the latter formats differently depending on HTML or PDF output and takes a lot more work to get right.  If the model is too complicated to explain with `\preformatted{}`, then it should be documented somewhere in a vignette and the `details` section can provide a link to this.
-
-Shimeng: nu is the quantile value, documentation updated but not yet included model description, will do in the coming week.
+- [x] `qrls_*`: What is the `nu` parameter?  I can't understand from the provided description.  In general, the models should be described in the `details` section.  Please use `\preformatted{}` (or with Markdown, triple backticks) to describe models rather than LaTeX with `\eqn{}` and `\deqn{}`.  The reason is that the latter formats differently depending on HTML or PDF output and takes a lot more work to get right.  If the model is too complicated to explain with `\preformatted{}`, then it should be documented somewhere in a vignette and the `details` section can provide a link to this.
 
 - [x] `qrls_evalG_smooth`: Is a separate function really necessary?  How about only `qrls_evalG` but with an `sp = 10` default (probably better to smooth :), and explaining that `sp = 0` means no smoothing.  Inside the R function you can call the corresponding C++ function `.QuantRegLSEvalGSmooth` or `.QuantRegLSEvalG`.
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/qr_evalG.R
 \name{qr_evalG}
 \alias{qr_evalG}
-\title{Evaluate the G matrix for the quantile regression model.}
+\title{Evaluate the G matrix for a quantile regression model.}
 \usage{
 qr_evalG(y, X, alpha, Beta)
 }
@@ -19,7 +19,18 @@ qr_evalG(y, X, alpha, Beta)
 G matrix for location quantile regression model.
 }
 \description{
-Evaluate the G matrix for the quantile regression model.
+Evaluate the G matrix for a quantile regression model.
+}
+\details{
+Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
+}
+
+where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i) = x_i'beta, for i = 1, ..., n.
+}
+
+where the 1st element of \code{x_i} is 1 and such that the 1st element of \code{beta} corresponds
+to the \code{alpha}-level quantile of \code{eps}.
 }
 \examples{
 n <- 20
