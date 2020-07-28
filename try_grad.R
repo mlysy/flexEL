@@ -77,3 +77,61 @@ dldG_nd <- matrix(numDeriv::grad(mr_neglogEL_adj_R, G), nrow = nrow(G), ncol = n
 head(dldG_re)
 head(dldG_nd/n_obs)
 
+#--- simple test following qin-lawless 1994 ------------------------------------
+
+require(flexEL)
+require(numDeriv)
+
+n_obs <- 10
+n_eq <- 3
+G <- matrix(rnorm(n_obs*n_eq), n_obs, n_eq)
+
+lambda <- lambdaNR(G, verbose = TRUE)
+
+omega <- 1/(1 - c(G %*% lambda))/n_obs
+# check: - sign difference in lambda from qin and lawless
+omega - flexEL:::omega_hat(G)
+
+sum(log(omega)) - logEL(G)
+
+logEL2 <- function(G) {
+  lambda <- lambdaNR(G)
+  omega <- 1/(1 - c(G %*% lambda))/n_obs
+  sum(log(omega))
+}
+
+matrix(numDeriv::grad(func = logEL2, x = G), n_obs, n_eq) -
+  n_obs * outer(omega, lambda)
+
+# ok more complex test
+
+X0 <- matrix(rnorm(n_obs*n_eq), n_obs, n_eq)
+y0 <- rnorm(n_obs)
+
+Gfun <- function(theta) {
+  mr_evalG(y0, X0, theta)
+}
+
+logEL3 <- function(theta) {
+  G <- Gfun(theta)
+  logEL2(G)
+}
+
+theta0 <- rnorm(n_eq)
+
+
+G <- Gfun(theta0)
+lambda <- lambdaNR(G)
+omega <- 1/(1 - c(G %*% lambda))/n_obs
+## dGdt <- array(jacobian(Gfun, x = theta0, X = X0), dim = c(n_obs, n_eq, n_eq))
+
+dldt1 <- matrix(NA, n_obs, n_eq)
+for(ii in 1:n_obs) {
+  jac <- jacobian(function(theta) Gfun(theta)[ii,], x = theta0)
+  dldt1[ii,] <- omega[ii] * c(jac %*% lambda)
+}
+dldt1 <- colSums(dldt1)
+
+dldt2 <- grad(logEL3, x = theta0)
+
+n_obs * dldt1 - dldt2
