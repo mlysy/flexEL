@@ -34,7 +34,7 @@ mr_neglogEL_R <- function(G) {
   # omega <- c(1/(1-t(lambda) %*% t(G)) / sum(1/(1-t(lambda) %*% t(G))))
   omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
   neglogel <- -sum(log(omega))
-  dldG <- t(logEL_dldG_R(lambda, omega))
+  dldG <- logEL_dldG_R(lambda, omega)
   attr(neglogel, "gradient") <- dldG
   return(neglogel)
 }
@@ -51,15 +51,15 @@ res <- mr_neglogEL_R(G)
 dldG_re <- attr(res, "gradient")
 dldG_nd <- matrix(numDeriv::grad(mr_neglogEL_R, G), nrow = nrow(G), ncol = ncol(G))
 head(dldG_re)
-head(dldG_nd/n_obs)
-
+head(dldG_nd)
 
 mr_neglogEL_adj_R <- function(G) {
   n <- nrow(G)
   lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = TRUE)
   omega <- flexEL:::omega_hat(G = G, support = TRUE)
   neglogel <- -sum(log(omega))
-  dldGadj <- - t(logEL_dldG_R(lambda, omega[1:n]) - omega[n+1]*0.5*log(n)/n * lambda %*% t(rep(1, n)))
+  an <- max(1, 0.5*log(n))
+  dldGadj <- logEL_dldG_R(lambda, omega[1:n])/n*(n+1) + (n+1) * omega[n+1]*an/n * rep(1, n) %*% t(lambda)
   attr(neglogel, "gradient") <- dldGadj
   return(neglogel)
 }
@@ -75,7 +75,7 @@ res <- mr_neglogEL_adj_R(G)
 dldG_re <- attr(res, "gradient")
 dldG_nd <- matrix(numDeriv::grad(mr_neglogEL_adj_R, G), nrow = nrow(G), ncol = ncol(G))
 head(dldG_re)
-head(dldG_nd/n_obs)
+head(dldG_nd)
 
 #--- simple test following qin-lawless 1994 ------------------------------------
 

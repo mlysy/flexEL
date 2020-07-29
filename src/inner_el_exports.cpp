@@ -98,7 +98,7 @@ List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = f
   IL.LogELGrad(logel, dldG);
   
   return List::create(Named("logel") = logel,
-                      Named("dldG") = dldG,
+                      Named("dldG") = dldG.transpose(),
                       Named("omega") = IL.get_omegas());
 }
 

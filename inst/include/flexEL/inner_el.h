@@ -384,7 +384,7 @@ inline void flexEL::InnerEL::LogELGrad(double& logel, MatrixXd& dldG) {
     }
     else {
       logel = omegas_.head(n_obs2_).array().log().sum();
-      dldG = lambda_new_ * omegas_.head(n_obs2_).transpose();
+      dldG = -n_obs_ * lambda_new_ * omegas_.head(n_obs2_).transpose();
     }
   }
   // TODO: with support correction

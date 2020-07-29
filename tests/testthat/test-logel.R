@@ -66,12 +66,13 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
     dldG_cpp <- flexEL::logEL(G = G, support = support,
                                 max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
                                 return_omega = FALSE, return_dldG = TRUE, verbose = FALSE)$dldG
-    omegahat_R <- omega_hat_R(G = G, adjust = support,
-                              max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
-    lambda_R <- lambdaNR_R(G)$lambda
-    dldG_R <- logEL_dldG_R(lambda_R, omegahat_R)
-    if (check_res(lambda_R) & check_res(omegahat_R)) {
-      expect_equal(dldG_cpp, dldG_R, tolerance = 1e-4)
+    
+    dldG_nd <- matrix(tryCatch(numDeriv::grad(mr_neglogEL_R, G),
+                        error = function(e) {
+                          rep(NA, nrow(G) * ncol(G))
+                        }), nrow = nrow(G), ncol = ncol(G))
+    if (check_res(dldG_cpp) & check_res(dldG_nd)) {
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
     }
   }
 })
