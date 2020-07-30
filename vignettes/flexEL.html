@@ -12,7 +12,7 @@
 
 <meta name="author" content="Shimeng Huang, Martin Lysy" />
 
-<meta name="date" content="2020-07-20" />
+<meta name="date" content="2020-07-29" />
 
 <title>flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore"><code>flexEL</code>: A Fast and Flexible Framework for Empirical Likelihood Modeling</h1>
 <h4 class="author"><em>Shimeng Huang, Martin Lysy</em></h4>
-<h4 class="date"><em>2020-07-20</em></h4>
+<h4 class="date"><em>2020-07-29</em></h4>
 
 
 <div id="TOC">
@@ -200,7 +200,7 @@ y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> <
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">beta_init &lt;-<span class="st"> </span><span class="kw">coef</span>(<span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>X<span class="op">-</span><span class="dv">1</span>)) <span class="co"># obtain initial value</span>
 nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.5375735 0.9986863</code></pre>
+<pre><code>## [1] 0.5198538 0.9877701</code></pre>
 <p>You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mr_dGdt_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
   lx &lt;-<span class="st"> </span><span class="kw">split</span>(X, <span class="kw">row</span>(X))
@@ -212,7 +212,7 @@ mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, 
   G &lt;-<span class="st"> </span><span class="kw">mr_evalG_R</span>(y, X, beta)
   res_lst &lt;-<span class="st"> </span>flexEL<span class="op">::</span><span class="kw">logEL</span>(G, <span class="dt">return_dldG =</span> <span class="ot">TRUE</span>)
   neglogel &lt;-<span class="st"> </span><span class="op">-</span>res_lst<span class="op">$</span>logel
-  dldG &lt;-<span class="st"> </span>res_lst<span class="op">$</span>dldG
+  dldG &lt;-<span class="st"> </span><span class="kw">t</span>(res_lst<span class="op">$</span>dldG)
   dGdb &lt;-<span class="st"> </span><span class="kw">mr_dGdt_R</span>(y, X, beta)
   grad_mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">nrow =</span> <span class="kw">nrow</span>(dldG), <span class="dt">ncol =</span> <span class="kw">ncol</span>(dldG))
   <span class="cf">for</span> (ii <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(dldG)) {
@@ -224,7 +224,7 @@ mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, 
 }</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.5375735 0.9986863</code></pre>
+<pre><code>## [1] 0.5198538 0.9877701</code></pre>
 </div>
 <div id="usage-in-c" class="section level3">
 <h3>Usage in C++</h3>

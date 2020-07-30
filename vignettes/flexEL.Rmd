@@ -206,7 +206,7 @@ mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
   res_lst <- flexEL::logEL(G, return_dldG = TRUE)
   neglogel <- -res_lst$logel
-  dldG <- res_lst$dldG
+  dldG <- t(res_lst$dldG)
   dGdb <- mr_dGdt_R(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:ncol(dldG)) {
