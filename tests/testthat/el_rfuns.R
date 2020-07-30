@@ -542,6 +542,22 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
   }
 }
 
-logEL_dldG_R <- function(lambda, omega) {
-  return(-length(omega) * t(lambda %*% t(omega)))
+logEL_G_R <- function(G) {
+  lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = FALSE)
+  omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
+  neglogel <- sum(log(omega))
+  dldG <- length(omega) * t(lambda %*% t(omega))
+  attr(neglogel, "gradient") <- dldG
+  return(neglogel)
+}
+
+logEL_adjG_R <- function(G) {
+  n <- nrow(G)
+  lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = TRUE)
+  omega <- flexEL:::omega_hat(G = G, support = TRUE)
+  neglogel <- sum(log(omega))
+  an <- max(1, 0.5*log(n))
+  dldGadj <- (n+1) * t(lambda %*% t(omega[1:n])) - (n+1) * omega[n+1]*an/n * rep(1, n) %*% t(lambda)
+  attr(neglogel, "gradient") <- dldGadj
+  return(neglogel)
 }

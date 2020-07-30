@@ -4,3 +4,5 @@
 TODO.md
 summary.md
 try_grad.R
+^vignettes/Makefile$
+^inst/doxygen$

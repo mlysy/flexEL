@@ -21,9 +21,6 @@ logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
   
   if (is.null(delta) & is.null(eps)) {
     if (return_dldG) {
-      if (support) {
-        stop("Currently does not support gradient calculation with support correction.")
-      }
       return(.LogELGrad(t(G), max_iter = max_iter, rel_tol = rel_tol, 
                         support = support, verbose = verbose))
     }

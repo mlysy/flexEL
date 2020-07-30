@@ -67,10 +67,33 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
                                 max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
                                 return_omega = FALSE, return_dldG = TRUE, verbose = FALSE)$dldG
     
-    dldG_nd <- matrix(tryCatch(numDeriv::grad(mr_neglogEL_R, G),
+    dldG_nd <- matrix(tryCatch(numDeriv::grad(logEL_G_R, G, method.args = list(eps = rel_tol)),
                         error = function(e) {
                           rep(NA, nrow(G) * ncol(G))
                         }), nrow = nrow(G), ncol = ncol(G))
+    if (check_res(dldG_cpp) & check_res(dldG_nd)) {
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
+    }
+  }
+})
+
+# Non-censored dldG:
+test_that("dldG_cpp == dldG_R no censoring, with support correction", {
+  for(ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(10, 100, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-5)
+    G <- matrix(rnorm(n*p),n,p) # random G here
+    support <- TRUE
+    dldG_cpp <- flexEL::logEL(G = G, support = support,
+                              max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
+                              return_omega = FALSE, return_dldG = TRUE, verbose = FALSE)$dldG
+    
+    dldG_nd <- matrix(tryCatch(numDeriv::grad(logEL_adjG_R, G, method.args = list(eps = rel_tol)),
+                               error = function(e) {
+                                 rep(NA, nrow(G) * ncol(G))
+                               }), nrow = nrow(G), ncol = ncol(G))
     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
       expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
     }

@@ -377,17 +377,18 @@ inline double flexEL::InnerEL::LogEL() {
  * @brief Calculate LogEL and gradient matrix dldG
  */
 inline void flexEL::InnerEL::LogELGrad(double& logel, MatrixXd& dldG) {
-  if (supp_ == false) {
-    if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) {
-      logel = -INFINITY;
-      dldG = MatrixXd::Zero(n_eqs_,n_obs2_);
-    }
-    else {
-      logel = omegas_.head(n_obs2_).array().log().sum();
-      dldG = -n_obs_ * lambda_new_ * omegas_.head(n_obs2_).transpose();
-    }
+  if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) {
+    logel = -INFINITY;
+    dldG = MatrixXd::Zero(n_eqs_,n_obs2_);
   }
-  // TODO: with support correction
+  logel = omegas_.head(n_obs2_).array().log().sum();
+  if (supp_ == false) {
+    dldG = n_obs_ * lambda_new_ * omegas_.head(n_obs_).transpose();
+  }
+  else {
+    dldG = n_obs2_ * lambda_new_ * omegas_.head(n_obs_).transpose() - 
+      n_obs2_ * omegas_(n_obs2_-1) * supp_a_/n_obs_ * lambda_new_ * VectorXd::Ones(n_obs_).transpose();
+  }
 }
 
 // setters
