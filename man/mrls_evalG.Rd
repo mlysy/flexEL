@@ -7,29 +7,39 @@
 mrls_evalG(y, X, Z, beta, gamma, sig2)
 }
 \arguments{
-\item{y}{Length-\code{nObs} vector of responses.}
+\item{y}{A numeric vector of resoponses of length \code{n_obs} where \code{n_obs}
+is the number of observations.}
 
-\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
+\item{X}{A numeric matrix of covariates in the location function of dimension
+\code{n_obs} x \code{n_bet} where \code{n_obs} is the number of observations and
+\code{b_bet} is the number of location function's coefficients (length of \code{beta}).}
 
-\item{Z}{\code{nObs x nGam} matrix of covariates in the scale function, where \code{nObs} is the number of observations and \code{nGam} is the dimension of coefficients in the scale function.}
+\item{Z}{A numeric matrix of covariates in the scale function of dimension
+\code{n-obs} x \code{n_gam} where \code{n_obs} is the number of observations and
+\code{b_gam} is the number of scale function's coefficients (length of \code{gamma}).}
 
-\item{beta}{Length-\code{n_bet} vector of coefficients in location model.}
+\item{beta}{A numeric vector of coefficients in the location function.}
 
-\item{gamma}{Length-\code{n_gam} vector of coefficients in location model.}
+\item{gamma}{A numeric vector of coefficients in the scale function.}
 
-\item{sig2}{A positive scalar whose square root is the scale parameter for the error term.}
+\item{sig2}{A positive scalar whose square root is the scale parameter in the scale function.}
 }
 \value{
-G matrix for location-scale model.
+A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 1}.
 }
 \description{
 Evaluate the G matrix for a location-scale mean regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
+Assuming data were generated from\preformatted{y_i = x_i'beta + sqrt(sig2) * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
 }
 
-where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+where \code{eps_i}'s are ~iid \code{F(eps)}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+In this location-scale model, \verb{x_i'beta} is the location function and \verb{sqrt(sig2) * exp(z_i'gamma)}
+is the scale function. The \code{G} matrix is calculated by stacking together the first derivative of the
+quasi-likelihood function w.r.t \code{beta}, \code{gamma}, and \code{sig2}.
+More details of this setup can be found in the package vignette:
+\code{vignette("help", package = "flexEL")}.
 }
 \examples{
 n <- 20

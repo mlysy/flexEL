@@ -1,26 +1,38 @@
 #' Evaluate the G matrix for a location-scale quantile regression model.
 #'
-#' @template args-y_X
-#' @template arg-Z
-#' @param alpha A length-`n_qts` numeric vector of quantile levels.
-#' @param Beta An `n_bet x n_qts` matrix, each column is a vector of coefficients in location function.
-#' @param Gamma An `n_gam x n_qts` matrix, each column is a vector of coefficients in scale function.
-#' @param Sig2 A positive scalar whose square root is the scale parameter for the error term.
-#' @param Nu A length-`n_qts` numeric vector of quantile values corresponding to each alpha.
-#' @param sp A positive scalar as smoothing parameter.
+#' @template args-y_X_Z
+#' @param alpha A numeric vector of quantile levels of length \code{n_qts}.
+#' @param Beta A numeric matrix of dimension \code{n_bet} x \code{n_qts}. Each column of \code{Beta} 
+#'   is a vector of coefficients in the location function.
+#' @param Gamma A An numeric matrix of dimension \code{n_gam} x \code{n_qts}. Each column of \code{Beta} 
+#'   is a vector of coefficients in the scale function.
+#' @param Sig2 A positive numeric vector of length \code{n_qts} where each element' square root is 
+#'   the scale parameter in the scale function corresponding to the quantile level.
+#' @param Nu A numeric vector of quantile values of length \code{n_qts} corresponding to each alpha.
+#' @param sp A positive scalar as the smoothing parameter. If `sp = 0`, then no smoothing is performed.
 #' @details Assuming data were generated from 
 #' ```
 #' y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
 #' ```
-#' where `eps_i`'s are ~iid `eps`, with `E[eps] = 0` and `Var[eps] = 1`. 
+#' where `eps_i`'s are ~iid `F(eps)`, with `E[eps] = 0` and `Var[eps] = 1`. 
 #' Quantile regression estimates the alpha-level quantile of the response variable, i.e., 
 #' ```
 #' Q_alpha(y | x_i, z_i) = x_i'beta + sigma * exp(z_i'gamma) * nu_alpha,
-#' for i = 1, ..., n.
+#' for i = 1, ..., n
 #' ```
 #' where `nu_alpha` is the alpha-level quantile value of `eps`. 
-#' Neither `x_i` nor `z_i` should have a constant term.
-#' @return G matrix of size `for location-scale quantile regression model.
+#' In this location-scale model, `x_i'beta` is the location function and `sqrt(sig2) * exp(z_i'gamma)` 
+#' is the scale function. The `G` matrix is calculated by stacking together the first derivative of the 
+#' quasi-likelihood function w.r.t `beta`, `gamma`, `sig2`, and the first derivative w.r.t `nu_alpha` 
+#' of the check function introduced by Basset and Koenker (1978)
+#' ```
+#' rho_alpha(u) = u * (alpha - 1{u <= 0})
+#' ```
+#' where `alpha` is the quantile level and `1{}` is the indicator function which returns 1 if the
+#' condition is true and 0 otherwise.
+#' More details of this setup can be found in the package vignette: 
+#' \code{vignette("help", package = "flexEL")}.
+#' @return A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 2}.
 #' @example examples/qrls_evalG.R
 #' @export qrls_evalG
 qrls_evalG <- function(y, X, Z, alpha, Beta, Gamma, Sig2, Nu, sp = 0) {

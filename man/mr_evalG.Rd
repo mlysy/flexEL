@@ -7,29 +7,32 @@
 mr_evalG(y, X, beta)
 }
 \arguments{
-\item{y}{Length-\code{nObs} vector of responses.}
+\item{y}{A numeric vector of resoponses of length \code{n_obs} where \code{n_obs}
+is the number of observations.}
 
-\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
+\item{X}{A numeric matrix of covariates of dimension \code{n_obs} x \code{n_bet}
+where \code{n_obs} is the number of observations and \code{b_bet} is the number
+of coefficients (length of \code{beta}).}
 
-\item{beta}{Length-\code{n_eqs} vector of coefficients in location model.}
+\item{beta}{A numeric vector of coefficients.}
 }
 \value{
-G matrix for location mean regression model.
+A numeric matrix of dimension \code{n_obs} x \code{n_bet}.
 }
 \description{
 Evaluate the G matrix for a mean regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i \%*\% beta + eps_i, for i = 1, ..., n,
+Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
 }
 
-where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
+where \code{eps_i}'s are ~iid \code{F(eps)}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
 The estimating equations for \code{beta} can be derived based on the least squares method,
-that is,\preformatted{min_beta t(y - X \%*\% beta) \%*\% (y - X  \%*\% beta)
+that is,\preformatted{min_beta (y - X*beta)'(y - X*beta)
 }
 
 The above minimization problem is equavalent to setting it's first derivative
-w.r.t \code{beta} to 0, i.e.,\preformatted{t(X) \%*\% (y - X \%*\% beta) = 0
+w.r.t \code{beta} to 0, i.e.,\preformatted{X'*(y - X*beta) = 0
 }
 
 The left-hand-side of the above equation is the \code{G} matrix returned by this function.

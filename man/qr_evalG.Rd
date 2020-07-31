@@ -7,40 +7,46 @@
 qr_evalG(y, X, alpha, Beta)
 }
 \arguments{
-\item{y}{Length-\code{nObs} vector of responses.}
+\item{y}{A numeric vector of resoponses of length \code{n_obs} where \code{n_obs}
+is the number of observations.}
 
-\item{X}{\code{nObs x nBet} matrix of covariates in the location function, where \code{nObs} is the number of observations and \code{nBet} is the dimension of coefficients in the location function.}
+\item{X}{A numeric matrix of covariates of dimension \code{n_obs} x \code{n_bet}
+where \code{n_obs} is the number of observations and \code{n_bet} is the number
+of coefficients (length of \code{beta}). \code{X} should contain a column of \code{1}s and
+the corresponding element of \code{beta} (a column of \code{Beta}) corresponds to the
+quantile value of \code{eps} at that quantile level.}
 
 \item{alpha}{a vector of quantile levels.}
 
-\item{Beta}{\verb{n_eqs x n_qts} matrix, each column is a vector of coefficients in location model.}
+\item{Beta}{A numeric matrix of dimension \code{n_bet} x \code{n_qts}, each column is a
+vector of coefficients in location model corresponding to the quantile level.}
 }
 \value{
-G matrix for location quantile regression model.
+A numeric matrix of dimension \code{n_obs} x \code{n_bet}.
 }
 \description{
 Evaluate the G matrix for a quantile regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i \%*\% beta + eps_i, for i = 1, ..., n,
+Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
 }
 
 where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
-Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i) = x_i \%*\% beta, for i = 1, ..., n.
+Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i) = x_i'beta, for i = 1, ..., n.
 }
 
-where the 1st element of \code{x_i} is 1 and such that the 1st element of \code{beta} corresponds
+where the 1st element of \code{x_i} should be 1 and  the 1st element of \code{beta} corresponds
 to the \code{alpha}-level quantile of \code{eps}.
 The estimating equation can be derived based on the minimizing "check function" introduced by
 Basset and Koenker (1978),\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
 }
 
-where \code{alpha} is the quantile level and \verb{1\{\}} is the indicator function which returns 1 if the
-condition is true and 0 otherwise. That is,\preformatted{min_beta rho(y - X \%*\% beta)
+where \code{alpha} is the quantile level, \verb{1\{\}} is the indicator function which returns 1 if the
+condition is true and 0 otherwise, and \verb{u_i = y_i - x_i'beta}. That is,\preformatted{min_beta rho(y - X*beta)
 }
 
 The above minimization problem is equavalent to setting it's first derivative
-w.r.t \code{beta} to 0, i.e.,\preformatted{phi(y - X \%*\% beta) = 0
+w.r.t \code{beta} to 0, i.e.,\preformatted{phi(y - X*beta) = 0
 }
 
 where \code{phi} is the first derivative of \code{rho}.
