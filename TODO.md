@@ -30,7 +30,7 @@ Shimeng: Removed from exported for now.
 
 - [x] Move portable C++ code to `inst/include/flexEL`.  This way other R packages can easily include our C++ code (otherwise it's essentially impossible without copy-pasting).
 
-- [ ] Make sure build passes `devtools::check()`.  This catches all sorts of issues that need to be resolved before submitting to CRAN.  It should return zero warnings and errors.  Ideal zero notes as well, but some of these are benign (e.g., "first package submission").  After this passes, please test on CRAN's Windows machines as well by running `devtools::check_win_devel()`.  You will have to set yourself as the package maintainer in the DESCRIPTION (`role = "cre"`) to send the test output to your email, not mine.
+- [x] Make sure build passes `devtools::check()`.  This catches all sorts of issues that need to be resolved before submitting to CRAN.  It should return zero warnings and errors.  Ideal zero notes as well, but some of these are benign (e.g., "first package submission").  After this passes, please test on CRAN's Windows machines as well by running `devtools::check_win_devel()`.  You will have to set yourself as the package maintainer in the DESCRIPTION (`role = "cre"`) to send the test output to your email, not mine.
 
 Shimeng: check passed, waiting for the win build.
 

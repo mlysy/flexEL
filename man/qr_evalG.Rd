@@ -38,7 +38,7 @@ Quantile regression estimates the alpha-level quantile of the response variable,
 where the 1st element of \code{x_i} should be 1 and  the 1st element of \code{beta} corresponds
 to the \code{alpha}-level quantile of \code{eps}.
 The estimating equation can be derived based on the minimizing "check function" introduced by
-Basset and Koenker (1978),\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
+\insertCite{koenker-bassett78;textual}{flexEL},\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
 }
 
 where \code{alpha} is the quantile level, \verb{1\{\}} is the indicator function which returns 1 if the
@@ -61,4 +61,7 @@ beta <- rnorm(p)
 alpha <- runif(1)
 y <- c(X \%*\% beta) + rnorm(n) # with N(0,1) error term
 qr_evalG(y, X, alpha, beta)
+}
+\references{
+\insertRef{koenker-bassett78}{flexEL}
 }

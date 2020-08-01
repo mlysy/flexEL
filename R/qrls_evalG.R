@@ -24,7 +24,7 @@
 #' In this location-scale model, `x_i'beta` is the location function and `sqrt(sig2) * exp(z_i'gamma)` 
 #' is the scale function. The `G` matrix is calculated by stacking together the first derivative of the 
 #' quasi-likelihood function w.r.t `beta`, `gamma`, `sig2`, and the first derivative w.r.t `nu_alpha` 
-#' of the check function introduced by Basset and Koenker (1978)
+#' of the check function introduced by \insertCite{koenker-bassett78;textual}{flexEL},
 #' ```
 #' rho_alpha(u) = u * (alpha - 1{u <= 0})
 #' ```
@@ -32,6 +32,7 @@
 #' condition is true and 0 otherwise.
 #' More details of this setup can be found in the package vignette: 
 #' \code{vignette("help", package = "flexEL")}.
+#' @references \insertRef{koenker-bassett78}{flexEL} 
 #' @return A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 2}.
 #' @example examples/qrls_evalG.R
 #' @export qrls_evalG

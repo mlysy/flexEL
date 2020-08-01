@@ -22,7 +22,7 @@
 #' where the 1st element of `x_i` should be 1 and  the 1st element of `beta` corresponds 
 #' to the `alpha`-level quantile of `eps`.
 #' The estimating equation can be derived based on the minimizing "check function" introduced by 
-#' Basset and Koenker (1978),
+#' \insertCite{koenker-bassett78;textual}{flexEL},
 #' ```
 #' rho_alpha(u) = u * (alpha - 1{u <= 0})
 #' ```
@@ -38,6 +38,7 @@
 #' ```
 #' where `phi` is the first derivative of `rho`.
 #' The left-hand-side of the above equation is the `G` matrix returned by this function.
+#' @references \insertRef{koenker-bassett78}{flexEL} 
 #' @return A numeric matrix of dimension \code{n_obs} x \code{n_bet}.
 #' @example examples/qr_evalG.R
 #' @export qr_evalG
