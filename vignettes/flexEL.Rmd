@@ -10,8 +10,12 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: flexEL.bib
+header-include:
+  - \usepackage{amsmath}
 ---
 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\XX}{{\bm{X}}}
 \newcommand{\xx}{{\bm{x}}}
@@ -35,11 +39,11 @@ bibliography: flexEL.bib
 
 The Empirical Likelhood (EL) framework for regression is a semi-parametric model where inference about the regression parameters is conducted through maximizing the log EL function subject to specified moment conditions or estimating equations. 
 
-In the following two subsections, more details about the basic EL framwork and a modified EL function when the responses are under right-censoring are provided.
+In the following two subsections, more details about the basic EL framwork and a modified EL function when the responses are subject to right-censoring are provided.
 
 ### Basic EL framework
 
-Suppose we observe covariates $x_i\in\R^d$ and responses $y_i\in\R$ for $i=1,\cdots,n$. Let's denote the vector containing all regression parameters by $\tth\in\R^p$.
+Suppose we have iid observations $X_1, \ldots, X_n$, $X_i \in \mathbb{R}^d$, such that $E[g_k(X, \tth)] = 0$ for $k = 1,\ldots, m$ where $g_k$'s are real-valued functions and $\tth$ is the vector containing all regression parameters. These functions provide all information about the parameter $\tth$ of interest and are often called the estimating equations for $\tth$. 
 
 The log empirical likelihood function (**log EL** function) is defined by
 \[
@@ -49,29 +53,188 @@ where for any given $\tth$, the $n$-dimensional probability weights vector $\hat
 \[
 \begin{split}
   \max_{\w}\quad & \sum_{i=1}^n \log(\w_i) \\
-  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot g(x_i,y_i;\tth) = 0 \\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot g(X_i;\tth) = 0 \\
   & \sum_{i=1}^n \w_i = 1 \\
   & \w_i \geq 0, \quad i=1,\cdots,n.
 \end{split}
 \]
-In the above, $g$ is a real-valued function whose range is in $\R^m$ that satisfies
-\[
-  \E[g(x,y;\tth)] = 0.
-\]
-This function provides all information about the parameter $\tth$ of interest and is often called the estimating equation for $\tth$. 
 
-The above inner optimization problem to find $\hat{\w}$ given $\tth$ can be solved efficiently through solving the dual problem via a Newton-Raphoson algorithm.
-
-An important element for EL inference is the matrix constructed by the values of this function evaluated at each of the observed values for a given $\tth$. Let's denote this matrix of dimension $n\times m$ by $G$, whose rows correspoind to the observations:
-\[
-  G := [g(x_1,y_1;\tth)^T,\cdots,g(x_n,y_n;\tth)^T]
-\]
-
-To use this package, specifying the $G$ matrix according to your regression model is the only requirement. 
+The above inner optimization problem to find $\hat{\w}$ given $\tth$ can be solved efficiently through solving the dual problem via a Newton-Raphoson algorithm which is provided in this package.
 
 We also include the **support adjustment** introduced by @chen-et-al2008 in this package, which addresses the issue when the numerical problem (the above constrained optimization) has no solution.
 
-### EL for Right-censored Responses
+### Usage by Example
+
+In order to perform inference using this package, two main steps are required from the user:
+
+1. Design the estimating equations according to your model
+2. Find estimates based on the log EL function
+
+In the first step, the key element required from the user is a function evaluating the $G$ matrix that was explained in the previous section.
+
+In the second step, depending on your purpose and the property of the resulting log EL function, you may choose to use an optimization algorithm to find the maximum EL estimate, or to use a Markov Chain Monte Carlo sampler to obtain your estimate.
+
+One thing to notice is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem, for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate. 
+
+Let's use a simple two-parameter linear regression model as an example. Suppose we assume the following model
+\[
+  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
+\]
+where $\epsilon_i \iid \F(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\var(\epsilon_i) = 1$. Notice that the distribution of $\epsilon_i$ is unkown, and no distribution assumption is made except for its mean and variance here. 
+
+As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (`evalG`) to calculate the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. This function can be directly implemented in R.
+
+For example, for a linear regression model, the following estimating equation is used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
+\[
+  \E[(y-x^T\beta)\cdot x] = 0,
+\]
+which in its a sample form
+\[
+  \sum_{i=1}^n (y_i-x_i^T\beta)\cdot x_i = 0.
+\]
+In other words, the $g$ function is specified as
+\[
+  g(x,y;\beta) = (y-x^T\beta)\cdot x.
+\]
+
+This can be implemented in R (`mr_evalG_R`) which returns the $G$ matrix: 
+```{r, echo=TRUE, eval=TRUE}
+mr_evalG_R <- function(y, X, beta) {
+  tX <- t(X)
+  yXb <- y - c(X %*% beta)
+  G <- sweep(tX, MARGIN = 2, yXb, `*`)
+  return(t(G))
+}
+```
+
+With `er_evalG_R` we can obtain a $G$ matrix for any given $\beta$. This function can then be used to construct the log EL function, which is a function of the parameter $\beta$. 
+
+To find the estimate of $\beta$, we can use optimization algorithms in R such as `nlm` or `optim`. These functions require a starting value of the parameters to be optimized. In the above linear regression case, we can use `lm` in R, which assumes $\epsilon_i\iid\N(0,1)$ but nonetheless should be able to provide a good starting point. 
+
+Here, for the convience of using the minimization algorithm `nlm`, we implement the negative log EL:
+```{r, echo=TRUE, eval=TRUE}
+mr_neglogEL_R <- function(y, X, beta) {
+  G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
+  return(-flexEL::logEL(G = G, support = FALSE)) # support correction not on
+}
+```
+
+Let's simulate some data:
+```{r, echo=TRUE, eval=TRUE}
+gen_nct_eps <- function(n, df, ncp) {
+  m <- ncp*sqrt(df/2)*gamma((df-1)/2)/gamma(df/2)
+  v <- df*(1+ncp^2)/(df-2)-ncp^2*df/2*(gamma((df-1)/2)/gamma(df/2))^2
+  eps <- (rt(n, df = df, ncp = ncp)-m)/sqrt(v)
+}
+n <- 500 # number of observations
+b <- c(0.5,1) # beta_0 = 0.5, beta_1 = 1
+eps <- gen_nct_eps(n, df = 20, ncp = 1) # a re-centered right-skewed non-central t distribution
+X <- cbind(1, rnorm(n)) # n x 2 covariate matrix (intercept included)
+y <- X %*% b + eps # length n response vector
+```
+
+With the `neglogEL` function, we can then obtain the estimate using `nlm`:
+```{r, echo=TRUE, eval=TRUE}
+beta_init <- coef(lm(y ~ X-1)) # obtain initial value
+nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
+nlmout$estimate
+```
+
+You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.
+```{r, echo=TRUE, eval=TRUE}
+mr_dGdb_R <- function(y, X, beta) {
+  lx <- split(X, row(X))
+  dg <- lapply(lx, function(x) tcrossprod(x,x))
+  return(dg)
+}
+
+mr_neglogEL_R <- function(y, X, beta) {
+  G <- mr_evalG_R(y, X, beta)
+  res_lst <- flexEL::logEL(G, support = FALSE, return_dldG = TRUE) 
+  neglogel <- -res_lst$logel
+  dldG <- -res_lst$dldG
+  dGdb <- mr_dGdb_R(y, X, beta)
+  grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
+  for (ii in 1:ncol(dldG)) {
+    grad_mat[,ii] <- dGdb[[ii]] %*% dldG[ii,]
+  }
+  grad <- colSums(grad_mat)
+  attr(neglogel, "gradient") <- grad
+  return(neglogel)
+}
+```
+
+```{r, echo=TRUE, eval=TRUE}
+nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
+nlmout$estimate
+```
+
+## Models Included in the Package
+
+We include two types of regression models in this package: mean regression and quantile regression, and for each of them we provide a function to calculate the `G` matrix based on the estimating equation explained below.
+
+### Mean and quantile regression models
+
+The location models are the common linear regression models
+
+\[
+  y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n,
+\]
+
+where $\e_i, i=1,\cdots,n$ are iid with mean 0 and variance 1. 
+
+These two models are explained in the documentation of the functions `flexEL::mr_evalG` and `flexEL::qr_evalG` respectively, and are special cases of the location-scale models explained below where the scale function is fixed to be a constant `1`.
+
+### Location-Scale Mean and Quantile Regression Model
+
+The location-scale models add a scale function as a multiplier of the error term, which helps in the case of heteroscedasticity
+
+\[
+  y_i = \xx_i'\bbe + \sigma\cdot\exp(\zz_i'\bga)\cdot\e_i, \quad i=1,\cdots,n,
+\]
+
+where $\e_i, i=1,\cdots,n$ are iid with mean 0 and variance 1.
+
+The functions are provided in this package as `flexEL::mrls_evalG` and `flexEL::qrls_evalG`.
+
+For mean regression, the estimating equation is constructed as the first derivative w.r.t $\tth = (\bbe, \bga, \sigma^2)$ of the quasi-likelihood function
+
+\[
+\begin{split}
+  \E\Bigl[\frac{y-\xx'\bbe}{\exp(2\zz'\bga)}\cdot\xx\Bigr] &= 0 \\
+  \E\Bigl[(1-\frac{(y-\xx'\bbe)^2}{\sigma^2\cdot\exp(2\zz'\bga)})\cdot\zz\Bigr] &= 0 \\
+  \E\Bigl[\frac{(y-\xx'\bbe)^2}{\sigma^2\cdot\exp(2\zz'\bga)}-1\Bigr] &= 0.
+\end{split}
+\]
+
+more details regarding the quasi-likelihood setup can be found in @huang2018.
+
+For quantile regression, the $\alpha\times 100\%$ conditional quantile of $y_i$ is
+\[
+  Q_{\alpha}(y_i|X_i) = X_i'\bbe + \sigma\cdot\exp(Z_i'\bga)\cdot\nu_{\alpha}.
+\]
+so the vector of parameters is $\tth = (\bbe, \bga, \sigma^2, \nu_{\alpha})$.
+
+The estimating equations in this case include the above used for the mean regression but also one more targeting the quantile value, based on the "check function" introduced by @koenker-bassett78.
+
+If the $\alpha$-th quantile value of $\e_i\iid(0,1)$ is $\nu_{\alpha}$, then $\e_i-\nu_{\alpha}$ has $\alpha$-th quantile value $0$. The estimator of $\nu_{\alpha}$ is then defined as
+\[
+  \hat\nu_{\alpha} = \argmin_{\tilde\nu_{\alpha}} \E\Biggl[\rho_{\alpha}\Bigl(\frac{y-\xx'\bbe}{\sigma\cdot\exp(\zz'\bga)}-\tilde\nu_{\alpha}\Bigr)\Biggr].
+\]
+Therefore, the first derivative of this function is included in the set of estimating equations for location-scale quantile equations
+
+\[
+\begin{split}
+  \E\Bigl[\frac{y-\xx'\bbe}{\exp(2\zz'\bga)}\cdot\xx\Bigr] &= 0 \\
+  \E\Bigl[\bigl(1-\frac{(y-\xx'\bbe)^2}{\sigma^2\cdot\exp(2\zz'\bga)}\bigr)\cdot\zz\Bigr] &= 0 \\
+  \E\Bigl[\frac{(y-\xx'\bbe)^2}{\sigma^2\cdot\exp(2\zz'\bga)}-1\Bigr] &= 0 \\
+  \E\Bigl[\rho'_{\alpha}\bigl(\frac{y-\xx'\bbe}{\sigma\cdot\exp(\zz'\bga)}-\nu_{\alpha}\bigr)\Bigr] &= 0.
+\end{split}
+\]
+
+In fact, `flexEL::qrls_evalG` can also calculate the `G` matrix for estimating parameters over multiple quantile levels at the same time, which is documented in its help page.
+
+## EL for Right-censored Responses
 
 When the response is time-to-event data such as survial time in many clinical studies, one situation that often occurs is right-censoring, one type of length-bias problem. Specifically, instead of observing the true survival time for each individual, what being observed is either the true survival time or the time this person dropped out of the study. That is, instead of observing $y_i$, we observe $u_i = \min(y_i,c_i)$ and $\delta_i=\mathfrak 1(y_i\leq c_i)$, where $c_i$ is a censoring variable that is assumed to be independent of $y_i$ given covariate $x_i$. 
 
@@ -114,116 +277,7 @@ The log smoothed censored EL **(log SCEL)** is then defined as
 This log SCEL function is then continuous in $\tth$ given $w(\tth)$ is continous in $\tth$ and $e(\tth)$ is continuous in $\tth$. The continuity of these two depend on the construction of the regression model.
 
 
-## Usage of <code>flexEL</code> Explained by Examples
-
-Upon observing data, the purpose is to find the estimates of the parameters of your semi-parametric regression model. To achieve this, two steps are required:
-
-1. Construct the log EL function according to your model
-2. Obtain an estimate based on the log EL function
-
-In the first step, the only key element required from the user is a function evaluating the $G$ matrix that was explained in the previous section.
-
-In the second step, depending on your purpose and the property of the resulting log EL function, you may choose to use an optimization algorithm to find the maximum EL estimate, or to use a Markov Chain Monte Carlo sampler to obtain your estimate.
-
-One thing to notice is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem, for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate. 
-
-Let's use a simple two-parameter linear regression model as an example. Suppose we assume the following model
-\[
-  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
-\]
-where $\epsilon_i \iid \F(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\var(\epsilon_i) = 1$. Notice that the distribution of $\epsilon_i$ is unkown, and no distribution assumption is made except for its mean and variance here. 
-
-Let's start by simulating some data:
-```{r, echo=TRUE, eval=TRUE}
-gen_nct_eps <- function(n, df, ncp) {
-  m <- ncp*sqrt(df/2)*gamma((df-1)/2)/gamma(df/2)
-  v <- df*(1+ncp^2)/(df-2)-ncp^2*df/2*(gamma((df-1)/2)/gamma(df/2))^2
-  eps <- (rt(n, df = df, ncp = ncp)-m)/sqrt(v)
-}
-n <- 500 # number of observations
-b <- c(0.5,1) # beta_0 = 0.5, beta_1 = 1
-eps <- gen_nct_eps(n, df = 20, ncp = 1) # a re-centered right-skewed non-central t distribution
-X <- cbind(1, rnorm(n)) # n x 2 covariate matrix (intercept included)
-y <- X %*% b + eps # length n response vector
-```
-We explain how to use this package to conduct inference for your regression model either in R or in C++ in the following two sections.
-
-### Usage in R
-
-As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (`evalG`) to calculate the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. This function can be directly implemented in R.
-
-For example, for a linear regression model, the following estimating equation is used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
-\[
-  \E[(y-x^T\beta)\cdot x] = 0,
-\]
-which in its a sample form
-\[
-  \sum_{i=1}^n (y_i-x_i^T\beta)\cdot x_i = 0.
-\]
-In other words, the $g$ function is specified as
-\[
-  g(x,y;\beta) = (y-x^T\beta)\cdot x.
-\]
-
-This can be implemented in R (`mr_evalG_R`) which returns the $G$ matrix: 
-```{r, echo=TRUE, eval=TRUE}
-mr_evalG_R <- function(y, X, beta) {
-  tX <- t(X)
-  yXb <- y - c(X %*% beta)
-  G <- sweep(tX, MARGIN = 2, yXb, `*`)
-  return(t(G))
-}
-```
-
-With `evalG` we can obtain a $G$ matrix for any given $\beta$. This function can then be used to construct the log EL function, which is a function of the parameter $\beta$. 
-
-To find the estimate, we can use optimization algorithms in R such as `nlm` or `optim`. These functions require a starting value of the parameters to be optimized. In the above linear regression case, we can use `lm` in R to obtain it, which assumes $\epsilon_i\iid\N(0,1)$ but nonetheless should be able to provide a good starting point. 
-
-Here, for the convience of using the minimization algorithm `nlm`, let's implement the negative log EL:
-```{r, echo=TRUE, eval=TRUE}
-mr_neglogEL_R <- function(y, X, beta) {
-  G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
-  return(-flexEL::logEL(G = G))
-}
-```
-
-With the `neglogEL` function, we can then obtain the estimate using `nlm`:
-```{r, echo=TRUE, eval=TRUE}
-beta_init <- coef(lm(y ~ X-1)) # obtain initial value
-nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
-nlmout$estimate
-```
-
-You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.
-```{r, echo=TRUE, eval=TRUE}
-mr_dGdt_R <- function(y, X, beta) {
-  lx <- split(X, row(X))
-  dg <- lapply(lx, function(x) tcrossprod(x,x))
-  return(dg)
-}
-
-mr_neglogEL_R <- function(y, X, beta) {
-  G <- mr_evalG_R(y, X, beta)
-  res_lst <- flexEL::logEL(G, return_dldG = TRUE)
-  neglogel <- -res_lst$logel
-  dldG <- t(res_lst$dldG)
-  dGdb <- mr_dGdt_R(y, X, beta)
-  grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
-  for (ii in 1:ncol(dldG)) {
-    grad_mat[,ii] <- dGdb[[ii]] %*% dldG[,ii]
-  }
-  grad <- rowSums(grad_mat)
-  attr(neglogel, "gradient") <- grad
-  return(neglogel)
-}
-```
-
-```{r, echo=TRUE, eval=TRUE}
-nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
-nlmout$estimate
-```
-
-### Usage in C++
+## Usage in C++
 
 One can also implement a regression model in C++ following the header file `mean_reg_model.h`. The key element of this is once again the `EvalG` method which defines the regression model. Then one can export this method as in `mean_reg_model_exports.cpp`. 
 
@@ -263,25 +317,7 @@ EL.EvalOmegas();
 EL.LogEL();
 ```
 
-There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder.
-
-## Models Included in the Package
-
-1. Mean and quantile regression models
-
-\[
-  y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.
-\]
-
-where $\e_i, i=1,\cdots,n$ are iid with mean 0 and variance 1.
-
-3. Location-Scale Mean and Quantile Regression Model
-
-\[
-  y_i = \xx_i'\bbe + \sigma\cdot\exp(\zz_i'\bga)\cdot\e_i, \quad i=1,\cdots,n.
-\]
-
-where $\e_i, i=1,\cdots,n$ are iid with mean 0 and variance 1.
+There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder
 
 ## Future Works
 

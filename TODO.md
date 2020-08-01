@@ -32,8 +32,6 @@ Shimeng: Removed from exported for now.
 
 - [x] Make sure build passes `devtools::check()`.  This catches all sorts of issues that need to be resolved before submitting to CRAN.  It should return zero warnings and errors.  Ideal zero notes as well, but some of these are benign (e.g., "first package submission").  After this passes, please test on CRAN's Windows machines as well by running `devtools::check_win_devel()`.  You will have to set yourself as the package maintainer in the DESCRIPTION (`role = "cre"`) to send the test output to your email, not mine.
 
-Shimeng: check passed, waiting for the win build.
-
 - [x] C++ naming conventions.  I suggest you use only one naming convention for methods (snake case :)  Also, please check include guards / doxygen `@filename`s and make them consistent with the current names of the files.  Please finish the Doxygen documentation with `@param` and `@return` arguments if needed (the more thoroughly documented, the better :) Also, you can Doxygen document Rcpp functions in `src` as well!
 
 Shimeng: currently haven't changed all methods to snake case, was following Google style guide that setters & getters, will change them after cleaned up other things:) 
