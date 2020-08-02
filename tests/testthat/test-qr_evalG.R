@@ -13,7 +13,7 @@ test_that("qr_evalG_R == qr_evalG_cpp", {
         n <- sample(10:20,1)
         p <- sample(1:(n-2), 1)
         X <- replicate(p, rnorm(n))
-        X[,1] <- rep(1,p)
+        X[,1] <- rep(1,n)
         beta <- rnorm(p)
         alpha <- runif(1)
         y <- c(X %*% beta) + rnorm(n) # with N(0,1) error term

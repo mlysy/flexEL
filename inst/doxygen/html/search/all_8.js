@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['n_5feqs_5f',['n_eqs_',['../classflex_e_l_1_1_mean_reg_model.html#a374ed4ae05fdaff6e2872ed8bf25c367',1,'flexEL::MeanRegModel::n_eqs_()'],['../classflex_e_l_1_1_quant_reg_model.html#a217788036a93b67201733f6accbae445',1,'flexEL::QuantRegModel::n_eqs_()']]],
-  ['n_5fobs_5f',['n_obs_',['../classflex_e_l_1_1_mean_reg_model.html#a32e77dc0186b6e70b749c85ce7a27c67',1,'flexEL::MeanRegModel::n_obs_()'],['../classflex_e_l_1_1_quant_reg_model.html#a239a1c9812804c7c854b0daef7483475',1,'flexEL::QuantRegModel::n_obs_()']]]
+  ['lambdanr',['LambdaNR',['../classflex_e_l_1_1_inner_e_l.html#ae8c58f92f9d8c37725c4594b0cbcdb86',1,'flexEL::InnerEL::LambdaNR()'],['../classflex_e_l_1_1_inner_e_l_c.html#a3fcdb407db47eb372b72b56de6120bd6',1,'flexEL::InnerELC::LambdaNR()']]],
+  ['logel',['LogEL',['../classflex_e_l_1_1_inner_e_l.html#a205112fea400b80d9418a0ffa8eff28c',1,'flexEL::InnerEL::LogEL()'],['../classflex_e_l_1_1_inner_e_l_c.html#a3f6fe4d03d4b3615002208576602ee3c',1,'flexEL::InnerELC::LogEL()']]],
+  ['logelgrad',['LogELGrad',['../classflex_e_l_1_1_inner_e_l.html#a944056b6d30ca29dc0b219bf31be305d',1,'flexEL::InnerEL']]],
+  ['logelsmooth',['LogELSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#a3c3f9ecebf8a476c75bfe0521dc6d923',1,'flexEL::InnerELC']]]
 ];

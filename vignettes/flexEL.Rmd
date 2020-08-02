@@ -276,6 +276,7 @@ The log smoothed censored EL **(log SCEL)** is then defined as
 
 This log SCEL function is then continuous in $\tth$ given $w(\tth)$ is continous in $\tth$ and $e(\tth)$ is continuous in $\tth$. The continuity of these two depend on the construction of the regression model.
 
+In `flexEL::logEL`, the argument `sp` corresponds to this smoothing parameter.
 
 ## Usage in C++
 
@@ -283,7 +284,7 @@ One can also implement a regression model in C++ following the header file `mean
 
 Or, if one wish to use the C++ api directly, the steps are as below:
 
-```{c, echo=TRUE, eval=FALSE}
+```{Rcpp, echo=TRUE, eval=FALSE}
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <random> // for simulating some data here
