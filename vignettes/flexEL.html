@@ -162,7 +162,7 @@ y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> <
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">beta_init &lt;-<span class="st"> </span><span class="kw">coef</span>(<span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>X<span class="op">-</span><span class="dv">1</span>)) <span class="co"># obtain initial value</span>
 nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.5387549 0.9748360</code></pre>
+<pre><code>## [1] 0.4718693 1.0135510</code></pre>
 <p>You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mr_dGdb_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {
   lx &lt;-<span class="st"> </span><span class="kw">split</span>(X, <span class="kw">row</span>(X))
@@ -186,7 +186,7 @@ mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, 
 }</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)
 nlmout<span class="op">$</span>estimate</code></pre></div>
-<pre><code>## [1] 0.5387549 0.9748360</code></pre>
+<pre><code>## [1] 0.4718693 1.0135510</code></pre>
 </div>
 </div>
 <div id="models-included-in-the-package" class="section level2">
@@ -234,6 +234,7 @@ nlmout<span class="op">$</span>estimate</code></pre></div>
 \end{split}
 \]</span></p>
 <p>In fact, <code>flexEL::qrls_evalG</code> can also calculate the <code>G</code> matrix for estimating parameters over multiple quantile levels at the same time, which is documented in its help page.</p>
+<p>Moreover, as the check function used for the quantile regression estimation is not smooth, we also include a smoothed version of the check function in this package, which is controlled by the <code>sp</code> argument in <code>flexEL::qrls_evalG</code> function. Details of this setup can be found in <span class="citation">Huang (2018)</span>.</p>
 </div>
 </div>
 <div id="el-for-right-censored-responses" class="section level2">
@@ -264,6 +265,7 @@ S_{ij}({{{\boldsymbol{\theta}}}};s) := S(e_i({{{\boldsymbol{\theta}}}})-e_j({{{\
     (1-\delta_i)\log(\sum_{j=1}^n S_{ij}({{{\boldsymbol{\theta}}}};s)\cdot w_j({{{\boldsymbol{\theta}}}}))\Bigr].
 \]</span></p>
 <p>This log SCEL function is then continuous in <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> given <span class="math inline">\(w({{{\boldsymbol{\theta}}}})\)</span> is continous in <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span> and <span class="math inline">\(e({{{\boldsymbol{\theta}}}})\)</span> is continuous in <span class="math inline">\({{{\boldsymbol{\theta}}}}\)</span>. The continuity of these two depend on the construction of the regression model.</p>
+<p>In <code>flexEL::logEL</code>, the argument <code>sp</code> corresponds to this smoothing parameter.</p>
 </div>
 </div>
 <div id="usage-in-c" class="section level2">
@@ -273,7 +275,7 @@ S_{ij}({{{\boldsymbol{\theta}}}};s) := S(e_i({{{\boldsymbol{\theta}}}})-e_j({{{\
 <div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span>
 <span class="pp">#include </span><span class="im">&lt;RcppEigen.h&gt;</span>
 <span class="pp">#include </span><span class="im">&lt;random&gt;</span><span class="pp"> </span><span class="co">// for simulating some data here</span>
-<span class="pp"># include </span><span class="im">&quot;inner_el.h&quot;</span>
+<span class="pp">#include </span><span class="im">&quot;inner_el.h&quot;</span>
 <span class="pp">#include </span><span class="im">&quot;mean_reg_model.h&quot;</span><span class="pp"> </span><span class="co">// using mean regression as an example, this could be your model C++ header file</span>
 
 <span class="co">// simulate some data</span>
@@ -313,10 +315,10 @@ EL.LogEL();</code></pre></div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
 <div id="refs" class="references">
-<div id="ref-chen-et-al2008">
+<div id="ref-chen-et-al08">
 <p>Chen, Jiahua, Asokan Mulayath Variyath, and Bovas Abraham. 2008. “Adjusted Empirical Likelihood and Its Properties.” <em>Journal of Computational and Graphical Statistics</em> 17 (2). Taylor &amp; Francis: 426–43.</p>
 </div>
-<div id="ref-huang2018">
+<div id="ref-huang18">
 <p>Huang, Shimeng. 2018. “Empirical Likelihood Quantile Regression for Right-Censored Data.” Master’s thesis, University of Waterloo.</p>
 </div>
 <div id="ref-koenker-bassett78">
