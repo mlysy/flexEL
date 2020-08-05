@@ -6,6 +6,5 @@
 #' @name flexEL
 #' @useDynLib flexEL, .registration = TRUE
 #' @importFrom Rcpp evalCpp
-#' @importFrom Rdpack reprompt
 #' @keywords internal
 NULL

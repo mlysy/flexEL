@@ -52,7 +52,7 @@ where \code{nu_alpha} is the alpha-level quantile value of \code{eps}.
 In this location-scale model, \verb{x_i'beta} is the location function and \verb{sqrt(sig2) * exp(z_i'gamma)}
 is the scale function. The \code{G} matrix is calculated by stacking together the first derivative of the
 quasi-likelihood function w.r.t \code{beta}, \code{gamma}, \code{sig2}, and the first derivative w.r.t \code{nu_alpha}
-of the check function introduced by \insertCite{koenker-bassett78;textual}{flexEL},\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
+of the check function introduced by Koenker and Bassett (1978),\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
 }
 
 where \code{alpha} is the quantile level and \verb{1\{\}} is the indicator function which returns 1 if the
@@ -81,5 +81,5 @@ sp <- 10
 qrls_evalG(y, X, Z, alpha, beta, gamma, sig2, nu, sp)
 }
 \references{
-\insertRef{koenker-bassett78}{flexEL}
+G. Basset and R. Koenker. Regression quantiles. Econometrica, 46(1):33–50, 1978.
 }

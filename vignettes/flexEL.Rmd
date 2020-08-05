@@ -286,7 +286,7 @@ One can also implement a regression model in C++ following the header file `mean
 
 Or, if one wish to use the C++ api directly, the steps are as below:
 
-```{Rcpp, echo=TRUE, eval=FALSE}
+```{c, echo=TRUE, eval=FALSE}
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <random> // for simulating some data here

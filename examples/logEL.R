@@ -1,16 +1,29 @@
 # no censoring
 n <- 20
-omegas <- abs(rnorm(n))
-omegas <- omegas/sum(omegas) # create a random probability vector
-logEL(omegas)
+p <- 5
+max_iter <- 200
+rel_tol <- 1e-4
+G <- matrix(rnorm(n*p),n,p) # random G here
+flexEL::logEL(G = G, support = FALSE,
+              max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
+              return_omega = FALSE, verbose = FALSE)
+
+# no censoring, get the derivative of log EL w.r.t. G
+flexEL::logEL(G = G, support = FALSE,
+              max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
+              return_omega = FALSE, return_dldG = TRUE, verbose = FALSE)$dldG
 
 # right censoring
-n <- 20 # total number of observations
-k <- 4 # number of censored observations
-idx <- sample(n,k) # indices of censored observations
+n <- 20
+p <- 5
+max_iter <- 200
+rel_tol <- 1e-4
+abs_tol <- 1e-3
+G <- matrix(rnorm(n*p), n, p)
 deltas <- rep(1,n)
-deltas[idx] <- 0 # censoring indicators
-omegas <- abs(rnorm(n)) 
-omegas <- omegas/sum(omegas) # create a random probability vector
-epsilons <- rnorm(n) # time to event for each observation
-logEL(omegas,epsilons,deltas)
+numcens <- sample(round(n/2),1)
+censinds <- sample(n,numcens)
+deltas[censinds] <- 0
+epsilons <- rnorm(n)
+flexEL::logEL(G = G, delta = deltas, eps = epsilons, support = FALSE, 
+              max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
