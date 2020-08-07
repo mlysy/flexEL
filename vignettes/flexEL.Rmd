@@ -286,41 +286,16 @@ One can also implement a regression model in C++ following the header file `mean
 
 Or, if one wish to use the C++ api directly, the steps are as below:
 
-```{c, echo=TRUE, eval=FALSE}
-#include <Rcpp.h>
-#include <RcppEigen.h>
-#include <random> // for simulating some data here
-#include "inner_el.h"
-#include "mean_reg_model.h" // using mean regression as an example, this could be your model C++ header file
-
-// simulate some data
-Eigen::VectorXd X = Eigen::VectorXd::Random(2,20);
-Eigen::VectorXd beta(2);
-beta << 1, 2;
-static default_random_engine e(time(0));
-static normal_distribution<double> n(0,1);
-Eigen::VectorXd eps(20);
-for (int ii=0; i<20; i++) {
-  eps << n(e);
-}
-Eigen::VectorXd y = beta.transpose() * X + eps;
-
-// instantiate the model and EL objects
-flexEL::MeanRegModel MR(y, X); // instantiate a mean regression object
-flexEL::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs()); // instantiate an EL object with dimention of G matrix
-EL.set_opts(support = true); // set support correction
-
-// evaluate EL for a particular beta
-Eigen::VectorXd beta = Eigen::VectorXd::Random(2);
-MR.EvalG(EL.get_ref_G(), beta);
-int n_iter;
-double max_err;
-EL.LambdaNR(n_iter, max_err);
-EL.EvalOmegas();
-EL.LogEL();
+```{r, echo = FALSE, results = "asis"}
+cat("```c", readLines("example.cpp"), "```", sep = "\n")
 ```
 
-There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder
+```{r, include = TRUE, eval=TRUE}
+Rcpp::sourceCpp("example.cpp")
+example_logEL(20)
+```
+
+There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder.
 
 ## Future Works
 
