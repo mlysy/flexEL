@@ -14,7 +14,7 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 
-using namespace Rcpp;
+// using namespace Rcpp;
 using namespace Eigen;
 
 /* --------------------------------------------------------------------------- */

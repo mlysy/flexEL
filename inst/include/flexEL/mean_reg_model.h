@@ -7,6 +7,8 @@
 #ifndef MEAN_REG_MODEL_h
 #define MEAN_REG_MODEL_h
 
+using namespace Eigen;
+
 /* --------------------------------------------------------------------------- */
 
 /**
