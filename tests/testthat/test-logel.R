@@ -60,7 +60,7 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
     max_iter <- sample(c(10, 100, 500), 1)
-    rel_tol <- runif(1, 1e-6, 1e-5)
+    rel_tol <- runif(1, 1e-6, 1e-4)
     G <- matrix(rnorm(n*p),n,p) # random G here
     support <- FALSE
     dldG_cpp <- flexEL::logEL(G = G, support = support,
@@ -83,7 +83,7 @@ test_that("dldG_cpp == dldG_R no censoring, with support correction", {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
     max_iter <- sample(c(10, 100, 500), 1)
-    rel_tol <- runif(1, 1e-6, 1e-5)
+    rel_tol <- runif(1, 1e-6, 1e-4)
     G <- matrix(rnorm(n*p),n,p) # random G here
     support <- TRUE
     dldG_cpp <- flexEL::logEL(G = G, support = support,

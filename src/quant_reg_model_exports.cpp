@@ -8,7 +8,6 @@
 #include <RcppEigen.h>
 #include "inner_el.h"
 #include "quant_reg_model.h"
-#include "dvec_to_barr.h"
 
 //[[Rcpp::depends("RcppEigen")]]
 
