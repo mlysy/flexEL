@@ -1,28 +1,24 @@
-/**
- * @file sort_order.h
- * 
- * @brief Find the order of elements if a vector is sorted (ascendingly).
- */
+
+// Modifed from: https://stackoverflow.com/a/12399290/5186269
 
 #ifndef SORT_ORDER_H
 #define SORT_ORDER_H
 
 #include <RcppEigen.h>
+
 using namespace Eigen;
+
 // [[Rcpp::depends(RcppEigen)]]
 
-// Modifed from: https://stackoverflow.com/a/12399290/5186269
-
-// 
-/**
- * @file       sort_order.h
- *
- * @class      compare_acc_vec
- *
- * @brief      A helper class for obtaining indices corresponding to ascendingly sorted values in a vector
- */
 namespace flexEL {
 
+  /**
+   * @file       sort_order.h
+   *
+   * @class      compare_acc_vec
+   *
+   * @brief      A helper class for obtaining indices corresponding to ascendingly sorted values in a vector
+   */
   template <typename T>
   class compare_acc_vec {
       const T& vec;
@@ -33,8 +29,14 @@ namespace flexEL {
       }
   };
 
-  // return indices after sorting 
   // TODO: this could be a void function and pass the inds as an argument too 
+  /**
+   * @brief Find the indices of elements in a vector if it is sorted ascendingly.
+   * 
+   * @param vec A numeric vector.
+   * 
+   * @return A vector of integers (the indicies of the elements in \c vec).
+   */
   inline VectorXi sort_inds(const VectorXd &vec) {
       int n = vec.size();
       VectorXi inds(n);

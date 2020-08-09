@@ -75,6 +75,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1compare__acc__vec.html">compare_acc_vec</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A helper class for obtaining indices corresponding to ascendingly sorted values in a vector.  <a href="classflex_e_l_1_1compare__acc__vec.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_inner_e_l.html">InnerEL</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A template class for empirical likelihood inner optimization calculation with fully observed responses.  <a href="classflex_e_l_1_1_inner_e_l.html#details">More...</a><br /></td></tr>
@@ -91,29 +92,243 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3ae8d62fa46062ed718144361727c286"><td class="memItemLeft" align="right" valign="top"><a id="a3ae8d62fa46062ed718144361727c286"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>adj_G</b> (Eigen::MatrixXd &amp;G, double a)</td></tr>
+<tr class="memitem:a3ae8d62fa46062ed718144361727c286"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceflex_e_l.html#a3ae8d62fa46062ed718144361727c286">adj_G</a> (Eigen::MatrixXd &amp;G, double a)</td></tr>
+<tr class="memdesc:a3ae8d62fa46062ed718144361727c286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the adjusted G matrix given a G matrix.  <a href="#a3ae8d62fa46062ed718144361727c286">More...</a><br /></td></tr>
 <tr class="separator:a3ae8d62fa46062ed718144361727c286"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81e4f50e632730fb97c7ca8281d4eb10"><td class="memItemLeft" align="right" valign="top"><a id="a81e4f50e632730fb97c7ca8281d4eb10"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>block_outer</b> (Eigen::MatrixXd &amp;GGt, const Eigen::Ref&lt; const Eigen::MatrixXd &gt; &amp;G)</td></tr>
+<tr class="memitem:a81e4f50e632730fb97c7ca8281d4eb10"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceflex_e_l.html#a81e4f50e632730fb97c7ca8281d4eb10">block_outer</a> (Eigen::MatrixXd &amp;GGt, const Eigen::Ref&lt; const Eigen::MatrixXd &gt; &amp;G)</td></tr>
+<tr class="memdesc:a81e4f50e632730fb97c7ca8281d4eb10"><td class="mdescLeft">&#160;</td><td class="mdescRight">For an (m x N) matrix G = [g1 ... gN], calculates the (m x mN) matrix GGt = [g1 g1' ... gN gN'].  <a href="#a81e4f50e632730fb97c7ca8281d4eb10">More...</a><br /></td></tr>
 <tr class="separator:a81e4f50e632730fb97c7ca8281d4eb10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53600a9a1495b191e139d19449805406"><td class="memItemLeft" align="right" valign="top"><a id="a53600a9a1495b191e139d19449805406"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dVec_to_bArr</b> (Eigen::VectorXd dVec, bool *bArr)</td></tr>
-<tr class="separator:a53600a9a1495b191e139d19449805406"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d92a85674e40b55f855682478dc024e"><td class="memItemLeft" align="right" valign="top"><a id="a1d92a85674e40b55f855682478dc024e"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>ind_smooth</b> (double x, double s)</td></tr>
+<tr class="memitem:a1d92a85674e40b55f855682478dc024e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceflex_e_l.html#a1d92a85674e40b55f855682478dc024e">ind_smooth</a> (double x, double s)</td></tr>
+<tr class="memdesc:a1d92a85674e40b55f855682478dc024e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smoothed indicator function.  <a href="#a1d92a85674e40b55f855682478dc024e">More...</a><br /></td></tr>
 <tr class="separator:a1d92a85674e40b55f855682478dc024e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4dc5e21cdbe5a3442f89c763691d88b"><td class="memItemLeft" align="right" valign="top"><a id="ab4dc5e21cdbe5a3442f89c763691d88b"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>ind1_smooth</b> (double x, double s)</td></tr>
+<tr class="memitem:ab4dc5e21cdbe5a3442f89c763691d88b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceflex_e_l.html#ab4dc5e21cdbe5a3442f89c763691d88b">ind1_smooth</a> (double x, double s)</td></tr>
+<tr class="memdesc:ab4dc5e21cdbe5a3442f89c763691d88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">First derivative of <code>ind_smooth</code>.  <a href="#ab4dc5e21cdbe5a3442f89c763691d88b">More...</a><br /></td></tr>
 <tr class="separator:ab4dc5e21cdbe5a3442f89c763691d88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe4668313914a9d2b4c3438e6ce0f6f3"><td class="memItemLeft" align="right" valign="top"><a id="afe4668313914a9d2b4c3438e6ce0f6f3"></a>
-VectorXi&#160;</td><td class="memItemRight" valign="bottom"><b>sort_inds</b> (const VectorXd &amp;vec)</td></tr>
+<tr class="memitem:afe4668313914a9d2b4c3438e6ce0f6f3"><td class="memItemLeft" align="right" valign="top">VectorXi&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceflex_e_l.html#afe4668313914a9d2b4c3438e6ce0f6f3">sort_inds</a> (const VectorXd &amp;vec)</td></tr>
+<tr class="memdesc:afe4668313914a9d2b4c3438e6ce0f6f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the indices of elements in a vector if it is sorted ascendingly.  <a href="#afe4668313914a9d2b4c3438e6ce0f6f3">More...</a><br /></td></tr>
 <tr class="separator:afe4668313914a9d2b4c3438e6ce0f6f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p class="">EL namespace. </p>
 <p class="">Wrap the exported library components into a namespace called <b>el</b> to avoid potential naming conflicts with other libraries or user-defined headers. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a3ae8d62fa46062ed718144361727c286"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ae8d62fa46062ed718144361727c286">&#9670;&nbsp;</a></span>adj_G()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void flexEL::adj_G </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::MatrixXd &amp;&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>a</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate the adjusted G matrix given a G matrix. </p>
+<p class="">J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">G</td><td>A numeric matrix. </td></tr>
+    <tr><td class="paramname">a</td><td>Tuning parameter for the adjustment. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a81e4f50e632730fb97c7ca8281d4eb10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81e4f50e632730fb97c7ca8281d4eb10">&#9670;&nbsp;</a></span>block_outer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void flexEL::block_outer </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::MatrixXd &amp;&#160;</td>
+          <td class="paramname"><em>GGt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Ref&lt; const Eigen::MatrixXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>G</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>For an (m x N) matrix G = [g1 ... gN], calculates the (m x mN) matrix GGt = [g1 g1' ... gN gN']. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">GGt</td><td>A numeric matrix of dimension m x mN in which the calculated result will be saved. </td></tr>
+    <tr><td class="paramname">G</td><td>A numeric matrix of dimension m x N. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab4dc5e21cdbe5a3442f89c763691d88b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4dc5e21cdbe5a3442f89c763691d88b">&#9670;&nbsp;</a></span>ind1_smooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double flexEL::ind1_smooth </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>First derivative of <code>ind_smooth</code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>The value to be evaluated at. </td></tr>
+    <tr><td class="paramname">s</td><td>A positive number controlling the level of smoothness. The bigger the more smooth. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1d92a85674e40b55f855682478dc024e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d92a85674e40b55f855682478dc024e">&#9670;&nbsp;</a></span>ind_smooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double flexEL::ind_smooth </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Smoothed indicator function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>The value to be evaluated at. For x &gt; 0, the function returns a number that is close to 0; for x &lt; 0, the function returns a number that is close to 1. </td></tr>
+    <tr><td class="paramname">s</td><td>A positive number controlling the level of smoothness. The bigger the more smooth. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afe4668313914a9d2b4c3438e6ce0f6f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe4668313914a9d2b4c3438e6ce0f6f3">&#9670;&nbsp;</a></span>sort_inds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">VectorXi flexEL::sort_inds </td>
+          <td>(</td>
+          <td class="paramtype">const VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>vec</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find the indices of elements in a vector if it is sorted ascendingly. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vec</td><td>A numeric vector.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A vector of integers (the indicies of the elements in <code>vec</code>). </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

@@ -173,8 +173,8 @@ inline flexEL::InnerEL::InnerEL(){}
 /**
  * @brief Constructor for InnerEL with dimensions of G matrix as inputs for memory allocation.
  * 
- * @param n_obs    Number of observations.
- * @param n_eqs    Number of estimating equations.
+ * @param n_obs[in]    Number of observations.
+ * @param n_eqs[in]    Number of estimating equations.
  */
 inline flexEL::InnerEL::InnerEL(int n_obs, int n_eqs) {
   // assign internal values
@@ -210,15 +210,15 @@ inline flexEL::InnerEL::InnerEL(int n_obs, int n_eqs) {
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter    Maximum number of iterations.
- * @param rel_tol     Relative tolerance.
- * @param supp    Whether to have support correction.
- * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
- * @param lambda0    Initial value for lambda.
+ * @param max_iter[in]    Maximum number of iterations.
+ * @param rel_tol[in]     Relative tolerance to control the convergence of lambda.
+ * @param supp[in]        Whether to conduct support correction.
+ * @param supp_a[in]      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
+ * @param lambda0[in]     Initial value for lambda.
  */
 inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
-                                          const bool& supp, const double& supp_a, 
-                                          const Ref<const VectorXd>& lambda0) {
+                                      const bool& supp, const double& supp_a, 
+                                      const Ref<const VectorXd>& lambda0) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
   supp_ = supp;
@@ -230,13 +230,13 @@ inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol
 /**
  * @brief Set tolerance values for NR, support correction option, and initial value of lambda.
  * 
- * @param max_iter    Maximum number of iterations.
- * @param rel_tol     Relative tolerance.
- * @param lambda0    Initial value for lambda.
+ * @param max_iter[in]    Maximum number of iterations.
+ * @param rel_tol[in]     Relative tolerance to control the convergence of lambda.
+ * @param lambda0[in]     Initial value for lambda.
  */
 inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
-                                          const bool& supp, 
-                                          const Ref<const VectorXd>& lambda0) {
+                                      const bool& supp, 
+                                      const Ref<const VectorXd>& lambda0) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
   supp_ = supp;
@@ -248,13 +248,13 @@ inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol
 /**
  * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
  * 
- * @param max_iter    Maximum number of iterations.
- * @param rel_tol     Relative tolerance.
- * @param supp    Whether to have support correction.
- * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
+ * @param max_iter[in]    Maximum number of iterations.
+ * @param rel_tol[in]     Relative tolerance to control the convergence of lambda.
+ * @param supp[in]        Whether to conduct support correction.
+ * @param supp_a[in]      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
  */
 inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
-                                          const bool& supp, const double& supp_a) {
+                                      const bool& supp, const double& supp_a) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
   supp_ = supp;
@@ -265,12 +265,12 @@ inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol
 /**
  * @brief Set tolerance values for NR, support correction option. Initial value of lambda is omitted and is default to be a vector of zeros.
  * 
- * @param max_iter    Maximum number of iterations.
- * @param rel_tol     Relative tolerance.
- * @param supp    Whether to have support correction.
+ * @param max_iter[in]    Maximum number of iterations.
+ * @param rel_tol[in]     Relative tolerance to control the convergence of lambda.
+ * @param supp[in]        Whether to conduct support correction.
  */
 inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol, 
-                                          const bool& supp) {
+                                      const bool& supp) {
   max_iter_ = max_iter;
   rel_tol_ = rel_tol;
   supp_ = supp;
@@ -281,8 +281,8 @@ inline void flexEL::InnerEL::set_opts(const int& max_iter, const double& rel_tol
 /**
  * @brief Set support correction option and tuning parameter only. 
  * 
- * @param supp    Whether to have support correction.
- * @param supp_a       Tuning parameter for support correction (referred as "a" in chen-et-al08).
+ * @param supp[in]      Whether to conduct support correction.
+ * @param supp_a[in]    Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
  */
 inline void flexEL::InnerEL::set_opts(const bool& supp, const double& supp_a) {
   supp_ = supp;
@@ -293,7 +293,7 @@ inline void flexEL::InnerEL::set_opts(const bool& supp, const double& supp_a) {
 /**
  * @brief Set support correction option only. 
  * 
- * @param supp    Whether to have support correction.
+ * @param supp[in]   Whether to conduct support correction.
  */
 inline void flexEL::InnerEL::set_opts(const bool& supp) {
   supp_ = supp;
@@ -304,7 +304,7 @@ inline void flexEL::InnerEL::set_opts(const bool& supp) {
 /**
  * @brief Find the optimal lambda by a Newton-Raphson algorithm.
  * 
- * @param[out] n_iter    Number of iterations to achieve convergence.
+ * @param[out] n_iter     Number of iterations to achieve convergence.
  * @param[out] max_iter   Maximum relative error among entires in lambda at the last step.
  */
 inline void flexEL::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
@@ -344,7 +344,7 @@ inline void flexEL::InnerEL::LambdaNR(int& n_iter, double& max_iter) {
 }
 
 /**
- * @brief Evaluate omegas based on G and lambdaNew.
+ * @brief Evaluate omegas based on current G and lambda.
  */
 inline void flexEL::InnerEL::EvalOmegas() {
   // G and lambdaNew must have been assigned
@@ -375,6 +375,9 @@ inline double flexEL::InnerEL::LogEL() {
 
 /**
  * @brief Calculate LogEL and gradient matrix dldG
+ * 
+ * @param logel[out]   The value of log EL evaluated at the current G.
+ * @param dldG[out]    The first derivative of log EL w.r.t. G evaluated at the current G.
  */
 inline void flexEL::InnerEL::LogELGrad(double& logel, MatrixXd& dldG) {
   if (omegas_.head(n_obs2_) != omegas_.head(n_obs2_)) {
@@ -395,6 +398,8 @@ inline void flexEL::InnerEL::LogELGrad(double& logel, MatrixXd& dldG) {
 
 /**
  * @brief Set the value of lambda (e.g. to be used directly to calculate omegas).
+ * 
+ * @param lambda[in] A numeric vector.
  */
 inline void flexEL::InnerEL::set_lambda(const Ref<const VectorXd>& lambda) {
   // lambda_old_ = lambda;
@@ -403,6 +408,8 @@ inline void flexEL::InnerEL::set_lambda(const Ref<const VectorXd>& lambda) {
 
 /**
  * @brief Set the value of omegas (e.g. to be used directly to calculate log EL).
+ * 
+ * @param omegas[in] A numeric probability vector (which sums to 1).
  */
 inline void flexEL::InnerEL::set_omegas(const Ref<const VectorXd>& omegas) {
   omegas_.head(n_obs2_) = omegas; 
@@ -410,6 +417,8 @@ inline void flexEL::InnerEL::set_omegas(const Ref<const VectorXd>& omegas) {
 
 /**
  * @brief Set the value of G (e.g. to be used directly to calculate lambda or log EL).
+ * 
+ * @param G[in] A numeric matrix of dimension n_eqs x n_obs.
  */
 inline void flexEL::InnerEL::set_G(const Ref<const MatrixXd>& G) {
   G_.block(0,0,n_eqs_,n_obs_) = G;
@@ -440,7 +449,7 @@ inline MatrixXd flexEL::InnerEL::get_G() {
 }
 
 /**
- * @brief Get the reference of original dimension G (not including the adjusted row).
+ * @brief Get the reference of original dimension G (not including the adjusted row if exists).
  */
 inline Ref<MatrixXd> flexEL::InnerEL::get_ref_G() {
   return Ref<MatrixXd>(G_.block(0,0,n_eqs_,n_obs2_-supp_));

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>flexEL Package: flexEL::compare_acc_vec&lt; T &gt; Class Template Reference</title>
+<title>flexEL Package: src/inner_el_exports.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -61,41 +61,41 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceflex_e_l.html">flexEL</a></li><li class="navelem"><a class="el" href="classflex_e_l_1_1compare__acc__vec.html">compare_acc_vec</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classflex_e_l_1_1compare__acc__vec-members.html">List of all members</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">flexEL::compare_acc_vec&lt; T &gt; Class Template Reference</div>  </div>
+<div class="title">inner_el_exports.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>A helper class for obtaining indices corresponding to ascendingly sorted values in a vector.  
- <a href="classflex_e_l_1_1compare__acc__vec.html#details">More...</a></p>
-
-<p><code>#include &lt;<a class="el" href="sort__order_8h_source.html">sort_order.h</a>&gt;</code></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a3fdac4388baf4f1d985fdb78d45e8db6"><td class="memItemLeft" align="right" valign="top"><a id="a3fdac4388baf4f1d985fdb78d45e8db6"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>compare_acc_vec</b> (const T &amp;vec)</td></tr>
-<tr class="separator:a3fdac4388baf4f1d985fdb78d45e8db6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0fcedf513fe1391fc5c6c24d2a0ec1c"><td class="memItemLeft" align="right" valign="top"><a id="aa0fcedf513fe1391fc5c6c24d2a0ec1c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> (size_t lind, size_t rind) const</td></tr>
-<tr class="separator:aa0fcedf513fe1391fc5c6c24d2a0ec1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<p>Export InnerEL functions to R.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;Rcpp.h&gt;</code><br />
+<code>#include &lt;RcppEigen.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="inner__el_8h_source.html">inner_el.h</a>&quot;</code><br />
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a614f03321aa9b586dfc82a1fb3953aff"><td class="memItemLeft" align="right" valign="top"><a id="a614f03321aa9b586dfc82a1fb3953aff"></a>
+Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>LambdaNR</b> (Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose)</td></tr>
+<tr class="separator:a614f03321aa9b586dfc82a1fb3953aff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67ec76ac4df203128554fc35b07537d7"><td class="memItemLeft" align="right" valign="top"><a id="a67ec76ac4df203128554fc35b07537d7"></a>
+Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>OmegaHat</b> (Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support)</td></tr>
+<tr class="separator:a67ec76ac4df203128554fc35b07537d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a211dbe7d9cc46f655303b4557d974c97"><td class="memItemLeft" align="right" valign="top"><a id="a211dbe7d9cc46f655303b4557d974c97"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>LogEL</b> (Eigen::VectorXd omegas, bool support)</td></tr>
+<tr class="separator:a211dbe7d9cc46f655303b4557d974c97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ceb3d0fdec47c19cd10793ef601d62f"><td class="memItemLeft" align="right" valign="top"><a id="a8ceb3d0fdec47c19cd10793ef601d62f"></a>
+List&#160;</td><td class="memItemRight" valign="bottom"><b>LogELGrad</b> (Eigen::MatrixXd G, int max_iter, double rel_tol, bool support=false, bool verbose=false)</td></tr>
+<tr class="separator:a8ceb3d0fdec47c19cd10793ef601d62f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename T&gt;<br />
-class flexEL::compare_acc_vec&lt; T &gt;</h3>
-
-<p class="">A helper class for obtaining indices corresponding to ascendingly sorted values in a vector. </p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
-<li>inst/include/flexEL/<a class="el" href="sort__order_8h_source.html">sort_order.h</a></li>
-</ul>
-</div><!-- contents -->
+<div class="textblock"><p class="">Export InnerEL functions to R. </p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

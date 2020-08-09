@@ -1,5 +1,5 @@
 /**
- * @file InnerElcExports.cpp
+ * @file inner_elc_exports.cpp
  * 
  * @brief Export InnerELC functions to R.
  */

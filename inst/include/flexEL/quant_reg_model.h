@@ -140,6 +140,13 @@ inline flexEL::QuantRegModel::QuantRegModel(int n_obs, int n_eqs) {
   n_eqs_ = n_eqs; // X gets passed as nBet x n_obs matrix
 }
 
+/**
+ * @brief Constructor for QuantRegModel with data as inputs (location model).
+ * 
+ * @param y      Responses of length <code>n_obs</code>.
+ * @param X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param params   An array of quantile levels.
+ */
 inline flexEL::QuantRegModel::QuantRegModel(const Ref<const VectorXd>& y,
                                             const Ref<const MatrixXd>& X,
                                             void* params) {
@@ -155,6 +162,14 @@ inline flexEL::QuantRegModel::QuantRegModel(const Ref<const VectorXd>& y,
   n_eqs_ = n_bet_*n_qts_; // Total number of equations
 }
 
+/**
+ * @brief Constructor for QuantRegModel with data as inputs (location-scale model).
+ * 
+ * @param y      Responses of length <code>n_obs</code>.
+ * @param X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param Z      Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>.
+ * @param params   An array of quantile levels.
+ */
 inline flexEL::QuantRegModel::QuantRegModel(const Ref<const VectorXd>& y,
                                             const Ref<const MatrixXd>& X,
                                             const Ref<const MatrixXd>& Z,
@@ -225,6 +240,7 @@ inline void flexEL::QuantRegModel::set_data(const Ref<const VectorXd>& y,
 /**
 * @brief Evaluate G matrix for quantile regression location model.
 * 
+* @param G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
 * @param Beta     Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function.
 */
 inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, const Ref<const MatrixXd>& Beta) {
@@ -241,6 +257,7 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, const Ref<const Matrix
 /**
 * @brief Evaluate G matrix for quantile regression location-scale model.
 * 
+* @param G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
 * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
 * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
 * @param sig2     Scale parameter in scale function.
@@ -278,6 +295,7 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G,
 /**
 * @brief Evaluate G matrix for quantile regression location-scale model with smoothing.
 * 
+* @param G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
 * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
 * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
 * @param sig2     Scale parameter in scale function.
@@ -314,10 +332,16 @@ inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G,
   G = tG_.transpose();
 }
 
+/**
+ * @brief Return the number of observations.
+ */
 inline int flexEL::QuantRegModel::get_n_obs() {
   return n_obs_;
 }
 
+/**
+ * @brief Return the number of estimating equations.
+ */
 inline int flexEL::QuantRegModel::get_n_eqs() {
   return n_eqs_;
 }

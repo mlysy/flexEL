@@ -1,3 +1,9 @@
+/**
+ * @file adj_G_exports.cpp
+ * 
+ * @brief Export the function to calculate adjusted G matrix.
+ */
+
 #include <Rcpp.h>
 using namespace Rcpp;
 //[[Rcpp::depends("RcppEigen")]]

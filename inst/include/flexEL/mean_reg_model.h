@@ -100,6 +100,12 @@ inline flexEL::MeanRegModel::MeanRegModel(int n_obs, int n_eqs) {
   // y_ = VectorXd::Zero(n_obs_);
 }
 
+/**
+ * @brief Constructor for MeanRegModel with data as inputs (location model).
+ * 
+ * @param y      Responses of length <code>n_obs</code>.
+ * @param X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ */
 inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
                                           const Ref<const MatrixXd>& X) {
   y_ = y;
@@ -110,6 +116,13 @@ inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
   n_eqs_ = n_bet_;
 }
 
+/**
+ * @brief Constructor for MeanRegModel with data as inputs (location-scale model).
+ * 
+ * @param y      Responses of length <code>n_obs</code>.
+ * @param X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param Z      Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>.
+ */
 inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
                                           const Ref<const MatrixXd>& X,
                                           const Ref<const MatrixXd>& Z) {
@@ -163,6 +176,7 @@ inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
 /**
 * @brief Evaluate G matrix for mean regression location model.
 * 
+* @param G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
 * @param beta     Coefficient vector of length <code>n_bet_</code> in linear location function.
 */
 inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G, const Ref<const VectorXd>& beta) {
@@ -175,7 +189,8 @@ inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G, const Ref<const VectorX
 // form the G matrix for location-scale linear regression model
 /**
 * @brief Evaluate G matrix for mean regression location-scale model.
-* 
+*
+* @param G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
 * @param beta     Coefficient vector of length <code>nBet</code> in linear location function.
 * @param gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
 * @param sig2     Scale parameter in scale function.
@@ -197,10 +212,16 @@ inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G,
   G = tG_.transpose();
 }
 
+/**
+ * @brief Return the number of observations.
+ */
 inline int flexEL::MeanRegModel::get_n_obs() {
   return n_obs_;
 }
 
+/**
+ * @brief Return the number of estimating equations.
+ */
 inline int flexEL::MeanRegModel::get_n_eqs() {
   return n_eqs_;
 }
