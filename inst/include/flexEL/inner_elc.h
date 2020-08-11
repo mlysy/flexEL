@@ -227,7 +227,7 @@ inline flexEL::InnerELC::InnerELC() {}
 /**
  * @brief Constructor for InnerELC with number of observations only as input for memory allocation.
  * 
- * @param n_obs[in]    Number of observations.
+ * @param[in] n_obs    Number of observations.
  */
 inline flexEL::InnerELC::InnerELC(int n_obs) {
   n_obs_ = n_obs;
@@ -242,8 +242,8 @@ inline flexEL::InnerELC::InnerELC(int n_obs) {
 /**
  * @brief Constructor for InnerELC with dimensions of G matrix as inputs for memory allocation.
  * 
- * @param n_obs[in]    Number of observations.
- * @param n_eqs[in]    Number of estimating equations.
+ * @param[in] n_obs    Number of observations.
+ * @param[in] n_eqs    Number of estimating equations.
  */
 inline flexEL::InnerELC::InnerELC(int n_obs, int n_eqs) {
   // set internal values
@@ -281,12 +281,12 @@ inline flexEL::InnerELC::InnerELC(int n_obs, int n_eqs) {
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter[in]    Maximum number of iterations.
- * @param rel_tol[in]     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
- * @param abs_tol[in]     Absolute tolerance (to control convergence of the EM algorithm).
- * @param supp[in]        Whether to conduct support correction.
- * @param supp_a[in]      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
- * @param lambda0[in]     Initial value for lambda.
+ * @param[in] max_iter    Maximum number of iterations.
+ * @param[in] rel_tol     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
+ * @param[in] abs_tol     Absolute tolerance (to control convergence of the EM algorithm).
+ * @param[in] supp        Whether to conduct support correction.
+ * @param[in] supp_a      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
+ * @param[in] lambda0     Initial value for lambda.
  */
 inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                        const double& rel_tol, const double& abs_tol, 
@@ -308,11 +308,11 @@ inline void flexEL::InnerELC::set_opts(const int& max_iter,
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter[in]    Maximum number of iterations.
- * @param rel_tol[in]     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
- * @param abs_tol[in]     Absolute tolerance (to control convergence of the EM algorithm).
- * @param supp[in]        Whether to conduct support correction.
- * @param lambda0[in]     Initial value for lambda.
+ * @param[in] max_iter    Maximum number of iterations.
+ * @param[in] rel_tol     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
+ * @param[in] abs_tol     Absolute tolerance (to control convergence of the EM algorithm).
+ * @param[in] supp        Whether to conduct support correction.
+ * @param[in] lambda0     Initial value for lambda.
  */
 inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                        const double& rel_tol, const double& abs_tol, 
@@ -334,11 +334,11 @@ inline void flexEL::InnerELC::set_opts(const int& max_iter,
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter[in]    Maximum number of iterations.
- * @param rel_tol[in]     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
- * @param abs_tol[in]     Absolute tolerance (to control convergence of the EM algorithm).
- * @param supp[in]        Whether to conduct support correction.
- * @param supp_a[in]      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
+ * @param[in] max_iter    Maximum number of iterations.
+ * @param[in] rel_tol     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
+ * @param[in] abs_tol     Absolute tolerance (to control convergence of the EM algorithm).
+ * @param[in] supp        Whether to conduct support correction.
+ * @param[in] supp_a      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
  */
 inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                        const double& rel_tol, const double& abs_tol, 
@@ -358,10 +358,10 @@ inline void flexEL::InnerELC::set_opts(const int& max_iter,
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter[in]    Maximum number of iterations.
- * @param rel_tol[in]     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
- * @param abs_tol[in]     Absolute tolerance (to control convergence of the EM algorithm).
- * @param supp[in]        Whether to conduct support correction.
+ * @param[in] max_iter    Maximum number of iterations.
+ * @param[in] rel_tol     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
+ * @param[in] abs_tol     Absolute tolerance (to control convergence of the EM algorithm).
+ * @param[in] supp        Whether to conduct support correction.
  */
 inline void flexEL::InnerELC::set_opts(const int& max_iter, 
                                        const double& rel_tol, const double& abs_tol, 
@@ -381,10 +381,10 @@ inline void flexEL::InnerELC::set_opts(const int& max_iter,
 /**
  * @brief Set tolerance values for NR, supp correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter[in]    Maximum number of iterations.
- * @param rel_tol[in]     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
- * @param supp[in]        Whether to conduct support correction.
- * @param supp_a[in]      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
+ * @param[in] max_iter    Maximum number of iterations.
+ * @param[in] rel_tol     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
+ * @param[in] supp        Whether to conduct support correction.
+ * @param[in] supp_a      Tuning parameter for support correction (see J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
  */
 inline void flexEL::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
                                   const bool& supp, const double& supp_a) {
@@ -402,9 +402,9 @@ inline void flexEL::InnerELC::set_opts(const int& max_iter, const double& rel_to
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param max_iter[in]    Maximum number of iterations.
- * @param rel_tol[in]     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
- * @param supp[in]        Whether to conduct support correction.
+ * @param[in] max_iter    Maximum number of iterations.
+ * @param[in] rel_tol     Relative tolerance (to control convergence of the Newton-Raphson algorithm).
+ * @param[in] supp        Whether to conduct support correction.
  */
 inline void flexEL::InnerELC::set_opts(const int& max_iter, const double& rel_tol,
                                   const bool& supp) {
@@ -422,7 +422,7 @@ inline void flexEL::InnerELC::set_opts(const int& max_iter, const double& rel_to
 /**
  * @brief Set tolerance values for NR, support correction option and tuning parameter, and initial value of lambda.
  * 
- * @param supp[in]    Whether to conduct support correction.
+ * @param[in] supp    Whether to conduct support correction.
  */
 inline void flexEL::InnerELC::set_opts(const bool& supp) {
   supp_ = supp;
@@ -581,7 +581,7 @@ inline double flexEL::InnerELC::LogEL() {
 /**
  * @brief Calculate weights for weighted log EL in EM according to epsilons.
  * 
- * @param s[in]   Tuning parameter for smoothing.
+ * @param[in] s   Tuning parameter for smoothing.
  */
 inline void flexEL::InnerELC::EvalWeightsSmooth(const double s) {
   psots_.fill(0.0); 
@@ -611,7 +611,7 @@ inline void flexEL::InnerELC::EvalWeightsSmooth(const double s) {
 /**
  * @brief Evaluate omegas using an EM algorithm with continuity correction.
  * 
- * @param s[in]   Tuning parameter for smoothing.
+ * @param[in] s   Tuning parameter for smoothing.
  */
 inline void flexEL::InnerELC::EvalOmegasSmooth(const double s) {
   if (omegas_ != omegas_) {
@@ -649,7 +649,7 @@ inline void flexEL::InnerELC::EvalOmegasSmooth(const double s) {
 /**
  * @brief Calculate logEL using omegas and deltas.
  * 
- * @param s[in]   Tuning parameter for smoothing.
+ * @param[in] s   Tuning parameter for smoothing.
  */
 inline double flexEL::InnerELC::LogELSmooth(const double s) {
   if (omegas_ != omegas_) return -INFINITY; // (NaN is not equal to themselves)
@@ -674,7 +674,7 @@ inline double flexEL::InnerELC::LogELSmooth(const double s) {
 /**
  * @brief Set the value of epsilons.
  * 
- * @param epsilons[in]   A numeric vector of residuals.
+ * @param[in] epsilons   A numeric vector of residuals.
  */
 inline void flexEL::InnerELC::set_epsilons(const Ref<const VectorXd>& epsilons) {
   epsilons_.head(n_obs_) = epsilons;
@@ -684,7 +684,7 @@ inline void flexEL::InnerELC::set_epsilons(const Ref<const VectorXd>& epsilons) 
 /**
  * @brief Set the value of lambda.
  * 
- * @param lambda[in]   A numeric vector.
+ * @param[in] lambda   A numeric vector.
  */
 inline void flexEL::InnerELC::set_lambda(const Ref<const VectorXd>& lambda) {
   lambda_new_ = lambda;
@@ -693,7 +693,7 @@ inline void flexEL::InnerELC::set_lambda(const Ref<const VectorXd>& lambda) {
 /**
  * @brief Set the value of weights.
  * 
- * @param weights[in]   A numeric vector of weights to be used in the weighted empirical likelihood function.
+ * @param[in] weights   A numeric vector of weights to be used in the weighted empirical likelihood function.
  */
 inline void flexEL::InnerELC::set_weights(const Ref<const VectorXd>& weights) {
   weights_.head(n_obs_) = weights; 
@@ -702,7 +702,7 @@ inline void flexEL::InnerELC::set_weights(const Ref<const VectorXd>& weights) {
 /**
  * @brief Set the value of omegas.
  * 
- * @param omegas[in]   A numeric probability vector (which sums to 1).
+ * @param[in] omegas   A numeric probability vector (which sums to 1).
  */
 inline void flexEL::InnerELC::set_omegas(const Ref<const VectorXd>& omegas) {
   // n_obs = _omegas.size(); // TODO: where to set n_obs
@@ -713,7 +713,7 @@ inline void flexEL::InnerELC::set_omegas(const Ref<const VectorXd>& omegas) {
 /**
  * @brief Set the value of deltas.
  * 
- * @param deltas[in]   A numeric vector of 0's and 1's of cencoring indicators. 1 for observed value, 0 for right-censored value.
+ * @param[in] deltas   A numeric vector of 0's and 1's of cencoring indicators. 1 for observed value, 0 for right-censored value.
  */
 inline void flexEL::InnerELC::set_deltas(const Ref<const VectorXd>& deltas) {
   psots_ = VectorXd::Zero(n_obs2_); // TODO: initialization maybe should be done at better places
@@ -723,7 +723,7 @@ inline void flexEL::InnerELC::set_deltas(const Ref<const VectorXd>& deltas) {
 /**
  * @brief Set the value of G.
  * 
- * @param G[in]   A numeric matrix of dimension n_eqs x n_obs.
+ * @param[in] G   A numeric matrix of dimension n_eqs x n_obs.
  */
 inline void flexEL::InnerELC::set_G(const Ref<const MatrixXd>& G) {
   G_.block(0,0,n_eqs_,n_obs_) = G;

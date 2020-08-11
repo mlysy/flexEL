@@ -21,19 +21,31 @@ namespace flexEL {
    */
   template <typename T>
   class compare_acc_vec {
-      const T& vec;
+    
+    const T& vec;
+    
   public:
-      compare_acc_vec(const T& vec): vec(vec) { }
-      bool operator () (size_t lind, size_t rind) const {
+    /**
+     * @brief Constructor of compare_acc_vec.
+     */
+    compare_acc_vec(const T& vec): vec(vec) { }
+    
+    /**
+     * @brief Compare two values in \c vec.
+     * 
+     * @param[in] lind   First index (LHS of <).
+     * @param[in] rind   Second index (RHS of <).
+     */
+    bool operator () (size_t lind, size_t rind) const {
           return vec[lind] < vec[rind]; // < to sort ascendingly; > to sort descendingly
-      }
+    }
   };
 
   // TODO: this could be a void function and pass the inds as an argument too 
   /**
    * @brief Find the indices of elements in a vector if it is sorted ascendingly.
    * 
-   * @param vec A numeric vector.
+   * @param[in] vec A numeric vector.
    * 
    * @return A vector of integers (the indicies of the elements in \c vec).
    */
@@ -43,6 +55,7 @@ namespace flexEL {
       for (int ii=0; ii<n; ii++) {
           inds(ii) = ii;
       }
+      // sort inds based based on ascending order of elements in vec
       std::sort(inds.data(), inds.data()+n, compare_acc_vec <decltype(vec)> (vec));
       return inds;
   }

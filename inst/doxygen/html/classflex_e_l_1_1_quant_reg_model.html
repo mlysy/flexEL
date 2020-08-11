@@ -165,8 +165,8 @@ Protected Attributes</h2></td></tr>
 <p>Constructor for <a class="el" href="classflex_e_l_1_1_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> with dimensions as inputs. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">n_obs</td><td>Number of observations. </td></tr>
-    <tr><td class="paramname">n_eqs</td><td>Number of estimating equations. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_obs</td><td>Number of observations. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_eqs</td><td>Number of estimating equations. </td></tr>
   </table>
   </dd>
 </dl>
@@ -216,9 +216,9 @@ Protected Attributes</h2></td></tr>
 <p>Constructor for <a class="el" href="classflex_e_l_1_1_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> with data as inputs (location model). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
   </table>
   </dd>
 </dl>
@@ -274,10 +274,10 @@ Protected Attributes</h2></td></tr>
 <p>Constructor for <a class="el" href="classflex_e_l_1_1_quant_reg_model.html" title="A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile...">QuantRegModel</a> with data as inputs (location-scale model). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
   </table>
   </dd>
 </dl>
@@ -322,8 +322,8 @@ Protected Attributes</h2></td></tr>
 <p>Evaluate G matrix for quantile regression location model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
-    <tr><td class="paramname">Beta</td><td>Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Beta</td><td>Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function. </td></tr>
   </table>
   </dd>
 </dl>
@@ -385,11 +385,11 @@ Protected Attributes</h2></td></tr>
 <p>Evaluate G matrix for quantile regression location-scale model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
-    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
-    <tr><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
-    <tr><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
-    <tr><td class="paramname">nu</td><td>Quantile parameters for each quantile level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>Quantile parameters for each quantile level. </td></tr>
   </table>
   </dd>
 </dl>
@@ -457,12 +457,12 @@ Protected Attributes</h2></td></tr>
 <p>Evaluate G matrix for quantile regression location-scale model with smoothing. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
-    <tr><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
-    <tr><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
-    <tr><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
-    <tr><td class="paramname">nu</td><td>Quantile parameters for each quantile level. </td></tr>
-    <tr><td class="paramname">s</td><td>Smoothing parameter (s &gt; 0). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>Quantile parameters for each quantile level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>Smoothing parameter (s &gt; 0). </td></tr>
   </table>
   </dd>
 </dl>
@@ -512,9 +512,9 @@ Protected Attributes</h2></td></tr>
 <p>Set data for quantile regression location model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
   </table>
   </dd>
 </dl>
@@ -570,10 +570,10 @@ Protected Attributes</h2></td></tr>
 <p>Set data for quantile regression location-scale model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>. </td></tr>
-    <tr><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>An array of quantile levels. </td></tr>
   </table>
   </dd>
 </dl>

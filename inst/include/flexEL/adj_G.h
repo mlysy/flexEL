@@ -19,8 +19,8 @@ namespace flexEL {
    * J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties.
    *    Journal of Computational and Graphical Statistics, 17(2):426–443, 2008.
    * 
-   * @param G   A numeric matrix.
-   * @param a   Tuning parameter for the adjustment.
+   * @param[in] G   A numeric matrix.
+   * @param[in] a   Tuning parameter for the adjustment.
    */
   inline void adj_G(Eigen::MatrixXd &G, double a) {
     // std::cout << "adj_G: G = \n" << G << std::endl;

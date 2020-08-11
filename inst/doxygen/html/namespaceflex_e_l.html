@@ -150,8 +150,8 @@ Functions</h2></td></tr>
 <p class="">J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">G</td><td>A numeric matrix. </td></tr>
-    <tr><td class="paramname">a</td><td>Tuning parameter for the adjustment. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>A numeric matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>Tuning parameter for the adjustment. </td></tr>
   </table>
   </dd>
 </dl>
@@ -195,8 +195,8 @@ Functions</h2></td></tr>
 <p>For an (m x N) matrix G = [g1 ... gN], calculates the (m x mN) matrix GGt = [g1 g1' ... gN gN']. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">GGt</td><td>A numeric matrix of dimension m x mN in which the calculated result will be saved. </td></tr>
-    <tr><td class="paramname">G</td><td>A numeric matrix of dimension m x N. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">GGt</td><td>A numeric matrix of dimension m x mN in which the calculated result will be saved. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>A numeric matrix of dimension m x N. </td></tr>
   </table>
   </dd>
 </dl>
@@ -240,8 +240,8 @@ Functions</h2></td></tr>
 <p>First derivative of <code>ind_smooth</code>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>The value to be evaluated at. </td></tr>
-    <tr><td class="paramname">s</td><td>A positive number controlling the level of smoothness. The bigger the more smooth. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The value to be evaluated at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>A positive number controlling the level of smoothness. The bigger the more smooth. </td></tr>
   </table>
   </dd>
 </dl>
@@ -285,8 +285,8 @@ Functions</h2></td></tr>
 <p>Smoothed indicator function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>The value to be evaluated at. For x &gt; 0, the function returns a number that is close to 0; for x &lt; 0, the function returns a number that is close to 1. </td></tr>
-    <tr><td class="paramname">s</td><td>A positive number controlling the level of smoothness. The bigger the more smooth. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The value to be evaluated at. For x &gt; 0, the function returns a number that is close to 0; for x &lt; 0, the function returns a number that is close to 1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>A positive number controlling the level of smoothness. The bigger the more smooth. </td></tr>
   </table>
   </dd>
 </dl>
@@ -320,7 +320,7 @@ Functions</h2></td></tr>
 <p>Find the indices of elements in a vector if it is sorted ascendingly. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">vec</td><td>A numeric vector.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>A numeric vector.</td></tr>
   </table>
   </dd>
 </dl>
