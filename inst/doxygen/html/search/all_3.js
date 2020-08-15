@@ -4,6 +4,6 @@ var searchData=
   ['evalgsmooth',['EvalGSmooth',['../classflex_e_l_1_1_quant_reg_model.html#a5fdf4b136cc7bf19fdd525a2bd9e1a51',1,'flexEL::QuantRegModel']]],
   ['evalomegas',['EvalOmegas',['../classflex_e_l_1_1_inner_e_l.html#a727869bd5990ce481602106a7c68fcc9',1,'flexEL::InnerEL::EvalOmegas()'],['../classflex_e_l_1_1_inner_e_l_c.html#abcee203e83a8cd43b19404ffd82971bd',1,'flexEL::InnerELC::EvalOmegas()']]],
   ['evalomegassmooth',['EvalOmegasSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#a9897806d763c816150fbd03ecbf8671a',1,'flexEL::InnerELC']]],
-  ['evalweights',['EvalWeights',['../classflex_e_l_1_1_inner_e_l_c.html#ac6d5b9f8cf18f08857da59e93c1b3f94',1,'flexEL::InnerELC']]],
-  ['evalweightssmooth',['EvalWeightsSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#aab9056b87d8a068d3cbb4224801a9a59',1,'flexEL::InnerELC']]]
+  ['evalweights',['EvalWeights',['../classflex_e_l_1_1_inner_e_l_c.html#ac6d5b9f8cf18f08857da59e93c1b3f94',1,'flexEL::InnerELC::EvalWeights()'],['../inner__elc__exports_8cpp.html#a91cc8ddfdbcbd4a50f1254b3d7860fb2',1,'EvalWeights():&#160;inner_elc_exports.cpp']]],
+  ['evalweightssmooth',['EvalWeightsSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#aab9056b87d8a068d3cbb4224801a9a59',1,'flexEL::InnerELC::EvalWeightsSmooth()'],['../inner__elc__exports_8cpp.html#a5ef049e8130ea589648efc058d6d5d11',1,'EvalWeightsSmooth():&#160;inner_elc_exports.cpp']]]
 ];

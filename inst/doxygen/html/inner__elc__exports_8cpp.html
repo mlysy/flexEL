@@ -80,31 +80,494 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0601b6d1fb01820e9c91846881426371"><td class="memItemLeft" align="right" valign="top"><a id="a0601b6d1fb01820e9c91846881426371"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>EvalWeights</b> (Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, bool support)</td></tr>
-<tr class="separator:a0601b6d1fb01820e9c91846881426371"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a41a706f1fdad76b7212e69955126d3"><td class="memItemLeft" align="right" valign="top"><a id="a6a41a706f1fdad76b7212e69955126d3"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>LambdaNRCens</b> (Eigen::MatrixXd G, Eigen::VectorXd weights, int max_iter, double rel_tol, bool support, bool verbose)</td></tr>
+<tr class="memitem:a91cc8ddfdbcbd4a50f1254b3d7860fb2"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#a91cc8ddfdbcbd4a50f1254b3d7860fb2">EvalWeights</a> (Eigen::VectorXd omegas, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, bool support)</td></tr>
+<tr class="memdesc:a91cc8ddfdbcbd4a50f1254b3d7860fb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weights for the weighted log EL.  <a href="#a91cc8ddfdbcbd4a50f1254b3d7860fb2">More...</a><br /></td></tr>
+<tr class="separator:a91cc8ddfdbcbd4a50f1254b3d7860fb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a41a706f1fdad76b7212e69955126d3"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#a6a41a706f1fdad76b7212e69955126d3">LambdaNRCens</a> (Eigen::MatrixXd G, Eigen::VectorXd weights, int max_iter, double rel_tol, bool support, bool verbose)</td></tr>
+<tr class="memdesc:a6a41a706f1fdad76b7212e69955126d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the solution of the dual problem of the weighted maximum log EL problem.  <a href="#a6a41a706f1fdad76b7212e69955126d3">More...</a><br /></td></tr>
 <tr class="separator:a6a41a706f1fdad76b7212e69955126d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f0c70787e4605d0030d76e55e037e79"><td class="memItemLeft" align="right" valign="top"><a id="a0f0c70787e4605d0030d76e55e037e79"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>OmegaHatEM</b> (Eigen::VectorXd omegas_init, Eigen::MatrixXd G, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, int max_iter, double rel_tol, double abs_tol, bool support, bool verbose)</td></tr>
-<tr class="separator:a0f0c70787e4605d0030d76e55e037e79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60d58a0a2e78c693bf9884b1eac69e5e"><td class="memItemLeft" align="right" valign="top"><a id="a60d58a0a2e78c693bf9884b1eac69e5e"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>LogELCens</b> (Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, bool support)</td></tr>
-<tr class="separator:a60d58a0a2e78c693bf9884b1eac69e5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44eb07b7ec0c93d14636abf888d31349"><td class="memItemLeft" align="right" valign="top"><a id="a44eb07b7ec0c93d14636abf888d31349"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>LogELSmooth</b> (Eigen::VectorXd omegas, Eigen::VectorXd epsilons, Eigen::VectorXd deltas, double sp, bool support)</td></tr>
-<tr class="separator:a44eb07b7ec0c93d14636abf888d31349"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28a87569d510c6ce7fac5206c8568c2f"><td class="memItemLeft" align="right" valign="top"><a id="a28a87569d510c6ce7fac5206c8568c2f"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>EvalWeightsSmooth</b> (Eigen::VectorXd deltas, Eigen::VectorXd omegas, Eigen::VectorXd epsilons, double s, bool support)</td></tr>
-<tr class="separator:a28a87569d510c6ce7fac5206c8568c2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83e489b4eebb8788399e344e642b639c"><td class="memItemLeft" align="right" valign="top"><a id="a83e489b4eebb8788399e344e642b639c"></a>
-Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><b>OmegaHatEMSmooth</b> (Eigen::VectorXd omegas_init, Eigen::MatrixXd G, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, double s, int max_iter, double rel_tol, double abs_tol, bool support, bool verbose)</td></tr>
-<tr class="separator:a83e489b4eebb8788399e344e642b639c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95cf5bf8d4bb6acb579884fc2e78110b"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#a95cf5bf8d4bb6acb579884fc2e78110b">OmegaHatEM</a> (Eigen::MatrixXd G, Eigen::VectorXd omegas_init, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, int max_iter, double rel_tol, double abs_tol, bool support, bool verbose)</td></tr>
+<tr class="memdesc:a95cf5bf8d4bb6acb579884fc2e78110b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the probability vector given right-censored observation using an EM algorithm.  <a href="#a95cf5bf8d4bb6acb579884fc2e78110b">More...</a><br /></td></tr>
+<tr class="separator:a95cf5bf8d4bb6acb579884fc2e78110b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62fa56520e88247abecadc9e72cf4e27"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#a62fa56520e88247abecadc9e72cf4e27">LogELCens</a> (Eigen::VectorXd omegas, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, bool support)</td></tr>
+<tr class="memdesc:a62fa56520e88247abecadc9e72cf4e27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the censored log EL.  <a href="#a62fa56520e88247abecadc9e72cf4e27">More...</a><br /></td></tr>
+<tr class="separator:a62fa56520e88247abecadc9e72cf4e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59731923b6524fe3b31404c3bed32708"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#a59731923b6524fe3b31404c3bed32708">LogELSmooth</a> (Eigen::VectorXd omegas, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, double sp, bool support)</td></tr>
+<tr class="memdesc:a59731923b6524fe3b31404c3bed32708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the censored log EL with continuity correction.  <a href="#a59731923b6524fe3b31404c3bed32708">More...</a><br /></td></tr>
+<tr class="separator:a59731923b6524fe3b31404c3bed32708"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ef049e8130ea589648efc058d6d5d11"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#a5ef049e8130ea589648efc058d6d5d11">EvalWeightsSmooth</a> (Eigen::VectorXd omegas, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, double sp, bool support)</td></tr>
+<tr class="memdesc:a5ef049e8130ea589648efc058d6d5d11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weights for the weighted log EL with continuity correction.  <a href="#a5ef049e8130ea589648efc058d6d5d11">More...</a><br /></td></tr>
+<tr class="separator:a5ef049e8130ea589648efc058d6d5d11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad26c123e15e400bd8fd808cd0fd52ea1"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inner__elc__exports_8cpp.html#ad26c123e15e400bd8fd808cd0fd52ea1">OmegaHatEMSmooth</a> (Eigen::MatrixXd G, Eigen::VectorXd omegas_init, Eigen::VectorXd deltas, Eigen::VectorXd epsilons, double sp, int max_iter, double rel_tol, double abs_tol, bool support, bool verbose)</td></tr>
+<tr class="memdesc:ad26c123e15e400bd8fd808cd0fd52ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the probability vector given right-censored observation using an EM algorithm.  <a href="#ad26c123e15e400bd8fd808cd0fd52ea1">More...</a><br /></td></tr>
+<tr class="separator:ad26c123e15e400bd8fd808cd0fd52ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p class="">Export InnerELC functions to R. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a91cc8ddfdbcbd4a50f1254b3d7860fb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91cc8ddfdbcbd4a50f1254b3d7860fb2">&#9670;&nbsp;</a></span>EvalWeights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd EvalWeights </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>omegas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>deltas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>epsilons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the weights for the weighted log EL. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">omegas</td><td>A numeric probability vector of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deltas</td><td>A numeric vector of 0 and 1s where 1 indicates fully observed value and 0 indicates right-censored value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilons</td><td>A numeric vector of residuals of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5ef049e8130ea589648efc058d6d5d11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ef049e8130ea589648efc058d6d5d11">&#9670;&nbsp;</a></span>EvalWeightsSmooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd EvalWeightsSmooth </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>omegas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>deltas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>epsilons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the weights for the weighted log EL with continuity correction. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">omegas</td><td>A numeric probability vector of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deltas</td><td>A numeric vector of 0 and 1s where 1 indicates fully observed value and 0 indicates right-censored value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilons</td><td>A numeric vector of residuals of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sp</td><td>A numeric scalar as the tuning parameter for continuity correction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6a41a706f1fdad76b7212e69955126d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a41a706f1fdad76b7212e69955126d3">&#9670;&nbsp;</a></span>LambdaNRCens()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd LambdaNRCens </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max_iter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>rel_tol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>verbose</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the solution of the dual problem of the weighted maximum log EL problem. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>A matrix of dimension <code>n_eqs x n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>A numeric vector serving as the weights of the weighted maximum log EL problem. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">max_iter</td><td>A positive integer controlling the maximum number of iterations. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rel_tol</td><td>A small positive number controlling accuracy at convergence. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">verbose</td><td>A boolean indicating whether to print out number of iterations and maximum error. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a62fa56520e88247abecadc9e72cf4e27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62fa56520e88247abecadc9e72cf4e27">&#9670;&nbsp;</a></span>LogELCens()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LogELCens </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>omegas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>deltas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>epsilons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the censored log EL. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">omegas</td><td>A numeric probability vector of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deltas</td><td>A numeric vector of 0 and 1s where 1 indicates fully observed value and 0 indicates right-censored value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilons</td><td>A numeric vector of residuals of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a59731923b6524fe3b31404c3bed32708"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59731923b6524fe3b31404c3bed32708">&#9670;&nbsp;</a></span>LogELSmooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double LogELSmooth </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>omegas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>deltas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>epsilons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the censored log EL with continuity correction. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">omegas</td><td>A numeric probability vector of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deltas</td><td>A numeric vector of 0 and 1s where 1 indicates fully observed value and 0 indicates right-censored value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilons</td><td>A numeric vector of residuals of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sp</td><td>A numeric scalar as the tuning parameter for continuity correction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a95cf5bf8d4bb6acb579884fc2e78110b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95cf5bf8d4bb6acb579884fc2e78110b">&#9670;&nbsp;</a></span>OmegaHatEM()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd OmegaHatEM </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>omegas_init</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>deltas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>epsilons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max_iter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>rel_tol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>abs_tol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>verbose</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the probability vector given right-censored observation using an EM algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>A matrix of dimension <code>n_eqs x n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">omegas_init</td><td>A numeric probability vector serving as initial value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deltas</td><td>A numeric vector of 0 and 1s where 1 indicates fully observed value and 0 indicates right-censored value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilons</td><td>A numeric vector of residuals of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">max_iter</td><td>A positive integer controlling the maximum number of iterations. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rel_tol</td><td>A small positive number controlling accuracy at convergence of the Newton-Raphson algorithm (tolerance of relative error). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">abs_tol</td><td>A small positive number controlling accuracy at convergence of the EM algorithm (tolerance of absolute error). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">verbose</td><td>A boolean indicating whether to print out number of iterations and maximum error. at the end of the Newton-Raphson algorithm. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad26c123e15e400bd8fd808cd0fd52ea1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad26c123e15e400bd8fd808cd0fd52ea1">&#9670;&nbsp;</a></span>OmegaHatEMSmooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd OmegaHatEMSmooth </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>omegas_init</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>deltas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>epsilons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>max_iter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>rel_tol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>abs_tol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>support</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>verbose</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the probability vector given right-censored observation using an EM algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>A matrix of dimension <code>n_eqs x n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">omegas_init</td><td>A numeric probability vector serving as initial value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deltas</td><td>A numeric vector of 0 and 1s where 1 indicates fully observed value and 0 indicates right-censored value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilons</td><td>A numeric vector of residuals of the same length as <code>deltas</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sp</td><td>A numeric scalar as the tuning parameter for continuity correction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">max_iter</td><td>A positive integer controlling the maximum number of iterations. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rel_tol</td><td>A small positive number controlling accuracy at convergence of the Newton-Raphson algorithm (tolerance of relative error). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">abs_tol</td><td>A small positive number controlling accuracy at convergence of the EM algorithm (tolerance of absolute error). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">support</td><td>A boolean indicating whether to conduct support correction or not. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">verbose</td><td>A boolean indicating whether to print out number of iterations and maximum error. at the end of the Newton-Raphson algorithm. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

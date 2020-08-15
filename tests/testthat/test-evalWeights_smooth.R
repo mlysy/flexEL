@@ -18,7 +18,7 @@ test_that("evalPsos_R == evalPsos_cpp", {
     numcens <- sample(1:round(n/2),1)
     deltas[sample(1:n,numcens)] <- 0
     support <- FALSE
-    val_cpp <- flexEL:::.EvalWeightsSmooth(deltas,omegas,epsilons,s,support)
+    val_cpp <- flexEL:::.EvalWeightsSmooth(omegas,deltas,epsilons,s,support)
     val_R <- evalWeights_smooth_R(deltas,omegas,epsilons,s)
     expect_equal(val_R, val_cpp)
   }
@@ -35,7 +35,7 @@ test_that("evalPsos_R == evalPsos_cpp (with support correction)", {
     numcens <- sample(1:round(n/2),1)
     deltas[sample(1:n,numcens)] <- 0
     support <- TRUE
-    val_cpp <- flexEL:::.EvalWeightsSmooth(deltas,omegas,epsilons,s,support)
+    val_cpp <- flexEL:::.EvalWeightsSmooth(omegas,deltas,epsilons,s,support)
     val_R <- evalWeights_smooth_R(c(deltas,0), omegas, c(epsilons,-Inf),s,support)
     expect_equal(val_R, val_cpp)
   }

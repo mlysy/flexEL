@@ -13,6 +13,16 @@
 using namespace Eigen;
 using namespace Rcpp;
 
+/**
+ * @brief Calculate the solution of the dual problem of maximum log EL problem.
+ * 
+ * @param[in] G          A matrix of dimension <code>n_eqs x n_obs</code>.
+ * @param[in] max_iter   A positive integer controlling the maximum number of iterations.
+ * @param[in] rel_tol    A small positive number controlling accuracy at convergence.
+ * @param[in] support    A boolean indicating whether to conduct support correction or not.
+ * @param[in] verbose    A boolean indicating whether to print out number of iterations and maximum error.
+ *                         at the end of the Newton-Raphson algorithm.
+ */
 // [[Rcpp::export(".LambdaNR")]]
 Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose) {
   int n_obs = G.cols();
@@ -25,7 +35,6 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   int n_iter;
   double max_err;
   bool not_conv;
-  // IL.setTol(max_iter, rel_tol);
   IL.LambdaNR(n_iter, max_err);
   VectorXd lambda = IL.get_lambda(); // output (could be not converged)
   // check convergence
@@ -43,22 +52,53 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   return lambda;
 }
 
-// Eigen::VectorXd y, Eigen::MatrixXd X not needed here since there is no ordering 
-// as in the censored case 
+/**
+ * @brief Calculate the probability vector base on the given G matrix.
+ * 
+ * @param[in] G          A matrix of dimension <code>n_eqs x n_obs</code>.
+ * @param[in] max_iter   A positive integer controlling the maximum number of iterations.
+ * @param[in] rel_tol    A small positive number controlling accuracy at convergence.
+ * @param[in] support    A boolean indicating whether to conduct support correction or not.
+ * @param[in] verbose    A boolean indicating whether to print out number of iterations and maximum error.
+ *                         at the end of the Newton-Raphson algorithm.
+ */
 // [[Rcpp::export(".OmegaHat")]]
-Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda, bool support) {
+Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose) {
+  
   int n_obs = G.cols();
   int n_eqs = G.rows();
-  flexEL::InnerEL IL(n_obs, n_eqs);
-  IL.set_opts(support);
+  flexEL::InnerEL IL(n_obs,n_eqs);
+  IL.set_opts(max_iter,rel_tol,support);
   IL.set_G(G); // assign the given G
-  IL.set_lambda(lambda); 
+  
+  // initialize variables for output here 
+  int n_iter;
+  double max_err;
+  bool not_conv;
+  IL.LambdaNR(n_iter, max_err);
+  // check convergence
+  not_conv = (n_iter == max_iter) && (max_err > rel_tol);
+  if(verbose) {
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
+  
+  // int n_obs = G.cols();
+  // int n_eqs = G.rows();
+  // flexEL::InnerEL IL(n_obs, n_eqs);
+  // IL.set_opts(support);
+  // IL.set_G(G); // assign the given G
+  // IL.set_lambda(lambda); 
   IL.EvalOmegas(); // calculate omegas
   VectorXd omegasnew = IL.get_omegas(); // get omegas
   return omegasnew;
 }
 
-// Calculate logEL given omegas
+/**
+ * @brief Calculate the log empirical likelihood base on the given probability vector.
+ * 
+ * @param[in] omegas    A numeric probability vector.
+ * @param[in] support   A boolean indicating whether to conduct support correction or not.
+ */
 // [[Rcpp::export(".LogEL")]]
 double LogEL(Eigen::VectorXd omegas, bool support) {
   int n_obs = omegas.size() - support;
@@ -69,7 +109,16 @@ double LogEL(Eigen::VectorXd omegas, bool support) {
   return log_el; 
 }
 
-// Calculate logEL and gradient given omegas (no support correction)
+/**
+ * @brief Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+ * 
+ * @param[in] G          A matrix of dimension <code>n_eqs x n_obs</code>.
+ * @param[in] max_iter   A positive integer controlling the maximum number of iterations.
+ * @param[in] rel_tol    A small positive number controlling accuracy at convergence.
+ * @param[in] support    A boolean indicating whether to conduct support correction or not.
+ * @param[in] verbose    A boolean indicating whether to print out number of iterations and maximum error.
+ *                         at the end of the Newton-Raphson algorithm.
+ */
 // [[Rcpp::export(".LogELGrad")]]
 List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = false, bool verbose = false) {
   

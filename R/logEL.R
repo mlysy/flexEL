@@ -21,7 +21,7 @@ logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
   
   if (is.null(delta) & is.null(eps)) {
     if (return_dldG) {
-      return(.LogELGrad(t(G), max_iter = max_iter, rel_tol = rel_tol, 
+      return(.LogELGrad(G = t(G), max_iter = max_iter, rel_tol = rel_tol, 
                         support = support, verbose = verbose))
     }
     else {
@@ -52,17 +52,17 @@ logEL <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
                     omega = omega))
       }
       else{
-        return(.LogELCens(omegas = omega, epsilons = eps, deltas = delta, support = support))
+        return(.LogELCens(omegas = omega, deltas = delta, epsilons = eps, support = support))
       }
     }
     else if (sp > 0) {
       if (return_omega) {
-        return(list(log_el = .LogELSmooth(omegas = omega, epsilons = eps, deltas = delta, 
+        return(list(log_el = .LogELSmooth(omegas = omega, deltas = delta, epsilons = eps, 
                                           sp = sp, support = support),
                     omega = omega))
       }
       else{
-        return(.LogELSmooth(omegas = omega, epsilons = eps, deltas = delta, 
+        return(.LogELSmooth(omegas = omega, deltas = delta, epsilons = eps, 
                             sp = sp, support = support))
       }
     }
