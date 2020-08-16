@@ -61,7 +61,7 @@ omega_hat <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
                                  sp = sp,
                                  max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol,
                                  support = support, 
-                                 erbose = verbose))
+                                 verbose = verbose))
       }
     }
   }

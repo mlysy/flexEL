@@ -81,19 +81,236 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab14ce6bc98ddcd0ed0b769c5ce4db0d5"><td class="memItemLeft" align="right" valign="top"><a id="ab14ce6bc98ddcd0ed0b769c5ce4db0d5"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>QuantRegEvalG</b> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::VectorXd beta)</td></tr>
+<tr class="memitem:ab14ce6bc98ddcd0ed0b769c5ce4db0d5"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="quant__reg__model__exports_8cpp.html#ab14ce6bc98ddcd0ed0b769c5ce4db0d5">QuantRegEvalG</a> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::VectorXd beta)</td></tr>
+<tr class="memdesc:ab14ce6bc98ddcd0ed0b769c5ce4db0d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the G matrix for regular quantile regression model.  <a href="#ab14ce6bc98ddcd0ed0b769c5ce4db0d5">More...</a><br /></td></tr>
 <tr class="separator:ab14ce6bc98ddcd0ed0b769c5ce4db0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae09191eca8e520f8a8090231c037e16b"><td class="memItemLeft" align="right" valign="top"><a id="ae09191eca8e520f8a8090231c037e16b"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>QuantRegLSEvalG</b> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu)</td></tr>
+<tr class="memitem:ae09191eca8e520f8a8090231c037e16b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="quant__reg__model__exports_8cpp.html#ae09191eca8e520f8a8090231c037e16b">QuantRegLSEvalG</a> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu)</td></tr>
+<tr class="memdesc:ae09191eca8e520f8a8090231c037e16b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the G matrix for location-scale quantile regression model.  <a href="#ae09191eca8e520f8a8090231c037e16b">More...</a><br /></td></tr>
 <tr class="separator:ae09191eca8e520f8a8090231c037e16b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac46e19fac1dcbb48d3b8af9a6e198202"><td class="memItemLeft" align="right" valign="top"><a id="ac46e19fac1dcbb48d3b8af9a6e198202"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><b>QuantRegLSEvalGSmooth</b> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu, double s)</td></tr>
+<tr class="memitem:ac46e19fac1dcbb48d3b8af9a6e198202"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="quant__reg__model__exports_8cpp.html#ac46e19fac1dcbb48d3b8af9a6e198202">QuantRegLSEvalGSmooth</a> (Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu, double s)</td></tr>
+<tr class="memdesc:ac46e19fac1dcbb48d3b8af9a6e198202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the G matrix for location-scale quantile regression model with continuity correction.  <a href="#ac46e19fac1dcbb48d3b8af9a6e198202">More...</a><br /></td></tr>
 <tr class="separator:ac46e19fac1dcbb48d3b8af9a6e198202"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p class="">Export quant_reg_model functions to R. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="ab14ce6bc98ddcd0ed0b769c5ce4db0d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab14ce6bc98ddcd0ed0b769c5ce4db0d5">&#9670;&nbsp;</a></span>QuantRegEvalG()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd QuantRegEvalG </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>tauArr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>beta</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the G matrix for regular quantile regression model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tauArr</td><td>A numeric array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae09191eca8e520f8a8090231c037e16b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae09191eca8e520f8a8090231c037e16b">&#9670;&nbsp;</a></span>QuantRegLSEvalG()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd QuantRegLSEvalG </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>Z</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>tauArr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>gamma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sig2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>nu</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the G matrix for location-scale quantile regression model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tauArr</td><td>A numeric array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>Quantile parameters for each quantile level. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac46e19fac1dcbb48d3b8af9a6e198202"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac46e19fac1dcbb48d3b8af9a6e198202">&#9670;&nbsp;</a></span>QuantRegLSEvalGSmooth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd QuantRegLSEvalGSmooth </td>
+          <td>(</td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>X</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramname"><em>Z</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>tauArr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>gamma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>sig2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::VectorXd&#160;</td>
+          <td class="paramname"><em>nu</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the G matrix for location-scale quantile regression model with continuity correction. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Responses of length <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">X</td><td>Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Z</td><td>Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tauArr</td><td>A numeric array of quantile levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Coefficient vector of length <code>nBet</code> in linear location function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Coefficient vector of length <code>nGam</code> in exponential scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sig2</td><td>Scale parameter in scale function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>Quantile parameters for each quantile level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>Smoothing parameter (s &gt; 0). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
