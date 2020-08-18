@@ -17,4 +17,4 @@ devtools::install_github("mlysy/flexEL")
 
 ### Usage
 
-Please see package [vignette](https://htmlpreview.github.io/?https://github.com/mlysy/flexEL/doc/flexEL.html).
+Please see package [vignette](https://htmlpreview.github.io/?https://github.com/mlysy/flexEL/blob/master/doc/flexEL.html).
