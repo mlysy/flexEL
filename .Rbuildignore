@@ -1,8 +1,7 @@
-^man-roxygen$      # Templates used in roxygen documentation
-^examples$         # Examples used in roxygen documentation
-^inst/doxygen$     # Doxygen documentation
+^man-roxygen$
+^examples$
+^inst/doxygen/html$
 TODO.md
 summary.md
-try_grad.R
-^vignettes/Makefile$
-^inst/doxygen$
+^doc$
+^Meta$

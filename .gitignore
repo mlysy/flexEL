@@ -1,12 +1,17 @@
-# usual .gitignore for R packages
+# template .gitignore for R packages
+
+# R
+*.Rhistory
+*.Rapp.history
+vignettes/.build.timestamp
+doc
+Meta
+!doc
 
 # C++
 *.o
 *.so
 *.dll
-# R
-*.Rhistory
-*.Rapp.history
-inst/doc
+
 # osx
 *.DS_Store
