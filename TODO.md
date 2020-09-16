@@ -38,6 +38,10 @@ Shimeng: currently haven't changed all methods to snake case, was following Goog
 
 - [ ] Vignette.  I think the organization could be improved for readers who are not familiar with EL.  How about this:
 
+	- Use bold for all non-scalars :)
+	
+	- Please emphasize estimator vs estimand.  That is, the moment conditions are what define the parameter of interest.  The logEL is then a way of estimating this quantity.  Even just putting moment conditions on their own line would be great :)
+
 	- The EL Framework.  Rather than provide the estimator, please provide the model first.  The general model is covariate-free, i.e., you have iid observations $\bm{X}_1, \ldots, \bm{X}_n$, $\bm{X}_i \in \mathbb{R}^d$, such that $E[g_k(\bm{X}, \bm{\theta})] = 0$ for $k = 1,\ldots, m$.  The EL estimator of $\tth$ is then given by ...
 	
 	- Example 1: Mean Regression.  Now you can walk through the R code for this.
