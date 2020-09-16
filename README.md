@@ -17,4 +17,4 @@ devtools::install_github("mlysy/flexEL")
 
 ### Usage
 
-Please see package [vignette](https://htmlpreview.github.io/?https://github.com/mlysy/flexEL/blob/master/doc/flexEL.html).
+Please see package [vignette](https://htmlpreview.github.io/?https://github.com/mlysy/flexEL/blob/master/doc/flexEL.html).  Extended documentation for the C++ library is available [here](https://htmlpreview.github.io/?https://github.com/mlysy/flexEL/blob/master/inst/doxygen/html/index.html).
