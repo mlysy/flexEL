@@ -23,6 +23,18 @@ classoption: article
 header-includes:
   - \usepackage{caption}
   - \captionsetup[table]{skip=.1em}
+  - \usepackage{bm}
+  - \usepackage{amsmath}
+  - \newcommand{\yy}{\bm y}
+  - \newcommand{\tth}{\bm \theta}
+  - \newcommand{\lla}{\bm \lambda}
+  - \newcommand{\R}{\mathbb R}
+  - \renewcommand{\gg}{\bm g}
+  - \newcommand{\w}{\omega}
+  - \renewcommand{\l}{\lambda}
+  - \newcommand{\EL}{\textrm{EL}}
+  - \newcommand{\str}[1]{{#1}^{\star}}
+  - \DeclareMathOperator*{\argmax}{arg\,max}
 output: 
   bookdown::pdf_book:
     toc: false
@@ -100,6 +112,49 @@ This paper describes a framework we designed for EL researchers to develop fast 
 # Methodology
 
 ## Basics
+
+Let $\yy_1,\cdots,\yy_n$ where $\yy_i\in\R^{d+1}$ be iid observations from an unknown distribution $F_0(\yy)$, about which a parameter of interest $\tth$ is defined as satisfying an $m$-dimensional moment condition:
+\begin{equation} \label{eq:momcond}
+  \E\bigl[\gg(\yy;\tth)\bigr] = 0,
+\end{equation}
+where $\gg(\yy, \tth) = \bigl( g_1(\yy, \tth), \ldots, g_m(\yy, \tth) \bigr)$.
+
+The empirical likelihood $\EL(\tth)$ is defined as the profile likelihood over the distribution function of $\yy$:
+\begin{equation} \label{eq:elF}
+  \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\yy_i),
+\end{equation}
+where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
+
+It was shown @owen1988 that for any $\tth$, the maximum of \eqref{eq:elF} must be achieved by a PMF putting all mass on the support of the observed data $\yy_1, \cdots, \yy_n$, such that the infinite-dimensional profile likelihood \eqref{eq:elF} reduces to a finite-dimensional one:
+\begin{equation}
+  \EL(\tth) = \prod_{i=1}^n \hat{\w_i}(\tth),
+\end{equation}
+where the $n$-dimensional vector of probability weights $\hat{\w}(\tth)$ associated with the observations is the solution of an inner optimization problem which will be referred to as \textbf{EL inner optimization}
+\begin{equation} \label{eq:noncensopt}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^n \log(\w_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot \gg(\yy_i;\tth) = 0 \\
+  & \sum_{i=1}^n \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1,\cdots,n,
+\end{split}
+\end{equation}
+
+The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found by solving its dual problem derived through the Lagrangian function, as described by @owen1990.
+
+Specifically, provided that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$, a unique optimal weight vector exist and can be shown to be
+\begin{equation}
+  \hat{\w_i}(\tth) = \frac{1}{n\cdot[1 - \hat \lla'(\tth) \gg(\yy_i;\tth)]},
+\end{equation}
+where the vector $\hat{\lla}(\tth)$ solves the unconstrained optimization problem
+\begin{equation}
+\hat{\l}(\tth) = \argmax_{\lla} \sum_{i=1}^n \str\log\Big(1 - \lla' \gg(\yy_i;\tth)\Big),
+\end{equation}
+and where
+\begin{equation}
+\str\log(x) = \begin{cases} \log(x) & x \ge \tfrac 1 n \\ -\tfrac 1 2 n^2 x^2 + 2 n x - \tfrac 3 2 - \log(n) & x < \tfrac 1 n \end{cases}.
+\end{equation}
+
+@qin-lawless1994 has shown that $\lla(\tth)$ is a continuous differentiable function of $\tth$ provided that convex hull condition is satisfied with $\tth$ and $\sum_{i=1}^n \gg(\yy_i;\tth)g'(\yy_i;\tth)$ is positive definite. However, the support of $\tth$ is not necessarily a convex set, as demonstrated by @chaudhuri-et-al2017.
 
 - Dual problem.
 
