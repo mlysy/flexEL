@@ -35,6 +35,7 @@ output:
     # latex_engine: xelatex
   html_document:
     keep_md: true
+bibliography: references.bib  
 ---
 
 ```{r setup, include = FALSE}
@@ -67,6 +68,12 @@ embed_file <- function(file, lang) {
 ```
 
 # Introduction
+
+Empirical likelhood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric familiy of the data, the estimator is in some sense as efficient as a fully parametric model [@qin-lawless1994].
+
+The EL approach can be traced back to @thomas-grunkemeier1975. Its current framework was mainly developed by @owen1988, @owen1990, and @owen1991. Over the years, many researchers have extended or generalized the method, but there has not been a flexible and efficient software available to the public. The existing softwares are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g. \pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
+
+This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the inner optimization algorithm. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
 
 - Motivation: What is EL?  
 
