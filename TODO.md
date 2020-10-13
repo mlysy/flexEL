@@ -67,3 +67,64 @@ Shimeng: currently haven't changed all methods to snake case, was following Goog
 	- Future Work.  Excellent.
 	
 Shimeng: I couldn't get the c++ code work in the rmarkdown, need to investigate.
+
+## C++ API
+
+### General EL
+
+```cpp
+// instantiate
+flexEL::GenEL el(n_obs, n_eqs);
+
+// set options.  all optional since constructor provides defaults.
+el.set_max_iter(100);
+el.set_rel_tol(1e-7);
+el.set_supp_corr(true, a); // and version without a
+el.set_lambda0(lambda0);
+
+// high-level interface
+loglik = el.logel(G);
+loglik = el.logel_grad(dldG, G); // return gradient as well
+
+// all intermediate steps
+el.lambda_nr(lambda, G); solve dual problem
+el.omega_hat(omega, G, lambda);
+loglik = el.logel_omega(omega); // could overload logel with Array input,
+                                // but seems risky if user accidentally
+						   	    // creates (1 x n_obs) Array G...
+el.logel_grad(dldG, G, omega, lambda); // don't compute logel as well.
+								
+// diagnostics: use these outputs to determine whether NR converged
+el.get_diag(nr_iter, nr_err); // actual number of steps and 
+                              // largest relative error 
+```
+
+### Censored Regression EL
+
+```cpp
+// instantiate
+flexEL::CensEL cel(n_obs, n_eqs);
+
+// mostly same options except:
+cel.set_max_iter_nr(100); // NR iterations (same as el.set_max_iter)
+cel.set_max_iter_em(10); // EM iterations
+cel.set_abs_tol(1e-5); // EM absolute tolerance
+cel.set_smooth_weights(true, a); // smooth weights to get a continuous logel
+
+// just logel
+loglik = cel.logel(G, epsilon, delta);
+
+// intermediate steps
+cel.lambda_nr(lambda, G, weights); // M-step
+cel.expected_weights(weights, omega, delta); // E-step
+cel.expected_weights(weights, omega, delta, epsilon); // recalculate ranking
+cel.omega_hat(omega, G, epsilon, delta) // EM algorithm
+loglik = cel.logel_omega(omega, epsilon, delta);
+
+// diagnostics
+cel.get_diag(em_iter, em_err, nr_iter, nr_err);
+```
+
+## R API
+
+TBD

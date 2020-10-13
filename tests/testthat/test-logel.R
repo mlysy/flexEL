@@ -24,6 +24,8 @@ test_that("logel_cpp == logel_R no censoring, no support correction", {
     logopt_cpp <- flexEL::logEL(G = G, support = support,
                                 max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
                                 return_omega = FALSE, verbose = FALSE)
+    ## omegahat_cpp <- flexEL:::omega_hat(G = G, support = support,
+    ##                                    max_iter = max_iter, rel_tol = rel_tol)
     omegahat_R <- omega_hat_R(G = G, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3, verbose = FALSE)
     logopt_R <- logEL_R(omegahat_R, adjust = support)
@@ -42,9 +44,11 @@ test_that("logel_cpp == logel_R no censoring, with support correction", {
     abs_tol <- runif(1, 1e-5, 1e-3)
     G <- matrix(rnorm(n*p),n,p) # random G here
     support <- TRUE
-    logopt_cpp <- flexEL::logEL(G = G, support = support, 
-                                max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, 
+    logopt_cpp <- flexEL::logEL(G = G, support = support,
+                                max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol,
                                 return_omega = FALSE, verbose = FALSE)
+    ## omegahat_cpp <- flexEL:::omega_hat(G = G, support = support,
+    ##                                    max_iter = max_iter, rel_tol = rel_tol)
     omegahat_R <- omega_hat_R(G = adjG_R(G), adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
     logopt_R <- logEL_R(omegahat_R, adjust = support)
@@ -66,7 +70,6 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
     dldG_cpp <- flexEL::logEL(G = G, support = support,
                                 max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
                                 return_omega = FALSE, return_dldG = TRUE, verbose = FALSE)$dldG
-    
     dldG_nd <- matrix(tryCatch(numDeriv::grad(logEL_G_R, G, method.args = list(eps = rel_tol)),
                         error = function(e) {
                           rep(NA, nrow(G) * ncol(G))
@@ -89,7 +92,6 @@ test_that("dldG_cpp == dldG_R no censoring, with support correction", {
     dldG_cpp <- flexEL::logEL(G = G, support = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = 1e-3,
                               return_omega = FALSE, return_dldG = TRUE, verbose = FALSE)$dldG
-    
     dldG_nd <- matrix(tryCatch(numDeriv::grad(logEL_adjG_R, G, method.args = list(eps = rel_tol)),
                                error = function(e) {
                                  rep(NA, nrow(G) * ncol(G))
@@ -115,7 +117,7 @@ test_that("logel_cpp == logel_R right-censored, no support correction", {
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
     support <- FALSE
-    logopt_cpp <- flexEL::logEL(G = G, delta = deltas, eps = epsilons, support = support, 
+    logopt_cpp <- flexEL::logEL(G = G, delta = deltas, eps = epsilons, support = support,
                                 max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
     omegahat_R <- omega_hat_R(G = G, deltas = deltas, epsilons = epsilons, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
@@ -142,7 +144,7 @@ test_that("logel_cpp == logel_R right-censored, with support correction", {
     deltas[censinds] <- 0
     epsilons <- rnorm(n)
     support <- TRUE
-    logopt_cpp <- flexEL::logEL(G = G, delta = deltas, eps = epsilons, support = support, 
+    logopt_cpp <- flexEL::logEL(G = G, delta = deltas, eps = epsilons, support = support,
                                 max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)
     omegahat_R <- omega_hat_R(G = adjG_R(G), deltas = deltas, epsilons = epsilons, adjust = support,
                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol, verbose = FALSE)$omegas
@@ -160,7 +162,7 @@ test_that("logel_cpp == logel_R right-censored, with support correction", {
 # Censored case with continuity correction:
 
 test_that("logEL_smooth_R == logEL_smooth_cpp, no support correction", {
-  
+
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
@@ -192,7 +194,7 @@ test_that("logEL_smooth_R == logEL_smooth_cpp, no support correction", {
 
 
 test_that("logEL_smooth_R == logEL_smooth_cpp, with support correction", {
-  
+
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)

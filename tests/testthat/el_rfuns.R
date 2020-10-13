@@ -1,11 +1,12 @@
-# ---- helper functions ---- 
+# ---- helper functions ----
 
 # maximum relative error
 max_rel_err <- function(lambdaNew, lambdaOld) {
   # Note: for stability (using the same tolerance as in C++ implementation)
-  if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
-  relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
-  return(max(relErr))
+  ## if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
+  ## relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
+  ## return(max(relErr))
+  max(abs(lambdaNew - lambdaOld)/(.1 + abs(lambdaNew + lambdaOld)))
 }
 
 # adjusted EM by chen-et-al2008
@@ -54,7 +55,7 @@ Qfun <- function(lambda, G) {
 
 # R implementation of lambdaNR
 # G is nObs x nEqs
-lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE, 
+lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
                        lambdaOld = NULL) {
   G <- t(G)
   nObs <- ncol(G)
@@ -152,7 +153,7 @@ QfunCens <- function(lambda, G, weights) {
 }
 
 # R implementation of lambdaNRC
-# G is nObs x nEqs 
+# G is nObs x nEqs
 # lambdaOld passed in is for the EM algorithm `_R` to work properly
 lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
@@ -180,7 +181,7 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     }
     weights_sav <- weights
     weights_sav[weights_sav < rel_tol*nObs] <- 0
-    rho[is.infinite(rho) & !weights_sav] <- 0 
+    rho[is.infinite(rho) & !weights_sav] <- 0
     # Q1 <- G %*% (rho * weights)
     Q1 <- G %*% (rho * weights_sav)
     lambdaNew <- lambdaOld - solve(Q2,Q1)
@@ -213,7 +214,7 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
   return(psos)
 }
 
-# calculate the weights for the weighted (censored) EL problem 
+# calculate the weights for the weighted (censored) EL problem
 evalWeights_R <- function(deltas, omegas, epsilons) {
   nObs <- length(omegas)
   epsOrd <- order(epsilons)
@@ -229,15 +230,15 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
       if (kk == ii) break
     }
   }
-  # the weights have the order as the original sample 
+  # the weights have the order as the original sample
   weights <- deltas + psots
   return(weights)
 }
 
-# G is nObs x nEqs 
+# G is nObs x nEqs
 # TODO: rel_tol should be called abs_tol now -- using absolute error for diff in logEL
 # Note: if adjust G (using support adjustment), pass the adjusted G to this function and set adjust to TRUE
-omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
+omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
                            max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
   n <- nrow(G)
@@ -245,7 +246,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   err <- Inf
   # lambdaNew <- rep(0,m)
   nIter <- 0
-  # initialize omegas with uncensored solution 
+  # initialize omegas with uncensored solution
   omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
@@ -259,7 +260,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas,epsilons,deltas)
   # message("logelOld = ", logelOld)
-  
+
   # for debug
   if (dbg) {
     omegamMat <- matrix(NA,nrow=n,ncol=max_iter+1)
@@ -267,7 +268,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     logels <- c(logelOld)
     artome <- c()
   }
-  
+
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
@@ -297,14 +298,14 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     # err <- max_rel_err(omegas,omegasOld)
     logel <- logEL_R(omegas,epsilons,deltas)
     # message("logel = ", logel)
-    
+
     # for debug
     if (dbg) {
       omegamMat[,ii+1] <- omegas
       logels <- c(logels,logel)
       artome <- c(artome,weights[n])
     }
-    
+
     # err <- max_rel_err(logel,logelOld)
     err <- abs(logel-logelOld)
     # if (verbose && nIter %% 20 == 0) {
@@ -316,7 +317,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged
   if (notconv) {
     # omegas = rep(NaN,n)
     if (dbg) {
@@ -326,7 +327,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
       return(list(conv=FALSE,omegas = rep(NaN,n)))
     }
   }
-  
+
   # for debug
   if (dbg) {
     return(list(conv=TRUE,
@@ -374,7 +375,7 @@ logEL_smooth_R <- function(omegas, epsilons, deltas, s = 10, adjust=FALSE) {
   n <- length(omegas)
   psos <- rep(0,n)
   for (ii in 1:n) {
-    psos[ii] <- evalPsos_smooth_R(ii,omegas,epsilons,s,support = adjust) 
+    psos[ii] <- evalPsos_smooth_R(ii,omegas,epsilons,s,support = adjust)
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
@@ -407,14 +408,14 @@ evalWeights_smooth_R <- function(deltas, omegas, epsilons, s=10, support = FALSE
 }
 
 # using smoothed objective function in EM
-omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE, 
-                                  max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, 
+omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
+                                  max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3,
                                   verbose=FALSE, dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
   nIter <- 0
-  # initialize omegas with uncensored solution 
+  # initialize omegas with uncensored solution
   omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
@@ -426,7 +427,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     deltas <- c(deltas,0)
   }
   logelOld <- logEL_smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
-  
+
   # for debug
   if (dbg) {
     omegamMat <- matrix(NA,nrow=n,ncol=max_iter+1)
@@ -434,7 +435,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     logels <- c(logelOld)
     artome <- c()
   }
-  
+
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
@@ -461,7 +462,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     omegas <- abs(omegas)
     omegas <- omegas/sum(omegas)
     logel <- logEL_smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
-    
+
     # for debug
     if (dbg) {
       omegamMat[,ii+1] <- omegas
@@ -477,7 +478,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged
   if (notconv) {
     # omegas = rep(NaN,n)
     if (dbg) {
@@ -487,7 +488,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
       return(list(conv=FALSE,omegas = rep(NaN,n)))
     }
   }
-  
+
   # for debug
   if (dbg) {
     return(list(conv=TRUE,
@@ -512,7 +513,7 @@ omega_hat_R <- function(G, deltas, epsilons, adjust = FALSE,
     omegas <- omega_hat_NC_R(G, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   else {
-    omegas <- omega_hat_EM_R(G, deltas, epsilons, adjust, 
+    omegas <- omega_hat_EM_R(G, deltas, epsilons, adjust,
                              max_iter=max_iter, rel_tol=rel_tol, abs_tol = abs_tol, verbose=verbose)
   }
   return(c(omegas))
@@ -534,7 +535,7 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
     n <- length(omegas)
     psos <- rep(0,n)
     for (ii in 1:n) {
-      psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+      psos[ii] <- evalPsos_R(ii, epsOrd, omegas)
     }
     # numerical stability: watch out for extremely small negative values
     omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10

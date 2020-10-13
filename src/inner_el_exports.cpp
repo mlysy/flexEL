@@ -16,7 +16,7 @@ using namespace Rcpp;
 /**
  * @brief Calculate the solution of the dual problem of maximum log EL problem.
  * 
- * @param[in] G          A matrix of dimension <code>n_eqs x n_obs</code>.
+ * @param[in] G          A matrix of dimension `n_eqs x n_obs`.
  * @param[in] max_iter   A positive integer controlling the maximum number of iterations.
  * @param[in] rel_tol    A small positive number controlling accuracy at convergence.
  * @param[in] support    A boolean indicating whether to conduct support correction or not.
@@ -27,16 +27,22 @@ using namespace Rcpp;
 Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose) {
   int n_obs = G.cols();
   int n_eqs = G.rows();
-  flexEL::InnerEL IL(n_obs,n_eqs);
-  IL.set_opts(max_iter,rel_tol,support);
-  IL.set_G(G); // assign the given G
+  flexEL::GenEL IL(n_obs,n_eqs);
+  IL.set_max_iter(max_iter);
+  IL.set_rel_tol(rel_tol);
+  IL.set_supp_adj(support);
+  // IL.set_opts(max_iter,rel_tol,support);
+  // IL.set_G(G); // assign the given G
   
   // initialize variables for output here 
   int n_iter;
   double max_err;
   bool not_conv;
-  IL.LambdaNR(n_iter, max_err);
-  VectorXd lambda = IL.get_lambda(); // output (could be not converged)
+  // IL.LambdaNR(n_iter, max_err);
+  // VectorXd lambda = IL.get_lambda(); // output (could be not converged)
+  VectorXd lambda(n_eqs);
+  IL.lambda_nr(lambda, G);
+  IL.get_diag(n_iter, max_err);
   // check convergence
   not_conv = (n_iter == max_iter) && (max_err > rel_tol);
   if(verbose) {
@@ -67,15 +73,22 @@ Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   
   int n_obs = G.cols();
   int n_eqs = G.rows();
-  flexEL::InnerEL IL(n_obs,n_eqs);
-  IL.set_opts(max_iter,rel_tol,support);
-  IL.set_G(G); // assign the given G
+  flexEL::GenEL IL(n_obs,n_eqs);
+  // IL.set_opts(max_iter,rel_tol,support);
+  // IL.set_G(G); // assign the given G
+  IL.set_max_iter(max_iter);
+  IL.set_rel_tol(rel_tol);
+  IL.set_supp_adj(support);
   
   // initialize variables for output here 
   int n_iter;
   double max_err;
   bool not_conv;
-  IL.LambdaNR(n_iter, max_err);
+  // IL.LambdaNR(n_iter, max_err);
+  VectorXd lambda(n_eqs);
+  VectorXd omega(n_obs + support);
+  IL.lambda_nr(lambda, G);
+  IL.get_diag(n_iter, max_err);
   // check convergence
   not_conv = (n_iter == max_iter) && (max_err > rel_tol);
   if(verbose) {
@@ -88,9 +101,10 @@ Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   // IL.set_opts(support);
   // IL.set_G(G); // assign the given G
   // IL.set_lambda(lambda); 
-  IL.EvalOmegas(); // calculate omegas
-  VectorXd omegasnew = IL.get_omegas(); // get omegas
-  return omegasnew;
+  // IL.EvalOmegas(); // calculate omegas
+  // VectorXd omegasnew = IL.get_omegas(); // get omegas
+  IL.omega_hat(omega, G, lambda);
+  return omega;
 }
 
 /**
@@ -102,10 +116,11 @@ Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
 // [[Rcpp::export(".LogEL")]]
 double LogEL(Eigen::VectorXd omegas, bool support) {
   int n_obs = omegas.size() - support;
-  flexEL::InnerEL IL(n_obs,1);
-  IL.set_opts(support);
-  IL.set_omegas(omegas); 
-  double log_el = IL.LogEL();
+  flexEL::GenEL IL(n_obs,1);
+  // IL.set_opts(support);
+  // IL.set_omegas(omegas); 
+  // double log_el = IL.LogEL();
+  double log_el = IL.logel_omega(omegas);
   return log_el; 
 }
 
@@ -124,17 +139,25 @@ List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = f
   
   int n_obs = G.cols();
   int n_eqs = G.rows();
-  flexEL::InnerEL IL(n_obs,n_eqs);
-  IL.set_opts(max_iter, rel_tol, support);
-  IL.set_G(G); // assign the given G
+  // flexEL::InnerEL IL(n_obs,n_eqs);
+  // IL.set_opts(max_iter, rel_tol, support);
+  // IL.set_G(G); // assign the given G
+  flexEL::GenEL IL(n_obs,n_eqs);
+  IL.set_max_iter(max_iter);
+  IL.set_rel_tol(rel_tol);
+  IL.set_supp_adj(support);
 
   int n_iter;
   double max_err;
   // bool not_conv;
   double logel;
-  MatrixXd dldG;
+  VectorXd lambda(n_eqs);
+  VectorXd omega(n_obs + support);
+  MatrixXd dldG(n_eqs, n_obs);
   
-  IL.LambdaNR(n_iter, max_err);
+  // IL.LambdaNR(n_iter, max_err);
+  IL.lambda_nr(lambda, G);
+  IL.get_diag(n_iter, max_err);
   if(verbose) {
     Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
   }
@@ -143,11 +166,14 @@ List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = f
   //   
   // }
   
-  IL.EvalOmegas();
-  IL.LogELGrad(logel, dldG);
+  // IL.EvalOmegas();
+  // IL.LogELGrad(logel, dldG);
+  IL.omega_hat(omega, G, lambda);
+  logel = IL.logel_omega(omega);
+  IL.logel_grad(dldG, G, omega, lambda);
   
   return List::create(Named("logel") = logel,
                       Named("dldG") = dldG.transpose(),
-                      Named("omega") = IL.get_omegas());
+                      Named("omega") = omega);
 }
 
