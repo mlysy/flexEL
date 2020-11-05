@@ -40,9 +40,17 @@ namespace flexEL {
     // dim of G matrix
     int n_obs_; // number of columns
     int n_eqs_; // number of rows    
-    // constants for logstar
-    double trunc_, aa_, bb_, cc_; 
-    // internal variables for lambda_nr
+    // for support modification
+    int n_obs1_; // n_obs1_ = n_obs_+1: for memory allocation
+    int n_obs2_; // n_obs2_ = n_obs_+support: used n_obs_ in calculation
+    // logstar parameters
+    VectorXd tstar_;
+    VectorXd astar_;
+    VectorXd bstar_;
+    // VectorXd cstar_;
+    VectorXd norm_weights_;
+    // double trunc_, aa_, bb_, cc_; 
+    // internal variables for Newton-Raphson 
     MatrixXd Gaug_; // augmented G matrix with space for support adjustment 
     VectorXd lambda_new_; // new lambda in Newton-Raphson iterations
     MatrixXd GGt_; //  G times G transpose
@@ -66,22 +74,26 @@ namespace flexEL {
     bool supp_adj_; // whether do support adjustment or not
     double supp_a_; // tuning parameter for support currection
     VectorXd lambda0_; // initial lambda in Newton-Raphson iterations
-
-    // for support modification
-    int n_obs1_; // n_obs1_ = n_obs_+1: for memory allocation
-    int n_obs2_; // n_obs2_ = n_obs_+support: used n_obs_ in calculation
         
-    // log_star and its derivatives for the EL dual problem
-    double log_star(double x) {return ::flexEL::log_star(x, trunc_, aa_, bb_, cc_);}
-    double log_star1(double x) {return ::flexEL::log_star1(x, trunc_, aa_, bb_);}
-    double log_star2(double x) {return ::flexEL::log_star2(x, trunc_, aa_);}
+    // // log_star and its derivatives for the EL dual problem
+    // double log_star(double x) {return ::flexEL::log_star(x, trunc_, aa_, bb_, cc_);}
+    // double log_star1(double x) {return ::flexEL::log_star1(x, trunc_, aa_, bb_);}
+    // double log_star2(double x) {return ::flexEL::log_star2(x, trunc_, aa_);}
 
+    // functions to perform support correction.
+    Ref<const MatrixXd> supp_G(const Ref<const MatrixXd>& G);
+    Ref<const VectorXd> supp_norm_weights(const Ref<const VectorXd>& norm_weights);
     // implementation versions of functions to avoid defining pointer to matrix
     void omega_hat_impl(Ref<VectorXd> omega,
-			const Ref<const MatrixXd>& Geff,
-			const Ref<const VectorXd>& lambda);
+    			const Ref<const VectorXd>& lambda,
+    			const Ref<const MatrixXd>& G,
+			const Ref<const VectorXd>& norm_weights);
     void lambda_nr_impl(Ref<VectorXd> lambda,
-			const Ref<const MatrixXd>& Geff);
+    			const Ref<const MatrixXd>& G,
+    			const Ref<const VectorXd>& norm_weights);
+    double logel_impl(const Ref<const MatrixXd>& G,
+		      const Ref<const VectorXd>& norm_weights,
+		      double sum_weights);
       
   public:
 
@@ -101,19 +113,31 @@ namespace flexEL {
     void get_diag(int& nr_iter, double& nr_err);
 
     /// Solve the dual problem via Newton-Raphson algorithm.
-    void lambda_nr(Ref<VectorXd> lambda, const Ref<const MatrixXd>& G);
+    void lambda_nr(Ref<VectorXd> lambda, const Ref<const MatrixXd>& G,
+		   const Ref<const VectorXd>& norm_weights);
     /// Calculate the profile probability weights.
-    void omega_hat(Ref<VectorXd> omega, const Ref<const MatrixXd>& G,
-		   const Ref<const VectorXd>& lambda);
+    void omega_hat(Ref<VectorXd> omega,
+		   const Ref<const VectorXd>& lambda,
+		   const Ref<const MatrixXd>& G,
+		   const Ref<const VectorXd>& norm_weights);
     /// Calculate the empirical loglikelihood given the probability weights.
-    double logel_omega(const Ref<const VectorXd>& omega);
+    double logel_omega(const Ref<const VectorXd>& omega,
+		       const Ref<const VectorXd>& norm_weights,
+		       double sum_weights);
     /// Calculate the empirical loglikelihood.
     double logel(const Ref<const MatrixXd>& G);
+    double logel(const Ref<const MatrixXd>& G,
+		 const Ref<const VectorXd>& weights);
     /// Calculate the gradient of the empirical loglikelihood.
-    void logel_grad(Ref<MatrixXd> dldG, const Ref<const MatrixXd>& G,
-		    const Ref<const VectorXd>& omega,
-		    const Ref<const VectorXd>& lambda);
     double logel_grad(Ref<MatrixXd> dldG, const Ref<const MatrixXd>& G);
+    double logel_grad(Ref<MatrixXd> dldG, const Ref<const MatrixXd>& G,
+		      const Ref<const VectorXd>& weights);
+    void logel_grad(Ref<MatrixXd> dldG,
+		    const Ref<const VectorXd>& omega,
+		    const Ref<const VectorXd>& lambda,
+		    // const Ref<const MatrixXd>& G,
+		    // const Ref<const VectorXd>& norm_weights,
+		    double sum_weights);
   };
 
 
@@ -123,15 +147,20 @@ namespace flexEL {
     // assign internal values
     n_obs_ = n_obs;
     n_eqs_ = n_eqs;
-    // initialization of log_star constants
-    trunc_ = 1.0 / n_obs_;
-    aa_ = -.5 * n_obs_*n_obs_;
-    bb_ = 2.0 * n_obs_;
-    cc_ = -1.5 - log(n_obs_);
     n_obs1_ = n_obs_+1; // space for augmented G
     // support adjustment
     supp_adj_ = false;
     n_obs2_ = n_obs_+supp_adj_;
+    // initialization of log_star constants
+    // trunc_ = 1.0 / n_obs_;
+    // aa_ = -.5 * n_obs_*n_obs_;
+    // bb_ = 2.0 * n_obs_;
+    // cc_ = -1.5 - log(n_obs_);
+    tstar_ = VectorXd::Zero(n_obs1_);
+    astar_ = VectorXd::Zero(n_obs1_);
+    bstar_ = VectorXd::Zero(n_obs1_);
+    // cstar_ = VectorXd::Zero(n_obs1_);
+    norm_weights_ = VectorXd::Zero(n_obs1_);
     // memory allocation
     omega_ = VectorXd::Constant(n_obs1_, 1.0/(double)n_obs1_); // Initialize to 1/n_obs_
     Gaug_ = MatrixXd::Zero(n_eqs_,n_obs1_); // augmented G
@@ -187,6 +216,8 @@ namespace flexEL {
     return;
   }
 
+  /// @param[in] weights Vector of length `n_obs` or `n_obs + supp_adj`.  In case of the former when `supp_adj = false`
+
   /// @param[out] nr_iter Number of Newton-Raphson iterations.
   /// @param[out] nr_err Maximum relative difference between elements of `lambda` in the last two Newton-Raphson steps.
   inline void GenEL::get_diag(int& nr_iter, double& nr_err) {
@@ -195,27 +226,61 @@ namespace flexEL {
     return;
   }
 
+  inline Ref<const MatrixXd> GenEL::supp_G(const Ref<const MatrixXd>& G) {
+    if(supp_adj_ && G.cols() == n_obs_) {
+      Gaug_.leftCols(n_obs_) = G;
+      adj_G(Gaug_, supp_a_);
+      return Ref<const MatrixXd>(Gaug_);
+    } else {
+      return Ref<const MatrixXd>(G);
+    }
+  }
+
+    inline Ref<const VectorXd> GenEL::supp_norm_weights(const Ref<const VectorXd>& norm_weights) {
+    if(supp_adj_ && norm_weights.size() == n_obs_) {
+	norm_weights_.head(n_obs_) = n_obs_/(n_obs_+1.0) * norm_weights;
+	norm_weights_(n_obs_) = 1.0/(n_obs_+1.0);
+      return Ref<const VectorXd>(norm_weights_);
+    } else {
+      return Ref<const VectorXd>(norm_weights);
+    }
+  }
+
+
   inline void GenEL::lambda_nr_impl(Ref<VectorXd> lambda,
-				    const Ref<const MatrixXd>& Geff) {
-  
+  				    const Ref<const MatrixXd>& G,
+				    const Ref<const VectorXd>& norm_weights) {
+    int n_obs = G.cols();
     lambda = lambda0_; // set to initial value
+    // logstar constants
+    // assume the weights are normalized to sum to one
+    bstar_ = norm_weights.array().inverse();
+    astar_ = -.5 * bstar_.array().square();
+    bstar_ *= 2.0;
     // newton-raphson loop
     int ii, jj;
+    // for(ii=0; ii<n_obs2_; ii++) {
+    //   Rprintf("norm_weights(%i) = %f, astar(%i) = %f, bstar(%i) = %f\n",
+    // 	      ii, norm_weights(ii), ii, astar_(ii), ii, bstar_(ii)); 
+    // }
     for(ii=0; ii<max_iter_; ii++) {
       // Q1 and Q2
-      Glambda_.noalias() = lambda.transpose() * Geff;
+      Glambda_.noalias() = lambda.transpose() * G;
       Glambda_= 1.0 - Glambda_.array();
       // std::cout << "Glambda = \n" << Glambda_ << std::endl;
       Q2_.fill(0.0);
-      for(jj=0; jj<n_obs2_; jj++) {
-	rho_(jj) = log_star1(Glambda_(jj));
-	GGt_.noalias() = Geff.col(jj) * Geff.col(jj).transpose();
-	Q2_ -= log_star2(Glambda_(jj)) * GGt_;
+      for(jj=0; jj<n_obs; jj++) {
+	rho_(jj) = log_star1(Glambda_(jj),
+			     norm_weights(jj), astar_(jj), bstar_(jj));
+	GGt_.noalias() = G.col(jj) * G.col(jj).transpose();
+	Q2_ -= norm_weights(jj) *
+	  log_star2(Glambda_(jj), norm_weights(jj), astar_(jj)) * GGt_;
 	// Q2_ += log_star2(Glambda_(jj)) * GGt_.block(0,jj*n_eqs_,n_eqs_,n_eqs_);
       }
       // std::cout << "Q2 = \n" << Q2_ << std::endl;
       // update lambda
-      Q1_.noalias() = Geff * rho_.head(n_obs2_);
+      rho_.array() *= norm_weights.array();
+      Q1_.noalias() = G * rho_;
       // std::cout << "Q1 = \n" << Q1_ << std::endl;      
       Q2llt_.compute(Q2_);
       Q2llt_.solveInPlace(Q1_);
@@ -231,88 +296,191 @@ namespace flexEL {
     }
     nr_iter_ = ii;
     return;
+    // // uniform weights
+    // lambda = lambda0_; // set to initial value
+    // // newton-raphson loop
+    // int ii, jj;
+    // for(ii=0; ii<max_iter_; ii++) {
+    //   // Q1 and Q2
+    //   Glambda_.noalias() = lambda.transpose() * Geff;
+    //   Glambda_= 1.0 - Glambda_.array();
+    //   // std::cout << "Glambda = \n" << Glambda_ << std::endl;
+    //   Q2_.fill(0.0);
+    //   for(jj=0; jj<n_obs2_; jj++) {
+    // 	rho_(jj) = log_star1(Glambda_(jj));
+    // 	GGt_.noalias() = Geff.col(jj) * Geff.col(jj).transpose();
+    // 	Q2_ -= log_star2(Glambda_(jj)) * GGt_;
+    // 	// Q2_ += log_star2(Glambda_(jj)) * GGt_.block(0,jj*n_eqs_,n_eqs_,n_eqs_);
+    //   }
+    //   // std::cout << "Q2 = \n" << Q2_ << std::endl;
+    //   // update lambda
+    //   Q1_.noalias() = Geff * rho_.head(n_obs2_);
+    //   // std::cout << "Q1 = \n" << Q1_ << std::endl;      
+    //   Q2llt_.compute(Q2_);
+    //   Q2llt_.solveInPlace(Q1_);
+    //   // std::cout << "solve(Q2, Q1) = \n" << Q1_ << std::endl;
+    //   lambda_new_ = lambda - Q1_;
+    //   // std::cout << "lambda_new = \n" << lambda_new_ << std::endl;
+    //   // lambda_new_.noalias() = lambda_old_ - Q2llt_.solve(Q1_);
+    //   nr_err_ = max_rel_err(lambda, lambda_new_);
+    //   lambda = lambda_new_; // complete cycle
+    //   if (nr_err_ < rel_tol_) {
+    // 	break;
+    //   }
+    // }
+    // nr_iter_ = ii;
+    // return;
   }
-
 
   /// @param[out] lambda Vector of length `n_eqs` containing the candidate solution to the dual optimization problem.
-  /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
+  /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+  /// @param[in] norm_weights Vector of weights of length `n_obs` or `n_obs + 1` following same logic as above.  Normalized to sum to one.
   ///
-  /// @note The internal version of this fnction `lambda_nr_impl` uses the "effective" `G` which has `n_obs + supp_adj` columns.  This is a workaround to assigning a pointer to an Eigen matrix which is specified by a conditional (`supp_adj`).
+  /// @note Due to the difficulty of creating Eigen "pointers", current hack is to explicitly tell lambda_nr_impl whether to use external or internal `G` and `norm_weights`.
   inline void GenEL::lambda_nr(Ref<VectorXd> lambda,
-			       const Ref<const MatrixXd>& G) {
-    if(supp_adj_) {
-      Gaug_.leftCols(n_obs_) = G;
-      adj_G(Gaug_, supp_a_);
-      lambda_nr_impl(lambda, Gaug_);
-    } else {
-      lambda_nr_impl(lambda, G);
-    }
+			       const Ref<const MatrixXd>& G,
+			       const Ref<const VectorXd>& norm_weights) {  
+    // if(supp_adj_) {
+    //   bool supp_G = G.cols() == n_obs_;
+    //   bool supp_w = norm_weights.size() == n_obs_;
+    //   if(supp_G) {
+    // 	Gaug_.leftCols(n_obs_) = G;
+    // 	adj_G(Gaug_, supp_a_);
+    //   }
+    //   if(supp_w) {
+    // 	norm_weights_.head(n_obs_) = n_obs_/(n_obs_+1.0) * norm_weights;
+    // 	norm_weights_(n_obs_) = 1.0/(n_obs_+1.0);
+    //   }
+    //   if(supp_G) {
+    // 	if(supp_w) {
+    // 	  lambda_nr_impl(lambda, Gaug_, norm_weights_);
+    // 	} else {
+    // 	  lambda_nr_impl(lambda, Gaug_, norm_weights);
+    // 	}
+    //   } else {
+    // 	if(supp_w) {
+    // 	  lambda_nr_impl(lambda, G, norm_weights_);
+    // 	} else {
+    // 	  lambda_nr_impl(lambda, G, norm_weights);
+    // 	}
+    //   }
+    // } else {
+    //   lambda_nr_impl(lambda, G, norm_weights);
+    // }
+    Ref<const MatrixXd> G_eff = supp_G(G);
+    Ref<const VectorXd> norm_weights_eff = supp_norm_weights(norm_weights);
+    // std::cout << "G_eff = \n" << G_eff << std::endl;
+    // std::cout << "norm_weights_eff \n" << norm_weights_eff.adjoint() << std::endl;
+    lambda_nr_impl(lambda, G_eff, norm_weights_eff);
+    return;
   }
 
+
   inline void GenEL::omega_hat_impl(Ref<VectorXd> omega,
-				    const Ref<const MatrixXd>& Geff,
-				    const Ref<const VectorXd>& lambda) {
+				    const Ref<const VectorXd>& lambda,
+				    const Ref<const MatrixXd>& G,
+				    const Ref<const VectorXd>& norm_weights) {
     // std::cout << "Geff = \n" << Geff << std::endl;
-    Glambda_.head(n_obs2_).noalias() = lambda.transpose() * Geff;
-    omega = (1.0-Glambda_.head(n_obs2_).array()).inverse();
-    // note: when lambda is the optimal value denominator is n_obs...
+    Glambda_.noalias() = lambda.transpose() * G;
+    omega = (1.0-Glambda_.array()).inverse() * norm_weights.array();
+    // note: when lambda is the optimal value denominator is n_obs.
+    // however things get more mixed up with support correction,
+    // so explicitly normalize for safety.
     omega.array() /= omega.array().sum();
     return;
   }
 
   
   /// @param[out] omega Probability vector of length `n_obs + supp_adj`.
-  /// @param[in] G Moment matrix of size `n_eqs x n_obs` _or_ of size `n_eqs x (n_obs + 1)`.  When `supp_adj && G.cols() == n_obs`, performs the support adjustment.  Otherwise, assumes that `G` has already been support corrected./// @param[in] lambda Dual problem vector of size `n_eqs`.  
-  /// @note The internal version of this fnction `omega_hat_impl` uses the "effective" `G` which has `n_obs + supp_adj` columns.  This is a workaround to assigning a pointer to an Eigen matrix which is specified by a conditional (`supp_adj`).
+  /// @param[in] lambda Dual problem vector of size `n_eqs`.  
+  /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+  /// @param[in] norm_weights Vector of weights of length `n_obs` or `n_obs + supp_adj` following same logic as above.  Normalized to sum to one.
+  ///
+  /// @note Due to the difficulty of creating Eigen "pointers", current hack is to explicitly tell lambda_nr_impl whether to use external or internal `G` and `norm_weights`.
   inline void GenEL::omega_hat(Ref<VectorXd> omega,
+			       const Ref<const VectorXd>& lambda,
 			       const Ref<const MatrixXd>& G,
-			       const Ref<const VectorXd>& lambda) {
-    if(supp_adj_ && (G.cols() == n_obs_)) {
-      Gaug_.leftCols(n_obs_) = G;
-      adj_G(Gaug_, supp_a_);
-      omega_hat_impl(omega, Gaug_, lambda);
-    } else {
-      omega_hat_impl(omega, G, lambda);
-    }
+			       const Ref<const VectorXd>& norm_weights) {
+    // if(supp_adj_ && (G.cols() == n_obs_)) {
+    //   Gaug_.leftCols(n_obs_) = G;
+    //   adj_G(Gaug_, supp_a_);
+    //   omega_hat_impl(omega, Gaug_, lambda);
+    // } else {
+    //   omega_hat_impl(omega, G, lambda);
+    // }
+    // // FIXME: Trying to assign a Ref with unknown size...
     // Ref<MatrixXd> G_ = (supp_adj_ && (G.cols() == n_obs_)) ? Gaug_ : G;
     // Glambda_.head(n_obs2_).noalias() = lambda.transpose() * G_;
     // omega = (1.0-Glambda_.head(n_obs2_).array()).inverse();
     // // note: when lambda is the optimal value denominator is n_obs...
     // omega.array() /= omega.array().sum();
+    Ref<const MatrixXd> G_eff = supp_G(G);
+    Ref<const VectorXd> norm_weights_eff = supp_norm_weights(norm_weights);
+    omega_hat_impl(omega, lambda, G_eff, norm_weights_eff); 
     return;
   }
 
   /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
+  /// @param[in] norm_weights Vector of weights of length `n_obs` or `n_obs + supp_adj` following same logic as above.  Normalized to sum to one.
+  /// @param[in] sum_weights Sum of the weights prior to normalization.
   /// @return Value of empirical loglikelihood, which is `sum(log(omega))`.
-  inline double GenEL::logel_omega(const Ref<const VectorXd>& omega) {
-    return omega.array().log().sum();
+  inline double GenEL::logel_omega(const Ref<const VectorXd>& omega,
+				   const Ref<const VectorXd>& norm_weights,
+				   double sum_weights) {
+    Ref<const VectorXd> norm_weights_eff = supp_norm_weights(norm_weights);
+    // std::cout << "norm_weights_eff = \n" << norm_weights_eff.adjoint() << std::endl;
+    // std::cout << "omega = \n" << omega.adjoint() << std::endl;
+    // std::cout << "sum_weights = \n" << sum_weights << std::endl;
+    return sum_weights * (omega.array().log() * norm_weights.array()).sum();
+  }
+
+  inline double GenEL::logel_impl(const Ref<const MatrixXd>& G,
+				  const Ref<const VectorXd>& norm_weights,
+				  double sum_weights) {
+    lambda_nr(lambda_, G, norm_weights);
+    omega_hat(omega_.head(n_obs2_), lambda_, G, norm_weights);
+    return logel_omega(omega_.head(n_obs2_), norm_weights, sum_weights);
   }
 
   /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
-  /// @return Value of empirical loglikelihood, which is `sum(log(omega))`.
-  inline double GenEL::logel(const Ref<const MatrixXd>& G) {
-    lambda_nr(lambda_, G); // newton-raphson step
+  /// @param[in] weights Vector of weights of length `n_obs`.  Not assumed to be normalized.
+  /// @return Value of empirical loglikelihood, which is `sum(weights * log(omega))`.
+  inline double GenEL::logel(const Ref<const MatrixXd>& G,
+			     const Ref<const VectorXd>& weights) {
+    Ref<const MatrixXd> G_eff = supp_G(G);
+    double sum_weights = weights.sum();
+    norm_weights_.head(n_obs_) = weights;
     if(supp_adj_) {
-      omega_hat(omega_, Gaug_, lambda_);
-    } else {
-      omega_hat(omega_.head(n_obs2_), G, lambda_);
+      norm_weights_(n_obs_) = 1.0;
+      sum_weights += 1.0;
     }
-    return logel_omega(omega_.head(n_obs2_));
+    norm_weights_.head(n_obs2_) /= sum_weights;
+    return logel_impl(G_eff, norm_weights_.head(n_obs2_), sum_weights);
+  }
+
+  inline double GenEL::logel(const Ref<const MatrixXd>& G) {
+    Ref<const MatrixXd> G_eff = supp_G(G);
+    double sum_weights = double(n_obs2_);
+    norm_weights_.head(n_obs2_) = VectorXd::Ones(n_obs2_);
+    return logel_impl(G_eff, norm_weights_.head(n_obs2_), sum_weights);
   }
 
   /// @param[out] dldG Matrix of size `n_eqs x n_obs` containing the gradient of logel with respect to G.
-  /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
-  /// @param[out] omega Probability vector of length `n_obs + supp_adj`.
+  /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
   /// @param[in] lambda Dual problem vector of size `n_eqs`.
+  /// @param[in] sum_weights Sum of the weights prior to normalization.
   inline void GenEL::logel_grad(Ref<MatrixXd> dldG,
-				const Ref<const MatrixXd>& G,
 				const Ref<const VectorXd>& omega,
-				const Ref<const VectorXd>& lambda) {
+				const Ref<const VectorXd>& lambda,
+				// const Ref<const MatrixXd>& G,
+				// const Ref<const VectorXd>& norm_weights,
+				double sum_weights) {
     dldG.noalias() = lambda * omega.head(n_obs_).transpose();
     if(supp_adj_) {
-      dldG.colwise() -= omega(n_obs1_-1) * supp_a_/n_obs_ * lambda;
+      dldG.colwise() -= omega(n_obs_) * supp_a_/n_obs_ * lambda;
     }
-    dldG *= n_obs2_;
+    // dldG *= n_obs2_;
+    dldG *= sum_weights;
     return;
   }
 
@@ -320,13 +488,24 @@ namespace flexEL {
   /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
   /// @return For convenience, returns the value of the empirical loglikelihood.
   inline double GenEL::logel_grad(Ref<MatrixXd> dldG,
-				  const Ref<const MatrixXd>& G) {
-    double ll = logel(G);
+				  const Ref<const MatrixXd>& G,
+				  const Ref<const VectorXd>& weights) {
+    double sum_weights = weights.sum();
+    double ll = logel(G, weights);
     // use internal values of omega_ and lambda_
-    logel_grad(dldG, G, omega_, lambda_);
+    logel_grad(dldG, omega_.head(n_obs2_), lambda_, sum_weights);
     return ll;
   }
 
+  inline double GenEL::logel_grad(Ref<MatrixXd> dldG,
+				  const Ref<const MatrixXd>& G) {
+    double ll = logel(G);
+    // use internal values of omega_ and lambda_
+    logel_grad(dldG, omega_.head(n_obs2_), lambda_, double(n_obs2_));
+    return ll;
+  }
+
+  
 } // end namespace flexEL
 
 #endif

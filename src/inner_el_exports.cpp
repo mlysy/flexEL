@@ -41,7 +41,9 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   // IL.LambdaNR(n_iter, max_err);
   // VectorXd lambda = IL.get_lambda(); // output (could be not converged)
   VectorXd lambda(n_eqs);
-  IL.lambda_nr(lambda, G);
+  VectorXd norm_weights = VectorXd::Constant(n_obs+support, 1.0/(n_obs+support));
+  // VectorXd norm_weights = VectorXd::Constant(n_obs, 1.0/n_obs);
+  IL.lambda_nr(lambda, G, norm_weights);
   IL.get_diag(n_iter, max_err);
   // check convergence
   not_conv = (n_iter == max_iter) && (max_err > rel_tol);
@@ -87,7 +89,8 @@ Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   // IL.LambdaNR(n_iter, max_err);
   VectorXd lambda(n_eqs);
   VectorXd omega(n_obs + support);
-  IL.lambda_nr(lambda, G);
+  VectorXd norm_weights = VectorXd::Constant(n_obs+support, 1.0/(n_obs+support));
+  IL.lambda_nr(lambda, G, norm_weights);
   IL.get_diag(n_iter, max_err);
   // check convergence
   not_conv = (n_iter == max_iter) && (max_err > rel_tol);
@@ -103,7 +106,7 @@ Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
   // IL.set_lambda(lambda); 
   // IL.EvalOmegas(); // calculate omegas
   // VectorXd omegasnew = IL.get_omegas(); // get omegas
-  IL.omega_hat(omega, G, lambda);
+  IL.omega_hat(omega, lambda, G, norm_weights);
   return omega;
 }
 
@@ -120,7 +123,9 @@ double LogEL(Eigen::VectorXd omegas, bool support) {
   // IL.set_opts(support);
   // IL.set_omegas(omegas); 
   // double log_el = IL.LogEL();
-  double log_el = IL.logel_omega(omegas);
+  VectorXd norm_weights = VectorXd::Constant(n_obs+support, 1.0/(n_obs+support));
+  double sum_weights = double(n_obs + support);
+  double log_el = IL.logel_omega(omegas, norm_weights, sum_weights);
   return log_el; 
 }
 
@@ -153,10 +158,12 @@ List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = f
   double logel;
   VectorXd lambda(n_eqs);
   VectorXd omega(n_obs + support);
+  VectorXd norm_weights = VectorXd::Constant(n_obs+support, 1.0/(n_obs+support));
+  double sum_weights = double(n_obs+support);
   MatrixXd dldG(n_eqs, n_obs);
   
   // IL.LambdaNR(n_iter, max_err);
-  IL.lambda_nr(lambda, G);
+  IL.lambda_nr(lambda, G, norm_weights);
   IL.get_diag(n_iter, max_err);
   if(verbose) {
     Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
@@ -168,9 +175,9 @@ List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = f
   
   // IL.EvalOmegas();
   // IL.LogELGrad(logel, dldG);
-  IL.omega_hat(omega, G, lambda);
-  logel = IL.logel_omega(omega);
-  IL.logel_grad(dldG, G, omega, lambda);
+  IL.omega_hat(omega, lambda, G, norm_weights);
+  logel = IL.logel_omega(omega, norm_weights, sum_weights);
+  IL.logel_grad(dldG, omega, lambda, sum_weights);
   
   return List::create(Named("logel") = logel,
                       Named("dldG") = dldG.transpose(),
