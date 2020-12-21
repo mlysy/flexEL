@@ -33,4 +33,8 @@
 
 - Might wish to provide gradient here, for optimization over theta.
 
+## Censoring
+
+- What this is and how we estimate it with \pkg{flexEL} (EM algorithm, give the steps).
+
 

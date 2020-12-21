@@ -26,6 +26,7 @@ header-includes:
   - \usepackage{bm}
   - \usepackage{amsmath}
   - \newcommand{\yy}{\bm y}
+  - \newcommand{\uu}{\bm u}
   - \newcommand{\tth}{\bm \theta}
   - \newcommand{\lla}{\bm \lambda}
   - \newcommand{\R}{\mathbb R}
@@ -33,9 +34,12 @@ header-includes:
   - \newcommand{\w}{\omega}
   - \renewcommand{\l}{\lambda}
   - \renewcommand{\L}{\mathcal{L}}
+  - \renewcommand{\E}{\textrm{E}}
   - \newcommand{\EL}{\textrm{EL}}
+  - \newcommand{\CEL}{\textrm{CEL}}
   - \newcommand{\str}[1]{{#1}^{\star}}
   - \DeclareMathOperator*{\argmax}{arg\,max}
+  - \newcommand{\cx}{\bm{{\scriptstyle \mathcal X}}}
 output: 
   bookdown::pdf_book:
     toc: false
@@ -173,7 +177,30 @@ It is also shown by @chen-et-al2008 that this approach retains the optimally pro
 
 ## Censoring
 
-- What this is and how we estimate it with \pkg{flexEL} (EM algorithm, give the steps).
+\pkg{flexEL} considers the situation of right-censoring, that is, instead of observing $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. In a regression setting where we also observe a set of covariates $\cx_i$ for each of the observations, we assume that the censoring variable $c_i$ is conditionally independent of $y_i$ given $\cx_i$. 
+
+The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\uu$:
+\begin{equation} \label{eq:celF}
+  \CEL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\uu_i)^{\delta_i} [1-\mathrm{d}F(\uu_i)]^{1-\delta_i},
+\end{equation}
+where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
+
+It can be shown that with censored observations, it is no longer true that an optimal $F$ is only on the support of the data points $u_i, i=1,\cdots,n$. However, if we restrict ourselves to this case, we arrive at a finite dimensional problem
+\begin{equation}
+  \CEL(\tth) = \prod_{i=1}^n \Big[\hat \w_i(\tth)^{\delta_i}(\sum_{j: e_j \geq e_i}\hat \w_i(\tth))^{1-\delta_i}\Big].
+\end{equation}
+where similar as before, $\hat\w(\tth)$ is the solution of an inner optimization problem
+\begin{equation} \label{eq:elcens}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^n \Big[\delta_i\log(\w_i) + (1-\delta_i)\log(\sum_{j: e_j\geq e_i}\w_i)\Big]\\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot \gg(u_i;\tth) = 0 \\
+  & \sum_{i=1}^n \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1\cdots,n.
+\end{split}
+\end{equation}
+
+In \pkg{flexEL}, the right-censored EL problem is solved via an EM algorithm. The details of the EL algorithm is discussed below.
+
 
 # Illustrations
 
