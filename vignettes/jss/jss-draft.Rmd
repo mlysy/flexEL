@@ -84,31 +84,21 @@ embed_file <- function(file, lang) {
 
 Empirical likelhood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric familiy of the data, the estimator is in some sense as efficient as a fully parametric model [@qin-lawless1994].
 
-The EL approach can be traced back to @thomas-grunkemeier1975. Its current framework was mainly developed by @owen1988, @owen1990, and @owen1991. Over the years, many researchers have extended or generalized the method, but there has not been a flexible and efficient software available to the public. The existing softwares are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g. \pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
+The empirical likelihood (EL) approach can be traced back to @thomas-grunkemeier1975. Its current framework is mainly developed by @owen1988, @owen1990, and @owen1991, where empirical likelihood ratio statistics is introduced, and the EL method is extended to linear regression models under fixed or random design. @kolaczyk1994 further generalize the method to be used with generalized linear models. @qin-lawless1994 relate estimating equation and empirical likelihood and provide asymptotic properties of the estimator.
 
-This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the inner optimization algorithm. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
+A Bayesian approach to EL considers the pseudo-posterior distribution $p_{\EL}(\tth|Y) \propto \EL(\tth)\pi(\tth)$ where $\pi(\tth)$ is the prior distribution of $\tth$, is usually straightforward to explore by Markov chain Monte Carlo (MCMC) algorithm. However, notice that since EL is not a true likelihood, neither is $p_{\EL}(\tth|Y)$ a true posterior. The consequences of this have been investigated by e.g. @lazar2003. @chaudhuri-et-al2017 considers using Hamiltonian Monte Carlo sampling for the Bayesian EL models.
 
-- Motivation: What is EL?  
+EL approach generally requires a convex hall condition, which means that a solution may not exist if this condition is not satisfied. @chen-et-al2008 propose an adjustment to the constraints in the EL framework to ensure a solution always exist, and the theoretical properties are not affected.
 
-	- Partially specified model via moment conditions (estimand).  
-	- An estimator that's "in some sense" as efficient as full parametric likelihood (refs).
+An approach related to EL is the so-called exponentially tilting (ET) method [@efron1981]. @schennach2005, and @schennach2007 propose the exponentially tilted empirical likelihood (ELET) approach, which enjoys the properties of both ET and EL methods. @newey-smith2004 also gives the theoretical results relating Generalized Method of Moment (GMM) and Generalized Empirical Likelihood (GEL), their higher order properties, as well as their bias-corrected forms in the absence of length-bias.
 
-- Gap: Much theory, but relatively little software (should list the ones we know of).  
+For length-biased data with EL, @zhou2005 proposes an EM algorithm for censored an truncated data under mean type constraints without covariates. @zhou-li2008 combine the empirical likelihood with the Buckley-James estimator which works for regression models. @zhou-et-al2012 revisit the fixed and random design linear regression models but for right-censored data and show that the model works well even with heteroscedastic errors. @shen-et-al2016 develop a different EM algorithm under the EL framework for one- or two- sample doubly censored data.
 
-	- Bulk of computations done via a convex optimization problem dual to eq (??) (describe here or relegate to methods section).  
-	- Existing libraries are either written in a high-level programming language for which inner optimization is not efficient, or provide efficient implementation but for e.g., pecific regression problems (like \pkg{emplik} in \proglang{R}).
-	
-- Contribution: A framework for EL researchers to develop fast/efficient implementations of their own EL models and related methods.
+The construction of confidence regions or intervals under the EL frameworks has been mainly discussed when there is no length-bias. In this case, an asymptotic $\chi^2$ distribution of log EL is valid. When right-censoring is present, the asymptotic distribution is no longer a standard $\chi^2$ distribution but subject to an unknown scaling factor. Some approaches have been proposed with modifications of the estimating equations under the EL framework. For example, @he-et-al2016 consider using a special influence functions in the estimating equations to retain a standard $\chi^2$ distribution. @li-wang2003 propose an adjusted EL for linear regression using synthetic data approach. They extend the EL method for inference on a linear combination of the coefficients and also incorporate auxiliary information on the covariates. @ning-et-al2013 consider length-biased right-censored data in a non-regression setting for the estimation of mean, quantile and survival function of the population as well as confidence intervals.
 
-	- This is achieved with a low-level C++ implementation of the NR method using Eigen for linear algebra.
-	
-	- Other EL techniques provided include: support correction, censoring, gradients.  (is this too technical for intro?)
-	
-- How to address theory/existing literature?
+Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing softwares are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g. \pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
 
-	- Should definitely cite as much existing literature as possible, theoretical or otherwise.
-	
-	- As for explanations, I think in many cases just the "equation" is good enough (for example, for support correction can just show how to add the observation, and explain that this is known to make NR have a unique solution for every `\bm{\theta}`.
+This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the inner optimization (Newton–Raphson) algorithm. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
 	
 # Methodology
 
@@ -147,7 +137,7 @@ The problem in (\ref{eq:noncensopt}) is a constrained convex optimization proble
 
 Provided that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$, a unique optimal weight vector exist and can be shown to be
 \begin{equation}
-  \hat{\w_i}(\tth) = \frac{1}{n\cdot[1 - \hat \lla'(\tth) \gg(\yy_i;\tth)]},
+  \hat{\w_i}(\tth) = \frac{1}{n\cdot [1 - \hat{\lla}' (\tth) \gg(\yy_i;\tth)]},
 \end{equation}
 where the vector $\hat{\lla}(\tth)$ solves the unconstrained optimization problem
 \begin{equation}
