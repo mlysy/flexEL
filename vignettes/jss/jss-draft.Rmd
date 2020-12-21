@@ -98,7 +98,7 @@ The construction of confidence regions or intervals under the EL frameworks has 
 
 Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing softwares are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g. \pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
 
-This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the inner optimization (Newton–Raphson) algorithm. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
+This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the Newton–Raphson algorithm which is a key step in the EL inner optimization problem. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
 	
 # Methodology
 
@@ -132,10 +132,10 @@ where the $n$-dimensional vector of probability weights $\hat{\w}(\tth)$ associa
 
 The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian funciton can be set up as 
 \begin{equation} \label{eq:lagrange}
-  \L = \sum_{i=1}^n \log(\w_i) + n\l^T(\sum_{i=1}^n \w_i \cdot g(\yy_i;\tth)) - \mu(\sum_{i=1}^n \w_i -1)
+  \L = \sum_{i=1}^n \log(\w_i) + n\lla'(\sum_{i=1}^n \w_i \cdot g(\yy_i;\tth)) - \mu(\sum_{i=1}^n \w_i -1)
 \end{equation}
 
-Provided that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$, a unique optimal weight vector exist and can be shown to be
+Provided that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$, a unique optimal probability vector exist and can be shown to be
 \begin{equation}
   \hat{\w_i}(\tth) = \frac{1}{n\cdot [1 - \hat{\lla}' (\tth) \gg(\yy_i;\tth)]},
 \end{equation}
@@ -154,13 +154,22 @@ In the case that we are only interested in one parameter $\theta$ of an unknown 
 
 With the Lagrangian function in (\ref{eq:lagrange}) , we can also derive the gradient of $\L$ with respect to the matrix $G = [\gg(\yy_1;\tth), \cdots, \gg(\yy_n;\tth)]$, such that given the gradient of $G$ with respect to the paramters of interest $\tth$, we can obtain the gradient of L with respect to $\tth$, and with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator.
 
-- Dual problem.
-
-- Uncertainty.  Either chi-square inversion for single parameters, or turns out that mode-quadrature (like MLE) also gives asymptotic normality, cf Qin-Lawless94.
-
-- Might wish to provide gradient here, for optimization over theta.
-
 ## Support Correction
+
+As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$ which may not be satisfied with the data. @chen-et-al2008 proposes a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+
+\begin{equation} \label{eq:noncensoptadj}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^{n+1} \log(\w_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^{n+1} \w_i\cdot \gg_i(\tth) = 0 \\
+  & \sum_{i=1}^{n+1} \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1,\cdots,{n+1},
+\end{split}
+\end{equation}
+
+where $\gg_i(\tth) = \gg_i(y_i;\tth)$ for $i = 1,\cdots,n$, and $g_{n+1}(\tth) = -\frac{a_n}{n} \sum_{i=1}^n \gg_i(y_i;\tth)$ for some small positive $a_n$.
+
+It is also shown by @chen-et-al2008 that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions.
 
 ## Censoring
 

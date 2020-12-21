@@ -23,3 +23,14 @@
 	
 	- As for explanations, I think in many cases just the "equation" is good enough (for example, for support correction can just show how to add the observation, and explain that this is known to make NR have a unique solution for every `\bm{\theta}`.
 	
+# Methodology
+
+## Basics
+
+- Dual problem.
+
+- Uncertainty.  Either chi-square inversion for single parameters, or turns out that mode-quadrature (like MLE) also gives asymptotic normality, cf Qin-Lawless94.
+
+- Might wish to provide gradient here, for optimization over theta.
+
+
