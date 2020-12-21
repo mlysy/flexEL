@@ -163,10 +163,10 @@ lambda <- el$lambda_nr(G)
 # also allows user to create their own EL models via inheritance
 MeanRegEL <- R6Class(
   "MeanRegEL",
-  inherits = "GenEL",
+  inherits = GenEL,
   private = list(
-    .y = NA,
-	.X = NA,
+    .y = NULL,
+	.X = NULL,
   ),
   # todo: active bindings for X and y
   public = list(
@@ -177,6 +177,9 @@ MeanRegEL <- R6Class(
 	Gfun = function(beta) {
 	  # whatever this does
 	},
+	dGfun = function(beta) {
+	  # this function is optional
+	},
     logel = function(beta) {
       G <- Gfun(beta)
 	  super$logel(G)
@@ -185,7 +188,7 @@ MeanRegEL <- R6Class(
 	  # provided inherited version by default, so helpful to explicitly disable
 	  # to avoid surprises
 	  stop("logel_grad method for MeanRegEL has not been implemented yet.")
-	  # or you can implement here and call super$logel_grad(G)
+	  # or you can implement here using dGfun and super$logel_grad(G)
 	}
   )
 )
