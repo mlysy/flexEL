@@ -5,20 +5,20 @@
     .Call(`_flexEL_adjG`, G, a)
 }
 
-.LambdaNR <- function(G, max_iter, rel_tol, support, verbose) {
-    .Call(`_flexEL_LambdaNR`, G, max_iter, rel_tol, support, verbose)
+.LambdaNR <- function(G, lambda0, max_iter, rel_tol, support, verbose) {
+    .Call(`_flexEL_LambdaNR`, G, lambda0, max_iter, rel_tol, support, verbose)
 }
 
-.OmegaHat <- function(G, max_iter, rel_tol, support, verbose) {
-    .Call(`_flexEL_OmegaHat`, G, max_iter, rel_tol, support, verbose)
+.OmegaHat <- function(G, lambda0, max_iter, rel_tol, support, verbose) {
+    .Call(`_flexEL_OmegaHat`, G, lambda0, max_iter, rel_tol, support, verbose)
 }
 
 .LogEL <- function(omegas, support) {
     .Call(`_flexEL_LogEL`, omegas, support)
 }
 
-.LogELGrad <- function(G, max_iter, rel_tol, support = FALSE, verbose = FALSE) {
-    .Call(`_flexEL_LogELGrad`, G, max_iter, rel_tol, support, verbose)
+.LogELGrad <- function(G, lambda0, max_iter, rel_tol, support = FALSE, verbose = FALSE) {
+    .Call(`_flexEL_LogELGrad`, G, lambda0, max_iter, rel_tol, support, verbose)
 }
 
 .EvalWeights <- function(omegas, deltas, epsilons, support) {

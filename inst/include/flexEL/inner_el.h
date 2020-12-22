@@ -238,8 +238,8 @@ namespace flexEL {
 
   inline Ref<const VectorXd> GenEL::supp_norm_weights(const Ref<const VectorXd>& norm_weights) {
     if(supp_adj_ && norm_weights.size() == n_obs_) {
-	norm_weights_.head(n_obs_) = n_obs_/(n_obs_+1.0) * norm_weights;
-	norm_weights_(n_obs_) = 1.0/(n_obs_+1.0);
+      norm_weights_.head(n_obs_) = n_obs_/(n_obs_+1.0) * norm_weights;
+      norm_weights_(n_obs_) = 1.0/(n_obs_+1.0);
       return Ref<const VectorXd>(norm_weights_);
     } else {
       return Ref<const VectorXd>(norm_weights);
@@ -248,8 +248,8 @@ namespace flexEL {
 
 
   inline void GenEL::lambda_nr_impl(Ref<VectorXd> lambda,
-  				    const Ref<const MatrixXd>& G,
-				    const Ref<const VectorXd>& norm_weights) {
+                                    const Ref<const MatrixXd>& G,
+                                    const Ref<const VectorXd>& norm_weights) {
     int n_obs = G.cols();
     lambda = lambda0_; // set to initial value
     // logstar constants
@@ -270,12 +270,12 @@ namespace flexEL {
       // std::cout << "Glambda = \n" << Glambda_ << std::endl;
       Q2_.fill(0.0);
       for(jj=0; jj<n_obs; jj++) {
-	rho_(jj) = log_star1(Glambda_(jj),
-			     norm_weights(jj), astar_(jj), bstar_(jj));
-	GGt_.noalias() = G.col(jj) * G.col(jj).transpose();
-	Q2_ -= norm_weights(jj) *
-	  log_star2(Glambda_(jj), norm_weights(jj), astar_(jj)) * GGt_;
-	// Q2_ += log_star2(Glambda_(jj)) * GGt_.block(0,jj*n_eqs_,n_eqs_,n_eqs_);
+        rho_(jj) = log_star1(Glambda_(jj),
+             norm_weights(jj), astar_(jj), bstar_(jj));
+        GGt_.noalias() = G.col(jj) * G.col(jj).transpose();
+        Q2_ -= norm_weights(jj) *
+          log_star2(Glambda_(jj), norm_weights(jj), astar_(jj)) * GGt_;
+        // Q2_ += log_star2(Glambda_(jj)) * GGt_.block(0,jj*n_eqs_,n_eqs_,n_eqs_);
       }
       // std::cout << "Q2 = \n" << Q2_ << std::endl;
       // update lambda
@@ -291,7 +291,7 @@ namespace flexEL {
       nr_err_ = max_rel_err(lambda, lambda_new_);
       lambda = lambda_new_; // complete cycle
       if (nr_err_ < rel_tol_) {
-	break;
+        break;
       }
     }
     nr_iter_ = ii;
@@ -377,9 +377,9 @@ namespace flexEL {
 
 
   inline void GenEL::omega_hat_impl(Ref<VectorXd> omega,
-				    const Ref<const VectorXd>& lambda,
-				    const Ref<const MatrixXd>& G,
-				    const Ref<const VectorXd>& norm_weights) {
+                                    const Ref<const VectorXd>& lambda,
+                                    const Ref<const MatrixXd>& G,
+                                    const Ref<const VectorXd>& norm_weights) {
     // std::cout << "Geff = \n" << Geff << std::endl;
     Glambda_.noalias() = lambda.transpose() * G;
     omega = (1.0-Glambda_.array()).inverse() * norm_weights.array();
@@ -398,9 +398,9 @@ namespace flexEL {
   ///
   /// @note Due to the difficulty of creating Eigen "pointers", current hack is to explicitly tell lambda_nr_impl whether to use external or internal `G` and `norm_weights`.
   inline void GenEL::omega_hat(Ref<VectorXd> omega,
-			       const Ref<const VectorXd>& lambda,
-			       const Ref<const MatrixXd>& G,
-			       const Ref<const VectorXd>& norm_weights) {
+                               const Ref<const VectorXd>& lambda,
+                               const Ref<const MatrixXd>& G,
+                               const Ref<const VectorXd>& norm_weights) {
     // if(supp_adj_ && (G.cols() == n_obs_)) {
     //   Gaug_.leftCols(n_obs_) = G;
     //   adj_G(Gaug_, supp_a_);
@@ -425,8 +425,8 @@ namespace flexEL {
   /// @param[in] sum_weights Sum of the weights prior to normalization.
   /// @return Value of empirical loglikelihood, which is `sum(log(omega))`.
   inline double GenEL::logel_omega(const Ref<const VectorXd>& omega,
-				   const Ref<const VectorXd>& norm_weights,
-				   double sum_weights) {
+                                   const Ref<const VectorXd>& norm_weights,
+                                   double sum_weights) {
     Ref<const VectorXd> norm_weights_eff = supp_norm_weights(norm_weights);
     // std::cout << "norm_weights_eff = \n" << norm_weights_eff.adjoint() << std::endl;
     // std::cout << "omega = \n" << omega.adjoint() << std::endl;
@@ -435,8 +435,8 @@ namespace flexEL {
   }
 
   inline double GenEL::logel_impl(const Ref<const MatrixXd>& G,
-				  const Ref<const VectorXd>& norm_weights,
-				  double sum_weights) {
+                                  const Ref<const VectorXd>& norm_weights,
+                                  double sum_weights) {
     lambda_nr(lambda_, G, norm_weights);
     omega_hat(omega_.head(n_obs2_), lambda_, G, norm_weights);
     return logel_omega(omega_.head(n_obs2_), norm_weights, sum_weights);
@@ -446,7 +446,7 @@ namespace flexEL {
   /// @param[in] weights Vector of weights of length `n_obs`.  Not assumed to be normalized.
   /// @return Value of empirical loglikelihood, which is `sum(weights * log(omega))`.
   inline double GenEL::logel(const Ref<const MatrixXd>& G,
-			     const Ref<const VectorXd>& weights) {
+                             const Ref<const VectorXd>& weights) {
     Ref<const MatrixXd> G_eff = supp_G(G);
     double sum_weights = weights.sum();
     norm_weights_.head(n_obs_) = weights;
@@ -470,11 +470,11 @@ namespace flexEL {
   /// @param[in] lambda Dual problem vector of size `n_eqs`.
   /// @param[in] sum_weights Sum of the weights prior to normalization.
   inline void GenEL::logel_grad(Ref<MatrixXd> dldG,
-				const Ref<const VectorXd>& omega,
-				const Ref<const VectorXd>& lambda,
-				// const Ref<const MatrixXd>& G,
-				// const Ref<const VectorXd>& norm_weights,
-				double sum_weights) {
+                                const Ref<const VectorXd>& omega,
+                                const Ref<const VectorXd>& lambda,
+                                // const Ref<const MatrixXd>& G,
+                                // const Ref<const VectorXd>& norm_weights,
+                                double sum_weights) {
     dldG.noalias() = lambda * omega.head(n_obs_).transpose();
     if(supp_adj_) {
       dldG.colwise() -= omega(n_obs_) * supp_a_/n_obs_ * lambda;
@@ -488,8 +488,8 @@ namespace flexEL {
   /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
   /// @return For convenience, returns the value of the empirical loglikelihood.
   inline double GenEL::logel_grad(Ref<MatrixXd> dldG,
-				  const Ref<const MatrixXd>& G,
-				  const Ref<const VectorXd>& weights) {
+                                  const Ref<const MatrixXd>& G,
+                                  const Ref<const VectorXd>& weights) {
     double sum_weights = weights.sum();
     double ll = logel(G, weights);
     // use internal values of omega_ and lambda_
@@ -498,7 +498,7 @@ namespace flexEL {
   }
 
   inline double GenEL::logel_grad(Ref<MatrixXd> dldG,
-				  const Ref<const MatrixXd>& G) {
+                                  const Ref<const MatrixXd>& G) {
     double ll = logel(G);
     // use internal values of omega_ and lambda_
     logel_grad(dldG, omega_.head(n_obs2_), lambda_, double(n_obs2_));

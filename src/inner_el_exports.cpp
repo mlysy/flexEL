@@ -24,10 +24,16 @@ using namespace Rcpp;
  *                         at the end of the Newton-Raphson algorithm.
  */
 // [[Rcpp::export(".LambdaNR")]]
-Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose) {
+Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, 
+                         Eigen::VectorXd lambda0,
+                         int max_iter, 
+                         double rel_tol, 
+                         bool support, 
+                         bool verbose) {
   int n_obs = G.cols();
   int n_eqs = G.rows();
   flexEL::GenEL IL(n_obs,n_eqs);
+  IL.set_lambda0(lambda0);
   IL.set_max_iter(max_iter);
   IL.set_rel_tol(rel_tol);
   IL.set_supp_adj(support);
@@ -71,13 +77,19 @@ Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool s
  *                         at the end of the Newton-Raphson algorithm.
  */
 // [[Rcpp::export(".OmegaHat")]]
-Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose) {
+Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, 
+                         Eigen::VectorXd lambda0,
+                         int max_iter, 
+                         double rel_tol, 
+                         bool support, 
+                         bool verbose) {
   
   int n_obs = G.cols();
   int n_eqs = G.rows();
   flexEL::GenEL IL(n_obs,n_eqs);
   // IL.set_opts(max_iter,rel_tol,support);
   // IL.set_G(G); // assign the given G
+  IL.set_lambda0(lambda0);
   IL.set_max_iter(max_iter);
   IL.set_rel_tol(rel_tol);
   IL.set_supp_adj(support);
@@ -140,7 +152,12 @@ double LogEL(Eigen::VectorXd omegas, bool support) {
  *                         at the end of the Newton-Raphson algorithm.
  */
 // [[Rcpp::export(".LogELGrad")]]
-List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = false, bool verbose = false) {
+List LogELGrad(Eigen::MatrixXd G, 
+               Eigen::VectorXd lambda0,
+               int max_iter, 
+               double rel_tol, 
+               bool support = false, 
+               bool verbose = false) {
   
   int n_obs = G.cols();
   int n_eqs = G.rows();
@@ -148,6 +165,7 @@ List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support = f
   // IL.set_opts(max_iter, rel_tol, support);
   // IL.set_G(G); // assign the given G
   flexEL::GenEL IL(n_obs,n_eqs);
+  IL.set_lambda0(lambda0);
   IL.set_max_iter(max_iter);
   IL.set_rel_tol(rel_tol);
   IL.set_supp_adj(support);

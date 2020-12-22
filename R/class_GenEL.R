@@ -9,12 +9,11 @@ GenEL <- R6::R6Class(
     
     .n_obs = NULL,
     .n_eqs = NULL,
-    .G = NULL,
+    # .G = NULL,
     .max_iter = 100,
     .rel_tol = 1e-7,
-    .abs_tol = 1e-3,
     .supp_corr = TRUE,
-    .lambda0 = 0
+    .lambda0 = 0,
     
     #' @description Check the dimension of G is what is expected.
     #' @param G A numeric matrix.
@@ -45,18 +44,17 @@ GenEL <- R6::R6Class(
     initialize = function(n_obs, n_eqs) {
       private$.n_obs <- n_obs
       private$.n_eqs <- n_eqs
-      private$.G <- matrix(NA, nrow = n_obs, ncol = n_eqs)
+      self$.G <- matrix(NA, nrow = n_obs, ncol = n_eqs)
     },
     
     #' @description Set options for EL evaluation.
     #' @template args-lambda_precision
     #' @template arg-support
-    #' @template lambda0 A numeric vector of length `n_eqs` as the initial value of lambda.
-    set_opts = function(max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3,
+    #' @param lambda0 A numeric vector of length `n_eqs` as the initial value of lambda.
+    set_opts = function(max_iter = 100, rel_tol = 1e-7, 
                         supp_corr = TRUE, lambda0 = 0) {
       private$.max_iter <- max_iter
       private$.rel_tol <- rel_tol
-      private$.abs_tol <- abs_tol
       private$.supp_corr <- supp_corr
       private$.lambda0 <- lambda0
     },
@@ -64,11 +62,10 @@ GenEL <- R6::R6Class(
     # TODO: add setting lambda0 in logEL
     logel = function(G, return_omega = FALSE, return_dldG = FALSE, verbose = FALSE) {
       private$check_G(G)
-      private$.G <- G
-      logEL(G = private$.G, 
+      self$.G <- G
+      logEL(G = self$.G, 
             max_iter = private$.max_iter,
             rel_tol = private$.rel_tol,
-            abs_tol = private$.abs_tol
             support = private$.supp_corr,
             return_omega = return_omega, 
             return_dldG = return_dldG, 
@@ -78,7 +75,7 @@ GenEL <- R6::R6Class(
     # TODO
     lambda_nr = function(G, ...) {
       private$check_G(G)
-      private$.G <- G
+      self$.G <- G
       lambdaNR(private$.G, ...)
     }
   )

@@ -19,32 +19,34 @@ BEGIN_RCPP
 END_RCPP
 }
 // LambdaNR
-Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose);
-RcppExport SEXP _flexEL_LambdaNR(SEXP GSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
+Eigen::VectorXd LambdaNR(Eigen::MatrixXd G, Eigen::VectorXd lambda0, int max_iter, double rel_tol, bool support, bool verbose);
+RcppExport SEXP _flexEL_LambdaNR(SEXP GSEXP, SEXP lambda0SEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
     Rcpp::traits::input_parameter< bool >::type support(supportSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(LambdaNR(G, max_iter, rel_tol, support, verbose));
+    rcpp_result_gen = Rcpp::wrap(LambdaNR(G, lambda0, max_iter, rel_tol, support, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // OmegaHat
-Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose);
-RcppExport SEXP _flexEL_OmegaHat(SEXP GSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
+Eigen::VectorXd OmegaHat(Eigen::MatrixXd G, Eigen::VectorXd lambda0, int max_iter, double rel_tol, bool support, bool verbose);
+RcppExport SEXP _flexEL_OmegaHat(SEXP GSEXP, SEXP lambda0SEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
     Rcpp::traits::input_parameter< bool >::type support(supportSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(OmegaHat(G, max_iter, rel_tol, support, verbose));
+    rcpp_result_gen = Rcpp::wrap(OmegaHat(G, lambda0, max_iter, rel_tol, support, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -61,17 +63,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // LogELGrad
-List LogELGrad(Eigen::MatrixXd G, int max_iter, double rel_tol, bool support, bool verbose);
-RcppExport SEXP _flexEL_LogELGrad(SEXP GSEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
+List LogELGrad(Eigen::MatrixXd G, Eigen::VectorXd lambda0, int max_iter, double rel_tol, bool support, bool verbose);
+RcppExport SEXP _flexEL_LogELGrad(SEXP GSEXP, SEXP lambda0SEXP, SEXP max_iterSEXP, SEXP rel_tolSEXP, SEXP supportSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
     Rcpp::traits::input_parameter< bool >::type support(supportSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(LogELGrad(G, max_iter, rel_tol, support, verbose));
+    rcpp_result_gen = Rcpp::wrap(LogELGrad(G, lambda0, max_iter, rel_tol, support, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -271,10 +274,10 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
-    {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 5},
-    {"_flexEL_OmegaHat", (DL_FUNC) &_flexEL_OmegaHat, 5},
+    {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 6},
+    {"_flexEL_OmegaHat", (DL_FUNC) &_flexEL_OmegaHat, 6},
     {"_flexEL_LogEL", (DL_FUNC) &_flexEL_LogEL, 2},
-    {"_flexEL_LogELGrad", (DL_FUNC) &_flexEL_LogELGrad, 5},
+    {"_flexEL_LogELGrad", (DL_FUNC) &_flexEL_LogELGrad, 6},
     {"_flexEL_EvalWeights", (DL_FUNC) &_flexEL_EvalWeights, 4},
     {"_flexEL_LambdaNRCens", (DL_FUNC) &_flexEL_LambdaNRCens, 6},
     {"_flexEL_OmegaHatEM", (DL_FUNC) &_flexEL_OmegaHatEM, 9},

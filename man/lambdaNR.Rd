@@ -6,6 +6,7 @@
 \usage{
 lambdaNR(
   G,
+  lambda0 = rep(0, ncol(G)),
   weights = NULL,
   support = FALSE,
   max_iter = 100,

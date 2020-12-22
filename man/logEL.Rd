@@ -6,6 +6,7 @@
 \usage{
 logEL(
   G,
+  lambda0 = rep(0, ncol(G)),
   delta = NULL,
   eps = NULL,
   support = FALSE,
@@ -35,7 +36,7 @@ logEL(
 
 \item{abs_tol}{Positive scalar for absolute tolerance of Newton-Raphson steps.}
 
-\item{return_omega}{A boolean indicating whether to return the progability vector omega used to evaluate log EL.}
+\item{return_omega}{A boolean indicating whether to return the probability vector omega used to evaluate log EL.}
 
 \item{return_dldG}{A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.}
 
