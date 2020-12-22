@@ -236,7 +236,7 @@ namespace flexEL {
     }
   }
 
-    inline Ref<const VectorXd> GenEL::supp_norm_weights(const Ref<const VectorXd>& norm_weights) {
+  inline Ref<const VectorXd> GenEL::supp_norm_weights(const Ref<const VectorXd>& norm_weights) {
     if(supp_adj_ && norm_weights.size() == n_obs_) {
 	norm_weights_.head(n_obs_) = n_obs_/(n_obs_+1.0) * norm_weights;
 	norm_weights_(n_obs_) = 1.0/(n_obs_+1.0);
