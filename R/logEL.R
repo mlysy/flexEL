@@ -1,6 +1,7 @@
 #' Calculates log empirical likelihood.
 #'
 #' @template arg-G
+#' @template arg-lambda0
 #' @template arg-delta
 #' @template arg-eps
 #' @template arg-support

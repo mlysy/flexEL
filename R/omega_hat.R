@@ -1,6 +1,7 @@
 #' Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
 #'
 #' @template arg-G
+#' @template arg-lambda0
 #' @template arg-delta
 #' @template arg-eps
 #' @template args-lambda_precision

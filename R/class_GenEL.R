@@ -50,7 +50,7 @@ GenEL <- R6::R6Class(
     #' @description Set options for EL evaluation.
     #' @template args-lambda_precision
     #' @template arg-support
-    #' @param lambda0 A numeric vector of length `n_eqs` as the initial value of lambda.
+    #' @template arg-lambda0
     set_opts = function(max_iter = 100, rel_tol = 1e-7, 
                         supp_corr = TRUE, lambda0 = 0) {
       private$.max_iter <- max_iter
@@ -59,24 +59,36 @@ GenEL <- R6::R6Class(
       private$.lambda0 <- lambda0
     },
     
-    # TODO: add setting lambda0 in logEL
+    #' @description Solve the inner optimization problem given G matrix.
+    #' @template arg-G 
+    #' @template arg-verbose
+    lambda_nr = function(G, verbose = FALSE) {
+      private$check_G(G)
+      self$.G <- G
+      lambdaNR(G = self$.G,
+               lambda0 = private$.lambda0,
+               support = private$.supp_corr,
+               max_iter = private$.max_iter,
+               rel_tol = private$.rel_tol,
+               verbose = verbose)
+    },
+    
+    #' @description Calculate log EL given G matrix.
+    #' @template arg-G
+    #' @param return_omega A boolean indicating whether to return the probability vector omega used to evaluate log EL.
+    #' @param return_dldG A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.
+    #' @template arg-verbose
     logel = function(G, return_omega = FALSE, return_dldG = FALSE, verbose = FALSE) {
       private$check_G(G)
       self$.G <- G
       logEL(G = self$.G, 
+            lambda0 = private$.lambda0,
             max_iter = private$.max_iter,
             rel_tol = private$.rel_tol,
             support = private$.supp_corr,
             return_omega = return_omega, 
             return_dldG = return_dldG, 
             verbose = verbose)
-    },
-    
-    # TODO
-    lambda_nr = function(G, ...) {
-      private$check_G(G)
-      self$.G <- G
-      lambdaNR(private$.G, ...)
     }
   )
 )

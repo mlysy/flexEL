@@ -16,8 +16,8 @@ A general EL object.
 \itemize{
 \item \href{#method-new}{\code{GenEL$new()}}
 \item \href{#method-set_opts}{\code{GenEL$set_opts()}}
-\item \href{#method-logel}{\code{GenEL$logel()}}
 \item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
+\item \href{#method-logel}{\code{GenEL$logel()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
 }
 }
@@ -68,9 +68,35 @@ Set options for EL evaluation.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-lambda_nr"></a>}}
+\if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
+\subsection{Method \code{lambda_nr()}}{
+Solve the inner optimization problem given G matrix.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, verbose = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
+
+\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
+
+\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
+
+\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
+
+\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-logel"></a>}}
 \if{latex}{\out{\hypertarget{method-logel}{}}}
 \subsection{Method \code{logel()}}{
+Calculate log EL given G matrix.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, return_omega = FALSE, return_dldG = FALSE, verbose = FALSE)}\if{html}{\out{</div>}}
 }
@@ -79,22 +105,18 @@ Set options for EL evaluation.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-lambda_nr"></a>}}
-\if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
-\subsection{Method \code{lambda_nr()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, ...)}\if{html}{\out{</div>}}
-}
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
 \item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
+
+\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
+
+\item{\code{return_omega}}{A boolean indicating whether to return the probability vector omega used to evaluate log EL.}
+
+\item{\code{return_dldG}}{A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.}
+
+\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
+
+\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
 }
 \if{html}{\out{</div>}}
 }

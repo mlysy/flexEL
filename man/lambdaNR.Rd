@@ -17,6 +17,8 @@ lambdaNR(
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
 
+\item{lambda0}{A numeric vector of length \code{n_eqs} as the initial value of lambda.}
+
 \item{weights}{Optional length-\code{n_obs} vector of weights for weighted Newton-Raphson algorithm for right-censored data.}
 
 \item{support}{A boolean indicating whether support correction should be conducted.}

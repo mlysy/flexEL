@@ -1,6 +1,7 @@
 #' Solves the inner optimization problem of an EL maximization problem.
 #'
 #' @template arg-G
+#' @template arg-lambda0
 #' @param weights Optional length-`n_obs` vector of weights for weighted Newton-Raphson algorithm for right-censored data.
 #' @template args-lambda_precision
 #' @template arg-support

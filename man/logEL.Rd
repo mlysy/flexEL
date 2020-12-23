@@ -22,6 +22,8 @@ logEL(
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
 
+\item{lambda0}{A numeric vector of length \code{n_eqs} as the initial value of lambda.}
+
 \item{delta}{Length-\code{nObs} vector of censoring indicators (1 right-censord, 0 not-censored).}
 
 \item{eps}{Length-\code{nObs} vector of residuals.}
