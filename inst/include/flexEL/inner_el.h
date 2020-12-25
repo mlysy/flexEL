@@ -27,9 +27,9 @@ namespace flexEL {
   /// @param x2[in] Second vector.
   /// @return The maximum relative error.
   inline double max_rel_err(const Ref<const VectorXd>& x1,
-			    const Ref<const VectorXd>&x2) {
+                            const Ref<const VectorXd>&x2) {
     return ((x1 - x2).array().abs() /
-    	    ((x1 + x2).array().abs() + 0.1)).maxCoeff();
+            ((x1 + x2).array().abs() + 0.1)).maxCoeff();
   }
   
   /// Empirical likelihood for the general moment specification.
@@ -85,15 +85,15 @@ namespace flexEL {
     Ref<const VectorXd> supp_norm_weights(const Ref<const VectorXd>& norm_weights);
     // implementation versions of functions to avoid defining pointer to matrix
     void omega_hat_impl(Ref<VectorXd> omega,
-    			const Ref<const VectorXd>& lambda,
-    			const Ref<const MatrixXd>& G,
-			const Ref<const VectorXd>& norm_weights);
+                        const Ref<const VectorXd>& lambda,
+                        const Ref<const MatrixXd>& G,
+                        const Ref<const VectorXd>& norm_weights);
     void lambda_nr_impl(Ref<VectorXd> lambda,
-    			const Ref<const MatrixXd>& G,
-    			const Ref<const VectorXd>& norm_weights);
+                        const Ref<const MatrixXd>& G,
+                        const Ref<const VectorXd>& norm_weights);
     double logel_impl(const Ref<const MatrixXd>& G,
-		      const Ref<const VectorXd>& norm_weights,
-		      double sum_weights);
+                      const Ref<const VectorXd>& norm_weights,
+                      double sum_weights);
       
   public:
 
@@ -113,31 +113,34 @@ namespace flexEL {
     void get_diag(int& nr_iter, double& nr_err);
 
     /// Solve the dual problem via Newton-Raphson algorithm.
-    void lambda_nr(Ref<VectorXd> lambda, const Ref<const MatrixXd>& G,
-		   const Ref<const VectorXd>& norm_weights);
+    void lambda_nr(Ref<VectorXd> lambda, 
+                   const Ref<const MatrixXd>& G,
+                   const Ref<const VectorXd>& norm_weights);
     /// Calculate the profile probability weights.
     void omega_hat(Ref<VectorXd> omega,
-		   const Ref<const VectorXd>& lambda,
-		   const Ref<const MatrixXd>& G,
-		   const Ref<const VectorXd>& norm_weights);
+                   const Ref<const VectorXd>& lambda,
+                   const Ref<const MatrixXd>& G,
+                   const Ref<const VectorXd>& norm_weights);
     /// Calculate the empirical loglikelihood given the probability weights.
     double logel_omega(const Ref<const VectorXd>& omega,
-		       const Ref<const VectorXd>& norm_weights,
-		       double sum_weights);
+                       const Ref<const VectorXd>& norm_weights,
+                       double sum_weights);
     /// Calculate the empirical loglikelihood.
     double logel(const Ref<const MatrixXd>& G);
     double logel(const Ref<const MatrixXd>& G,
-		 const Ref<const VectorXd>& weights);
+                 const Ref<const VectorXd>& weights);
     /// Calculate the gradient of the empirical loglikelihood.
-    double logel_grad(Ref<MatrixXd> dldG, const Ref<const MatrixXd>& G);
-    double logel_grad(Ref<MatrixXd> dldG, const Ref<const MatrixXd>& G,
-		      const Ref<const VectorXd>& weights);
+    double logel_grad(Ref<MatrixXd> dldG, 
+                      const Ref<const MatrixXd>& G);
+    double logel_grad(Ref<MatrixXd> dldG, 
+                      const Ref<const MatrixXd>& G,
+                      const Ref<const VectorXd>& weights);
     void logel_grad(Ref<MatrixXd> dldG,
-		    const Ref<const VectorXd>& omega,
-		    const Ref<const VectorXd>& lambda,
-		    // const Ref<const MatrixXd>& G,
-		    // const Ref<const VectorXd>& norm_weights,
-		    double sum_weights);
+                    const Ref<const VectorXd>& omega,
+                    const Ref<const VectorXd>& lambda,
+                    // const Ref<const MatrixXd>& G,
+                    // const Ref<const VectorXd>& norm_weights,
+                    double sum_weights);
   };
 
 
@@ -246,7 +249,6 @@ namespace flexEL {
     }
   }
 
-
   inline void GenEL::lambda_nr_impl(Ref<VectorXd> lambda,
                                     const Ref<const MatrixXd>& G,
                                     const Ref<const VectorXd>& norm_weights) {
@@ -338,8 +340,8 @@ namespace flexEL {
   ///
   /// @note Due to the difficulty of creating Eigen "pointers", current hack is to explicitly tell lambda_nr_impl whether to use external or internal `G` and `norm_weights`.
   inline void GenEL::lambda_nr(Ref<VectorXd> lambda,
-			       const Ref<const MatrixXd>& G,
-			       const Ref<const VectorXd>& norm_weights) {  
+                               const Ref<const MatrixXd>& G,
+                               const Ref<const VectorXd>& norm_weights) {  
     // if(supp_adj_) {
     //   bool supp_G = G.cols() == n_obs_;
     //   bool supp_w = norm_weights.size() == n_obs_;
@@ -374,7 +376,6 @@ namespace flexEL {
     lambda_nr_impl(lambda, G_eff, norm_weights_eff);
     return;
   }
-
 
   inline void GenEL::omega_hat_impl(Ref<VectorXd> omega,
                                     const Ref<const VectorXd>& lambda,
