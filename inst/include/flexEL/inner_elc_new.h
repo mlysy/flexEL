@@ -19,7 +19,7 @@ namespace flexEL {
     
     // internal variables for EM algorithm
     VectorXd delta_; // censoring indicators
-    VectorXd weight_; // weights in weighted maximum log EL
+    VectorXd weights_; // weights in weighted maximum log EL
     VectorXd omega_; // empirical distribution
     VectorXd omega_init_; // initial value for omegas, in case of reset
     VectorXd omegaps_; // partial sum of omegas
@@ -32,6 +32,9 @@ namespace flexEL {
     // internals for EM options
     double abs_tol_; // absolute tolerance
     
+    // helper function for eval_weights: calculate partial sum of omegas
+    double eval_pso(const int ii); // Partial sum of omegas_jj s.t. eps_jj >= eps_ii
+    
     
   public:
     
@@ -41,10 +44,13 @@ namespace flexEL {
     void set_max_iter_nr(int max_iter);
     /// Set the maximum number of EM iterations.
     void set_max_iter_em(int max_iter);
-    // Set the relative tolerance for the Newton-Raphson algorithm.
+    /// Set the relative tolerance for the Newton-Raphson algorithm.
     void set_rel_tol(double rel_tol);
-    // Set the absolute tolerance for the EM algorithm.
+    /// Set the absolute tolerance for the EM algorithm.
     void set_abs_tol(double abs_tol);
+    
+    /// Calculate weights according to epsilons
+    void eval_weights();
     
   };
   
@@ -54,7 +60,7 @@ namespace flexEL {
     
     GEL = GenEL(n_obs, n_eqs);
     
-    // TODO
+    // TODO: shall CensEL still have it's own n_eqs_, n_obs_, etc. or use them from GEL?
     
   }
   
@@ -92,6 +98,43 @@ namespace flexEL {
                                const Ref<const VectorXd>& norm_weights) {  
     GEL.lambda_nr(lambda, G, norm_weights); // TODO: add methods to calculate weights for CensEL
     return;
+  }
+  
+  // TODO: needs modification
+  inline double CensEL::eval_pso(const int ii) {
+    double psos = 0;
+    int kk;
+    for (int jj=n_obs2_-1; jj>=0; jj--) {
+      // Note: eps_ord_ corresponds to epsilons in ascending order
+      kk = eps_ord_(jj); // kk is the index of the jj-th largest epsilon
+      psos += omega_(kk);
+      if (kk == ii) break; // until (backwardly) reaching ii-th largest epsilon 
+    }
+    return psos;
+  }
+  
+  // TODO: needs modification
+  inline void CensEL::eval_weights() {
+    // find the indices for increasing order of epsilons 
+    psot_.fill(0.0);
+    int kk;
+    double psos;
+    for (int ii=0; ii<n_obs2_; ii++) {
+      for (int jj=0; jj<n_obs2_; jj++) {
+        kk = eps_ord_(jj);
+        if (delta_(kk) == 0) {
+          psos = eval_pso(kk);
+          // to prevent dividing by 0
+          if (abs(psos) >= 1e-10) psot_(ii) += omegas_(ii)/psos;
+          // else if (omegas_(ii) >= 1e-10 && EvalPSO(kk) < 1e-10) {
+          //   // TODO: this means a problem
+          //   // std::cout << "EvalWeights: dividing by 0 problem." << std::endl;
+          // }
+        }
+        if (kk == ii) break;
+      }
+    }
+    weights_.array() = delta_.array() + psot_.array();
   }
 
 }
