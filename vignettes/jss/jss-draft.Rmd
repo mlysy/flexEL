@@ -120,7 +120,7 @@ The empirical likelihood $\EL(\tth)$ is defined as the profile likelihood over t
 \end{equation}
 where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
 
-It was shown @owen1988 that for any $\tth$, the maximum of \eqref{eq:elF} must be achieved by a PMF putting all mass on the support of the observed data $\yy_1, \cdots, \yy_n$, such that the infinite-dimensional profile likelihood \eqref{eq:elF} reduces to a finite-dimensional one:
+It was shown [@owen1988] that for any $\tth$, the maximum of \eqref{eq:elF} must be achieved by a PMF putting all mass on the support of the observed data $\yy_1, \cdots, \yy_n$, such that the infinite-dimensional profile likelihood \eqref{eq:elF} reduces to a finite-dimensional one:
 \begin{equation}
   \EL(\tth) = \prod_{i=1}^n \hat{\w_i}(\tth),
 \end{equation}
@@ -199,8 +199,40 @@ where similar as before, $\hat\w(\tth)$ is the solution of an inner optimization
 \end{split}
 \end{equation}
 
-In \pkg{flexEL}, the right-censored EL problem is solved via an EM algorithm. The details of the EL algorithm is discussed below.
+Right-censoring is essentially a missing data problem. In \pkg{flexEL}, the right-censored EL problem is solved via an EM algorithm. The algorithm is a generalization of @zhou2005 to regression problems.
 
+Recall that if $\delta_i=1$, we have $u_i=y_i$, otherwise we do not observe $y_i$. This means that the \textbf{unobserved (latent) variables} are the $y_i'$s such that $\delta_i=0$, the \textbf{complete data likelihood} is
+\begin{equation}\label{eq:complike}
+  \ell(\w,\yy|\uu) = \sum_{i=1}^n\log(\prod_{j=1}^n \w_j^{\mathfrak 1(y_i=u_j)})
+\end{equation}
+
+The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to $\yy$ (vector of all latent variables) conditioned on the observed values, the censoring indicator and the current state of the parameters, and since for $\delta_i = 1$, we know that $u_i=y_i$, we have
+\begin{equation}\label{eq:estep}
+\begin{split}
+  \E_{\yy|\uu,\delta,\w_0}\bigl[\ell(\w,\yy|\uu)\bigr]
+  &= \E_{\yy|\uu,\delta,\w_0}\Bigl[\sum_{i=1}^n\delta_i\log(\w_i) +
+  (1-\delta_i)\log(\prod_{j=1}^n \w_j^{\mathfrak 1(y_i=u_j)})\Bigr] \\
+  &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) +
+  (1-\delta_i)\sum_{j=1}^n \E_{y_i|\uu,\delta,\w_0}[\mathfrak1(y_i=u_j)]\log(\w_j)\Bigr] \\
+  &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) +
+  (1-\delta_i)\sum_{j=1}^n P_{y_i|\uu,\delta,\w_0}(y_i=u_j)\log(\w_j)\Bigr].
+\end{split}
+\end{equation}
+
+Notice that we can write
+\[
+  \log(\prod_{j=1}^n \w_j^{\mathfrak 1(y_i=u_j)}) =
+  \sum_{i=1}^n \mathfrak 1(y_i=u_j)\log(\w_j),
+\]
+because for any $i \in \{1,\cdots,n\}$, $\mathfrak 1(y_i=u_j)=1$ for one and only one $j\in\{1,\cdots,n\}$. Also, the latent $y_i's$ are independent but not identically distributed, since each of them follows a different categorical distribution.
+
+The conditional distribution in (\ref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass only allocates on the values in a subset of $\{u_1,\cdots,u_n\}$ such that $\mathfrak 1(u_j\geq u_i) = 1$ for $j=1,\cdots,n$, which is still a multinomial distribution.
+\begin{equation}\label{eq:condprob_orig}
+  P_{y_i|\uu,\delta,\w_0}(y_i=u_j) =
+  \frac{\mathfrak 1(u_j\geq u_i)\cdot \w_{0j}}{\sum_{k=1}^n\mathfrak 1(u_k\geq u_i)\cdot\w_{0k}}.
+\end{equation}
+
+Therefore, the EM algorithm iterates between the following two steps: (TODO)
 
 # Illustrations
 

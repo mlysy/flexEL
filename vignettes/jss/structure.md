@@ -9,7 +9,7 @@
 - Gap: Much theory, but relatively little software (should list the ones we know of).  
 
 	- Bulk of computations done via a convex optimization problem dual to eq (??) (describe here or relegate to methods section).  
-	- Existing libraries are either written in a high-level programming language for which inner optimization is not efficient, or provide efficient implementation but for e.g., pecific regression problems (like \pkg{emplik} in \proglang{R}).
+	- Existing libraries are either written in a high-level programming language for which inner optimization is not efficient, or provide efficient implementation but for e.g., specific regression problems (like \pkg{emplik} in \proglang{R}).
 	
 - Contribution: A framework for EL researchers to develop fast/efficient implementations of their own EL models and related methods.
 
