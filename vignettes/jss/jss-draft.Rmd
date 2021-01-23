@@ -30,10 +30,12 @@ header-includes:
   - \newcommand{\yy}{\bm y}
   - \newcommand{\zz}{\bm z}
   - \newcommand{\uu}{\bm u}
+  - \newcommand{\qq}{\bm q}
   - \newcommand{\tth}{\bm \theta}
   - \newcommand{\lla}{\bm \lambda}
   - \newcommand{\bbe}{\bm \beta}
   - \newcommand{\gga}{\bm \gamma}
+  - \newcommand{\eep}{\bm \epsilon}
   - \newcommand{\R}{\mathbb R}
   - \renewcommand{\gg}{\bm g}
   - \newcommand{\w}{\omega}
@@ -117,58 +119,65 @@ This paper describes a framework we designed for EL researchers to develop fast 
 
 ## Basics
 
-Let $y_1,\cdots,y_n$ where $y_i\in\R^{d+1}$ be iid observations from an unknown distribution $F_0(\yy)$, about which a parameter of interest $\tth$ is defined as satisfying an $m$-dimensional moment condition:
+Let $\e_1,\cdots,\e_n$ where $\e_i\in\R^{d+1}$ be iid observations from an unknown distribution $F_0(\eep)$, about which a parameter of interest $\tth$ is defined as satisfying an $m$-dimensional moment condition:
 \begin{equation} \label{eq:momcond}
-  \E\bigl[\gg(\yy;\tth)\bigr] = 0,
+  \E\bigl[\gg(\eep;\tth)\bigr] = 0,
 \end{equation}
-where $\gg(\yy, \tth) = \bigl( g_1(\yy, \tth), \ldots, g_m(\yy, \tth) \bigr)$.
+where $\gg(\eep, \tth) = \bigl( g_1(\eep, \tth), \ldots, g_m(\eep, \tth) \bigr)$.
 
-The empirical likelihood $\EL(\tth)$ is defined as the profile likelihood over the distribution function of $\yy$:
+The empirical likelihood $\EL(\tth)$ as the profile likelihood over the distribution function of $\eep$:
 \begin{equation} \label{eq:elF}
-  \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\yy_i),
+  \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\e_i),
 \end{equation}
 where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
 
-It was shown [@owen1988] that for any $\tth$, the maximum of \eqref{eq:elF} must be achieved by a PMF putting all mass on the support of the observed data $\yy_1, \cdots, \yy_n$, such that the infinite-dimensional profile likelihood \eqref{eq:elF} reduces to a finite-dimensional one:
-\begin{equation}
-  \EL(\tth) = \prod_{i=1}^n \hat{\w_i}(\tth),
-\end{equation}
-where the $n$-dimensional vector of probability weights $\hat{\w}(\tth)$ associated with the observations is the solution of an inner optimization problem which will be referred to as \textbf{EL inner optimization}
+For any $\tth$, @owen1988 has shown that the maximum of \eqref{eq:elF} can be achieved by focusing on the distribution functions having all mass on the support of the observed data $\e_1, \cdots, \e_n$, and the infinite-dimensional profile likelihood \eqref{eq:elF} can be reduced to a finite-dimensional one. 
 
-[TODO: provide the weighted EL here which can be used in the right-censored case with EM instead?]
+To have a general notation consistent with the EM algorithm under right-censoring in later sections, we now define \textbf{weighted empirical likelihood}:
+
+\begin{equation}
+  \EL(\tth) = \prod_{i=1}^n \hat{\w_i}(\tth)^{q_i},
+\end{equation}
+
+where $q_i > 0, \forall i=1,\cdots,n$, and the $n$-dimensional vector of probability weights $\hat{\w}(\tth)$ associated with the observations is the solution of an inner optimization problem which will be referred to as \textbf{EL inner optimization}:
 
 \begin{equation} \label{eq:noncensopt}
 \begin{split}
-  \max_{\w}\quad & \sum_{i=1}^n \log(\w_i) \\
-  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot \gg(\yy_i;\tth) = 0 \\
+  \max_{\w}\quad & \sum_{i=1}^n q_i \log(\w_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot g_i(\eep;\tth) = 0 \\
   & \sum_{i=1}^n \w_i = 1 \\
-  & \w_i \geq 0, \quad i=1,\cdots,n,
+  & \w_i \geq 0, \quad i=1,\cdots,n.
 \end{split}
 \end{equation}
 
-The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian funciton can be set up as 
+When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian funciton can be set up as 
 \begin{equation} \label{eq:lagrange}
-  \L = \sum_{i=1}^n \log(\w_i) + n\lla'(\sum_{i=1}^n \w_i \cdot g(\yy_i;\tth)) - \mu(\sum_{i=1}^n \w_i -1)
+  \L = \sum_{i=1}^n q_i\log(\w_i) + n\lla'(\sum_{i=1}^n \w_i \cdot g_i(\eep;\tth)) - \mu(\sum_{i=1}^n \w_i -1).
 \end{equation}
 
-Provided that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$, a unique optimal probability vector exist and can be shown to be
+Let $r_i = q_i/\sum_{i=1}^n q_i$. Provided that $\bm 0$ is in the convex full of the points $g_1(\eep;\tth),\cdots,g_n(\eep;\tth)$, a unique optimal probability vector exist and can be shown to be
 \begin{equation}
-  \hat{\w_i}(\tth) = \frac{1}{n\cdot [1 - \hat{\lla}' (\tth) \gg(\yy_i;\tth)]},
+  \hat{\w_i}(\tth) = \frac{r_i}{1 - \hat{\lla}'(\tth) g_i(\eep;\tth)},
 \end{equation}
-where the vector $\hat{\lla}(\tth)$ solves the unconstrained optimization problem
+where 
+
 \begin{equation}
-\hat{\l}(\tth) = \argmax_{\lla} \sum_{i=1}^n \str\log\Big(1 - \lla' \gg(\yy_i;\tth)\Big),
-\end{equation}
-and where
-\begin{equation}
-\str\log(x) = \begin{cases} \log(x) & x \ge \tfrac 1 n \\ -\tfrac 1 2 n^2 x^2 + 2 n x - \tfrac 3 2 - \log(n) & x < \tfrac 1 n \end{cases}.
+\begin{aligned}
+\hat{\lla}(\tth) &= \argmax_{\lla(\tth)} \sum_{i=1}^n r_i\ \str\log\left(1 - \lla'(\tth) g_i(\eep;\tth); r_i\right), \\
+\str\log(x; r) &= 
+\begin{cases} 
+\log(x) & x \ge r \\
+- \frac{1}{2} (x/r)^2 + 2 (x/r) - \frac{3}{2} + \log r & x < r.
+\end{cases}
+\end{aligned}
+\label{eq:optim}
 \end{equation}
 
-@qin-lawless1994 has shown that $\lla(\tth)$ is a continuous differentiable function of $\tth$ provided that convex hull condition is satisfied with $\tth$ and $\sum_{i=1}^n \gg(\yy_i;\tth)g'(\yy_i;\tth)$ is positive definite. However, the support of $\tth$ is not necessarily a convex set, as demonstrated by @chaudhuri-et-al2017.
+@qin-lawless1994 has shown that $\lla(\tth)$ is a continuous differentiable function of $\tth$ provided that convex hull condition is satisfied with $\tth$ and $\sum_{i=1}^n g_i(\eep;\tth)g_i'(\eep;\tth)$ is positive definite. However, the support of $\tth$ is not necessarily a convex set, as demonstrated by @chaudhuri-et-al2017.
 
 In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the paramters accordingly.
 
-With the Lagrangian function in (\ref{eq:lagrange}) , we can also derive the gradient of $\L$ with respect to the matrix $G = [\gg(\yy_1;\tth), \cdots, \gg(\yy_n;\tth)]$, such that given the gradient of $G$ with respect to the paramters of interest $\tth$, we can obtain the gradient of L with respect to $\tth$, and with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator.
+With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator.
 
 ## Support Correction
 
