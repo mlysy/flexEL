@@ -119,13 +119,13 @@ This paper describes a framework we designed for EL researchers to develop fast 
 
 ## Basics
 
-Let $\e_1,\cdots,\e_n$ where $\e_i\in\R^{d+1}$ be iid observations from an unknown distribution $F_0(\eep)$, about which a parameter of interest $\tth$ is defined as satisfying an $m$-dimensional moment condition:
+Let $\e_1,\cdots,\e_n$ where $\e_i\in\R$ be iid observations from an unknown distribution $F_0(\e)$, about which a parameter of interest $\tth$ is defined as satisfying an $m$-dimensional moment condition:
 \begin{equation} \label{eq:momcond}
   \E\bigl[\gg(\eep;\tth)\bigr] = 0,
 \end{equation}
 where $\gg(\eep, \tth) = \bigl( g_1(\eep, \tth), \ldots, g_m(\eep, \tth) \bigr)$.
 
-The empirical likelihood $\EL(\tth)$ as the profile likelihood over the distribution function of $\eep$:
+The empirical likelihood $\EL(\tth)$ as the profile likelihood over the distribution function of $\e$:
 \begin{equation} \label{eq:elF}
   \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\e_i),
 \end{equation}
@@ -150,9 +150,9 @@ where $q_i > 0, \forall i=1,\cdots,n$, and the $n$-dimensional vector of probabi
 \end{split}
 \end{equation}
 
-When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian funciton can be set up as 
+When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian function can be set up as 
 \begin{equation} \label{eq:lagrange}
-  \L = \sum_{i=1}^n q_i\log(\w_i) + n\lla'(\sum_{i=1}^n \w_i \cdot g_i(\eep;\tth)) - \mu(\sum_{i=1}^n \w_i -1).
+  \L = \sum_{i=1}^n q_i\log(\w_i) + (\sum_{i=1}^n q_i)\lla'(\sum_{i=1}^n \w_i \cdot g_i(\eep;\tth)) + \mu(1-\sum_{i=1}^n \w_i).
 \end{equation}
 
 Let $r_i = q_i/\sum_{i=1}^n q_i$. Provided that $\bm 0$ is in the convex full of the points $g_1(\eep;\tth),\cdots,g_n(\eep;\tth)$, a unique optimal probability vector exist and can be shown to be
@@ -181,18 +181,18 @@ With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the grad
 
 ## Support Correction
 
-As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $\gg(\yy_1;\tth),\cdots,\gg(\yy_n;\tth)$ which may not be satisfied with the data. @chen-et-al2008 proposes a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_i(\eep;\tth),\cdots,g_n(\eep;\tth)$ which may not be satisfied with the data. @chen-et-al2008 proposes a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
 
 \begin{equation} \label{eq:noncensoptadj}
 \begin{split}
   \max_{\w}\quad & \sum_{i=1}^{n+1} \log(\w_i) \\
-  \text{s.t.}\quad & \sum_{i=1}^{n+1} \w_i\cdot \gg_i(\tth) = 0 \\
+  \text{s.t.}\quad & \sum_{i=1}^{n+1} \w_i\cdot g_i(\eep;\tth) = 0 \\
   & \sum_{i=1}^{n+1} \w_i = 1 \\
   & \w_i \geq 0, \quad i=1,\cdots,{n+1},
 \end{split}
 \end{equation}
 
-where $\gg_i(\tth) = \gg_i(y_i;\tth)$ for $i = 1,\cdots,n$, and $g_{n+1}(\tth) = -\frac{a_n}{n} \sum_{i=1}^n \gg_i(y_i;\tth)$ for some small positive $a_n$.
+where $g_{n+1}(\eep;\tth) = -\frac{a_n}{n} \sum_{i=1}^n g_i(\eep;\tth)$ for some small positive $a_n$.
 
 It is also shown by @chen-et-al2008 that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions.
 
