@@ -31,11 +31,13 @@ header-includes:
   - \newcommand{\zz}{\bm z}
   - \newcommand{\uu}{\bm u}
   - \newcommand{\qq}{\bm q}
+  - \newcommand{\ee}{\bm e}
   - \newcommand{\tth}{\bm \theta}
   - \newcommand{\lla}{\bm \lambda}
   - \newcommand{\bbe}{\bm \beta}
   - \newcommand{\gga}{\bm \gamma}
   - \newcommand{\eep}{\bm \epsilon}
+  - \newcommand{\oom}{\bm \omega}
   - \newcommand{\R}{\mathbb R}
   - \renewcommand{\gg}{\bm g}
   - \newcommand{\w}{\omega}
@@ -156,7 +158,7 @@ When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood f
 \end{equation}
 
 Let $r_i = q_i/\sum_{i=1}^n q_i$. Provided that $\bm 0$ is in the convex full of the points $g_1(\eep;\tth),\cdots,g_n(\eep;\tth)$, a unique optimal probability vector exist and can be shown to be
-\begin{equation}
+\begin{equation}\label{eq:omegas}
   \hat{\w_i}(\tth) = \frac{r_i}{1 - \hat{\lla}'(\tth) g_i(\eep;\tth)},
 \end{equation}
 where 
@@ -200,23 +202,36 @@ It is also shown by @chen-et-al2008 that this approach retains the optimally pro
 
 ### Empirical Likelihood under Right-Censoring
 
-\pkg{flexEL} considers the situation of right-censoring, that is, instead of observing $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. In a regression setting where we also observe a set of covariates $\cx_i$ for each of the observations, we assume that the censoring variable $c_i$ is conditionally independent of $y_i$ given $\cx_i$. 
+\pkg{flexEL} handles the situation of right-censoring, that is, instead of observing $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. 
 
-The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\uu$:
-\begin{equation} \label{eq:celF}
-  \CEL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\uu_i)^{\delta_i} [1-\mathrm{d}F(\uu_i)]^{1-\delta_i},
+Consider a general regression model
+\[
+  y_i = f(\cx_i; \tth) + \e_i, \quad i=1,\cdots,n
+\]
+where $\e_i \iid (0,1)$ and independent of $\cx_i$, and $m$-dimensional conditional moment restrictions
+\begin{equation}\label{eq:cmom}
+  \E\bigl[\gg(\yy; \tth) \| \cx\bigr] = 0.
 \end{equation}
-where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
 
-It can be shown that with censored observations, it is no longer true that an optimal $F$ is only on the support of the data points $u_i, i=1,\cdots,n$. However, if we restrict ourselves to this case, we arrive at a finite dimensional problem
+We assume that the censoring variable $c_i$ is conditionally independent of $y_i$ given $\cx_i$. Let's denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s), the complete residuals as $\e_i'$s (corresponding to $y_i'$s). 
+
+The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\ee$:
+\begin{equation} \label{eq:celF}
+  \CEL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(e_i)^{\delta_i} [1-\mathrm{d}F(e_i)]^{1-\delta_i},
+\end{equation}
+where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:cmom}.
+
+It can be shown that with censored observations, it is no longer true that an optimal $F$ has support only on the data points $e_i, i=1,\cdots,n$. However, if we restrict ourselves to this case, we arrive at a finite dimensional problem
 \begin{equation}
   \CEL(\tth) = \prod_{i=1}^n \Big[\hat \w_i(\tth)^{\delta_i}(\sum_{j: e_j \geq e_i}\hat \w_i(\tth))^{1-\delta_i}\Big].
 \end{equation}
+
 where similar as before, $\hat\w(\tth)$ is the solution of an inner optimization problem
+
 \begin{equation} \label{eq:elcens}
 \begin{split}
   \max_{\w}\quad & \sum_{i=1}^n \Big[\delta_i\log(\w_i) + (1-\delta_i)\log(\sum_{j: e_j\geq e_i}\w_i)\Big]\\
-  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot \gg(u_i;\tth) = 0 \\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot g_i(\yy,\cx;\tth) = 0 \\
   & \sum_{i=1}^n \w_i = 1 \\
   & \w_i \geq 0, \quad i=1\cdots,n.
 \end{split}
@@ -226,21 +241,13 @@ Right-censoring is essentially a missing data problem. In \pkg{flexEL}, the righ
 
 ### An EM Algorithm
 
-Consider a general regression model
-\[
-  y_i = f(\cx_i; \tth) + \e_i, \quad i=1,\cdots,n
-\]
-where $\e_i \iid (0,1)$ and independent of $\cx_i$, and $m$-dimensional conditional moment restrictions
-\begin{equation}\label{eq:cmom}
-  \E\bigl[\gg(\cx, \e; \tth) \| \cx\bigr] = 0.
-\end{equation}
-
-Let's denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s), the complete residuals as $\e_i'$ (corresponding to $y_i'$s). Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{unobserved (latent) variables} are the $\e_i'$s such that $\delta_i=0$, the \textbf{complete data likelihood} is
+Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{unobserved (latent) variables} are the $\e_i'$s such that $\delta_i = 0$, the \textbf{complete data likelihood} is
 \begin{equation}\label{eq:complike}
   \ell(\w,\e|\uu) = \sum_{i=1}^n\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)})
 \end{equation}
 
 The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to $\yy$ (vector of all latent variables) conditioned on the observed values, the censoring indicator and the current state of the parameters, and since for $\delta_i = 1$, we know that $u_i=y_i$, we have
+
 \begin{equation}\label{eq:estep}
 \begin{split}
   \E_{\e|e,\delta,\w_0}\bigl[\ell(\w,\e|e)\bigr]
@@ -295,23 +302,7 @@ Let $q_i = \delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)\cdot \tilde \w_{ki}$ fo
 \end{split}
 \end{equation}
 
-<!-- which is in the same form as in the case without right-censoring. It can be shown that (see Appendix \ref{app:mstep}) the solution of (\ref{eq:emmstep}) is -->
-
-\begin{equation}
-  \hat\w_i = \frac{q_i}{n + \hat{\lla}'(\tth) \gg(x_i,u_i;\tth)},
-\end{equation}
-
-where $\hat{\lla}(\tth)$ can be solved analogously which is
-
-\begin{equation}\label{eq:lhatcens}
-    \hat\l(\tth) = \argmax_{\lla} \sum_{i=1}^n q_i\cdot\sha\log\Bigl(n + \lla' \gg(x_i,u_i;\tth)\Bigr),
-\end{equation}
-
-where
-\begin{equation}\label{eq:logsharp}
-  \sha\log(x_i; q_i) = \begin{cases} \log(x_i) & x_i \ge q_i \\
-   -\frac{1}{2q_i^2} x_i^2 + \tfrac 2 q_i x_i - \tfrac 3 2 + \log(q_i) & x_i < q_i \end{cases}.
-\end{equation}
+which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegas}) to (\ref{eq:optim}).
 
 \end{itemize}
 
