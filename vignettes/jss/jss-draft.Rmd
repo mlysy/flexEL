@@ -213,16 +213,34 @@ Consider a general regression model
 \]
 where $\e_i \iid (0,1)$ and independent of $\cx_i$, and $m$-dimensional conditional moment restrictions
 \begin{equation}\label{eq:cmom}
-  \E\bigl[\gg(\yy; \tth) \| \cx\bigr] = 0.
+  \E\bigl[\gg(\cx, \eep; \tth) \| \cx\bigr] = 0.
 \end{equation}
 
 We assume that the censoring variable $c_i$ is conditionally independent of $y_i$ given $\cx_i$. Let's denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s), the complete residuals as $\e_i'$s (corresponding to $y_i'$s). 
 
-The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\ee$:
-\begin{equation} \label{eq:celF}
-  \CEL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(e_i)^{\delta_i} [1-\mathrm{d}F(e_i)]^{1-\delta_i},
+The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function $F(\cx,\e) = G(\cx) \cdot H(\e)$, where $G$ and $H$ are the CDFs of $\cx$ and $\e$:
+\begin{equation}\label{eq:celF}
+  \CEL(\tth) = \max_{F \in \mathcal F(\tth)}\prod_{i=1}^n dG(\cx_i) \cdot dH(e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
 \end{equation}
-where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:cmom}.
+where
+\[
+  e_i = e_i(\tth) = \frac{u_i - \mu(\cx_i;\tth)}{\eta(\cx_i;\tth)},
+\]
+and $\mathcal F(\tth)$ is the set of all valid distribution functions satisfying \eqref{eq:cmom}.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\cx)$ is attained as the empirical distribution $\hat G(\cx)$ which puts a point mass of $1/n$ on each covariate observation $\cx_1, \ldots, \cx_n$.  Restricting our attention to $G(\cx)$ uniform on the observed covariates, and considering only the weaker moment condition
+\begin{equation}\label{eq:umom}
+  \E\bigl[\gg(\cx, \e; \tth)\bigr] = 0
+\end{equation}
+(which is true for any $G(\cx)$ if \eqref{eq:cmom} holds), the CEL function reduces to
+\[
+  \CEL(\tth) = \max_{F \in \mathcal F^\star(\tth)}\prod_{i=1}^n dH(e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
+\]
+where $\mathcal F^\star(\tth)$ is the set of all valid distributions $F(\cx, \e)$ satisfying \eqref{eq:umom}.
+
+<!-- The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\ee$: -->
+<!-- \begin{equation} \label{eq:celF} -->
+<!--   \CEL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(e_i)^{\delta_i} [1-\mathrm{d}F(e_i)]^{1-\delta_i}, -->
+<!-- \end{equation} -->
+<!-- where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:cmom}. -->
 
 It can be shown that with censored observations, it is no longer true that an optimal $F$ has support only on the data points $e_i, i=1,\cdots,n$. However, if we restrict ourselves to this case, we arrive at a finite dimensional problem
 \begin{equation}
