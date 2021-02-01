@@ -122,15 +122,15 @@ This paper describes a framework we designed for EL researchers to develop fast 
 
 ## Basics
 
-Let $\XX = (\xx_1,\cdots,\xx_n)$ where $\xx_i\in\R^d$ be iid observations from an unknown distribution $F_0(\xx)$, about which a parameter of interest $\tth \in \R^p$ is defined as satisfying an $m$-dimensional moment condition:
+Let $\XX = (\cx_1,\cdots,\cx_n)$ where $\cx_i\in\R^d$ be iid observations from an unknown distribution $F_0(\cx)$, about which a parameter of interest $\tth \in \R^p$ is defined as satisfying an $m$-dimensional moment condition:
 \begin{equation} \label{eq:momcond}
-  \E\bigl[\gg(\XX;\tth)\bigr] = 0,
+  \E\bigl[\gg(\cx;\tth)\bigr] = 0,
 \end{equation}
-where $\gg(\XX, \tth) = \bigl( g_1(\XX, \tth), \ldots, g_m(\XX, \tth) \bigr)$.
+where $\gg(\cx, \tth) = \bigl( g_1(\cx, \tth), \ldots, g_m(\cx, \tth) \bigr)$.
 
-The empirical likelihood $\EL(\tth)$ as the profile likelihood over the distribution function of $\e$:
+The empirical likelihood $\EL(\tth)$ as the profile likelihood over the distribution function of $\cx$:
 \begin{equation} \label{eq:elF}
-  \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\xx_i),
+  \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\cx_i),
 \end{equation}
 where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
 
@@ -213,7 +213,7 @@ Consider a general regression model
 \]
 where $\e_i \iid (0,1)$ and independent of $\cx_i$, and $m$-dimensional conditional moment restrictions
 \begin{equation}\label{eq:cmom}
-  \E\bigl[\gg(\cx, \eep; \tth) \| \cx\bigr] = 0.
+  \E\bigl[\gg(\cx, \e; \tth) \| \cx\bigr] = 0.
 \end{equation}
 
 We assume that the censoring variable $c_i$ is conditionally independent of $y_i$ given $\cx_i$. Let's denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s), the complete residuals as $\e_i'$s (corresponding to $y_i'$s). 
