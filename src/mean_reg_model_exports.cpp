@@ -13,7 +13,6 @@
 // using namespace Rcpp;
 using namespace Eigen;
 
-
 /**
  * @brief Calculate the G matrix for regular mean regression model.
  * 

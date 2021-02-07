@@ -15,9 +15,10 @@ A general EL object.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{GenEL$new()}}
-\item \href{#method-set_opts}{\code{GenEL$set_opts()}}
-\item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
-\item \href{#method-logel}{\code{GenEL$logel()}}
+\item \href{#method-set_max_iter}{\code{GenEL$set_max_iter()}}
+\item \href{#method-set_rel_tol}{\code{GenEL$set_rel_tol()}}
+\item \href{#method-set_supp_adj}{\code{GenEL$set_supp_adj()}}
+\item \href{#method-set_lambda0}{\code{GenEL$set_lambda0()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
 }
 }
@@ -39,6 +40,55 @@ Create a new GenEL object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{n_obs}}{Number of observations.}
+
+\item{\code{n_eqs}}{Number of (moment constraint) equations.
+,
+
+#' @description Set options for EL evaluation.
+#' @template args-lambda_precision
+#' @template arg-support
+#' @template arg-lambda0
+set_opts = function(max_iter = 100, rel_tol = 1e-7,
+supp_corr = TRUE, lambda0 = 0) {
+private$.max_iter <- max_iter
+private$.rel_tol <- rel_tol
+private$.supp_corr <- supp_corr
+private$.lambda0 <- lambda0
+},
+
+#' @description Solve the inner optimization problem given G matrix.
+#' @template arg-G
+#' @template arg-verbose
+lambda_nr = function(G, verbose = FALSE) {
+private$check_G(G)
+self$.G <- G
+lambdaNR(G = self$.G,
+lambda0 = private$.lambda0,
+support = private$.supp_corr,
+max_iter = private$.max_iter,
+rel_tol = private$.rel_tol,
+verbose = verbose)
+},
+
+#' @description Calculate log EL given G matrix.
+#' @template arg-G
+#' @param return_omega A boolean indicating whether to return the probability vector omega used to evaluate log EL.
+#' @param return_dldG A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.
+#' @template arg-verbose
+logel = function(G, return_omega = FALSE, return_dldG = FALSE, verbose = FALSE) {
+private$check_G(G)
+self$.G <- G
+logEL(G = self$.G,
+lambda0 = private$.lambda0,
+max_iter = private$.max_iter,
+rel_tol = private$.rel_tol,
+support = private$.supp_corr,
+return_omega = return_omega,
+return_dldG = return_dldG,
+verbose = verbose)
+}}
+
 \item{\code{G}}{A numeric matrix.}
 
 \item{\code{value}}{Missing or a numeric matrix.}
@@ -47,79 +97,40 @@ Create a new GenEL object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_opts"></a>}}
-\if{latex}{\out{\hypertarget{method-set_opts}{}}}
-\subsection{Method \code{set_opts()}}{
-Set options for EL evaluation.
+\if{html}{\out{<a id="method-set_max_iter"></a>}}
+\if{latex}{\out{\hypertarget{method-set_max_iter}{}}}
+\subsection{Method \code{set_max_iter()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_opts(max_iter = 100, rel_tol = 1e-07, supp_corr = TRUE, lambda0 = 0)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_max_iter(max_iter = 100)}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{max_iter}}{Integer scalar for maximum number of Newton-Raphson steps.}
-
-\item{\code{rel_tol}}{Positive scalar for relative tolerance of Newton-Raphson steps.}
-
-\item{\code{lambda0}}{A numeric vector of length \code{n_eqs} as the initial value of lambda.}
-}
-\if{html}{\out{</div>}}
-}
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-lambda_nr"></a>}}
-\if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
-\subsection{Method \code{lambda_nr()}}{
-Solve the inner optimization problem given G matrix.
+\if{html}{\out{<a id="method-set_rel_tol"></a>}}
+\if{latex}{\out{\hypertarget{method-set_rel_tol}{}}}
+\subsection{Method \code{set_rel_tol()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_rel_tol(rel_tol = 1e-07)}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-
-\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-
-\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-
-\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
-
-\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
-}
-\if{html}{\out{</div>}}
-}
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-logel"></a>}}
-\if{latex}{\out{\hypertarget{method-logel}{}}}
-\subsection{Method \code{logel()}}{
-Calculate log EL given G matrix.
+\if{html}{\out{<a id="method-set_supp_adj"></a>}}
+\if{latex}{\out{\hypertarget{method-set_supp_adj}{}}}
+\subsection{Method \code{set_supp_adj()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, return_omega = FALSE, return_dldG = FALSE, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, a = NULL)}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-
-\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-
-\item{\code{G}}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
-
-\item{\code{return_omega}}{A boolean indicating whether to return the probability vector omega used to evaluate log EL.}
-
-\item{\code{return_dldG}}{A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.}
-
-\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
-
-\item{\code{verbose}}{Logical scalar for whether to display number of steps and tolerance criterion when algorithm terminates.}
 }
-\if{html}{\out{</div>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_lambda0"></a>}}
+\if{latex}{\out{\hypertarget{method-set_lambda0}{}}}
+\subsection{Method \code{set_lambda0()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_lambda0(lambda0)}\if{html}{\out{</div>}}
 }
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

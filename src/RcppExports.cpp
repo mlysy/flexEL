@@ -6,6 +6,68 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
+// GenEL_ctor
+SEXP GenEL_ctor(int n_obs, int n_eqs);
+RcppExport SEXP _flexEL_GenEL_ctor(SEXP n_obsSEXP, SEXP n_eqsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_obs(n_obsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_eqs(n_eqsSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_ctor(n_obs, n_eqs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// GenEL_set_max_iter
+void GenEL_set_max_iter(SEXP pGEL, int max_iter);
+RcppExport SEXP _flexEL_GenEL_set_max_iter(SEXP pGELSEXP, SEXP max_iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    GenEL_set_max_iter(pGEL, max_iter);
+    return R_NilValue;
+END_RCPP
+}
+// GenEL_set_rel_tol
+void GenEL_set_rel_tol(SEXP pGEL, int rel_tol);
+RcppExport SEXP _flexEL_GenEL_set_rel_tol(SEXP pGELSEXP, SEXP rel_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< int >::type rel_tol(rel_tolSEXP);
+    GenEL_set_rel_tol(pGEL, rel_tol);
+    return R_NilValue;
+END_RCPP
+}
+// GenEL_set_supp_adj
+void GenEL_set_supp_adj(SEXP pGEL, bool supp_adj, Rcpp::Nullable<Rcpp::NumericVector> a_);
+RcppExport SEXP _flexEL_GenEL_set_supp_adj(SEXP pGELSEXP, SEXP supp_adjSEXP, SEXP a_SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< bool >::type supp_adj(supp_adjSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type a_(a_SEXP);
+    GenEL_set_supp_adj(pGEL, supp_adj, a_);
+    return R_NilValue;
+END_RCPP
+}
+// GenEL_set_lambda0
+void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0);
+RcppExport SEXP _flexEL_GenEL_set_lambda0(SEXP pGELSEXP, SEXP lambda0SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
+    GenEL_set_lambda0(pGEL, lambda0);
+    return R_NilValue;
+END_RCPP
+}
 // adjG
 Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a);
 RcppExport SEXP _flexEL_adjG(SEXP GSEXP, SEXP aSEXP) {
@@ -273,6 +335,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_flexEL_GenEL_ctor", (DL_FUNC) &_flexEL_GenEL_ctor, 2},
+    {"_flexEL_GenEL_set_max_iter", (DL_FUNC) &_flexEL_GenEL_set_max_iter, 2},
+    {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},
+    {"_flexEL_GenEL_set_supp_adj", (DL_FUNC) &_flexEL_GenEL_set_supp_adj, 3},
+    {"_flexEL_GenEL_set_lambda0", (DL_FUNC) &_flexEL_GenEL_set_lambda0, 2},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 6},
     {"_flexEL_OmegaHat", (DL_FUNC) &_flexEL_OmegaHat, 6},
