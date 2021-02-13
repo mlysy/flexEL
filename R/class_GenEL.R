@@ -14,7 +14,9 @@ GenEL <- R6::R6Class(
     #' @description Check the dimension of G is what is expected.
     #' @param G A numeric matrix.
     check_G = function(G) {
-      if (nrow(G) != private$.n_obs | ncol(G) != private$.n_eqs) {
+      n_obs <- GenEL_get_n_obs(private$.GEL)
+      n_eqs <- GenEL_get_n_eqs(private$.GEL)
+      if (nrow(G) != n_obs | ncol(G) != n_eqs) {
         stop("Dimension of G matrix must be `n_obs` x `n_eqs`.")
       }
     }
@@ -70,9 +72,15 @@ GenEL <- R6::R6Class(
     },
     
     set_lambda0 = function(lambda0) {
-      # TODO: write a getter for n_obs and n_eqs in GenEL
-      #   and check here that the length of lambda0 should be n_eqs (does supp_adj affects this?)
+      n_eqs <- GenEL_get_n_eqs(private$.GEL)
+      if (length(lambda0) != 0) {
+        stop("`lambda0` must be of length equal to the number of estimating equations.")
+      }
       GenEL_set_lambda0(private$.GEL, lambda0)
+    },
+    
+    lambda_nr = function() {
+      GenEL_lambda_nr(private$.GEL, private$.G)
     }
     
 

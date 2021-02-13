@@ -68,6 +68,40 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// GenEL_lambda_nr
+Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G);
+RcppExport SEXP _flexEL_GenEL_lambda_nr(SEXP pGELSEXP, SEXP GSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_lambda_nr(pGEL, G));
+    return rcpp_result_gen;
+END_RCPP
+}
+// GenEL_get_n_obs
+int GenEL_get_n_obs(SEXP pGEL);
+RcppExport SEXP _flexEL_GenEL_get_n_obs(SEXP pGELSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_get_n_obs(pGEL));
+    return rcpp_result_gen;
+END_RCPP
+}
+// GenEL_get_n_eqs
+int GenEL_get_n_eqs(SEXP pGEL);
+RcppExport SEXP _flexEL_GenEL_get_n_eqs(SEXP pGELSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_get_n_eqs(pGEL));
+    return rcpp_result_gen;
+END_RCPP
+}
 // adjG
 Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a);
 RcppExport SEXP _flexEL_adjG(SEXP GSEXP, SEXP aSEXP) {
@@ -340,6 +374,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},
     {"_flexEL_GenEL_set_supp_adj", (DL_FUNC) &_flexEL_GenEL_set_supp_adj, 3},
     {"_flexEL_GenEL_set_lambda0", (DL_FUNC) &_flexEL_GenEL_set_lambda0, 2},
+    {"_flexEL_GenEL_lambda_nr", (DL_FUNC) &_flexEL_GenEL_lambda_nr, 2},
+    {"_flexEL_GenEL_get_n_obs", (DL_FUNC) &_flexEL_GenEL_get_n_obs, 1},
+    {"_flexEL_GenEL_get_n_eqs", (DL_FUNC) &_flexEL_GenEL_get_n_eqs, 1},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 6},
     {"_flexEL_OmegaHat", (DL_FUNC) &_flexEL_OmegaHat, 6},

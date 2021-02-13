@@ -111,6 +111,12 @@ namespace flexEL {
     void set_lambda0(const Ref<const VectorXd>& lambda0);
     /// Get the diagnostics for the last Newton-Raphson run.
     void get_diag(int& nr_iter, double& nr_err);
+    /// Get support adjustment flag.
+    bool get_supp_adj();
+    /// Get number of observations.
+    int get_n_obs();
+    /// Get number of estimating equations.
+    int get_n_eqs();
 
     /// Solve the dual problem via Newton-Raphson algorithm.
     void lambda_nr(Ref<VectorXd> lambda, 
@@ -504,6 +510,18 @@ namespace flexEL {
     // use internal values of omega_ and lambda_
     logel_grad(dldG, omega_.head(n_obs2_), lambda_, double(n_obs2_));
     return ll;
+  }
+  
+  inline bool GenEL::get_supp_adj() {
+    return supp_adj_;
+  }
+  
+  inline int GenEL::get_n_obs() {
+    return n_obs_;
+  }
+  
+  inline int GenEL::get_n_eqs() {
+    return n_eqs_;
   }
 
   

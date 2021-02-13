@@ -19,6 +19,7 @@ A general EL object.
 \item \href{#method-set_rel_tol}{\code{GenEL$set_rel_tol()}}
 \item \href{#method-set_supp_adj}{\code{GenEL$set_supp_adj()}}
 \item \href{#method-set_lambda0}{\code{GenEL$set_lambda0()}}
+\item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
 }
 }
@@ -129,6 +130,15 @@ verbose = verbose)
 \subsection{Method \code{set_lambda0()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$set_lambda0(lambda0)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-lambda_nr"></a>}}
+\if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
+\subsection{Method \code{lambda_nr()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr()}\if{html}{\out{</div>}}
 }
 
 }

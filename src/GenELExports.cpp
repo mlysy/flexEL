@@ -82,5 +82,37 @@ void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
   return;
 }
 
+/// Solve the dual problem via Newton-Raphson algorithm.
+///
+/// @param[in] pGEL `externalptr` pointer to GenEL object. 
+/// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+///
+// [[Rcpp::export]]
+Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  bool supp_adj = GEL->get_supp_adj();
+  int n_obs = G.cols();
+  int n_eqs = G.rows();
+  Eigen::VectorXd lambda(n_eqs);
+  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  GEL->lambda_nr(lambda, G, norm_weights);
+  return lambda;
+}
+
+
+// [[Rcpp::export]]
+int GenEL_get_n_obs(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_obs = GEL->get_n_obs();
+  return n_obs;
+}
+
+
+// [[Rcpp::export]]
+int GenEL_get_n_eqs(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_eqs = GEL->get_n_eqs();
+  return n_eqs;
+}
 
 
