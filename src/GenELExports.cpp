@@ -88,7 +88,7 @@ void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
 /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
 ///
 // [[Rcpp::export]]
-Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G) {
+Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   bool supp_adj = GEL->get_supp_adj();
   int n_obs = G.cols();
@@ -96,10 +96,25 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G) {
   Eigen::VectorXd lambda(n_eqs);
   Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
   GEL->lambda_nr(lambda, G, norm_weights);
+  int n_iter;
+  double max_err;
+  bool not_conv;
+  GEL->get_diag(n_iter, max_err);
+  not_conv = (n_iter == GEL->get_max_iter()) && (max_err > GEL->get_rel_tol());
+  if(verbose) {
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
+  if (not_conv) {
+    for (int ii=0; ii < lambda.size(); ii++) {
+      lambda(ii) = std::numeric_limits<double>::quiet_NaN();
+    }
+  }
   return lambda;
 }
 
-
+/// Getter for n_obs.
+///
+/// @param[in] pGEL `externalptr` pointer to GenEL object. 
 // [[Rcpp::export]]
 int GenEL_get_n_obs(SEXP pGEL) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -107,7 +122,9 @@ int GenEL_get_n_obs(SEXP pGEL) {
   return n_obs;
 }
 
-
+/// Getter for n_eqs.
+///
+/// @param[in] pGEL `externalptr` pointer to GenEL object. 
 // [[Rcpp::export]]
 int GenEL_get_n_eqs(SEXP pGEL) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -115,4 +132,39 @@ int GenEL_get_n_eqs(SEXP pGEL) {
   return n_eqs;
 }
 
+/// Calculate the probability vector base on the given G matrix.
+/// 
+/// @param[in] pGEL `externalptr` pointer to GenEL object. 
+/// @param[in] lambda Dual problem vector of size `n_eqs`.  
+/// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+// [[Rcpp::export(".OmegaHat")]]
+Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, 
+                                Eigen::VectorXd lambda,
+                                Eigen::MatrixXd G) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_obs = GEL->get_n_obs(); // G.cols() should be the same value, check in R side
+  bool supp_adj = GEL->get_supp_adj();
+  Eigen::VectorXd omega(n_obs + supp_adj);
+  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  GEL->omega_hat(omega, lambda, G, norm_weights);
+  return omega;
+}
 
+/// Calculate the log empirical likelihood base on the given probability vector.
+/// 
+/// @param[in] pGEL `externalptr` pointer to GenEL object. 
+/// @param[in] omega Probability vector of length `n_obs + supp_adj`.
+// [[Rcpp::export(".OmegaHat")]]
+double GenEL_logel_omega(SEXP pGEL,
+                         Eigen::VectorXd omega) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_obs = GEL->get_n_obs(); // length of omega should be the same, check in R side
+  bool supp_adj = GEL->get_supp_adj();
+  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  double sum_weights = double(n_obs + supp_adj);
+  double log_el = GEL->logel_omega(omega, norm_weights, sum_weights);
+  return log_el;
+}
+
+
+  

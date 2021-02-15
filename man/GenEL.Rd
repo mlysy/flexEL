@@ -20,6 +20,8 @@ A general EL object.
 \item \href{#method-set_supp_adj}{\code{GenEL$set_supp_adj()}}
 \item \href{#method-set_lambda0}{\code{GenEL$set_lambda0()}}
 \item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
+\item \href{#method-omega_hat}{\code{GenEL$omega_hat()}}
+\item \href{#method-logel}{\code{GenEL$logel()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
 }
 }
@@ -43,52 +45,7 @@ Create a new GenEL object.
 \describe{
 \item{\code{n_obs}}{Number of observations.}
 
-\item{\code{n_eqs}}{Number of (moment constraint) equations.
-,
-
-#' @description Set options for EL evaluation.
-#' @template args-lambda_precision
-#' @template arg-support
-#' @template arg-lambda0
-set_opts = function(max_iter = 100, rel_tol = 1e-7,
-supp_corr = TRUE, lambda0 = 0) {
-private$.max_iter <- max_iter
-private$.rel_tol <- rel_tol
-private$.supp_corr <- supp_corr
-private$.lambda0 <- lambda0
-},
-
-#' @description Solve the inner optimization problem given G matrix.
-#' @template arg-G
-#' @template arg-verbose
-lambda_nr = function(G, verbose = FALSE) {
-private$check_G(G)
-self$.G <- G
-lambdaNR(G = self$.G,
-lambda0 = private$.lambda0,
-support = private$.supp_corr,
-max_iter = private$.max_iter,
-rel_tol = private$.rel_tol,
-verbose = verbose)
-},
-
-#' @description Calculate log EL given G matrix.
-#' @template arg-G
-#' @param return_omega A boolean indicating whether to return the probability vector omega used to evaluate log EL.
-#' @param return_dldG A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.
-#' @template arg-verbose
-logel = function(G, return_omega = FALSE, return_dldG = FALSE, verbose = FALSE) {
-private$check_G(G)
-self$.G <- G
-logEL(G = self$.G,
-lambda0 = private$.lambda0,
-max_iter = private$.max_iter,
-rel_tol = private$.rel_tol,
-support = private$.supp_corr,
-return_omega = return_omega,
-return_dldG = return_dldG,
-verbose = verbose)
-}}
+\item{\code{n_eqs}}{Number of (moment constraint) equations.}
 
 \item{\code{G}}{A numeric matrix.}
 
@@ -139,6 +96,24 @@ verbose = verbose)
 \subsection{Method \code{lambda_nr()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-omega_hat"></a>}}
+\if{latex}{\out{\hypertarget{method-omega_hat}{}}}
+\subsection{Method \code{omega_hat()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-logel"></a>}}
+\if{latex}{\out{\hypertarget{method-logel}{}}}
+\subsection{Method \code{logel()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel()}\if{html}{\out{</div>}}
 }
 
 }

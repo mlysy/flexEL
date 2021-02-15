@@ -117,6 +117,11 @@ namespace flexEL {
     int get_n_obs();
     /// Get number of estimating equations.
     int get_n_eqs();
+    /// Get the maximum number of iterations.
+    int get_max_iter();
+    /// Get the relative tolerance.
+    double get_rel_tol();
+    
 
     /// Solve the dual problem via Newton-Raphson algorithm.
     void lambda_nr(Ref<VectorXd> lambda, 
@@ -522,6 +527,14 @@ namespace flexEL {
   
   inline int GenEL::get_n_eqs() {
     return n_eqs_;
+  }
+  
+  inline int GenEL::get_max_iter() {
+    return max_iter_;
+  }
+  
+  inline double GenEL::get_rel_tol() {
+    return rel_tol_;
   }
 
   

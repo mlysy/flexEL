@@ -21,8 +21,8 @@ GenEL_set_lambda0 <- function(pGEL, lambda0) {
     invisible(.Call(`_flexEL_GenEL_set_lambda0`, pGEL, lambda0))
 }
 
-GenEL_lambda_nr <- function(pGEL, G) {
-    .Call(`_flexEL_GenEL_lambda_nr`, pGEL, G)
+GenEL_lambda_nr <- function(pGEL, G, verbose) {
+    .Call(`_flexEL_GenEL_lambda_nr`, pGEL, G, verbose)
 }
 
 GenEL_get_n_obs <- function(pGEL) {
@@ -31,6 +31,14 @@ GenEL_get_n_obs <- function(pGEL) {
 
 GenEL_get_n_eqs <- function(pGEL) {
     .Call(`_flexEL_GenEL_get_n_eqs`, pGEL)
+}
+
+.OmegaHat <- function(pGEL, lambda, G) {
+    .Call(`_flexEL_GenEL_omega_hat`, pGEL, lambda, G)
+}
+
+.OmegaHat <- function(pGEL, omega) {
+    .Call(`_flexEL_GenEL_logel_omega`, pGEL, omega)
 }
 
 .adjG <- function(G, a) {
