@@ -27,8 +27,8 @@ SEXP GenEL_ctor(int n_obs, int n_eqs) {
 
 /// Set the max_iter of the GenEL object.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] max_iter Maximum number of Newton-Raphson iterations.
+/// @param[in] pGEL      `externalptr` pointer to GenEL object. 
+/// @param[in] max_iter  Maximum number of Newton-Raphson iterations.
 ///
 // [[Rcpp::export]]
 void GenEL_set_max_iter(SEXP pGEL, int max_iter) {
@@ -39,8 +39,8 @@ void GenEL_set_max_iter(SEXP pGEL, int max_iter) {
 
 /// Set the rel_tol of the GenEL object.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] rel_tol Relative tolerance for the Newton-Raphson algorithm.
+/// @param[in] pGEL      `externalptr` pointer to GenEL object. 
+/// @param[in] rel_tol   Relative tolerance for the Newton-Raphson algorithm.
 ///
 // [[Rcpp::export]]
 void GenEL_set_rel_tol(SEXP pGEL, int rel_tol) {
@@ -51,9 +51,9 @@ void GenEL_set_rel_tol(SEXP pGEL, int rel_tol) {
 
 /// Set the supp_adj of the GenEL object.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] supp_adj Whether or not to enable support adjustment.
-/// @param[in] a Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
+/// @param[in] pGEL        `externalptr` pointer to GenEL object. 
+/// @param[in] supp_adj    Whether or not to enable support adjustment.
+/// @param[in] a Support   adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
 ///
 // [[Rcpp::export]]
 void GenEL_set_supp_adj(SEXP pGEL, 
@@ -72,8 +72,8 @@ void GenEL_set_supp_adj(SEXP pGEL,
 
 /// Set the lambda0 of the GenEL object.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] lambda0 Initialization vector of size `n_eqs`.
+/// @param[in] pGEL `    externalptr` pointer to GenEL object. 
+/// @param[in] lambda0   Initialization vector of size `n_eqs`.
 ///
 // [[Rcpp::export]]
 void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
@@ -84,9 +84,10 @@ void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
 
 /// Solve the dual problem via Newton-Raphson algorithm.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
-///
+/// @param[in] pGEL     `externalptr` pointer to GenEL object. 
+/// @param[in] G         Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+/// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+/// 
 // [[Rcpp::export]]
 Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -114,7 +115,7 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
 
 /// Getter for n_obs.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
 // [[Rcpp::export]]
 int GenEL_get_n_obs(SEXP pGEL) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -124,7 +125,7 @@ int GenEL_get_n_obs(SEXP pGEL) {
 
 /// Getter for n_eqs.
 ///
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
 // [[Rcpp::export]]
 int GenEL_get_n_eqs(SEXP pGEL) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -134,9 +135,9 @@ int GenEL_get_n_eqs(SEXP pGEL) {
 
 /// Calculate the probability vector base on the given G matrix.
 /// 
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] lambda Dual problem vector of size `n_eqs`.  
-/// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+/// @param[in] pGEL     `externalptr` pointer to GenEL object. 
+/// @param[in] lambda   Dual problem vector of size `n_eqs`.  
+/// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
 // [[Rcpp::export(".OmegaHat")]]
 Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, 
                                 Eigen::VectorXd lambda,
@@ -152,8 +153,8 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
 
 /// Calculate the log empirical likelihood base on the given probability vector.
 /// 
-/// @param[in] pGEL `externalptr` pointer to GenEL object. 
-/// @param[in] omega Probability vector of length `n_obs + supp_adj`.
+/// @param[in] pGEL    `externalptr` pointer to GenEL object. 
+/// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
 // [[Rcpp::export(".OmegaHat")]]
 double GenEL_logel_omega(SEXP pGEL,
                          Eigen::VectorXd omega) {
@@ -165,6 +166,41 @@ double GenEL_logel_omega(SEXP pGEL,
   double log_el = GEL->logel_omega(omega, norm_weights, sum_weights);
   return log_el;
 }
+
+/// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+/// 
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
+/// @param[in] G      Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+/// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+// [[Rcpp::export(".OmegaHat")]]
+Rcpp::List GenEL_Logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_eqs = GEL->get_n_eqs();
+  int n_obs = GEL->get_n_obs();
+  bool supp_adj = GEL->get_supp_adj();
+  int n_iter;
+  double max_err;
+  // bool not_conv;
+  double logel;
+  Eigen::VectorXd lambda(n_eqs);
+  Eigen::VectorXd omega(n_obs + supp_adj);
+  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  double sum_weights = double(n_obs + supp_adj);
+  Eigen::MatrixXd dldG(n_eqs, n_obs);
+  GEL->lambda_nr(lambda, G, norm_weights);
+  GEL->get_diag(n_iter, max_err);
+  if(verbose) {
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
+  GEL->omega_hat(omega, lambda, G, norm_weights);
+  logel = GEL->logel_omega(omega, norm_weights, sum_weights);
+  GEL->logel_grad(dldG, omega, lambda, sum_weights);
+  
+  return Rcpp::List::create(Rcpp::Named("logel") = logel,
+                            Rcpp::Named("dldG") = dldG.transpose(),
+                            Rcpp::Named("omega") = omega);
+}
+
 
 
   

@@ -41,6 +41,10 @@ GenEL_get_n_eqs <- function(pGEL) {
     .Call(`_flexEL_GenEL_logel_omega`, pGEL, omega)
 }
 
+.OmegaHat <- function(pGEL, G, verbose) {
+    .Call(`_flexEL_GenEL_Logel_grad`, pGEL, G, verbose)
+}
+
 .adjG <- function(G, a) {
     .Call(`_flexEL_adjG`, G, a)
 }

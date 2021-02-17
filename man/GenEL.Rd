@@ -15,13 +15,12 @@ A general EL object.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{GenEL$new()}}
-\item \href{#method-set_max_iter}{\code{GenEL$set_max_iter()}}
-\item \href{#method-set_rel_tol}{\code{GenEL$set_rel_tol()}}
 \item \href{#method-set_supp_adj}{\code{GenEL$set_supp_adj()}}
-\item \href{#method-set_lambda0}{\code{GenEL$set_lambda0()}}
+\item \href{#method-set_opts}{\code{GenEL$set_opts()}}
 \item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
 \item \href{#method-omega_hat}{\code{GenEL$omega_hat()}}
 \item \href{#method-logel}{\code{GenEL$logel()}}
+\item \href{#method-logel_grad}{\code{GenEL$logel_grad()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
 }
 }
@@ -32,7 +31,13 @@ A general EL object.
 Check the dimension of G is what is expected.
 
 
-Access or reset the value of .G.
+Access or reset the value of .max_iter.
+
+
+Access or reset the value of .rel_tol.
+
+
+Access or reset the value of .lambda0.
 
 
 Create a new GenEL object.
@@ -49,44 +54,36 @@ Create a new GenEL object.
 
 \item{\code{G}}{A numeric matrix.}
 
-\item{\code{value}}{Missing or a numeric matrix.}
+\item{\code{value}}{Missing or a positive integer (default to 200).}
+
+\item{\code{value}}{Missing or a small positive number (default to 1e-7).}
+
+\item{\code{value}}{Missing or a vector of length \code{n_eqs}.}
 }
 \if{html}{\out{</div>}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_max_iter"></a>}}
-\if{latex}{\out{\hypertarget{method-set_max_iter}{}}}
-\subsection{Method \code{set_max_iter()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_max_iter(max_iter = 100)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_rel_tol"></a>}}
-\if{latex}{\out{\hypertarget{method-set_rel_tol}{}}}
-\subsection{Method \code{set_rel_tol()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_rel_tol(rel_tol = 1e-07)}\if{html}{\out{</div>}}
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_supp_adj"></a>}}
 \if{latex}{\out{\hypertarget{method-set_supp_adj}{}}}
 \subsection{Method \code{set_supp_adj()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, a = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL)}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_lambda0"></a>}}
-\if{latex}{\out{\hypertarget{method-set_lambda0}{}}}
-\subsection{Method \code{set_lambda0()}}{
+\if{html}{\out{<a id="method-set_opts"></a>}}
+\if{latex}{\out{\hypertarget{method-set_opts}{}}}
+\subsection{Method \code{set_opts()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_lambda0(lambda0)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_opts(
+  max_iter = 100,
+  rel_tol = 1e-07,
+  lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL)),
+  supp_adj = FALSE,
+  a = NULL
+)}\if{html}{\out{</div>}}
 }
 
 }
@@ -95,7 +92,7 @@ Create a new GenEL object.
 \if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
 \subsection{Method \code{lambda_nr()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 }
@@ -104,7 +101,7 @@ Create a new GenEL object.
 \if{latex}{\out{\hypertarget{method-omega_hat}{}}}
 \subsection{Method \code{omega_hat()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 }
@@ -113,7 +110,16 @@ Create a new GenEL object.
 \if{latex}{\out{\hypertarget{method-logel}{}}}
 \subsection{Method \code{logel()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, verbose = FALSE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-logel_grad"></a>}}
+\if{latex}{\out{\hypertarget{method-logel_grad}{}}}
+\subsection{Method \code{logel_grad()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 }
