@@ -31,13 +31,19 @@ A general EL object.
 Check the dimension of G is what is expected.
 
 
-Access or reset the value of .max_iter.
+Access or reset the value of the maximum number of iterations.
 
 
-Access or reset the value of .rel_tol.
+Access or reset the value of relative tolerance controlling the accuracy at convergence..
 
 
-Access or reset the value of .lambda0.
+Access or reset the initial value of lambda.
+
+
+Access or reset the support correction flag.
+
+
+Access or reset the value of support corection factor.
 
 
 Create a new GenEL object.
@@ -54,74 +60,159 @@ Create a new GenEL object.
 
 \item{\code{G}}{A numeric matrix.}
 
-\item{\code{value}}{Missing or a positive integer (default to 200).}
+\item{\code{value}}{Missing or a positive integer (default to 100).}
 
 \item{\code{value}}{Missing or a small positive number (default to 1e-7).}
 
 \item{\code{value}}{Missing or a vector of length \code{n_eqs}.}
+
+\item{\code{value}}{Missing or a boolean indicating whether to conduct support correction or not.}
+
+\item{\code{value}}{Missing or a scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A \code{GenEL} object.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_supp_adj"></a>}}
 \if{latex}{\out{\hypertarget{method-set_supp_adj}{}}}
 \subsection{Method \code{set_supp_adj()}}{
+Set the support correction flag and support correction factor.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+
+\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_opts"></a>}}
 \if{latex}{\out{\hypertarget{method-set_opts}{}}}
 \subsection{Method \code{set_opts()}}{
+Set more than one options together.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$set_opts(
   max_iter = 100,
   rel_tol = 1e-07,
   lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL)),
   supp_adj = FALSE,
-  a = NULL
+  supp_adj_a = NULL
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{max_iter}}{A positive integer controlling the maximum number of iterations.}
+
+\item{\code{rel_tol}}{A small positive number controlling accuracy at convergence.}
+
+\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
+
+\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+
+\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-lambda_nr"></a>}}
 \if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
 \subsection{Method \code{lambda_nr()}}{
+Calculate the solution of the dual problem of maximum log EL problem.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+
+\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A numeric vector of length \code{n_eqs}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-omega_hat"></a>}}
 \if{latex}{\out{\hypertarget{method-omega_hat}{}}}
 \subsection{Method \code{omega_hat()}}{
+Calculate the probability vector base on the given G matrix.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+
+\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A probability vector of length \code{n_obs + supp_adj}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-logel"></a>}}
 \if{latex}{\out{\hypertarget{method-logel}{}}}
 \subsection{Method \code{logel()}}{
+Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+
+\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A scalar.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-logel_grad"></a>}}
 \if{latex}{\out{\hypertarget{method-logel_grad}{}}}
 \subsection{Method \code{logel_grad()}}{
+Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+
+\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A list of three elements.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

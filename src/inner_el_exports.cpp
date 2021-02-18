@@ -20,7 +20,7 @@ using namespace Rcpp;
  * @param[in] max_iter   A positive integer controlling the maximum number of iterations.
  * @param[in] rel_tol    A small positive number controlling accuracy at convergence.
  * @param[in] support    A boolean indicating whether to conduct support correction or not.
- * @param[in] verbose    A boolean indicating whether to print out number of iterations and maximum error.
+ * @param[in] verbose    A boolean indicating whether to print out number of iterations and maximum error 
  *                         at the end of the Newton-Raphson algorithm.
  */
 // [[Rcpp::export(".LambdaNR")]]
