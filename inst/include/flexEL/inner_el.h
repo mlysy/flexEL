@@ -122,7 +122,6 @@ namespace flexEL {
     /// Get the relative tolerance.
     double get_rel_tol();
     
-
     /// Solve the dual problem via Newton-Raphson algorithm.
     void lambda_nr(Ref<VectorXd> lambda, 
                    const Ref<const MatrixXd>& G,
@@ -443,7 +442,8 @@ namespace flexEL {
     // std::cout << "norm_weights_eff = \n" << norm_weights_eff.adjoint() << std::endl;
     // std::cout << "omega = \n" << omega.adjoint() << std::endl;
     // std::cout << "sum_weights = \n" << sum_weights << std::endl;
-    return sum_weights * (omega.array().log() * norm_weights.array()).sum();
+    // return sum_weights * (omega.array().log() * norm_weights.array()).sum();
+    return sum_weights * (omega.array().log() * norm_weights_eff.array()).sum(); // TODO: check with Martin, seems above line was a typo?
   }
 
   inline double GenEL::logel_impl(const Ref<const MatrixXd>& G,
