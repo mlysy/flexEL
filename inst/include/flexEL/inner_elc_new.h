@@ -6,6 +6,7 @@
 #include <RcppEigen.h>
 #include "inner_el.h"
 #include "sort_order.h"
+#include "ind_smooth.h" 
 
 namespace flexEL {
 
@@ -25,6 +26,9 @@ namespace flexEL {
     double supp_a_;
     int n_obs1_; // n_obs1_ = n_obs_+1: for memory allocation
     int n_obs2_; // n_obs2_ = n_obs_+support: used n_obs_ in calculation
+    // for continuity correction
+    bool smooth_;
+    double smooth_s_;
     
     // internal variables for EM algorithm
     VectorXd omega_init_; // initial value for omegas, in case of reset
@@ -33,6 +37,7 @@ namespace flexEL {
     VectorXi eps_ord_; 
     VectorXd norm_weights_;
     VectorXd psot_; // partial sum of omegatildas
+    VectorXd psos_vec_; // partial sum of omegas up to each omega in the order of epsilon
 
     // internals for EM options
     int max_iter_em_;
@@ -42,6 +47,11 @@ namespace flexEL {
     void eval_pso(double &psos,
                   const int ii,
                   const Ref<const VectorXd>& omega); // Partial sum of omega_jj s.t. eps_jj >= eps_ii
+    // helper function for eval_weights: calculate partial sum of omegas
+    void eval_pso_smooth(double &psos,
+                         const int ii,
+                         const Ref<const VectorXd>& omega,
+                         const Ref<const VectorXd>& epsilon);
     
     
   public:
@@ -59,12 +69,19 @@ namespace flexEL {
     /// Set the support adjustment flag.
     void set_supp_adj(bool supp_adj, double a);
     void set_supp_adj(bool supp_adj);
+    /// Set the discontinuity correction flag
+    void set_smooth(bool smooth, double s);
+    void set_smooth(bool smooth);
     
     /// Calculate weights according to epsilons
     void eval_weights(Ref<VectorXd> weights,
                       const Ref<const VectorXd>& delta,
                       const Ref<const VectorXd>& epsilon,
                       const Ref<const VectorXd>& omega);
+    void eval_weights_smooth(Ref<VectorXd> weights,
+                             const Ref<const VectorXd>& delta,
+                             const Ref<const VectorXd>& epsilon,
+                             const Ref<const VectorXd>& omega);
     
     void omega_hat(Ref<VectorXd> omega,
                    const Ref<const MatrixXd>& G,
@@ -87,6 +104,8 @@ namespace flexEL {
     supp_adj_ = false; // no support correction by default
     n_obs1_ = n_obs_+1; // space for augmented G
     n_obs2_ = n_obs_ + supp_adj_;
+    smooth_ = false;
+    smooth_s_ = 10;
 
     omega_init_ = VectorXd::Zero(n_obs1_).array() + 1.0/(double)n_obs1_; 
     delta_ = VectorXd::Zero(n_obs1_);
@@ -94,6 +113,7 @@ namespace flexEL {
     eps_ord_ = VectorXi::Zero(n_obs1_);
     norm_weights_ = VectorXd::Zero(n_obs1_);
     psot_ = VectorXd::Zero(n_obs1_);
+    psos_vec_ = VectorXd::Zero(n_obs1_);
   }
   
   /// @param[in] max_iter Maximum number of Newton-Raphson iterations.
@@ -136,18 +156,45 @@ namespace flexEL {
     return;
   }
   
+  inline void CensEL::set_smooth(bool smooth, double s) {
+    smooth_ = smooth; 
+    smooth_s_ = s; 
+    return;
+  }
+  
+  inline void CensEL::set_smooth(bool smooth) {
+    set_smooth(smooth, 10); 
+    return;
+  }
+  
   /// @param[out] psos Partial sum of omega.
   /// @param[in] ii Index for ii-th largest epsilon.
   /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
   inline void CensEL::eval_pso(double &psos,
-                                 const int ii,
-                                 const Ref<const VectorXd>& omega) {
+                               const int ii,
+                               const Ref<const VectorXd>& omega) {
     int kk;
     for (int jj=n_obs2_-1; jj>=0; jj--) {
       // Note: eps_ord_ corresponds to epsilons in ascending order
       kk = eps_ord_(jj); // kk is the index of the jj-th largest epsilon
       psos += omega(kk);
       if (kk == ii) break; // until (backwardly) reaching ii-th largest epsilon 
+    }
+    return;
+  }
+  
+  inline void CensEL::eval_pso_smooth(double &psos,
+                                        const int ii,
+                                        const Ref<const VectorXd>& omega,
+                                        const Ref<const VectorXd>& epsilon) {
+    epsilon_.head(n_obs_) = epsilon;
+    if (supp_adj_ && ii == (n_obs2_-1)) {
+      psos = omega.head(n_obs2_-1).sum() + 0.5*omega(n_obs2_-1);
+    }
+    else {
+      for (int jj=0; jj<n_obs2_; jj++) {
+        psos += ind_smooth(epsilon_(ii)-epsilon_(jj), smooth_s_)*omega(jj);
+      }
     }
     return;
   }
@@ -159,7 +206,7 @@ namespace flexEL {
     // find the indices for increasing order of epsilons 
     psot_.fill(0.0);
     int kk;
-    double psos;
+    double psos = 0; // must init to 0
     delta_.head(n_obs_) = delta; 
     epsilon_.head(n_obs_) = epsilon;
     VectorXi eps_ord_ = sort_inds(epsilon_); 
@@ -181,6 +228,35 @@ namespace flexEL {
     weights.array() = delta_.array() + psot_.array();
   }
   
+  inline void CensEL::eval_weights_smooth(Ref<VectorXd> weights,
+                                          const Ref<const VectorXd>& delta,
+                                          const Ref<const VectorXd>& omega,
+                                          const Ref<const VectorXd>& epsilon) {
+    psot_.fill(0.0); 
+    for (int ii=0; ii<n_obs2_; ii++) {
+      eval_pso_smooth(psos_vec_(ii), ii, omega, epsilon);
+    }
+    delta_.head(n_obs_) = delta; 
+    if (supp_adj_) {
+      for (int jj=0; jj<n_obs2_; jj++) {
+        for (int kk=0; kk<n_obs2_; kk++) {
+          if (jj == n_obs2_-1 && kk == n_obs2_-1) {
+            psot_(jj) += (1-delta_(kk))*ind_smooth(0.0,smooth_s_)*omega(jj)/psos_vec_(kk);
+          }
+          else psot_(jj) += (1-delta_(kk))*ind_smooth(epsilon(kk)-epsilon(jj),smooth_s_)*omega(jj)/psos_vec_(kk);
+        }
+      }
+    }
+    else {
+      for (int jj=0; jj<n_obs2_; jj++) {
+        for (int kk=0; kk<n_obs2_; kk++) {
+          psot_(jj) += (1-delta_(kk))*ind_smooth(epsilon(kk)-epsilon(jj),smooth_s_)*omega(jj)/psos_vec_(kk);
+        }
+      }
+    }
+    weights = delta_.array()+psot_.array();
+  }
+  
   inline void CensEL::omega_hat(Ref<VectorXd> omega,
                                 const Ref<const MatrixXd>& G,
                                 const Ref<const VectorXd>& delta,
@@ -193,7 +269,11 @@ namespace flexEL {
     int em_iter;
     double em_err;
     VectorXd weights(n_obs2_);
-    eval_weights(weights, delta, epsilon, omega);
+    if (!smooth_) {
+      eval_weights(weights, delta, epsilon, omega);
+    } else{
+      eval_weights_smooth(weights, delta, epsilon, omega);
+    }
     double sum_weights = weights.head(n_obs2_).sum();
     norm_weights_.head(n_obs2_) /= sum_weights;
     double logel_old = GEL.logel_omega(omega, norm_weights_.head(n_obs2_), sum_weights);
@@ -201,7 +281,11 @@ namespace flexEL {
     int ii;
     for(ii=0; ii<max_iter_em_; ii++) {
       // E-step:
-      eval_weights(weights, delta, epsilon, omega); // assigns weights according to epsilons
+      if (!smooth_) {
+        eval_weights(weights, delta, epsilon, omega);
+      } else{
+        eval_weights_smooth(weights, delta, epsilon, omega);
+      }
       sum_weights = weights.head(n_obs2_).sum();
       norm_weights_.head(n_obs2_) /= sum_weights;
       // M-step:
@@ -228,7 +312,12 @@ namespace flexEL {
                                     const Ref<const VectorXd>& epsilon,
                                     const Ref<const VectorXd>& omega) {
     VectorXd weights(n_obs2_);
-    eval_weights(weights, delta, epsilon, omega);
+    // eval_weights(weights, delta, epsilon, omega);
+    if (!smooth_) {
+      eval_weights(weights, delta, epsilon, omega);
+    } else{
+      eval_weights_smooth(weights, delta, epsilon, omega);
+    }
     double sum_weights = weights.head(n_obs2_).sum();
     norm_weights_.head(n_obs2_) /= sum_weights;
     double logel = GEL.logel_omega(omega, norm_weights_, sum_weights);
