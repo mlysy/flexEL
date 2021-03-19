@@ -184,9 +184,9 @@ namespace flexEL {
   }
   
   inline void CensEL::eval_pso_smooth(double &psos,
-                                        const int ii,
-                                        const Ref<const VectorXd>& omega,
-                                        const Ref<const VectorXd>& epsilon) {
+                                      const int ii,
+                                      const Ref<const VectorXd>& omega,
+                                      const Ref<const VectorXd>& epsilon) {
     epsilon_.head(n_obs_) = epsilon;
     if (supp_adj_ && ii == (n_obs2_-1)) {
       psos = omega.head(n_obs2_-1).sum() + 0.5*omega(n_obs2_-1);
@@ -308,6 +308,9 @@ namespace flexEL {
     return;
   }
   
+  /// @param[in] delta Censoring indicator vector of length `n_obs`.
+  /// @param[in] epsilon Residual vector of length `n_obs`.
+  /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
   inline double CensEL::logel_omega(const Ref<const VectorXd>& delta,
                                     const Ref<const VectorXd>& epsilon,
                                     const Ref<const VectorXd>& omega) {

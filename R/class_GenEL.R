@@ -156,6 +156,9 @@ GenEL <- R6::R6Class(
       GenEL_omega_hat(private$.GEL, lambda, G)
     },
     
+    # TODO: change the name to logel_omega which takes omega as input 
+    #   and add another method using logel C++ method which takes G directly??
+    
     #' @description Calculate the log empirical likelihood base on the given G matrix.
     #' @param G        A matrix of dimension `n_eqs x n_obs`.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
