@@ -115,6 +115,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// GenEL_get_supp_adj
+bool GenEL_get_supp_adj(SEXP pGEL);
+RcppExport SEXP _flexEL_GenEL_get_supp_adj(SEXP pGELSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_get_supp_adj(pGEL));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GenEL_omega_hat
 Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, Eigen::VectorXd lambda, Eigen::MatrixXd G);
 RcppExport SEXP _flexEL_GenEL_omega_hat(SEXP pGELSEXP, SEXP lambdaSEXP, SEXP GSEXP) {
@@ -137,6 +148,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type omega(omegaSEXP);
     rcpp_result_gen = Rcpp::wrap(GenEL_logel_omega(pGEL, omega));
+    return rcpp_result_gen;
+END_RCPP
+}
+// GenEL_logel
+double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G);
+RcppExport SEXP _flexEL_GenEL_logel(SEXP pGELSEXP, SEXP GSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_logel(pGEL, G));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -429,8 +452,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_lambda_nr", (DL_FUNC) &_flexEL_GenEL_lambda_nr, 3},
     {"_flexEL_GenEL_get_n_obs", (DL_FUNC) &_flexEL_GenEL_get_n_obs, 1},
     {"_flexEL_GenEL_get_n_eqs", (DL_FUNC) &_flexEL_GenEL_get_n_eqs, 1},
+    {"_flexEL_GenEL_get_supp_adj", (DL_FUNC) &_flexEL_GenEL_get_supp_adj, 1},
     {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 3},
     {"_flexEL_GenEL_logel_omega", (DL_FUNC) &_flexEL_GenEL_logel_omega, 2},
+    {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 2},
     {"_flexEL_GenEL_Logel_grad", (DL_FUNC) &_flexEL_GenEL_Logel_grad, 3},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 6},

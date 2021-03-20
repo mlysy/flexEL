@@ -37,15 +37,23 @@ GenEL_get_n_eqs <- function(pGEL) {
     .Call(`_flexEL_GenEL_get_n_eqs`, pGEL)
 }
 
-.OmegaHat <- function(pGEL, lambda, G) {
+GenEL_get_supp_adj <- function(pGEL) {
+    .Call(`_flexEL_GenEL_get_supp_adj`, pGEL)
+}
+
+GenEL_omega_hat <- function(pGEL, lambda, G) {
     .Call(`_flexEL_GenEL_omega_hat`, pGEL, lambda, G)
 }
 
-.OmegaHat <- function(pGEL, omega) {
+GenEL_logel_omega <- function(pGEL, omega) {
     .Call(`_flexEL_GenEL_logel_omega`, pGEL, omega)
 }
 
-.OmegaHat <- function(pGEL, G, verbose) {
+GenEL_logel <- function(pGEL, G) {
+    .Call(`_flexEL_GenEL_logel`, pGEL, G)
+}
+
+GenEL_Logel_grad <- function(pGEL, G, verbose) {
     .Call(`_flexEL_GenEL_Logel_grad`, pGEL, G, verbose)
 }
 

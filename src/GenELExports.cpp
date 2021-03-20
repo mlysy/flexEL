@@ -133,12 +133,22 @@ int GenEL_get_n_eqs(SEXP pGEL) {
   return n_eqs;
 }
 
+/// Getter for supp_adj.
+///
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
+// [[Rcpp::export]]
+bool GenEL_get_supp_adj(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  bool supp_adj = GEL->get_supp_adj();
+  return supp_adj;
+}
+
 /// Calculate the probability vector base on the given G matrix.
 /// 
 /// @param[in] pGEL     `externalptr` pointer to GenEL object. 
 /// @param[in] lambda   Dual problem vector of size `n_eqs`.  
 /// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
-// [[Rcpp::export(".OmegaHat")]]
+// [[Rcpp::export]]
 Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, 
                                 Eigen::VectorXd lambda,
                                 Eigen::MatrixXd G) {
@@ -155,7 +165,7 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
 /// 
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
-// [[Rcpp::export(".OmegaHat")]]
+// [[Rcpp::export]]
 double GenEL_logel_omega(SEXP pGEL,
                          Eigen::VectorXd omega) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -167,12 +177,23 @@ double GenEL_logel_omega(SEXP pGEL,
   return log_el;
 }
 
+/// Calculate the log empirical likelihood base on the given probability vector.
+/// 
+/// @param[in] pGEL    `externalptr` pointer to GenEL object. 
+/// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
+// [[Rcpp::export]]
+double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  double log_el = GEL->logel(G);
+  return log_el;
+}
+
 /// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
 /// 
 /// @param[in] pGEL   `externalptr` pointer to GenEL object. 
 /// @param[in] G      Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
 /// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
-// [[Rcpp::export(".OmegaHat")]]
+// [[Rcpp::export]]
 Rcpp::List GenEL_Logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   int n_eqs = GEL->get_n_eqs();

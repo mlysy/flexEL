@@ -1,6 +1,7 @@
+#' Constructor and methods for general EL objects.
+#' 
 #' R6 class for EL with general moment specification.
 #' 
-#' A general EL object.
 #' @export
 GenEL <- R6::R6Class(
   
@@ -156,17 +157,22 @@ GenEL <- R6::R6Class(
       GenEL_omega_hat(private$.GEL, lambda, G)
     },
     
-    # TODO: change the name to logel_omega which takes omega as input 
-    #   and add another method using logel C++ method which takes G directly??
+    #' @description Calculate the log empirical likelihood base on the given probability vector omega.
+    #' @param omega       A probability vector of length `n_eqs + supp_adj`.
+    #' @return A scalar.
+    logel_omega = function(omega) {
+      n_obs2 <- GenEL_get_n_obs(private$.GEL) + GenEL_supp_adj(private$.GEL)
+      if (length(omega) != n_obs2) {
+        stop("`omega` must have length `n_eqs + supp_adj`.")
+      }
+      GenEL_logel_omega(private$.GEL, omega)
+    },
     
     #' @description Calculate the log empirical likelihood base on the given G matrix.
-    #' @param G        A matrix of dimension `n_eqs x n_obs`.
-    #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+    #' @param G       A matrix of dimension `n_eqs x n_obs`.
     #' @return A scalar.
-    logel = function(G, verbose = FALSE) {
-      private$check_G(G)
-      omega <- self$omega_hat(G, verbose)
-      GenEL_logel_omega(private$.GEL, omega)
+    logel = function(G) {
+      GenEL_logel(G)
     },
     
     #' @description Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
