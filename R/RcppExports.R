@@ -5,6 +5,26 @@ CensEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_CensEL_ctor`, n_obs, n_eqs)
 }
 
+CensEL_set_max_iter_nr <- function(pCEL, max_iter) {
+    invisible(.Call(`_flexEL_CensEL_set_max_iter_nr`, pCEL, max_iter))
+}
+
+CensEL_set_max_iter_em <- function(pCEL, max_iter) {
+    invisible(.Call(`_flexEL_CensEL_set_max_iter_em`, pCEL, max_iter))
+}
+
+CensEL_set_rel_tol <- function(pCEL, rel_tol) {
+    invisible(.Call(`_flexEL_CensEL_set_rel_tol`, pCEL, rel_tol))
+}
+
+CensEL_set_abs_tol <- function(pCEL, abs_tol) {
+    invisible(.Call(`_flexEL_CensEL_set_abs_tol`, pCEL, abs_tol))
+}
+
+CensEL_set_supp_adj <- function(pCEL, supp_adj, a_ = NULL) {
+    invisible(.Call(`_flexEL_CensEL_set_supp_adj`, pCEL, supp_adj, a_))
+}
+
 GenEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_GenEL_ctor`, n_obs, n_eqs)
 }

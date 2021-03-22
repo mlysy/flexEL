@@ -72,6 +72,11 @@ namespace flexEL {
     /// Set the discontinuity correction flag
     void set_smooth(bool smooth, double s);
     void set_smooth(bool smooth);
+    /// Set the initial value for Newton-Raphson algorithm.
+    void set_lambda0(const Ref<const VectorXd>& lambda0);
+    /// Get the diagnostics for the last Newton-Raphson run.
+    void get_diag(int& nr_iter, double& nr_err,
+                  int& em_iter, double& em_err); // TODO: CONTINUE HERE
     
     /// Calculate weights according to epsilons
     void eval_weights(Ref<VectorXd> weights,
@@ -164,6 +169,11 @@ namespace flexEL {
   
   inline void CensEL::set_smooth(bool smooth) {
     set_smooth(smooth, 10); 
+    return;
+  }
+  
+  inline void CensEL::set_lambda0(const Ref<const VectorXd>& lambda0) {
+    GEL.set_lambda0(lambda0);
     return;
   }
   

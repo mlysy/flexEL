@@ -12,7 +12,8 @@ check_res <- function(x) {
   all(is.finite(x) & !is.na(x))
 }
 
-# Non-censored case:
+# ---- no censoring logel ----
+
 test_that("logel_cpp == logel_R no censoring, no support correction", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -67,7 +68,8 @@ test_that("logel_cpp == logel_R no censoring, with support correction", {
   }
 })
 
-# Non-censored dldG:
+# ---- no censoring logel dldG ----
+
 test_that("dldG_cpp == dldG_R no censoring, no support correction", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -89,7 +91,6 @@ test_that("dldG_cpp == dldG_R no censoring, no support correction", {
   }
 })
 
-# Non-censored dldG:
 test_that("dldG_cpp == dldG_R no censoring, with support correction", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -111,7 +112,8 @@ test_that("dldG_cpp == dldG_R no censoring, with support correction", {
   }
 })
 
-# Censored case:
+# ---- right-censoring logel ----
+
 test_that("logel_cpp == logel_R right-censored, no support correction", {
   for(ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -137,7 +139,6 @@ test_that("logel_cpp == logel_R right-censored, no support correction", {
   }
 })
 
-# Censored case:
 # failed <- 0
 test_that("logel_cpp == logel_R right-censored, with support correction", {
   for(ii in 1:ntest) {
@@ -168,7 +169,7 @@ test_that("logel_cpp == logel_R right-censored, with support correction", {
   }
 })
 
-# Censored case with continuity correction:
+# ---- right-censoring logel with continuity correction ----
 
 test_that("logEL_smooth_R == logEL_smooth_cpp, no support correction", {
   for(ii in 1:ntest) {
@@ -199,7 +200,6 @@ test_that("logEL_smooth_R == logEL_smooth_cpp, no support correction", {
     # }
   }
 })
-
 
 test_that("logEL_smooth_R == logEL_smooth_cpp, with support correction", {
   for(ii in 1:ntest) {

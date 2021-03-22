@@ -23,6 +23,62 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// CensEL_set_max_iter_nr
+void CensEL_set_max_iter_nr(SEXP pCEL, int max_iter);
+RcppExport SEXP _flexEL_CensEL_set_max_iter_nr(SEXP pCELSEXP, SEXP max_iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    CensEL_set_max_iter_nr(pCEL, max_iter);
+    return R_NilValue;
+END_RCPP
+}
+// CensEL_set_max_iter_em
+void CensEL_set_max_iter_em(SEXP pCEL, int max_iter);
+RcppExport SEXP _flexEL_CensEL_set_max_iter_em(SEXP pCELSEXP, SEXP max_iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    CensEL_set_max_iter_em(pCEL, max_iter);
+    return R_NilValue;
+END_RCPP
+}
+// CensEL_set_rel_tol
+void CensEL_set_rel_tol(SEXP pCEL, int rel_tol);
+RcppExport SEXP _flexEL_CensEL_set_rel_tol(SEXP pCELSEXP, SEXP rel_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< int >::type rel_tol(rel_tolSEXP);
+    CensEL_set_rel_tol(pCEL, rel_tol);
+    return R_NilValue;
+END_RCPP
+}
+// CensEL_set_abs_tol
+void CensEL_set_abs_tol(SEXP pCEL, int abs_tol);
+RcppExport SEXP _flexEL_CensEL_set_abs_tol(SEXP pCELSEXP, SEXP abs_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< int >::type abs_tol(abs_tolSEXP);
+    CensEL_set_abs_tol(pCEL, abs_tol);
+    return R_NilValue;
+END_RCPP
+}
+// CensEL_set_supp_adj
+void CensEL_set_supp_adj(SEXP pCEL, bool supp_adj, Rcpp::Nullable<Rcpp::NumericVector> a_);
+RcppExport SEXP _flexEL_CensEL_set_supp_adj(SEXP pCELSEXP, SEXP supp_adjSEXP, SEXP a_SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< bool >::type supp_adj(supp_adjSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type a_(a_SEXP);
+    CensEL_set_supp_adj(pCEL, supp_adj, a_);
+    return R_NilValue;
+END_RCPP
+}
 // GenEL_ctor
 SEXP GenEL_ctor(int n_obs, int n_eqs);
 RcppExport SEXP _flexEL_GenEL_ctor(SEXP n_obsSEXP, SEXP n_eqsSEXP) {
@@ -444,6 +500,11 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_CensEL_ctor", (DL_FUNC) &_flexEL_CensEL_ctor, 2},
+    {"_flexEL_CensEL_set_max_iter_nr", (DL_FUNC) &_flexEL_CensEL_set_max_iter_nr, 2},
+    {"_flexEL_CensEL_set_max_iter_em", (DL_FUNC) &_flexEL_CensEL_set_max_iter_em, 2},
+    {"_flexEL_CensEL_set_rel_tol", (DL_FUNC) &_flexEL_CensEL_set_rel_tol, 2},
+    {"_flexEL_CensEL_set_abs_tol", (DL_FUNC) &_flexEL_CensEL_set_abs_tol, 2},
+    {"_flexEL_CensEL_set_supp_adj", (DL_FUNC) &_flexEL_CensEL_set_supp_adj, 3},
     {"_flexEL_GenEL_ctor", (DL_FUNC) &_flexEL_GenEL_ctor, 2},
     {"_flexEL_GenEL_set_max_iter", (DL_FUNC) &_flexEL_GenEL_set_max_iter, 2},
     {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},
