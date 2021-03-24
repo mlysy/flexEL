@@ -229,8 +229,6 @@ namespace flexEL {
     return;
   }
 
-  /// @param[in] weights Vector of length `n_obs` or `n_obs + supp_adj`.  In case of the former when `supp_adj = false`
-
   /// @param[out] nr_iter Number of Newton-Raphson iterations.
   /// @param[out] nr_err Maximum relative difference between elements of `lambda` in the last two Newton-Raphson steps.
   inline void GenEL::get_diag(int& nr_iter, double& nr_err) {

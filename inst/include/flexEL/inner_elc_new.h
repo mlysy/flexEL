@@ -38,6 +38,8 @@ namespace flexEL {
     VectorXd norm_weights_;
     VectorXd psot_; // partial sum of omegatildas
     VectorXd psos_vec_; // partial sum of omegas up to each omega in the order of epsilon
+    int em_iter_;
+    double em_err_;
 
     // internals for EM options
     int max_iter_em_;
@@ -74,9 +76,8 @@ namespace flexEL {
     void set_smooth(bool smooth);
     /// Set the initial value for Newton-Raphson algorithm.
     void set_lambda0(const Ref<const VectorXd>& lambda0);
-    /// Get the diagnostics for the last Newton-Raphson run.
-    void get_diag(int& nr_iter, double& nr_err,
-                  int& em_iter, double& em_err); // TODO: CONTINUE HERE
+    /// Get the diagnostics for the EM run.
+    void get_diag(int& em_iter, double& em_err);
     
     /// Calculate weights according to epsilons
     void eval_weights(Ref<VectorXd> weights,
@@ -174,6 +175,15 @@ namespace flexEL {
   
   inline void CensEL::set_lambda0(const Ref<const VectorXd>& lambda0) {
     GEL.set_lambda0(lambda0);
+    return;
+  }
+  
+  /// @param[out] nr_iter Number of Newton-Raphson iterations.
+  /// @param[out] nr_err Maximum relative difference between elements of `lambda` in the last two Newton-Raphson steps.
+  inline void CensEL::get_diag(int& em_iter, double& em_err) {
+    // GEL.get_diag(nr_iter, nr_err);
+    em_iter = em_iter_;
+    em_err = em_err_;
     return;
   }
   
@@ -315,6 +325,8 @@ namespace flexEL {
         omega(ii) = std::numeric_limits<double>::quiet_NaN();
       }
     }
+    em_iter_ = em_iter;
+    em_err_ = em_err;
     return;
   }
   

@@ -144,7 +144,7 @@ GenEL <- R6::R6Class(
     #' @return A numeric vector of length `n_eqs`.
     lambda_nr = function(G, verbose = FALSE) {
       private$check_G(G)
-      GenEL_lambda_nr(private$.GEL, G, verbose)
+      GenEL_lambda_nr(private$.GEL, t(G), verbose)
     },
     
     #' @description Calculate the probability vector base on the given G matrix.
@@ -153,8 +153,8 @@ GenEL <- R6::R6Class(
     #' @return A probability vector of length `n_obs + supp_adj`.
     omega_hat = function(G, verbose = FALSE) {
       private$check_G(G)
-      lambda <- self$lambda_nr(G, verbose)
-      GenEL_omega_hat(private$.GEL, lambda, G)
+      lambda <- self$lambda_nr(t(G), verbose)
+      GenEL_omega_hat(private$.GEL, lambda, t(G))
     },
     
     #' @description Calculate the log empirical likelihood base on the given probability vector omega.

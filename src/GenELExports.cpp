@@ -34,6 +34,7 @@ SEXP GenEL_ctor(int n_obs, int n_eqs) {
 void GenEL_set_max_iter(SEXP pGEL, int max_iter) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   GEL->set_max_iter(max_iter);
+  // std::cout << GEL->get_max_iter() << std::endl;
   return;
 }
 
@@ -43,9 +44,10 @@ void GenEL_set_max_iter(SEXP pGEL, int max_iter) {
 /// @param[in] rel_tol   Relative tolerance for the Newton-Raphson algorithm.
 ///
 // [[Rcpp::export]]
-void GenEL_set_rel_tol(SEXP pGEL, int rel_tol) {
+void GenEL_set_rel_tol(SEXP pGEL, double rel_tol) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   GEL->set_rel_tol(rel_tol);
+  // std::cout << GEL->get_rel_tol() << std::endl;
   return;
 }
 

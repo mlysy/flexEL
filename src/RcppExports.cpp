@@ -103,12 +103,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // GenEL_set_rel_tol
-void GenEL_set_rel_tol(SEXP pGEL, int rel_tol);
+void GenEL_set_rel_tol(SEXP pGEL, double rel_tol);
 RcppExport SEXP _flexEL_GenEL_set_rel_tol(SEXP pGELSEXP, SEXP rel_tolSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
-    Rcpp::traits::input_parameter< int >::type rel_tol(rel_tolSEXP);
+    Rcpp::traits::input_parameter< double >::type rel_tol(rel_tolSEXP);
     GenEL_set_rel_tol(pGEL, rel_tol);
     return R_NilValue;
 END_RCPP
