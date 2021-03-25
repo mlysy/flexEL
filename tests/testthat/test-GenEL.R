@@ -1,5 +1,5 @@
 
-# library(testthat)
+library(testthat)
 source("el_rfuns.R")
 
 ntest <- 10
@@ -42,6 +42,25 @@ test_that("lambda_nr with given convergence settings", {
     else {
       # nconv <<- nconv + 1
       expect_equal(lambda_cpp, lambda_R_lst$lambda)
+    }
+  }
+})
+
+# nconv <- 0
+test_that("omega_hat with default settings", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    gel <- GenEL$new(n, p)
+    G <- matrix(rnorm(n*p),n,p)
+    omega_cpp <- gel$omega_hat(G)
+    omega_R <- omega_hat_R(G)
+    if (!any(is.na(omega_cpp)) & !any(is.na(omega_R))) {
+      # nconv <<- nconv + 1
+      expect_equal(omega_cpp, omega_R)
+    }
+    else {
+      expect_equal(any(is.na(omega_cpp)), any(is.na(omega_R)))
     }
   }
 })
