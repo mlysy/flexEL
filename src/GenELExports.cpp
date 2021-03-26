@@ -163,21 +163,21 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
   return omega;
 }
 
-/// Calculate the log empirical likelihood base on the given probability vector.
-/// 
-/// @param[in] pGEL    `externalptr` pointer to GenEL object. 
-/// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
-// [[Rcpp::export]]
-double GenEL_logel_omega(SEXP pGEL,
-                         Eigen::VectorXd omega) {
-  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-  int n_obs = GEL->get_n_obs(); // length of omega should be the same, check in R side
-  bool supp_adj = GEL->get_supp_adj();
-  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
-  double sum_weights = double(n_obs + supp_adj);
-  double log_el = GEL->logel_omega(omega, norm_weights, sum_weights);
-  return log_el;
-}
+// /// Calculate the log empirical likelihood base on the given probability vector.
+// /// 
+// /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
+// /// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
+// // [[Rcpp::export]]
+// double GenEL_logel_omega(SEXP pGEL,
+//                          Eigen::VectorXd omega) {
+//   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+//   int n_obs = GEL->get_n_obs(); // length of omega should be the same, check in R side
+//   bool supp_adj = GEL->get_supp_adj();
+//   Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+//   double sum_weights = double(n_obs + supp_adj);
+//   double log_el = GEL->logel_omega(omega, norm_weights, sum_weights);
+//   return log_el;
+// }
 
 /// Calculate the log empirical likelihood base on the given probability vector.
 /// 

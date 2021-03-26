@@ -195,18 +195,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// GenEL_logel_omega
-double GenEL_logel_omega(SEXP pGEL, Eigen::VectorXd omega);
-RcppExport SEXP _flexEL_GenEL_logel_omega(SEXP pGELSEXP, SEXP omegaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type omega(omegaSEXP);
-    rcpp_result_gen = Rcpp::wrap(GenEL_logel_omega(pGEL, omega));
-    return rcpp_result_gen;
-END_RCPP
-}
 // GenEL_logel
 double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G);
 RcppExport SEXP _flexEL_GenEL_logel(SEXP pGELSEXP, SEXP GSEXP) {
@@ -515,7 +503,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_get_n_eqs", (DL_FUNC) &_flexEL_GenEL_get_n_eqs, 1},
     {"_flexEL_GenEL_get_supp_adj", (DL_FUNC) &_flexEL_GenEL_get_supp_adj, 1},
     {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 3},
-    {"_flexEL_GenEL_logel_omega", (DL_FUNC) &_flexEL_GenEL_logel_omega, 2},
     {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 2},
     {"_flexEL_GenEL_Logel_grad", (DL_FUNC) &_flexEL_GenEL_Logel_grad, 3},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},

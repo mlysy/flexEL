@@ -65,10 +65,6 @@ GenEL_omega_hat <- function(pGEL, lambda, G) {
     .Call(`_flexEL_GenEL_omega_hat`, pGEL, lambda, G)
 }
 
-GenEL_logel_omega <- function(pGEL, omega) {
-    .Call(`_flexEL_GenEL_logel_omega`, pGEL, omega)
-}
-
 GenEL_logel <- function(pGEL, G) {
     .Call(`_flexEL_GenEL_logel`, pGEL, G)
 }

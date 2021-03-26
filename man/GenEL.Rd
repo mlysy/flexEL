@@ -19,7 +19,6 @@ R6 class for EL with general moment specification.
 \item \href{#method-set_opts}{\code{GenEL$set_opts()}}
 \item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
 \item \href{#method-omega_hat}{\code{GenEL$omega_hat()}}
-\item \href{#method-logel_omega}{\code{GenEL$logel_omega()}}
 \item \href{#method-logel}{\code{GenEL$logel()}}
 \item \href{#method-logel_grad}{\code{GenEL$logel_grad()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
@@ -161,7 +160,7 @@ Calculate the probability vector base on the given G matrix.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+\item{\code{G}}{A matrix of dimension \verb{n_obs x n_eqs}.}
 
 \item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
 }
@@ -169,26 +168,6 @@ Calculate the probability vector base on the given G matrix.
 }
 \subsection{Returns}{
 A probability vector of length \code{n_obs + supp_adj}.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-logel_omega"></a>}}
-\if{latex}{\out{\hypertarget{method-logel_omega}{}}}
-\subsection{Method \code{logel_omega()}}{
-Calculate the log empirical likelihood base on the given probability vector omega.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_omega(omega)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{omega}}{A probability vector of length \code{n_eqs + supp_adj}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A scalar.
 }
 }
 \if{html}{\out{<hr>}}

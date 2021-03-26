@@ -73,7 +73,7 @@ GenEL <- R6::R6Class(
     #' @param value Missing or a boolean indicating whether to conduct support correction or not.
     supp_adj = function(value) {
       if (missing(value)) private$.supp_adj
-      else if (!is.logical(supp_adj)) {
+      else if (!is.logical(value)) {
         stop("`supp_adj` must be a boolean.")
       }
       else {
@@ -155,17 +155,6 @@ GenEL <- R6::R6Class(
       private$check_G(G)
       lambda <- self$lambda_nr(G, verbose)
       GenEL_omega_hat(private$.GEL, lambda, t(G))
-    },
-    
-    #' @description Calculate the log empirical likelihood base on the given probability vector omega.
-    #' @param omega       A probability vector of length `n_eqs + supp_adj`.
-    #' @return A scalar.
-    logel_omega = function(omega) {
-      n_obs2 <- GenEL_get_n_obs(private$.GEL) + GenEL_supp_adj(private$.GEL)
-      if (length(omega) != n_obs2) {
-        stop("`omega` must have length `n_eqs + supp_adj`.")
-      }
-      GenEL_logel_omega(private$.GEL, omega)
     },
     
     #' @description Calculate the log empirical likelihood base on the given G matrix.
