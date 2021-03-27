@@ -543,8 +543,8 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
   }
 }
 
-logEL_G_R <- function(G) {
-  lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = FALSE)
+logEL_G_R <- function(G, max_iter = 100, rel_tol = 1e-7) {
+  lambda <- flexEL::lambdaNR(G = G, max_iter = max_iter, rel_tol = rel_tol, support = FALSE)
   omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
   neglogel <- sum(log(omega))
   dldG <- length(omega) * t(lambda %*% t(omega))
@@ -552,13 +552,18 @@ logEL_G_R <- function(G) {
   return(neglogel)
 }
 
-logEL_adjG_R <- function(G) {
+logEL_adjG_R <- function(G, max_iter = 100, rel_tol = 1e-7, 
+                         an = max(1, 0.5*log(nrow(G)))) {
   n <- nrow(G)
-  lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = TRUE)
-  omega <- flexEL:::omega_hat(G = G, support = TRUE)
+  # lambda <- flexEL::lambdaNR(G = G, max_iter = max_iter, rel_tol = rel_tol, support = TRUE)
+  # omega <- flexEL:::omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, support = TRUE)
+  lambda <- lambdaNR_R(adjG_R(G, an), max_iter = max_iter, rel_tol = rel_tol)$lambda
+  G_adj <- adjG_R(G, an)
+  omega <- c(1/(1-t(lambda) %*% t(G_adj)) / sum(1/(1-t(lambda) %*% t(G_adj))))
   neglogel <- sum(log(omega))
-  an <- max(1, 0.5*log(n))
+  # an <- max(1, 0.5*log(n))
   dldGadj <- (n+1) * t(lambda %*% t(omega[1:n])) - (n+1) * omega[n+1]*an/n * rep(1, n) %*% t(lambda)
   attr(neglogel, "gradient") <- dldGadj
   return(neglogel)
 }
+
