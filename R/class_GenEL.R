@@ -161,7 +161,8 @@ GenEL <- R6::R6Class(
     #' @param G       A matrix of dimension `n_eqs x n_obs`.
     #' @return A scalar.
     logel = function(G) {
-      GenEL_logel(G)
+      private$check_G(G)
+      GenEL_logel(private$.GEL, t(G))
     },
     
     #' @description Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
@@ -170,7 +171,7 @@ GenEL <- R6::R6Class(
     #' @return A list of three elements.
     logel_grad = function(G, verbose = FALSE) {
       private$check_G(G)
-      GenEL_Logel_grad(private$.GEL, G, verbose)
+      GenEL_Logel_grad(private$.GEL, t(G), verbose)
     }
   )
 )

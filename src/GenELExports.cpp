@@ -98,6 +98,7 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   int n_eqs = G.rows();
   Eigen::VectorXd lambda(n_eqs);
   Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  // std::cout << "GenEL_lambda_nr: norm_weights = " << norm_weights.transpose() << std::endl;
   GEL->lambda_nr(lambda, G, norm_weights);
   int n_iter;
   double max_err;

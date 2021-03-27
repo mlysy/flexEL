@@ -437,8 +437,9 @@ namespace flexEL {
                                    const Ref<const VectorXd>& norm_weights,
                                    double sum_weights) {
     Ref<const VectorXd> norm_weights_eff = supp_norm_weights(norm_weights);
-    // std::cout << "norm_weights_eff = \n" << norm_weights_eff.adjoint() << std::endl;
-    // std::cout << "omega = \n" << omega.adjoint() << std::endl;
+    // std::cout << "norm_weights = \n" << norm_weights.transpose() << std::endl;
+    // std::cout << "norm_weights_eff = \n" << norm_weights_eff.transpose() << std::endl;
+    // std::cout << "omega = \n" << omega.transpose() << std::endl;
     // std::cout << "sum_weights = \n" << sum_weights << std::endl;
     // return sum_weights * (omega.array().log() * norm_weights.array()).sum();
     return sum_weights * (omega.array().log() * norm_weights_eff.array()).sum(); // TODO: check with Martin, seems above line was a typo?
@@ -448,7 +449,10 @@ namespace flexEL {
                                   const Ref<const VectorXd>& norm_weights,
                                   double sum_weights) {
     lambda_nr(lambda_, G, norm_weights);
+    // std::cout << "logel_impl: lambda_ = " << lambda_.transpose() << std::endl;
+    // std::cout << "logel_impl before: omega_ = \n" << omega_.transpose() << std::endl;
     omega_hat(omega_.head(n_obs2_), lambda_, G, norm_weights);
+    // std::cout << "logel_impl: omega_ = \n" << omega_.transpose() << std::endl;
     return logel_omega(omega_.head(n_obs2_), norm_weights, sum_weights);
   }
 
@@ -471,7 +475,8 @@ namespace flexEL {
   inline double GenEL::logel(const Ref<const MatrixXd>& G) {
     Ref<const MatrixXd> G_eff = supp_G(G);
     double sum_weights = double(n_obs2_);
-    norm_weights_.head(n_obs2_) = VectorXd::Ones(n_obs2_);
+    // norm_weights_.head(n_obs2_) = VectorXd::Ones(n_obs2_);
+    norm_weights_.head(n_obs2_) = VectorXd::Ones(n_obs2_)/sum_weights;
     return logel_impl(G_eff, norm_weights_.head(n_obs2_), sum_weights);
   }
 

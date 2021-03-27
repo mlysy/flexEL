@@ -48,6 +48,32 @@ test_that("lambda_nr with given convergence settings", {
   }
 })
 
+# nconv <- 0
+test_that("lambda_nr with given convergence settings and support correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(100, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-2)
+    adj_a <- runif(1, 1, 5)
+    gel <- GenEL$new(n, p)
+    gel$max_iter <- max_iter
+    gel$rel_tol <- rel_tol
+    gel$supp_adj <- TRUE
+    gel$supp_adj_a <- adj_a
+    G <- matrix(rnorm(n*p),n,p)
+    lambda_cpp <- gel$lambda_nr(G, verbose = FALSE)
+    lambda_R_lst <- lambdaNR_R(adjG_R(G, adj_a), max_iter = max_iter, rel_tol = rel_tol)
+    if (!lambda_R_lst$convergence) {
+      expect_equal(all(is.na(lambda_cpp)), all(is.na(lambda_R_lst$lambda)))
+    }
+    else {
+      # nconv <<- nconv + 1
+      expect_equal(lambda_cpp, lambda_R_lst$lambda)
+    }
+  }
+})
+
 # ---- omega_hat ----
 
 # nconv <- 0
@@ -118,6 +144,31 @@ test_that("omega_hat with default settings and support correction", {
     }
   }
 })
+
+# ---- logel ----
+
+# converged result
+check_res <- function(x) {
+  all(is.finite(x) & !is.na(x))
+}
+
+# nconv <- 0
+test_that("logel with default settings", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    gel <- GenEL$new(n, p)
+    G <- matrix(rnorm(n*p),n,p)
+    logel_cpp <- gel$logel(G)
+    omegahat_R <- omega_hat_R(G)
+    logel_R <- logEL_R(omegahat_R)
+    if (check_res(logel_R) & check_res(logel_cpp)) {
+      # nconv <<- nconv + 1
+      expect_equal(logel_cpp, logel_R)
+    }
+  }
+})
+
 
 # ---- logel_grad ----
 
