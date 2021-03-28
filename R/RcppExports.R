@@ -21,8 +21,24 @@ CensEL_set_abs_tol <- function(pCEL, abs_tol) {
     invisible(.Call(`_flexEL_CensEL_set_abs_tol`, pCEL, abs_tol))
 }
 
+CensEL_get_n_obs <- function(pGEL) {
+    .Call(`_flexEL_CensEL_get_n_obs`, pGEL)
+}
+
+CensEL_get_n_eqs <- function(pGEL) {
+    .Call(`_flexEL_CensEL_get_n_eqs`, pGEL)
+}
+
+CensEL_get_supp_adj <- function(pGEL) {
+    .Call(`_flexEL_CensEL_get_supp_adj`, pGEL)
+}
+
 CensEL_set_supp_adj <- function(pCEL, supp_adj, a_ = NULL) {
     invisible(.Call(`_flexEL_CensEL_set_supp_adj`, pCEL, supp_adj, a_))
+}
+
+CensEL_eval_weights <- function(pCEL, delta, epsilon, omega) {
+    .Call(`_flexEL_CensEL_eval_weights`, pCEL, delta, epsilon, omega)
 }
 
 GenEL_ctor <- function(n_obs, n_eqs) {

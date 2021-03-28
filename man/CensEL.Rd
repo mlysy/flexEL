@@ -15,6 +15,8 @@ A general EL object.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{CensEL$new()}}
+\item \href{#method-set_supp_adj}{\code{CensEL$set_supp_adj()}}
+\item \href{#method-set_opts}{\code{CensEL$set_opts()}}
 \item \href{#method-clone}{\code{CensEL$clone()}}
 }
 }
@@ -22,6 +24,30 @@ A general EL object.
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Check the dimension of G is what is expected.
+
+
+Access or reset the initial value of lambda.
+
+
+Access or reset the value of the maximum number of iterations for the Newton-Raphson algorithm.
+
+
+Access or reset the value of relative tolerance controlling the accuracy at convergence of the Newton-Raphson algorithm.
+
+
+Access or reset the value of the maximum number of iterations for the EM algorithm.
+
+
+Access or reset the value of absolute tolerance controlling the accuracy at convergence of the EM algorithm.
+
+
+Access or reset the support correction flag.
+
+
+Access or reset the value of support corection factor.
+
+
 Create a new CensEL object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
@@ -33,11 +59,83 @@ Create a new CensEL object.
 \item{\code{n_obs}}{Number of observations.}
 
 \item{\code{n_eqs}}{Number of (moment constraint) equations.}
+
+\item{\code{G}}{A numeric matrix.}
+
+\item{\code{value}}{Missing or a vector of length \code{n_eqs}.}
+
+\item{\code{value}}{Missing or a positive integer (default to 100).}
+
+\item{\code{value}}{Missing or a small positive number (default to 1e-7).}
+
+\item{\code{value}}{Missing or a positive integer (default to 100).}
+
+\item{\code{value}}{Missing or a small positive number (default to 1e-3).}
+
+\item{\code{value}}{Missing or a boolean indicating whether to conduct support correction or not.}
+
+\item{\code{value}}{Missing or a scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 A \code{CensEL} object.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_supp_adj"></a>}}
+\if{latex}{\out{\hypertarget{method-set_supp_adj}{}}}
+\subsection{Method \code{set_supp_adj()}}{
+Set the support correction flag and support correction factor.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+
+\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_opts"></a>}}
+\if{latex}{\out{\hypertarget{method-set_opts}{}}}
+\subsection{Method \code{set_opts()}}{
+Set more than one options together.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_opts(
+  max_iter_nr = 100,
+  rel_tol = 1e-07,
+  max_iter_em = 100,
+  abs_tol = 0.001,
+  lambda0 = rep(0, GenEL_get_n_eqs(private$.CEL)),
+  supp_adj = FALSE,
+  supp_adj_a = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{max_iter_nr}}{A positive integer controlling the maximum number of iterations for the Newton-Raphson algorithm.}
+
+\item{\code{rel_tol}}{A small positive number controlling accuracy at convergence for the Newton-Raphson algorithm.}
+
+\item{\code{max_iter_em}}{A positive integer controlling the maximum number of iterations for the EM algorithm.}
+
+\item{\code{abs_tol}}{A small positive number controlling accuracy at convergence for the EM algorithm.}
+
+\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
+
+\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+
+\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

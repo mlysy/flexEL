@@ -73,6 +73,36 @@ void CensEL_set_abs_tol(SEXP pCEL, int abs_tol) {
   return;
 }
 
+/// Getter for n_obs.
+///
+/// @param[in] pGEL   `externalptr` pointer to CensEL object. 
+// [[Rcpp::export]]
+int CensEL_get_n_obs(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::CensEL> GEL(pGEL);
+  int n_obs = GEL->get_n_obs();
+  return n_obs;
+}
+
+/// Getter for n_eqs.
+///
+/// @param[in] pGEL   `externalptr` pointer to CensEL object. 
+// [[Rcpp::export]]
+int CensEL_get_n_eqs(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::CensEL> GEL(pGEL);
+  int n_eqs = GEL->get_n_eqs();
+  return n_eqs;
+}
+
+/// Getter for supp_adj.
+///
+/// @param[in] pGEL   `externalptr` pointer to CensEL object. 
+// [[Rcpp::export]]
+bool CensEL_get_supp_adj(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::CensEL> GEL(pGEL);
+  bool supp_adj = GEL->get_supp_adj();
+  return supp_adj;
+}
+
 /// Set the supp_adj of the CensEL object.
 ///
 /// @param[in] pCEL        `externalptr` pointer to CensEL object. 
@@ -83,8 +113,8 @@ void CensEL_set_abs_tol(SEXP pCEL, int abs_tol) {
 void CensEL_set_supp_adj(SEXP pCEL, 
                         bool supp_adj, 
                         Rcpp::Nullable<Rcpp::NumericVector> a_ = R_NilValue) {
-  // TODO: is there a better way to handle optional scalar argument?
   Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+  // TODO: is there a better way to handle optional scalar argument?
   if (a_.isNull()) {
     CEL->set_supp_adj(supp_adj);
   } else{
@@ -94,5 +124,50 @@ void CensEL_set_supp_adj(SEXP pCEL,
   return;
 }
 
+/// ...
+///
+/// @param[in] pCEL     `externalptr` pointer to CensEL object. 
+/// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+/// @param[in] delta    Vector of censoring indicator of length `n_obs`.
+/// @param[in] epsilon  Vector of residuals of length `n_obs`.
+///
+// [[Rcpp::export]]
+Eigen::VectorXd CensEL_eval_weights(SEXP pCEL,
+                                    Eigen::VectorXd delta,
+                                    Eigen::VectorXd epsilon,
+                                    Eigen::VectorXd omega) {
+  Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+  int n_obs = CEL->get_n_obs(); // G.cols() should be the same value, check in R side
+  std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
+  bool supp_adj = CEL->get_supp_adj();
+  std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
+  Eigen::VectorXd weights(n_obs + supp_adj);
+  CEL->eval_weights(weights, delta, epsilon, omega);
+  // CEL->omega_hat(omega, G, delta, epsilon);
+  return weights;
+}
 
+// /// ...
+// ///
+// /// @param[in] pCEL     `externalptr` pointer to CensEL object. 
+// /// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+// /// @param[in] delta    Vector of censoring indicator of length `n_obs`.
+// /// @param[in] epsilon  Vector of residuals of length `n_obs`.
+// ///
+// // [[Rcpp::export]]
+// Eigen::VectorXd CensEL_omega_hat(SEXP pCEL, 
+//                       Eigen::MatrixXd G,
+//                       Eigen::VectorXd delta,
+//                       Eigen::VectorXd epsilon) {
+//   Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+//   int n_obs = CEL->get_n_obs(); // G.cols() should be the same value, check in R side
+//   std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
+//   bool supp_adj = CEL->get_supp_adj();
+//   std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
+//   Eigen::VectorXd omega =  Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+//   Eigen::VectorXd weights(n_obs + supp_adj);
+//   CEL->eval_weights(weights, delta, epsilon, omega);
+//   // CEL->omega_hat(omega, G, delta, epsilon);
+//   return weights;
+// }
 

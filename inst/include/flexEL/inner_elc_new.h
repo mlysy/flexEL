@@ -78,6 +78,20 @@ namespace flexEL {
     void set_lambda0(const Ref<const VectorXd>& lambda0);
     /// Get the diagnostics for the EM run.
     void get_diag(int& em_iter, double& em_err);
+    /// Get support adjustment flag.
+    bool get_supp_adj();
+    /// Get number of observations.
+    int get_n_obs();
+    /// Get number of estimating equations.
+    int get_n_eqs();
+    /// Get the maximum number of iterations for Newton-Raphson.
+    int get_max_iter_nr();
+    /// Get the relative tolerance.
+    double get_rel_tol();
+    /// Get the maximum number of iterations for EM.
+    int get_max_iter_em();
+    /// Get the relative tolerance.
+    double get_abs_tol();
     
     /// Calculate weights according to epsilons
     void eval_weights(Ref<VectorXd> weights,
@@ -97,6 +111,10 @@ namespace flexEL {
     double logel_omega(const Ref<const VectorXd>& delta,
                        const Ref<const VectorXd>& epsilon,
                        const Ref<const VectorXd>& omega);
+    
+    double logel(const Ref<const MatrixXd>& G,
+                 const Ref<const VectorXd>& delta,
+                 const Ref<const VectorXd>& epsilon);
     
   };
   
@@ -120,6 +138,9 @@ namespace flexEL {
     norm_weights_ = VectorXd::Zero(n_obs1_);
     psot_ = VectorXd::Zero(n_obs1_);
     psos_vec_ = VectorXd::Zero(n_obs1_);
+    
+    set_max_iter_em(100);
+    set_abs_tol(1e-3);
   }
   
   /// @param[in] max_iter Maximum number of Newton-Raphson iterations.
@@ -286,6 +307,7 @@ namespace flexEL {
       // std::cout << "EvalOmegas: resetting omega_." << std::endl;
       omega = omega_init_;
     }
+    std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
     int em_iter;
     double em_err;
     VectorXd weights(n_obs2_);
@@ -299,7 +321,10 @@ namespace flexEL {
     double logel_old = GEL.logel_omega(omega, norm_weights_.head(n_obs2_), sum_weights);
     double logel = logel_old;
     int ii;
+    std::cout << "before EM loop" << std::endl;
+    std::cout << "GEL.max_iter = " << GEL.get_max_iter() << std::endl;
     for(ii=0; ii<max_iter_em_; ii++) {
+      std::cout << "EM ii = " << ii << std::endl;
       // E-step:
       if (!smooth_) {
         eval_weights(weights, delta, epsilon, omega);
@@ -308,6 +333,7 @@ namespace flexEL {
       }
       sum_weights = weights.head(n_obs2_).sum();
       norm_weights_.head(n_obs2_) /= sum_weights;
+      std::cout << "norm_weights_ = " << norm_weights_.transpose() << std::endl;
       // M-step:
       VectorXd lambda;
       GEL.lambda_nr(lambda, G, norm_weights_.head(n_obs2_));
@@ -347,6 +373,47 @@ namespace flexEL {
     norm_weights_.head(n_obs2_) /= sum_weights;
     double logel = GEL.logel_omega(omega, norm_weights_, sum_weights);
     return logel;
+  }
+  
+  /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+  /// @param[in] delta Censoring indicator vector of length `n_obs`.
+  /// @param[in] epsilon Residual vector of length `n_obs`.
+  inline double CensEL::logel(const Ref<const MatrixXd>& G,
+                              const Ref<const VectorXd>& delta,
+                              const Ref<const VectorXd>& epsilon) {
+    // TODO: dimension of G works?
+    VectorXd omega;
+    omega_hat(omega, G, delta, epsilon);
+    double logel = logel_omega(delta, epsilon, omega);
+    return logel;
+  }
+  
+  inline bool CensEL::get_supp_adj() {
+    return supp_adj_;
+  }
+  
+  inline int CensEL::get_n_obs() {
+    return n_obs_;
+  }
+  
+  inline int CensEL::get_n_eqs() {
+    return n_eqs_;
+  }
+  
+  inline int CensEL::get_max_iter_nr() {
+    return GEL.get_max_iter();
+  }
+  
+  inline double CensEL::get_rel_tol() {
+    return GEL.get_rel_tol();
+  }
+  
+  inline int CensEL::get_max_iter_em() {
+    return max_iter_em_;
+  }
+  
+  inline double CensEL::get_abs_tol() {
+    return abs_tol_;
   }
 
 }
