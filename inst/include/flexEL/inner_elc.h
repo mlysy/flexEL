@@ -500,6 +500,7 @@ inline void flexEL::InnerELC::EvalWeights() {
   psots_.fill(0.0);
   int kk;
   double psos;
+  // std::cout << "eps_ord_ = " << eps_ord_.transpose() << std::endl;
   for (int ii=0; ii<n_obs2_; ii++) {
     for (int jj=0; jj<n_obs2_; jj++) {
       kk = eps_ord_(jj);

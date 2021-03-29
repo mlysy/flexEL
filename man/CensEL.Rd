@@ -17,6 +17,8 @@ A general EL object.
 \item \href{#method-new}{\code{CensEL$new()}}
 \item \href{#method-set_supp_adj}{\code{CensEL$set_supp_adj()}}
 \item \href{#method-set_opts}{\code{CensEL$set_opts()}}
+\item \href{#method-eval_weights}{\code{CensEL$eval_weights()}}
+\item \href{#method-omega_hat}{\code{CensEL$omega_hat()}}
 \item \href{#method-clone}{\code{CensEL$clone()}}
 }
 }
@@ -112,7 +114,7 @@ Set more than one options together.
   rel_tol = 1e-07,
   max_iter_em = 100,
   abs_tol = 0.001,
-  lambda0 = rep(0, GenEL_get_n_eqs(private$.CEL)),
+  lambda0 = rep(0, CensEL_get_n_eqs(private$.CEL)),
   supp_adj = FALSE,
   supp_adj_a = NULL
 )}\if{html}{\out{</div>}}
@@ -137,6 +139,24 @@ Set more than one options together.
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-eval_weights"></a>}}
+\if{latex}{\out{\hypertarget{method-eval_weights}{}}}
+\subsection{Method \code{eval_weights()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$eval_weights(delta, epsilon, omega)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-omega_hat"></a>}}
+\if{latex}{\out{\hypertarget{method-omega_hat}{}}}
+\subsection{Method \code{omega_hat()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$omega_hat(G, delta, epsilon)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

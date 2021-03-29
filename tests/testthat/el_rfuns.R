@@ -246,8 +246,9 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   err <- Inf
   # lambdaNew <- rep(0,m)
   nIter <- 0
-  # initialize omegas with uncensored solution
-  omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  # # initialize omegas with uncensored solution
+  # omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  omegas <- rep(1/n, n)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     # return(rep(NaN,length(deltas)))

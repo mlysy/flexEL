@@ -247,14 +247,16 @@ namespace flexEL {
     // find the indices for increasing order of epsilons 
     psot_.fill(0.0);
     int kk;
-    double psos = 0; // must init to 0
+    double psos; // must init to 0
     delta_.head(n_obs_) = delta; 
     epsilon_.head(n_obs_) = epsilon;
-    VectorXi eps_ord_ = sort_inds(epsilon_); 
+    eps_ord_.head(n_obs2_) = sort_inds(epsilon_.head(n_obs2_)); 
+    // std::cout << "eps_ord_ = " << eps_ord_.transpose() << std::endl;
     for (int ii=0; ii<n_obs2_; ii++) {
       for (int jj=0; jj<n_obs2_; jj++) {
         kk = eps_ord_(jj);
         if (delta_(kk) == 0) {
+          psos = 0;
           eval_pso(psos, kk, omega);
           // to prevent dividing by 0
           if (abs(psos) >= 1e-10) psot_(ii) += omega(ii)/psos;
@@ -307,7 +309,7 @@ namespace flexEL {
       // std::cout << "EvalOmegas: resetting omega_." << std::endl;
       omega = omega_init_;
     }
-    std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
+    // std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
     int em_iter;
     double em_err;
     VectorXd weights(n_obs2_);
@@ -317,14 +319,15 @@ namespace flexEL {
       eval_weights_smooth(weights, delta, epsilon, omega);
     }
     double sum_weights = weights.head(n_obs2_).sum();
-    norm_weights_.head(n_obs2_) /= sum_weights;
+    norm_weights_.head(n_obs2_) = weights/sum_weights;
     double logel_old = GEL.logel_omega(omega, norm_weights_.head(n_obs2_), sum_weights);
     double logel = logel_old;
     int ii;
-    std::cout << "before EM loop" << std::endl;
-    std::cout << "GEL.max_iter = " << GEL.get_max_iter() << std::endl;
+    VectorXd lambda(n_eqs_);
+    // std::cout << "before EM loop" << std::endl;
+    // std::cout << "norm_weights_ = " << norm_weights_.transpose() << std::endl;
     for(ii=0; ii<max_iter_em_; ii++) {
-      std::cout << "EM ii = " << ii << std::endl;
+      // std::cout << "EM ii = " << ii << std::endl;
       // E-step:
       if (!smooth_) {
         eval_weights(weights, delta, epsilon, omega);
@@ -332,12 +335,10 @@ namespace flexEL {
         eval_weights_smooth(weights, delta, epsilon, omega);
       }
       sum_weights = weights.head(n_obs2_).sum();
-      norm_weights_.head(n_obs2_) /= sum_weights;
-      std::cout << "norm_weights_ = " << norm_weights_.transpose() << std::endl;
+      norm_weights_.head(n_obs2_) = weights/sum_weights;
+      // std::cout << "norm_weights_ = " << norm_weights_.transpose() << std::endl;
       // M-step:
-      VectorXd lambda;
       GEL.lambda_nr(lambda, G, norm_weights_.head(n_obs2_));
-      // GEL.get_diag(nr_iter, nr_err);
       GEL.omega_hat(omega, lambda, G, norm_weights_.head(n_obs2_));
       logel = GEL.logel_omega(omega, norm_weights_.head(n_obs2_), sum_weights);
       em_err = abs(logel-logel_old); // absolute error in log EL

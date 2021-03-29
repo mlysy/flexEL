@@ -138,36 +138,34 @@ Eigen::VectorXd CensEL_eval_weights(SEXP pCEL,
                                     Eigen::VectorXd omega) {
   Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
   int n_obs = CEL->get_n_obs(); // G.cols() should be the same value, check in R side
-  std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
+  // std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
   bool supp_adj = CEL->get_supp_adj();
-  std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
+  // std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
   Eigen::VectorXd weights(n_obs + supp_adj);
   CEL->eval_weights(weights, delta, epsilon, omega);
   // CEL->omega_hat(omega, G, delta, epsilon);
   return weights;
 }
 
-// /// ...
-// ///
-// /// @param[in] pCEL     `externalptr` pointer to CensEL object. 
-// /// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
-// /// @param[in] delta    Vector of censoring indicator of length `n_obs`.
-// /// @param[in] epsilon  Vector of residuals of length `n_obs`.
-// ///
-// // [[Rcpp::export]]
-// Eigen::VectorXd CensEL_omega_hat(SEXP pCEL, 
-//                       Eigen::MatrixXd G,
-//                       Eigen::VectorXd delta,
-//                       Eigen::VectorXd epsilon) {
-//   Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
-//   int n_obs = CEL->get_n_obs(); // G.cols() should be the same value, check in R side
-//   std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
-//   bool supp_adj = CEL->get_supp_adj();
-//   std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
-//   Eigen::VectorXd omega =  Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
-//   Eigen::VectorXd weights(n_obs + supp_adj);
-//   CEL->eval_weights(weights, delta, epsilon, omega);
-//   // CEL->omega_hat(omega, G, delta, epsilon);
-//   return weights;
-// }
+/// ...
+///
+/// @param[in] pCEL     `externalptr` pointer to CensEL object.
+/// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected.
+/// @param[in] delta    Vector of censoring indicator of length `n_obs`.
+/// @param[in] epsilon  Vector of residuals of length `n_obs`.
+///
+// [[Rcpp::export]]
+Eigen::VectorXd CensEL_omega_hat(SEXP pCEL,
+                      Eigen::MatrixXd G,
+                      Eigen::VectorXd delta,
+                      Eigen::VectorXd epsilon) {
+  Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+  int n_obs = CEL->get_n_obs(); // G.cols() should be the same value, check in R side
+  // std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
+  bool supp_adj = CEL->get_supp_adj();
+  // std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
+  Eigen::VectorXd omega =  Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  CEL->omega_hat(omega, G, delta, epsilon);
+  return omega;
+}
 

@@ -289,7 +289,7 @@ test_that("dldG with given convergence settings and support correction", {
     # dldG_nd
     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
       # nconv <<- nconv + 1
-      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-3)
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 0.0025)
     }
   }
 })

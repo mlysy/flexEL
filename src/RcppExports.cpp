@@ -126,6 +126,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// CensEL_omega_hat
+Eigen::VectorXd CensEL_omega_hat(SEXP pCEL, Eigen::MatrixXd G, Eigen::VectorXd delta, Eigen::VectorXd epsilon);
+RcppExport SEXP _flexEL_CensEL_omega_hat(SEXP pCELSEXP, SEXP GSEXP, SEXP deltaSEXP, SEXP epsilonSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilon(epsilonSEXP);
+    rcpp_result_gen = Rcpp::wrap(CensEL_omega_hat(pCEL, G, delta, epsilon));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GenEL_ctor
 SEXP GenEL_ctor(int n_obs, int n_eqs);
 RcppExport SEXP _flexEL_GenEL_ctor(SEXP n_obsSEXP, SEXP n_eqsSEXP) {
@@ -544,6 +558,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_CensEL_get_supp_adj", (DL_FUNC) &_flexEL_CensEL_get_supp_adj, 1},
     {"_flexEL_CensEL_set_supp_adj", (DL_FUNC) &_flexEL_CensEL_set_supp_adj, 3},
     {"_flexEL_CensEL_eval_weights", (DL_FUNC) &_flexEL_CensEL_eval_weights, 4},
+    {"_flexEL_CensEL_omega_hat", (DL_FUNC) &_flexEL_CensEL_omega_hat, 4},
     {"_flexEL_GenEL_ctor", (DL_FUNC) &_flexEL_GenEL_ctor, 2},
     {"_flexEL_GenEL_set_max_iter", (DL_FUNC) &_flexEL_GenEL_set_max_iter, 2},
     {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},

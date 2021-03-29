@@ -41,6 +41,10 @@ CensEL_eval_weights <- function(pCEL, delta, epsilon, omega) {
     .Call(`_flexEL_CensEL_eval_weights`, pCEL, delta, epsilon, omega)
 }
 
+CensEL_omega_hat <- function(pCEL, G, delta, epsilon) {
+    .Call(`_flexEL_CensEL_omega_hat`, pCEL, G, delta, epsilon)
+}
+
 GenEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_GenEL_ctor`, n_obs, n_eqs)
 }
