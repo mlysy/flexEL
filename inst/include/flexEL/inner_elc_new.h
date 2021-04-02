@@ -170,6 +170,7 @@ namespace flexEL {
   inline void CensEL::set_supp_adj(bool supp_adj, double a) {
     supp_adj_ = supp_adj; 
     supp_a_ = a; 
+    n_obs2_ = n_obs_+supp_adj_;
     GEL.set_supp_adj(supp_adj_, supp_a_);
     if (supp_adj) {
       epsilon_.tail(1)(0) = -INFINITY;
@@ -214,6 +215,7 @@ namespace flexEL {
   inline void CensEL::eval_pso(double &psos,
                                const int ii,
                                const Ref<const VectorXd>& omega) {
+    psos = 0;
     int kk;
     for (int jj=n_obs2_-1; jj>=0; jj--) {
       // Note: eps_ord_ corresponds to epsilons in ascending order
@@ -250,14 +252,16 @@ namespace flexEL {
     double psos; // must init to 0
     delta_.head(n_obs_) = delta; 
     epsilon_.head(n_obs_) = epsilon;
+    // std::cout << "n_obs2_ = " << n_obs2_ << std::endl;
     eps_ord_.head(n_obs2_) = sort_inds(epsilon_.head(n_obs2_)); 
+    // std::cout << "eps_ord_.head(n_obs2_) = " << eps_ord_.head(n_obs2_).transpose() << std::endl;
     // std::cout << "eps_ord_ = " << eps_ord_.transpose() << std::endl;
     for (int ii=0; ii<n_obs2_; ii++) {
       for (int jj=0; jj<n_obs2_; jj++) {
         kk = eps_ord_(jj);
         if (delta_(kk) == 0) {
-          psos = 0;
           eval_pso(psos, kk, omega);
+          // std::cout << "psos = " << psos << std::endl;
           // to prevent dividing by 0
           if (abs(psos) >= 1e-10) psot_(ii) += omega(ii)/psos;
           // else if (omega_(ii) >= 1e-10 && EvalPSO(kk) < 1e-10) {
@@ -309,19 +313,24 @@ namespace flexEL {
       // std::cout << "EvalOmegas: resetting omega_." << std::endl;
       omega = omega_init_;
     }
-    // std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
     int em_iter;
     double em_err;
     VectorXd weights(n_obs2_);
     if (!smooth_) {
       eval_weights(weights, delta, epsilon, omega);
+      // std::cout << "delta = " << omega.transpose() << std::endl;
+      // std::cout << "epsilon = " << omega.transpose() << std::endl;
+      // std::cout << "initial omega = " << omega.transpose() << std::endl;
+      std::cout << "initial weights = " << weights.transpose() << std::endl;
     } else{
       eval_weights_smooth(weights, delta, epsilon, omega);
     }
     double sum_weights = weights.head(n_obs2_).sum();
     norm_weights_.head(n_obs2_) = weights/sum_weights;
+    std::cout << "initial norm_weights_ = " << norm_weights_.transpose() << std::endl;
     double logel_old = GEL.logel_omega(omega, norm_weights_.head(n_obs2_), sum_weights);
     double logel = logel_old;
+    std::cout << "initial logel = " << logel << std::endl;
     int ii;
     VectorXd lambda(n_eqs_);
     // std::cout << "before EM loop" << std::endl;

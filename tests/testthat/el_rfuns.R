@@ -216,7 +216,7 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
 
 # calculate the weights for the weighted (censored) EL problem
 evalWeights_R <- function(deltas, omegas, epsilons) {
-  nObs <- length(omegas)
+  nObs <- length(deltas)
   epsOrd <- order(epsilons)
   # message("epsOrd = ")
   # print(epsOrd-1)
@@ -225,6 +225,7 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     for (jj in 1:nObs) {
       kk <- epsOrd[jj]
       if (deltas[kk] == 0) {
+        # print(evalPsos_R(kk, epsOrd, omegas))
         psots[ii] <- psots[ii] + omegas[ii]/evalPsos_R(kk, epsOrd, omegas)
       }
       if (kk == ii) break
@@ -236,7 +237,6 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
 }
 
 # G is nObs x nEqs
-# TODO: rel_tol should be called abs_tol now -- using absolute error for diff in logEL
 # Note: if adjust G (using support adjustment), pass the adjusted G to this function and set adjust to TRUE
 omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
                            max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
@@ -259,8 +259,8 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     deltas <- c(deltas,0)
   }
   # omegasOld <- omegas
-  logelOld <- logEL_R(omegas,epsilons,deltas)
-  # message("logelOld = ", logelOld)
+  logelOld <- logEL_R(omegas, epsilons, deltas)
+  message("logelOld = ", logelOld)
 
   # for debug
   if (dbg) {
@@ -274,8 +274,10 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
-    # message("weights = ")
-    # print(weights)
+    weights <- weights/sum(weights)
+    if (ii == 1) {
+      print(weights)
+    }
     # M step:
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
@@ -441,7 +443,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, support = adjust)
-    # print(weights)
+    # message(paste0(weights, collapse = " "))
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
