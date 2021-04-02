@@ -321,16 +321,16 @@ namespace flexEL {
       // std::cout << "delta = " << omega.transpose() << std::endl;
       // std::cout << "epsilon = " << omega.transpose() << std::endl;
       // std::cout << "initial omega = " << omega.transpose() << std::endl;
-      std::cout << "initial weights = " << weights.transpose() << std::endl;
+      // std::cout << "initial weights = " << weights.transpose() << std::endl;
     } else{
       eval_weights_smooth(weights, delta, epsilon, omega);
     }
     double sum_weights = weights.head(n_obs2_).sum();
     norm_weights_.head(n_obs2_) = weights/sum_weights;
-    std::cout << "initial norm_weights_ = " << norm_weights_.transpose() << std::endl;
+    // std::cout << "initial norm_weights_.head(n_obs2_) = " << norm_weights_.head(n_obs2_).transpose() << std::endl;
     double logel_old = GEL.logel_omega(omega, norm_weights_.head(n_obs2_), sum_weights);
     double logel = logel_old;
-    std::cout << "initial logel = " << logel << std::endl;
+    // std::cout << "initial logel = " << logel << std::endl;
     int ii;
     VectorXd lambda(n_eqs_);
     // std::cout << "before EM loop" << std::endl;

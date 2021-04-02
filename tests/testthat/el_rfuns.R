@@ -260,7 +260,12 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   }
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas, epsilons, deltas)
-  message("logelOld = ", logelOld)
+  # message("logelOld = ", logelOld)
+  
+  # weights <- evalWeights_R(deltas, omegas, epsilons)
+  # weights <- weights/sum(weights)
+  # print(weights/sum(weights))
+  # message("logelOld2 = ", sum(weights*log(omegas)))
 
   # for debug
   if (dbg) {
@@ -275,9 +280,10 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
     weights <- weights/sum(weights)
-    if (ii == 1) {
-      print(weights)
-    }
+    # print(weights)
+    # if (ii == 1) {
+    #   print(weights)
+    # }
     # M step:
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
@@ -526,7 +532,7 @@ omega_hat_R <- function(G, deltas, epsilons, adjust = FALSE,
 logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
   if (any(is.nan(omegas))) return(-Inf)
   if (missing(deltas)) {
-    sum(log(omegas))
+    return(sum(log(omegas)))
   }
   else {
     if (adjust) {
@@ -542,7 +548,11 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
     }
     # numerical stability: watch out for extremely small negative values
     omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-    return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+    
+    weights <- evalWeights_R(deltas, omegas, epsilons)
+    # message("new weights logel: ", sum(weights*log(omegas)))
+    return(sum(weights*log(omegas)))
+    # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
   }
 }
 

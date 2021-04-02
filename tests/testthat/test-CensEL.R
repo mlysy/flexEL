@@ -42,26 +42,26 @@ test_that("omega_hat with default settings", {
     delta[censinds] <- 0
     epsilon <- rnorm(n)
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    omega_cpp
-    omega_R_lst <- omega_hat_R(G, deltas = delta, epsilons = epsilon)
-    omega_R_lst$omegas
+    # omega_cpp
+    omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon)
+    # omega_R_lst$omegas
     range(omega_cpp-omega_R_lst$omegas)
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
       # nconv <<- nconv + 1
-      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-2)
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-4)
     }
   }
 })
+# nconv
 
-# TODO: discrepancy too obvious .. need to check algorithm
 # nconv <- 0
 test_that("omega_hat with given convergence settings", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
     max_iter <- sample(c(100, 200, 500), 1)
-    rel_tol <- runif(1, 1e-7, 1e-3)
+    rel_tol <- runif(1, 1e-7, 1e-4)
     abs_tol <- runif(1, 1e-4, 1e-2)
     cel <- CensEL$new(n, p)
     cel$max_iter_nr <- max_iter
@@ -75,21 +75,20 @@ test_that("omega_hat with given convergence settings", {
     delta[censinds] <- 0
     epsilon <- rnorm(n)
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    # omega_cpp
-    omega_R_lst <- omega_hat_R(G, deltas = delta, epsilons = epsilon, 
-                               max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol)
-    # omega_R_lst$omegas
+    omega_cpp
+    omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon, 
+                                  max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol)
+    omega_R_lst$omegas
     range(omega_cpp-omega_R_lst$omegas)
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
       # nconv <<- nconv + 1
-      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 0.05)
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-2)
     }
   }
 })
 
-# TODO: discrepancy too obvious .. need to check algorithm
-nconv <- 0
+# nconv <- 0
 test_that("omega_hat with given convergence settings and support correction", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
@@ -112,14 +111,15 @@ test_that("omega_hat with given convergence settings and support correction", {
     delta[censinds] <- 0
     epsilon <- rnorm(n)
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    omega_cpp
+    # omega_cpp
     omega_R_lst <- omega_hat_EM_R(adjG_R(G, adj_a), deltas = delta, epsilons = epsilon, adjust = TRUE,
                                max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol)
     omega_R_lst$omegas
-    omega_R_lst$conv
+    range(omega_cpp-omega_R_lst$omegas)
+    # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
-      nconv <<- nconv + 1
-      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = abs_tol)
+      # nconv <<- nconv + 1
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-2)
     }
   }
 })
