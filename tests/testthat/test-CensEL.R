@@ -124,3 +124,38 @@ test_that("omega_hat with given convergence settings and support correction", {
   }
 })
 
+# ---- logel ----
+
+# converged result
+check_res <- function(x) {
+  all(is.finite(x) & !is.na(x))
+}
+
+# nconv <- 0
+test_that("logel with default settings", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    cel <- CensEL$new(n, p)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
+    cel$omega_hat(G, delta = delta, epsilon = epsilon)
+    logel_cpp <- cel$logel(G, delta = delta, epsilon = epsilon)
+    # logel_cpp
+    omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon)
+    # omega_R_lst$omegas
+    logel_R <- logEL_R(omega_R_lst$omegas, epsilon, delta)
+    # logel_R
+    # range(logel_cpp-logel_R)
+    # omega_R_lst$conv
+    if (check_res(logel_cpp) & check_res(logel_R)) {
+      # nconv <<- nconv + 1
+      expect_equal(logel_cpp, logel_R, tolerance = 1e-4)
+    }
+  }
+})
+# nconv

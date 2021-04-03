@@ -45,6 +45,10 @@ CensEL_omega_hat <- function(pCEL, G, delta, epsilon) {
     .Call(`_flexEL_CensEL_omega_hat`, pCEL, G, delta, epsilon)
 }
 
+CensEL_logel <- function(pCEL, G, delta, epsilon) {
+    .Call(`_flexEL_CensEL_logel`, pCEL, G, delta, epsilon)
+}
+
 GenEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_GenEL_ctor`, n_obs, n_eqs)
 }

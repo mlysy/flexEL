@@ -19,6 +19,7 @@ A general EL object.
 \item \href{#method-set_opts}{\code{CensEL$set_opts()}}
 \item \href{#method-eval_weights}{\code{CensEL$eval_weights()}}
 \item \href{#method-omega_hat}{\code{CensEL$omega_hat()}}
+\item \href{#method-logel}{\code{CensEL$logel()}}
 \item \href{#method-clone}{\code{CensEL$clone()}}
 }
 }
@@ -157,6 +158,26 @@ Set more than one options together.
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$omega_hat(G, delta, epsilon)}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-logel"></a>}}
+\if{latex}{\out{\hypertarget{method-logel}{}}}
+\subsection{Method \code{logel()}}{
+Calculate the log empirical likelihood base on the given G matrix.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$logel(G, delta, epsilon)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A scalar.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

@@ -308,9 +308,10 @@ namespace flexEL {
                                 const Ref<const MatrixXd>& G,
                                 const Ref<const VectorXd>& delta,
                                 const Ref<const VectorXd>& epsilon) {
+    std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
     // Need to have a valid starting value if the last one is not valid in MCMC
     if (omega != omega) { // if there is nan in omega
-      // std::cout << "EvalOmegas: resetting omega_." << std::endl;
+      std::cout << "omega_hat: resetting omega_." << std::endl;
       omega = omega_init_;
     }
     int em_iter;
@@ -366,8 +367,8 @@ namespace flexEL {
     return;
   }
   
-  /// @param[in] delta Censoring indicator vector of length `n_obs`.
-  /// @param[in] epsilon Residual vector of length `n_obs`.
+  /// @param[in] delta Censoring indicator vector of length `n_obs + supp_adj`.
+  /// @param[in] epsilon Residual vector of length `n_obs + supp_adj`.
   /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
   inline double CensEL::logel_omega(const Ref<const VectorXd>& delta,
                                     const Ref<const VectorXd>& epsilon,
@@ -375,9 +376,10 @@ namespace flexEL {
     VectorXd weights(n_obs2_);
     // eval_weights(weights, delta, epsilon, omega);
     if (!smooth_) {
-      eval_weights(weights, delta, epsilon, omega);
+      eval_weights(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
+      std::cout << "weights = " << weights.transpose() << std::endl;
     } else{
-      eval_weights_smooth(weights, delta, epsilon, omega);
+      eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
     }
     double sum_weights = weights.head(n_obs2_).sum();
     norm_weights_.head(n_obs2_) /= sum_weights;
@@ -392,9 +394,24 @@ namespace flexEL {
                               const Ref<const VectorXd>& delta,
                               const Ref<const VectorXd>& epsilon) {
     // TODO: dimension of G works?
-    VectorXd omega;
-    omega_hat(omega, G, delta, epsilon);
-    double logel = logel_omega(delta, epsilon, omega);
+    VectorXd omega = Eigen::VectorXd::Constant(n_obs2_, 1.0/(n_obs2_));
+    delta_.head(n_obs_) = delta;
+    epsilon_.head(n_obs_) = epsilon;
+    omega_hat(omega, G, delta_.head(n_obs2_), epsilon_.head(n_obs2_));
+    
+    VectorXd weights(n_obs2_);
+    if (!smooth_) {
+      eval_weights(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
+      std::cout << "weights = " << weights.transpose() << std::endl;
+    } else{
+      eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
+    }
+    double logel = GEL.logel(G, weights);
+    // omega_hat(omega, G, delta_.head(n_obs2_), epsilon_.head(n_obs2_));
+    // std::cout << "omega = " << omega.transpose() << std::endl;
+    // std::cout << "delta_.head(n_obs2_) = " << delta_.head(n_obs2_).transpose() << std::endl;
+    // std::cout << "epsilon_.head(n_obs2_) = " << epsilon_.head(n_obs2_).transpose() << std::endl;
+    // double logel = logel_omega(delta_.head(n_obs2_), epsilon_.head(n_obs2_), omega);
     return logel;
   }
   

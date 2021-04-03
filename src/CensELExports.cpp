@@ -169,3 +169,17 @@ Eigen::VectorXd CensEL_omega_hat(SEXP pCEL,
   return omega;
 }
 
+/// Calculate the log empirical likelihood base on the given probability vector.
+/// 
+/// @param[in] pCEL    `externalptr` pointer to CensEL object. 
+/// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
+// [[Rcpp::export]]
+double CensEL_logel(SEXP pCEL, 
+                    Eigen::MatrixXd G,
+                    Eigen::VectorXd delta,
+                    Eigen::VectorXd epsilon) {
+  Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+  double log_el = CEL->logel(G, delta, epsilon);
+  return log_el;
+}
+

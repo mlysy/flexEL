@@ -176,6 +176,14 @@ CensEL <- R6::R6Class(
     omega_hat = function(G, delta, epsilon) {
       private$check_G(G)
       CensEL_omega_hat(private$.CEL, t(G), delta, epsilon)
+    },
+    
+    #' @description Calculate the log empirical likelihood base on the given G matrix.
+    #' @param G       A matrix of dimension `n_eqs x n_obs`.
+    #' @return A scalar.
+    logel = function(G, delta, epsilon) {
+      private$check_G(G)
+      CensEL_logel(private$.CEL, t(G), delta, epsilon)
     }
     
   )
