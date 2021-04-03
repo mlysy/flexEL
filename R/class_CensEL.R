@@ -15,6 +15,8 @@ CensEL <- R6::R6Class(
     .abs_tol = 1e-3,
     .supp_adj = FALSE,
     .supp_adj_a = NULL,
+    .smooth = FALSE,
+    .smooth_s = NULL,
     
     #' @description Check the dimension of G is what is expected.
     #' @param G A numeric matrix.
@@ -120,7 +122,35 @@ CensEL <- R6::R6Class(
         private$.supp_adj_a <- value
         CensEL_set_supp_adj(private$.CEL, private$.supp_adj, private$.supp_adj_a)
       }
+    },
+    
+    #' @description Access or reset the continuity correction flag.
+    #' @param value Missing or a boolean indicating whether to conduct continuity correction or not.
+    smooth = function(value) {
+      if (missing(value)) private$.smooth
+      else if (!is.logical(value)) {
+        stop("`supp_adj` must be a boolean.")
+      }
+      else {
+        private$.smooth <- value
+        private$.smooth_s <- 10
+        CensEL_set_smooth(private$.CEL, private$.smooth, private$.smooth_s)
+      }
+    },
+    
+    #' @description Access or reset the continuity correction flag.
+    #' @param value Missing or a boolean indicating whether to conduct continuity correction or not.
+    smooth_s = function(value) {
+      if (missing(value)) private$.smooth_s
+      else if (!is.numeric(value) | value <= 0) {
+        stop("`a` must be a positive number if not NULL.")
+      }
+      else {
+        private$.smooth_s <- value
+        CensEL_set_supp_adj(private$.CEL, private$.smooth, private$.smooth_s)
+      }
     }
+    
   ),
   
   public = list(
@@ -169,6 +199,7 @@ CensEL <- R6::R6Class(
       self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a)
     },
     
+    # TODO: add smooth situation in CensEL_eval_weights & add tests (CONTINUE HERE)
     eval_weights = function(delta, epsilon, omega) {
       CensEL_eval_weights(private$.CEL, delta, epsilon, omega)
     },

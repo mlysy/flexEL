@@ -112,6 +112,18 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// CensEL_set_smooth
+void CensEL_set_smooth(SEXP pCEL, bool smooth, Rcpp::Nullable<Rcpp::NumericVector> s_);
+RcppExport SEXP _flexEL_CensEL_set_smooth(SEXP pCELSEXP, SEXP smoothSEXP, SEXP s_SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< bool >::type smooth(smoothSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type s_(s_SEXP);
+    CensEL_set_smooth(pCEL, smooth, s_);
+    return R_NilValue;
+END_RCPP
+}
 // CensEL_eval_weights
 Eigen::VectorXd CensEL_eval_weights(SEXP pCEL, Eigen::VectorXd delta, Eigen::VectorXd epsilon, Eigen::VectorXd omega);
 RcppExport SEXP _flexEL_CensEL_eval_weights(SEXP pCELSEXP, SEXP deltaSEXP, SEXP epsilonSEXP, SEXP omegaSEXP) {
@@ -571,6 +583,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_CensEL_get_n_eqs", (DL_FUNC) &_flexEL_CensEL_get_n_eqs, 1},
     {"_flexEL_CensEL_get_supp_adj", (DL_FUNC) &_flexEL_CensEL_get_supp_adj, 1},
     {"_flexEL_CensEL_set_supp_adj", (DL_FUNC) &_flexEL_CensEL_set_supp_adj, 3},
+    {"_flexEL_CensEL_set_smooth", (DL_FUNC) &_flexEL_CensEL_set_smooth, 3},
     {"_flexEL_CensEL_eval_weights", (DL_FUNC) &_flexEL_CensEL_eval_weights, 4},
     {"_flexEL_CensEL_omega_hat", (DL_FUNC) &_flexEL_CensEL_omega_hat, 4},
     {"_flexEL_CensEL_logel", (DL_FUNC) &_flexEL_CensEL_logel, 4},

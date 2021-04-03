@@ -37,6 +37,10 @@ CensEL_set_supp_adj <- function(pCEL, supp_adj, a_ = NULL) {
     invisible(.Call(`_flexEL_CensEL_set_supp_adj`, pCEL, supp_adj, a_))
 }
 
+CensEL_set_smooth <- function(pCEL, smooth, s_ = NULL) {
+    invisible(.Call(`_flexEL_CensEL_set_smooth`, pCEL, smooth, s_))
+}
+
 CensEL_eval_weights <- function(pCEL, delta, epsilon, omega) {
     .Call(`_flexEL_CensEL_eval_weights`, pCEL, delta, epsilon, omega)
 }

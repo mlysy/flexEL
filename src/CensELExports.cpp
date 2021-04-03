@@ -124,6 +124,27 @@ void CensEL_set_supp_adj(SEXP pCEL,
   return;
 }
 
+/// Set the smooth of the CensEL object.
+///
+/// @param[in] pCEL     `externalptr` pointer to CensEL object. 
+/// @param[in] smooth   Whether or not to enable support adjustment.
+/// @param[in] s        Smooth adjustment factor. Defaults to 10.
+///
+// [[Rcpp::export]]
+void CensEL_set_smooth(SEXP pCEL, 
+                       bool smooth, 
+                       Rcpp::Nullable<Rcpp::NumericVector> s_ = R_NilValue) {
+  Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+  // TODO: is there a better way to handle optional scalar argument?
+  if (s_.isNull()) {
+    CEL->set_smooth(smooth);
+  } else{
+    Rcpp::NumericVector s(s_);
+    CEL->set_smooth(smooth, s[0]);
+  }
+  return;
+}
+
 /// ...
 ///
 /// @param[in] pCEL     `externalptr` pointer to CensEL object. 

@@ -76,6 +76,35 @@ test_that("omega_hat with default settings", {
 })
 # nconv
 
+# # nconv <- 0
+# test_that("omega_hat with default settings and continuity correction", {
+#   for (ii in 1:ntest) {
+#     n <- sample(10:20,1)
+#     p <- sample(1:(n-2), 1)
+#     s <- sample(10:100, 1)
+#     cel <- CensEL$new(n, p)
+#     cel$smooth <- TRUE
+#     cel$smooth_s <- s
+#     G <- matrix(rnorm(n*p),n,p)
+#     delta <- rep(1,n)
+#     numcens <- sample(round(n/2),1)
+#     censinds <- sample(n,numcens)
+#     delta[censinds] <- 0
+#     epsilon <- rnorm(n)
+#     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
+#     omega_cpp
+#     omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon)
+#     # omega_R_lst$omegas
+#     range(omega_cpp-omega_R_lst$omegas)
+#     # omega_R_lst$conv
+#     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
+#       # nconv <<- nconv + 1
+#       expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-4)
+#     }
+#   }
+# })
+# # nconv
+
 # nconv <- 0
 test_that("omega_hat with given convergence settings", {
   for (ii in 1:ntest) {
