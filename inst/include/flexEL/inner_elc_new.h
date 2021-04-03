@@ -108,9 +108,9 @@ namespace flexEL {
                    const Ref<const VectorXd>& delta,
                    const Ref<const VectorXd>& epsilon);
     
-    double logel_omega(const Ref<const VectorXd>& delta,
-                       const Ref<const VectorXd>& epsilon,
-                       const Ref<const VectorXd>& omega);
+    // double logel_omega(const Ref<const VectorXd>& delta,
+    //                    const Ref<const VectorXd>& epsilon,
+    //                    const Ref<const VectorXd>& omega);
     
     double logel(const Ref<const MatrixXd>& G,
                  const Ref<const VectorXd>& delta,
@@ -367,25 +367,26 @@ namespace flexEL {
     return;
   }
   
-  /// @param[in] delta Censoring indicator vector of length `n_obs + supp_adj`.
-  /// @param[in] epsilon Residual vector of length `n_obs + supp_adj`.
-  /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
-  inline double CensEL::logel_omega(const Ref<const VectorXd>& delta,
-                                    const Ref<const VectorXd>& epsilon,
-                                    const Ref<const VectorXd>& omega) {
-    VectorXd weights(n_obs2_);
-    // eval_weights(weights, delta, epsilon, omega);
-    if (!smooth_) {
-      eval_weights(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
-      std::cout << "weights = " << weights.transpose() << std::endl;
-    } else{
-      eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
-    }
-    double sum_weights = weights.head(n_obs2_).sum();
-    norm_weights_.head(n_obs2_) /= sum_weights;
-    double logel = GEL.logel_omega(omega, norm_weights_, sum_weights);
-    return logel;
-  }
+  // TODO: this doesn't give correct result..
+  // /// @param[in] delta Censoring indicator vector of length `n_obs + supp_adj`.
+  // /// @param[in] epsilon Residual vector of length `n_obs + supp_adj`.
+  // /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
+  // inline double CensEL::logel_omega(const Ref<const VectorXd>& delta,
+  //                                   const Ref<const VectorXd>& epsilon,
+  //                                   const Ref<const VectorXd>& omega) {
+  //   VectorXd weights(n_obs2_);
+  //   // eval_weights(weights, delta, epsilon, omega);
+  //   if (!smooth_) {
+  //     eval_weights(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
+  //     std::cout << "weights = " << weights.transpose() << std::endl;
+  //   } else{
+  //     eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
+  //   }
+  //   double sum_weights = weights.head(n_obs2_).sum();
+  //   norm_weights_.head(n_obs2_) /= sum_weights;
+  //   double logel = GEL.logel_omega(omega, norm_weights_, sum_weights);
+  //   return logel;
+  // }
   
   /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
   /// @param[in] delta Censoring indicator vector of length `n_obs`.
