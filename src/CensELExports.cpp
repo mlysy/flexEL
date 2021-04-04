@@ -162,9 +162,15 @@ Eigen::VectorXd CensEL_eval_weights(SEXP pCEL,
   // std::cout << "CensEL_omega_hat: n_obs = " << n_obs << std::endl;
   bool supp_adj = CEL->get_supp_adj();
   // std::cout << "CensEL_omega_hat: supp_adj = " << supp_adj << std::endl;
+  bool smooth = CEL->get_smooth();
   Eigen::VectorXd weights(n_obs + supp_adj);
-  CEL->eval_weights(weights, delta, epsilon, omega);
-  // CEL->omega_hat(omega, G, delta, epsilon);
+  
+  if (!smooth) {
+    CEL->eval_weights(weights, delta, epsilon, omega);
+  } else{
+    CEL->eval_weights_smooth(weights, delta, epsilon, omega);
+  }
+  
   return weights;
 }
 

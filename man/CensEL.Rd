@@ -51,6 +51,12 @@ Access or reset the support correction flag.
 Access or reset the value of support corection factor.
 
 
+Access or reset the continuity correction flag.
+
+
+Access or reset the continuity correction flag.
+
+
 Create a new CensEL object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
@@ -78,6 +84,10 @@ Create a new CensEL object.
 \item{\code{value}}{Missing or a boolean indicating whether to conduct support correction or not.}
 
 \item{\code{value}}{Missing or a scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+
+\item{\code{value}}{Missing or a boolean indicating whether to conduct continuity correction or not.}
+
+\item{\code{value}}{Missing or a boolean indicating whether to conduct continuity correction or not.}
 }
 \if{html}{\out{</div>}}
 }

@@ -80,6 +80,8 @@ namespace flexEL {
     void get_diag(int& em_iter, double& em_err);
     /// Get support adjustment flag.
     bool get_supp_adj();
+    // Get continuity correction flag.
+    bool get_smooth();
     /// Get number of observations.
     int get_n_obs();
     /// Get number of estimating equations.
@@ -230,13 +232,14 @@ namespace flexEL {
                                       const int ii,
                                       const Ref<const VectorXd>& omega,
                                       const Ref<const VectorXd>& epsilon) {
-    epsilon_.head(n_obs_) = epsilon;
+    // std::cout << "epsilon = " << epsilon.transpose() << std::endl;
     if (supp_adj_ && ii == (n_obs2_-1)) {
       psos = omega.head(n_obs2_-1).sum() + 0.5*omega(n_obs2_-1);
     }
     else {
       for (int jj=0; jj<n_obs2_; jj++) {
-        psos += ind_smooth(epsilon_(ii)-epsilon_(jj), smooth_s_)*omega(jj);
+        // std::cout << "smooth_s_ = " << smooth_s_ << std::endl;
+        psos += ind_smooth(epsilon(ii)-epsilon(jj), smooth_s_)*omega(jj);
       }
     }
     return;
@@ -277,13 +280,19 @@ namespace flexEL {
   
   inline void CensEL::eval_weights_smooth(Ref<VectorXd> weights,
                                           const Ref<const VectorXd>& delta,
-                                          const Ref<const VectorXd>& omega,
-                                          const Ref<const VectorXd>& epsilon) {
+                                          const Ref<const VectorXd>& epsilon,
+                                          const Ref<const VectorXd>& omega) {
     psot_.fill(0.0); 
-    for (int ii=0; ii<n_obs2_; ii++) {
-      eval_pso_smooth(psos_vec_(ii), ii, omega, epsilon);
-    }
+    psos_vec_.fill(0.0);
     delta_.head(n_obs_) = delta; 
+    epsilon_.head(n_obs_) = epsilon; 
+    // std::cout << "n_obs2_ = " << n_obs2_ << std::endl;
+    for (int ii=0; ii<n_obs2_; ii++) {
+      eval_pso_smooth(psos_vec_(ii), ii, omega, epsilon_.head(n_obs2_));
+    }
+    // std::cout << "psot_ = " << psot_.transpose() << std::endl;
+    // std::cout << "psos_vec_ = " << psos_vec_.transpose() << std::endl;
+    
     if (supp_adj_) {
       for (int jj=0; jj<n_obs2_; jj++) {
         for (int kk=0; kk<n_obs2_; kk++) {
@@ -301,7 +310,7 @@ namespace flexEL {
         }
       }
     }
-    weights = delta_.array()+psot_.array();
+    weights = delta_.array() + psot_.array();
   }
   
   inline void CensEL::omega_hat(Ref<VectorXd> omega,
@@ -418,6 +427,10 @@ namespace flexEL {
   
   inline bool CensEL::get_supp_adj() {
     return supp_adj_;
+  }
+  
+  inline bool CensEL::get_smooth() {
+    return smooth_;
   }
   
   inline int CensEL::get_n_obs() {

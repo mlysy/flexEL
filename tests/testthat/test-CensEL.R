@@ -48,6 +48,31 @@ test_that("eval_weights with support correction", {
   }
 })
 
+test_that("eval_weights with continuity correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    cel <- CensEL$new(n, p)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
+    omega <- runif(n, 0, 1)
+    omega <- omega/sum(omega)
+    s <- runif(1, 10, 100)
+    cel$smooth <- TRUE
+    cel$smooth_s <- s
+    weights_cpp <- cel$eval_weights(delta, epsilon, omega)
+    # weights_cpp
+    weights_R <- evalWeights_smooth_R(delta, omega, epsilon, s)
+    # weights_R
+    # flexEL:::.EvalWeightsSmooth(omega, delta, epsilon, s, FALSE)
+    expect_equal(weights_cpp, weights_R)
+  }
+})
+
 # ---- omega_hat -----
 
 # nconv <- 0

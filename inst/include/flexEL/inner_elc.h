@@ -202,11 +202,13 @@ inline double flexEL::InnerELC::EvalPSO(const int ii) {
 
 inline double flexEL::InnerELC::EvalPSOSmooth(const int ii, const double s) {
   double psos_smooth = 0;
+  // std::cout << "epsilons_.head(n_obs2_) = " << epsilons_.head(n_obs2_).transpose() << std::endl;
   if (supp_ && ii == (n_obs2_-1)) {
     psos_smooth = omegas_.head(n_obs2_-1).sum() + 0.5*omegas_(n_obs2_-1);
   }
   else {
     for (int jj=0; jj<n_obs2_; jj++) {
+      // std::cout << "s = " << s << std::endl;
       psos_smooth += ind_smooth(epsilons_(ii)-epsilons_(jj),s)*omegas_(jj);
     }
   }
@@ -589,6 +591,8 @@ inline void flexEL::InnerELC::EvalWeightsSmooth(const double s) {
   for (int ii=0; ii<n_obs2_; ii++) {
     psoss_(ii) = EvalPSOSmooth(ii,s);
   }
+  // std::cout << "psots_ = " << psots_.transpose() << std::endl;
+  // std::cout << "psoss_ = " << psoss_.transpose() << std::endl;
   if (supp_) {
     for (int jj=0; jj<n_obs2_; jj++) {
       for (int kk=0; kk<n_obs2_; kk++) {

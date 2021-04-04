@@ -147,7 +147,7 @@ CensEL <- R6::R6Class(
       }
       else {
         private$.smooth_s <- value
-        CensEL_set_supp_adj(private$.CEL, private$.smooth, private$.smooth_s)
+        CensEL_set_smooth(private$.CEL, private$.smooth, private$.smooth_s)
       }
     }
     
@@ -199,7 +199,6 @@ CensEL <- R6::R6Class(
       self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a)
     },
     
-    # TODO: add smooth situation in CensEL_eval_weights & add tests (CONTINUE HERE)
     eval_weights = function(delta, epsilon, omega) {
       CensEL_eval_weights(private$.CEL, delta, epsilon, omega)
     },
