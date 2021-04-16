@@ -148,7 +148,6 @@ void CensEL_set_smooth(SEXP pCEL,
 /// ...
 ///
 /// @param[in] pCEL     `externalptr` pointer to CensEL object. 
-/// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
 /// @param[in] delta    Vector of censoring indicator of length `n_obs`.
 /// @param[in] epsilon  Vector of residuals of length `n_obs`.
 ///

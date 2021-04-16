@@ -400,11 +400,13 @@ evalWeights_smooth_R <- function(deltas, omegas, epsilons, s=10, support = FALSE
   for (jj in 1:n) {
     psoss[jj] <- evalPsos_smooth_R(jj,omegas,epsilons,s,support)
   }
+  # print(psoss)
   if (support) {
     for (ii in 1:n) {
       temp <- ind_smooth_R(epsilons-epsilons[ii],s)
       if (ii==n) temp[n] <- ind_smooth_R(0,s)
       psots[ii] <- sum((1-deltas)*temp*omegas[ii]/psoss)
+      # message(psots[ii])
     }
   }
   else {

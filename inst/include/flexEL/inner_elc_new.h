@@ -286,30 +286,34 @@ namespace flexEL {
     psos_vec_.fill(0.0);
     delta_.head(n_obs_) = delta; 
     epsilon_.head(n_obs_) = epsilon; 
-    // std::cout << "n_obs2_ = " << n_obs2_ << std::endl;
+    // std::cout << "epsilon_.head(n_obs2_) = " << epsilon_.head(n_obs2_).transpose() << std::endl;
     for (int ii=0; ii<n_obs2_; ii++) {
       eval_pso_smooth(psos_vec_(ii), ii, omega, epsilon_.head(n_obs2_));
     }
-    // std::cout << "psot_ = " << psot_.transpose() << std::endl;
     // std::cout << "psos_vec_ = " << psos_vec_.transpose() << std::endl;
-    
+
     if (supp_adj_) {
       for (int jj=0; jj<n_obs2_; jj++) {
+        // std::cout << "jj = " << jj << std::endl;
         for (int kk=0; kk<n_obs2_; kk++) {
+          // std::cout << "  kk = " << kk << std::endl;
           if (jj == n_obs2_-1 && kk == n_obs2_-1) {
             psot_(jj) += (1-delta_(kk))*ind_smooth(0.0,smooth_s_)*omega(jj)/psos_vec_(kk);
           }
-          else psot_(jj) += (1-delta_(kk))*ind_smooth(epsilon(kk)-epsilon(jj),smooth_s_)*omega(jj)/psos_vec_(kk);
+          else {
+            psot_(jj) += (1-delta_(kk))*ind_smooth(epsilon_(kk)-epsilon_(jj),smooth_s_)*omega(jj)/psos_vec_(kk);
+          }
         }
       }
     }
     else {
       for (int jj=0; jj<n_obs2_; jj++) {
         for (int kk=0; kk<n_obs2_; kk++) {
-          psot_(jj) += (1-delta_(kk))*ind_smooth(epsilon(kk)-epsilon(jj),smooth_s_)*omega(jj)/psos_vec_(kk);
+          psot_(jj) += (1-delta_(kk))*ind_smooth(epsilon_(kk)-epsilon_(jj),smooth_s_)*omega(jj)/psos_vec_(kk);
         }
       }
     }
+    // std::cout << "psot_ = " << psot_.transpose() << std::endl;
     weights = delta_.array() + psot_.array();
   }
   

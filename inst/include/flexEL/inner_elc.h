@@ -595,11 +595,16 @@ inline void flexEL::InnerELC::EvalWeightsSmooth(const double s) {
   // std::cout << "psoss_ = " << psoss_.transpose() << std::endl;
   if (supp_) {
     for (int jj=0; jj<n_obs2_; jj++) {
+      // std::cout << "jj = " << jj << std::endl;
       for (int kk=0; kk<n_obs2_; kk++) {
+        // std::cout << "  kk = " << kk << std::endl;
         if (jj == n_obs2_-1 && kk == n_obs2_-1) {
           psots_(jj) += (1-deltas_(kk))*ind_smooth(0.0,s)*omegas_(jj)/psoss_(kk);
         }
-        else psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss_(kk);
+        else {
+          psots_(jj) += (1-deltas_(kk))*ind_smooth(epsilons_(kk)-epsilons_(jj),s)*omegas_(jj)/psoss_(kk);
+        }
+        // std::cout << "psots_(jj) = " << psots_(jj) << std::endl;
       }
     }
   }
