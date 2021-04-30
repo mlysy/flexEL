@@ -102,7 +102,7 @@ embed_file <- function(file, lang) {
 
 # Introduction
 
-Empirical likelihood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric familiy of the data, the estimator is in some sense as efficient as a fully parametric model [@qin-lawless1994].
+Empirical likelihood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric family of the data, the estimator is in some sense as efficient as a fully parametric model [@qin-lawless1994].
 
 The empirical likelihood (EL) approach can be traced back to @thomas-grunkemeier1975. Its current framework is mainly developed by @owen1988, @owen1990, and @owen1991, where empirical likelihood ratio statistics is introduced, and the EL method is extended to linear regression models under fixed or random design. @kolaczyk1994 further generalize the method to be used with generalized linear models. @qin-lawless1994 relate estimating equation and empirical likelihood and provide asymptotic properties of the estimator. @chen-et-al2008 propose an adjustment to the constraints in the EL framework to ensure the convex hall condition is always satisfied and the theoretical properties are not affected. Moreover, @lazar2003 explores the validity of using empirical likelihood for Bayesian inference as well as the frequentist properties of the posterior intervals. @chaudhuri-et-al2017 considers using Hamiltonian Monte Carlo sampling for the Bayesian EL models.
 
