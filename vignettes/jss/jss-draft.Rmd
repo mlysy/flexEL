@@ -56,6 +56,8 @@ header-includes:
   - \newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
   - \renewcommand{\|}{\,|\,}
   - \newcommand{\sha}[1]{{#1}^{\sharp}}
+  - \newcommand{\ud}{\mathop{}\!\mathrm{d}}
+  - \newcommand{\dth}{\frac{\ud}{\ud\tth}}
 output: 
   bookdown::pdf_book:
     toc: false
@@ -164,7 +166,7 @@ When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood f
 
 Let $r_i = q_i/\sum_{i=1}^n q_i$. Provided that $\bm 0$ is in the convex full of the points $g(\xx_i;\tth),\cdots,g(\xx_n;\tth)$, a unique optimal probability vector exist and can be shown to be
 
-\begin{equation}\label{eq:omegas}
+\begin{equation}\label{eq:omegahat}
   \hat{\w_i}(\tth) = \frac{r_i}{1 - \hat{\lla}'(\tth) g(\xx_i;\tth)},
 \end{equation}
 
@@ -172,7 +174,7 @@ where
 
 \begin{equation}
 \begin{aligned}
-\hat{\lla}(\tth) &= \argmax_{\lla(\tth)} \sum_{i=1}^n r_i\ \str\log\left(1 - \lla'(\tth) g_i(\XX;\tth); r_i\right), \\
+\hat{\lla}(\tth) &= \argmax_{\lla(\tth)} \sum_{i=1}^n r_i\ \str\log\left(1 - \lla'(\tth) g(\xx_i;\tth); r_i\right), \\
 \str\log(x; r) &= 
 \begin{cases} 
 \log(x) & x \ge r \\
@@ -184,9 +186,31 @@ where
 
 @qin-lawless1994 has shown that $\lla(\tth)$ is a continuous differentiable function of $\tth$ provided that convex hull condition is satisfied with $\tth$ and $\sum_{i=1}^n g(\xx_i;\tth)g'(\xx_i;\tth)$ is positive definite. However, the support of $\tth$ is not necessarily a convex set, as demonstrated by @chaudhuri-et-al2017.
 
-In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the paramters accordingly.
+In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the parameters accordingly.
 
-With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator.
+With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to is
+
+\begin{equation}
+\begin{split}
+\dth \log \EL(\tth) &= \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\
+&= \sum_{i=1}^n \frac{q_i}{1 - \lla'g_i} \cdot \dth \lla(\tth)'g_i(\tth) \\
+&= \dth \lla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot g_i(\tth)}{1 - \lla'g_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth),
+\end{split}
+\end{equation}
+
+where $Q = \sum_{i=1}^n q_i$.  Since substituting \eqref{eq:omegahat} into \eqref{eq:noncensopt} gives
+
+\begin{equation}
+\sum_{i=1}^n \hat \omega_i \cdot g_i = \sum_{i=1}^n \frac{r_i \cdot g_i}{1 - \hat{\lla}'g_i} = 0,
+\end{equation}
+
+the first term in the gradient disappears, such that we have
+
+\begin{equation}
+\dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth).
+\label{eq:gradel}
+\end{equation}
+
 
 ## Support Correction
 
@@ -327,7 +351,7 @@ Let $q_i = \delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)\cdot \tilde \w_{ki}$ fo
 \end{split}
 \end{equation}
 
-which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegas}) to (\ref{eq:optim}).
+which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegahat}) to (\ref{eq:optim}).
 
 \end{itemize}
 

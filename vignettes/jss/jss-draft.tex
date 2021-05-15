@@ -53,7 +53,7 @@
 %%% need tightlist which is included in pandoc header
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-  
+
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newlength{\csllabelwidth}
@@ -104,13 +104,13 @@ Here is the abstract.
   University of Waterloo\\
   200 University Avenue West\\Ontario, Canada\\
   E-mail: \email{mlysy@uwaterloo.ca}\\
-  
+
   }
 
 % %   \title{true}
 %   % % % %   \author{true \\ true}
 %   % % %   %   \date{2021-05-15}
-% 
+%
 \usepackage{caption}
 \captionsetup[table]{skip=.1em}
 \usepackage{bm}
@@ -145,6 +145,8 @@ Here is the abstract.
 \newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
 \renewcommand{\|}{\,|\,}
 \newcommand{\sha}[1]{{#1}^{\sharp}}
+\newcommand{\ud}{\mathop{}\!\mathrm{d}}
+\newcommand{\dth}{\frac{\ud}{\ud\tth}}
 
 \begin{document}
 
@@ -153,7 +155,7 @@ Here is the abstract.
 % % \begin{abstract}
 % Here is the abstract.
 % \end{abstract}
-% 
+%
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
@@ -215,7 +217,7 @@ When \(q_i = 1, \forall i=1,\cdots,n\), we have the regular empirical likelihood
 
 Let \(r_i = q_i/\sum_{i=1}^n q_i\). Provided that \(\bm 0\) is in the convex full of the points \(g(\bm x_i;\bm \theta),\cdots,g(\bm x_n;\bm \theta)\), a unique optimal probability vector exist and can be shown to be
 
-\begin{equation}\label{eq:omegas}
+\begin{equation}\label{eq:omegahat}
   \hat{\omega_i}(\bm \theta) = \frac{r_i}{1 - \hat{\bm \lambda}'(\bm \theta) g(\bm x_i;\bm \theta)},
 \end{equation}
 
@@ -223,9 +225,9 @@ where
 
 \begin{equation}
 \begin{aligned}
-\hat{\bm \lambda}(\bm \theta) &= \mathop{\mathrm{arg\,max}}_{\bm \lambda(\bm \theta)} \sum_{i=1}^n r_i\ {\log}^{\star}\left(1 - \bm \lambda'(\bm \theta) g_i(\bm X;\bm \theta); r_i\right), \\
-{\log}^{\star}(x; r) &= 
-\begin{cases} 
+\hat{\bm \lambda}(\bm \theta) &= \mathop{\mathrm{arg\,max}}_{\bm \lambda(\bm \theta)} \sum_{i=1}^n r_i\ {\log}^{\star}\left(1 - \bm \lambda'(\bm \theta) g(\bm x_i;\bm \theta); r_i\right), \\
+{\log}^{\star}(x; r) &=
+\begin{cases}
 \log(x) & x \ge r \\
 - \frac{1}{2} (x/r)^2 + 2 (x/r) - \frac{3}{2} + \log r & x < r.
 \end{cases}
@@ -235,9 +237,30 @@ where
 
 Qin and Lawless (1994) has shown that \(\bm \lambda(\bm \theta)\) is a continuous differentiable function of \(\bm \theta\) provided that convex hull condition is satisfied with \(\bm \theta\) and \(\sum_{i=1}^n g(\bm x_i;\bm \theta)g'(\bm x_i;\bm \theta)\) is positive definite. However, the support of \(\bm \theta\) is not necessarily a convex set, as demonstrated by Chaudhuri, Mondal, and Yin (2017).
 
-In the case that we are only interested in one parameter \(\theta\) of an unknown distribution \(F\), Owen (1990) has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, Qin and Lawless (1994) shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the paramters accordingly.
+In the case that we are only interested in one parameter \(\theta\) of an unknown distribution \(F\), Owen (1990) has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, Qin and Lawless (1994) shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the parameters accordingly.
 
-With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of \(\mathcal{L}\) with respect to \(\bm \theta\), with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator.
+With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of \(\mathcal{L}\) with respect to \(\bm \theta\), with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to is
+
+\begin{equation}
+\begin{split}
+\frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}\log \textrm{EL}(\bm \theta) &= \frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}\sum_{i=1}^n q_i \log \hat \omega_i(\bm \theta) \\
+&= \sum_{i=1}^n \frac{q_i}{1 - \bm \lambda'g_i} \cdot \frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}\bm \lambda(\bm \theta)'g_i(\bm \theta) \\
+&= \frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}\bm \lambda(\bm \theta)' \left[\sum_{i=1}^n \frac{q_i \cdot g_i(\bm \theta)}{1 - \bm \lambda'g_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\bm \theta) \cdot \bm \lambda(\bm \theta)' \frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}g_i(\bm \theta),
+\end{split}
+\end{equation}
+
+where \(Q = \sum_{i=1}^n q_i\). Since substituting \eqref{eq:omegahat} into \eqref{eq:noncensopt} gives
+
+\begin{equation}
+\sum_{i=1}^n \hat \omega_i \cdot g_i = \sum_{i=1}^n \frac{r_i \cdot g_i}{1 - \hat{\bm \lambda}'g_i} = 0,
+\end{equation}
+
+the first term in the gradient disappears, such that we have
+
+\begin{equation}
+\frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}\log \textrm{EL}(\bm \theta) = Q \sum_{i=1}^n \hat \omega_i(\bm \theta) \cdot \bm \lambda(\bm \theta)' \frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\bm \theta}g_i(\bm \theta).
+\label{eq:gradel}
+\end{equation}
 
 \hypertarget{support-correction}{%
 \subsection{Support Correction}\label{support-correction}}
@@ -376,7 +399,7 @@ Let $q_i = \delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)\cdot \tilde \omega_{ki}
 \end{split}
 \end{equation}
 
-which has the form of the weighted empirical likelihood inner optimization problem, and $\bm \omega= (\omega_1,\cdots,\omega_n)$ can be updated as given by equations (\ref{eq:omegas}) to (\ref{eq:optim}).
+which has the form of the weighted empirical likelihood inner optimization problem, and $\bm \omega= (\omega_1,\cdots,\omega_n)$ can be updated as given by equations (\ref{eq:omegahat}) to (\ref{eq:optim}).
 
 \end{itemize}
 
