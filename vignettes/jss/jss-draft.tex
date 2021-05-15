@@ -1,0 +1,581 @@
+\documentclass[article]{jss}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage{longtable,booktabs}
+% \ifxetex
+%   \usepackage[setpagesize=false, % page size defined by xetex
+%               unicode=false, % unicode breaks when used with xetex
+%               xetex]{hyperref}
+% \else
+%   \usepackage{hyperref}
+% \fi
+% \hypersetup{breaklinks=true,
+%             bookmarks=true,
+%             pdfauthor={},
+%             pdftitle={},
+%             colorlinks=true,
+%             citecolor=blue,
+%             urlcolor=blue,
+%             linkcolor=magenta,
+%             pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{5}
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% need tightlist which is included in pandoc header
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+\author{
+Shimeng Huang\\University of Waterloo \And Martin Lysy\\University of Waterloo
+}
+\title{\pkg{flexEL}: A Fast and Flexible Framework for Empirical Likelihood Modeling}
+
+\Plainauthor{Shimeng Huang, Martin Lysy}
+\Plaintitle{flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling}
+
+\Abstract{
+Here is the abstract.
+}
+
+\Keywords{keywords, not capitalized, \proglang{Java}}
+\Plainkeywords{keywords, not capitalized, Java}
+
+%% publication information
+%% \Volume{50}
+%% \Issue{9}
+%% \Month{June}
+%% \Year{2012}
+%% \Submitdate{}
+%% \Acceptdate{2012-06-04}
+
+\Address{
+      Martin Lysy\\
+  University of Waterloo\\
+  200 University Avenue West\\Ontario, Canada\\
+  E-mail: \email{mlysy@uwaterloo.ca}\\
+  
+  }
+
+% %   \title{true}
+%   % % % %   \author{true \\ true}
+%   % % %   %   \date{2021-05-15}
+% 
+\usepackage{caption}
+\captionsetup[table]{skip=.1em}
+\usepackage{bm}
+\usepackage{amsmath}
+\newcommand{\s}{\sigma}
+\newcommand{\XX}{\bm X}
+\newcommand{\xx}{\bm x}
+\newcommand{\yy}{\bm y}
+\newcommand{\zz}{\bm z}
+\newcommand{\uu}{\bm u}
+\newcommand{\qq}{\bm q}
+\newcommand{\ee}{\bm e}
+\newcommand{\tth}{\bm \theta}
+\newcommand{\lla}{\bm \lambda}
+\newcommand{\bbe}{\bm \beta}
+\newcommand{\gga}{\bm \gamma}
+\newcommand{\eep}{\bm \epsilon}
+\newcommand{\oom}{\bm \omega}
+\newcommand{\R}{\mathbb R}
+\renewcommand{\gg}{\bm g}
+\newcommand{\w}{\omega}
+\renewcommand{\l}{\lambda}
+\newcommand{\g}{\gamma}
+\renewcommand{\L}{\mathcal{L}}
+\renewcommand{\E}{\textrm{E}}
+\newcommand{\EL}{\textrm{EL}}
+\newcommand{\CEL}{\textrm{CEL}}
+\newcommand{\str}[1]{{#1}^{\star}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\e}{\varepsilon}
+\newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
+\renewcommand{\|}{\,|\,}
+\newcommand{\sha}[1]{{#1}^{\sharp}}
+
+\begin{document}
+
+\maketitle
+
+% % \begin{abstract}
+% Here is the abstract.
+% \end{abstract}
+% 
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Empirical likelihood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric family of the data, the estimator is in some sense as efficient as a fully parametric model (Qin and Lawless 1994).
+
+The empirical likelihood (EL) approach can be traced back to Thomas and Grunkemeier (1975). Its current framework is mainly developed by Owen (1988), Owen (1990), and Owen (1991), where empirical likelihood ratio statistics is introduced, and the EL method is extended to linear regression models under fixed or random design. Kolaczyk (1994) further generalize the method to be used with generalized linear models. Qin and Lawless (1994) relate estimating equation and empirical likelihood and provide asymptotic properties of the estimator. Chen, Variyath, and Abraham (2008) propose an adjustment to the constraints in the EL framework to ensure the convex hall condition is always satisfied and the theoretical properties are not affected. Moreover, Lazar (2003) explores the validity of using empirical likelihood for Bayesian inference as well as the frequentist properties of the posterior intervals. Chaudhuri, Mondal, and Yin (2017) considers using Hamiltonian Monte Carlo sampling for the Bayesian EL models.
+
+An approach related to EL is the so-called exponentially tilting (ET) method (Efron 1981). Schennach (2005), and Schennach (2007) propose the exponentially tilted empirical likelihood (ELET) approach, which enjoys the properties of both ET and EL methods. Newey and Smith (2004) also gives the theoretical results relating Generalized Method of Moment (GMM) and Generalized Empirical Likelihood (GEL), their higher order properties, as well as their bias-corrected forms in the absence of length-bias.
+
+For EL with length-biased data, Zhou (2005) proposes an EM algorithm for censored and truncated data under mean type constraints without covariates. Zhou and Li (2008) combine the empirical likelihood with the Buckley-James estimator which works for regression models. Zhou, Kim, and Bathke (2012) revisit the fixed and random design linear regression models but for right-censored data and show that the model works well even with heteroscedastic errors. Shen, Yuen, and Liu (2016) develop a different EM algorithm under the EL framework for one- or two- sample doubly censored data.
+
+Given fully observed data, an asymptotic \(\chi^2\) distribution of log EL is valid. When right-censoring is present, the asymptotic distribution is no longer a standard \(\chi^2\) distribution but subject to an unknown scaling factor. He et al. (2016) consider using a special influence functions in the estimating equations to retain a standard \(\chi^2\) distribution. Li and Wang (2003) propose an adjusted EL for linear regression using synthetic data approach. Ning et al. (2013) consider length-biased right-censored data in a non-regression setting for the estimation of mean, quantile and survival function of the population as well as confidence intervals.
+
+Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing softwares are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g.~\pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
+
+This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the Newton--Raphson algorithm which is a key step in the EL inner optimization problem. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
+
+\hypertarget{methodology}{%
+\section{Methodology}\label{methodology}}
+
+\hypertarget{basics}{%
+\subsection{Basics}\label{basics}}
+
+Let \(\bm X= (\bm x_1,\cdots,\bm x_n)\) where \(\bm x_i\in\mathbb R^d\) be iid observations from an unknown distribution \(F_0(\bm x)\), about which a parameter of interest \(\bm \theta\in \mathbb R^p\) is defined as satisfying an \(m\)-dimensional moment condition:
+\begin{equation} \label{eq:momcond}
+  \textrm{E}\bigl[\bm g(\bm x;\bm \theta)\bigr] = 0,
+\end{equation}
+where \(\bm g(\bm x, \bm \theta) = \bigl( g_1(\bm x, \bm \theta), \ldots, g_m(\bm x, \bm \theta) \bigr)\).
+
+The empirical likelihood \(\textrm{EL}(\bm \theta)\) as the profile likelihood over the distribution function of \(\bm x\):
+\begin{equation} \label{eq:elF}
+  \textrm{EL}(\bm \theta) = \max_{F \in \mathcal F(\bm \theta)} \prod_{i=1}^n \mathrm{d} F(\bm x_i),
+\end{equation}
+where for any given \(\bm \theta\), \(\mathcal F(\bm \theta)\) is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
+
+For any \(\bm \theta\), Owen (1988) has shown that the maximum of \eqref{eq:elF} can be achieved by focusing on the distribution functions having all mass on the support of the observed data \(\bm x_1, \cdots, \bm x_n\), and the infinite-dimensional profile likelihood \eqref{eq:elF} can be reduced to a finite-dimensional one.
+
+To have a general notation consistent with the EM algorithm under right-censoring in later sections, we now define \textbf{weighted empirical likelihood}:
+
+\begin{equation}
+  \textrm{EL}(\bm \theta) = \prod_{i=1}^n \hat{\omega_i}(\bm \theta)^{q_i},
+\end{equation}
+
+where \(q_i > 0, \forall i=1,\cdots,n\), and the \(n\)-dimensional vector of probability weights \(\hat{\omega}(\bm \theta)\) associated with the observations is the solution of an inner optimization problem which will be referred to as \textbf{EL inner optimization}:
+
+\begin{equation} \label{eq:noncensopt}
+\begin{split}
+  \max_{\omega}\quad & \sum_{i=1}^n q_i \log(\omega_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^n \omega_i\cdot g(\bm x_i;\bm \theta) = 0 \\
+  & \sum_{i=1}^n \omega_i = 1 \\
+  & \omega_i \geq 0, \quad i=1,\cdots,n.
+\end{split}
+\end{equation}
+
+When \(q_i = 1, \forall i=1,\cdots,n\), we have the regular empirical likelihood function. The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in Owen (1990). Specifically, the Lagrangian function can be set up as
+\begin{equation} \label{eq:lagrange}
+  \mathcal{L}= \sum_{i=1}^n q_i\log(\omega_i) + (\sum_{i=1}^n q_i)\bm \lambda'(\sum_{i=1}^n \omega_i \cdot g(\bm x_i;\bm \theta)) + \mu(1-\sum_{i=1}^n \omega_i).
+\end{equation}
+
+Let \(r_i = q_i/\sum_{i=1}^n q_i\). Provided that \(\bm 0\) is in the convex full of the points \(g(\bm x_i;\bm \theta),\cdots,g(\bm x_n;\bm \theta)\), a unique optimal probability vector exist and can be shown to be
+
+\begin{equation}\label{eq:omegas}
+  \hat{\omega_i}(\bm \theta) = \frac{r_i}{1 - \hat{\bm \lambda}'(\bm \theta) g(\bm x_i;\bm \theta)},
+\end{equation}
+
+where
+
+\begin{equation}
+\begin{aligned}
+\hat{\bm \lambda}(\bm \theta) &= \mathop{\mathrm{arg\,max}}_{\bm \lambda(\bm \theta)} \sum_{i=1}^n r_i\ {\log}^{\star}\left(1 - \bm \lambda'(\bm \theta) g_i(\bm X;\bm \theta); r_i\right), \\
+{\log}^{\star}(x; r) &= 
+\begin{cases} 
+\log(x) & x \ge r \\
+- \frac{1}{2} (x/r)^2 + 2 (x/r) - \frac{3}{2} + \log r & x < r.
+\end{cases}
+\end{aligned}
+\label{eq:optim}
+\end{equation}
+
+Qin and Lawless (1994) has shown that \(\bm \lambda(\bm \theta)\) is a continuous differentiable function of \(\bm \theta\) provided that convex hull condition is satisfied with \(\bm \theta\) and \(\sum_{i=1}^n g(\bm x_i;\bm \theta)g'(\bm x_i;\bm \theta)\) is positive definite. However, the support of \(\bm \theta\) is not necessarily a convex set, as demonstrated by Chaudhuri, Mondal, and Yin (2017).
+
+In the case that we are only interested in one parameter \(\theta\) of an unknown distribution \(F\), Owen (1990) has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, Qin and Lawless (1994) shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the paramters accordingly.
+
+With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of \(\mathcal{L}\) with respect to \(\bm \theta\), with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator.
+
+\hypertarget{support-correction}{%
+\subsection{Support Correction}\label{support-correction}}
+
+Let \(g_i = g(\bm x_i;\bm \theta)\) for \(i = 1,\cdots, n\). As mentioned above, a necessary condition of obtaining a unique optimal solution is that \(\bm 0\) is in the convex full of the points \(g_1,\cdots,g_n\) which may not be satisfied with the data. Chen, Variyath, and Abraham (2008) proposes a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+
+\begin{equation} \label{eq:noncensoptadj}
+\begin{split}
+  \max_{\omega}\quad & \sum_{i=1}^{n+1} \log(\omega_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^{n+1} \omega_i\cdot g_i = 0 \\
+  & \sum_{i=1}^{n+1} \omega_i = 1 \\
+  & \omega_i \geq 0, \quad i=1,\cdots,{n+1},
+\end{split}
+\end{equation}
+
+where \(g_{n+1} = -\frac{a_n}{n} \sum_{i=1}^n g_i\) for some small positive \(a_n\).
+
+It is also shown by Chen, Variyath, and Abraham (2008) that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions.
+
+\hypertarget{regression-with-right-censored-outcome}{%
+\subsection{Regression with Right-Censored Outcome}\label{regression-with-right-censored-outcome}}
+
+\hypertarget{empirical-likelihood-with-right-censored-outcome-variable}{%
+\subsubsection{Empirical Likelihood with Right-Censored Outcome Variable}\label{empirical-likelihood-with-right-censored-outcome-variable}}
+
+\pkg{flexEL} handles the situation of right-censored regression, that is, instead of observing outcomes \(y_i\), we observe \(u_i = \min(y_i, c_i)\) and \(\delta_i = \mathfrak 1\{y_i \le c_i\}\), where \(c_i\) is the censoring time.
+
+Consider a general regression model
+\[
+  y_i = f(\bm x_i; \bm \theta) + \varepsilon_i, \quad i=1,\cdots,n
+\]
+where \(\varepsilon_i\) follows an unknown distribution with mean \(0\) and variance \(1\), and independent of \(\bm x_i\), and \(m\)-dimensional conditional moment restrictions
+\begin{equation}\label{eq:cmom}
+  \textrm{E}\bigl[\bm g(\bm x, \varepsilon; \bm \theta) \,|\, \bm x\bigr] = 0.
+\end{equation}
+
+We assume that the censoring variable \(c_i\) independent of \(y_i\). Let's denote the residuals given a specific \(\bm \theta\) as \(e_i'\)s (corresponding to \(u_i'\)s), the complete residuals as \(\varepsilon_i'\)s (corresponding to \(y_i'\)s).
+
+The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function \(F(\bm x,\varepsilon) = G(\bm x) \cdot H(\varepsilon)\), where \(G\) and \(H\) are the CDFs of \(\bm x\) and \(\varepsilon\):
+\begin{equation}\label{eq:celF}
+  \textrm{CEL}(\bm \theta) = \max_{F \in \mathcal F(\bm \theta)}\prod_{i=1}^n dG(\bm x_i) \cdot dH(\varepsilon_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
+\end{equation}
+where
+\[
+  e_i = e_i(\bm \theta) = \frac{u_i - \mu(\bm x_i;\bm \theta)}{\eta(\bm x_i;\bm \theta)},
+\]
+and \(\mathcal F(\bm \theta)\) is the set of all valid distribution functions satisfying \eqref{eq:cmom}. It is not hard to show that for any choice of \(H(\varepsilon)\), the maximum of \eqref{eq:celF} over \(G(\bm x)\) is attained as the empirical distribution \(\hat G(\bm x)\) which puts a point mass of \(1/n\) on each covariate observation \(\bm x_1, \ldots, \bm x_n\). Restricting our attention to \(G(\bm x)\) uniform on the observed covariates, and considering only the weaker moment condition
+\begin{equation}\label{eq:umom}
+  \textrm{E}\bigl[\bm g(\bm x, \varepsilon; \bm \theta)\bigr] = 0
+\end{equation}
+(which is true for any \(G(\bm x)\) if \eqref{eq:cmom} holds), the CEL function reduces to
+\[
+  \textrm{CEL}(\bm \theta) = \max_{F \in \mathcal F^\star(\bm \theta)}\prod_{i=1}^n dH(e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
+\]
+where \(\mathcal F^\star(\bm \theta)\) is the set of all valid distributions \(F(\bm x, \varepsilon)\) satisfying \eqref{eq:umom}.
+
+It can be shown that with censored observations, it is no longer true that an optimal \(F\) has support only on the data points \(e_i, i=1,\cdots,n\). However, if we restrict ourselves to this case, we arrive at a finite dimensional problem
+\begin{equation} \label{eq:elcens}
+  \textrm{CEL}(\bm \theta) = \prod_{i=1}^n \Big[\hat \omega_i(\bm \theta)^{\delta_i}(\sum_{j: e_j \geq e_i}\hat \omega_i(\bm \theta))^{1-\delta_i}\Big].
+\end{equation}
+
+where similar as before, \(\hat\omega(\bm \theta)\) is the solution of an inner optimization problem
+
+\begin{equation} \label{eq:elcens_inner}
+\begin{split}
+  \max_{\omega}\quad & \sum_{i=1}^n \Big[\delta_i\log(\omega_i) + (1-\delta_i)\log(\sum_{j: e_j\geq e_i}\omega_i)\Big]\\
+  \text{s.t.}\quad & \sum_{i=1}^n \omega_i\cdot g_i(\bm y,\bm x;\bm \theta) = 0 \\
+  & \sum_{i=1}^n \omega_i = 1 \\
+  & \omega_i \geq 0, \quad i=1\cdots,n.
+\end{split}
+\end{equation}
+
+Right-censoring is essentially a missing data problem. In \pkg{flexEL}, the right-censored EL problem is solved via an EM algorithm. The algorithm is a generalization of Zhou (2005) to regression problems.
+
+\hypertarget{an-em-algorithm}{%
+\subsubsection{An EM Algorithm}\label{an-em-algorithm}}
+
+Recall that if \(\delta_i=1\), we have \(e_i=\varepsilon_i\). This means that the \textbf{unobserved (latent) variables} are the \(\varepsilon_i'\)s such that \(\delta_i = 0\), the \textbf{complete data likelihood} is
+\begin{equation}\label{eq:complike}
+  \ell(\omega,\varepsilon|\bm u) = \sum_{i=1}^n\log(\prod_{j=1}^n \omega_j^{\mathfrak 1(\varepsilon_i=e_j)})
+\end{equation}
+
+The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to \(\bm y\) (vector of all latent variables) conditioned on the observed values, the censoring indicator and the current state of the parameters, and since for \(\delta_i = 1\), we know that \(u_i=y_i\), we have
+
+\begin{equation}\label{eq:estep}
+\begin{split}
+  \textrm{E}_{\varepsilon|e,\delta,\omega_0}\bigl[\ell(\omega,\varepsilon|e)\bigr]
+  &= \textrm{E}_{\varepsilon|e,\delta,\omega_0}\Bigl[\sum_{i=1}^n\delta_i\log(\omega_i) +
+  (1-\delta_i)\log(\prod_{j=1}^n \omega_j^{\mathfrak 1(\varepsilon_i=e_j)})\Bigr] \\
+  &= \sum_{i=1}^n\Bigl[\delta_i\log(\omega_i) +
+  (1-\delta_i)\sum_{j=1}^n \textrm{E}_{\varepsilon_i|e,\delta,\omega_0}[\mathfrak1(\varepsilon_i=e_j)]\log(\omega_j)\Bigr] \\
+  &= \sum_{i=1}^n\Bigl[\delta_i\log(\omega_i) +
+  (1-\delta_i)\sum_{j=1}^n P_{\varepsilon_i|e,\delta,\omega_0}(\varepsilon_i=e_j)\log(\omega_j)\Bigr].
+\end{split}
+\end{equation}
+
+Notice that we can write
+\[
+  \log(\prod_{j=1}^n \omega_j^{\mathfrak 1(\varepsilon_i=e_j)}) =
+  \sum_{i=1}^n \mathfrak 1(\varepsilon_i=e_j)\log(\omega_j),
+\]
+because for any \(i \in \{1,\cdots,n\}\), \(\mathfrak 1(\varepsilon_i=e_j)=1\) for one and only one \(j\in\{1,\cdots,n\}\). Also, the latent \(\varepsilon_i's\) are independent but not identically distributed, since each of them follows a different categorical distribution (multinomial distribution with one trial).
+
+The conditional distribution in (\ref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass only allocates on the values in a subset of \(\{e_1,\cdots,e_n\}\) such that \(\mathfrak 1(e_j\geq e_i) = 1\) for \(j=1,\cdots,n\), which is still a multinomial distribution.
+\begin{equation}\label{eq:condprob_orig}
+  P_{\varepsilon_i|e,\delta,\omega_0}(\varepsilon_i=e_j) =
+  \frac{\mathfrak 1(e_j\geq e_i)\cdot \omega_{0j}}{\sum_{k=1}^n\mathfrak 1(e_k\geq e_i)\cdot\omega_{0k}}.
+\end{equation}
+
+Therefore, the EM algorithm iterates between the following two steps:
+
+\begin{itemize}
+\item \textbf{E-step:} Given the observed values and the weights $\omega_0$ from the previous iteration, the expectation of the log likelihood is
+\begin{equation}\label{eq:emestep}
+\begin{split}
+  \textrm{E}_{\varepsilon|e,\delta,\omega_0}[\ell(\omega,\varepsilon|e)]
+  &= \sum_{i=1}^n \Big[\delta_i \log \omega_i +
+    (1-\delta_i) \sum_{j: e_j\geq e_i} \tilde \omega_{ij} \log \omega_j\Big] \\
+  &= \sum_{i=1}^n \Big[\delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)
+      \cdot\tilde\omega_{ki}\Big]\cdot\log \omega_i,
+\end{split}
+\end{equation}
+where
+\[
+  \tilde \omega_{ki} = \frac{\omega_{0i}}{\sum_{l: e_l\geq e_k}\omega_{0l}}, \quad k,i: e_k\leq e_i.
+\]
+
+\item \textbf{M-step:}
+Let $q_i = \delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)\cdot \tilde \omega_{ki}$ for $i=1,\cdots,n$, then the problem becomes
+\begin{equation}\label{eq:emmstep}
+\begin{split}
+  \max_{\omega}\quad & \sum_{i=1}^n q_i \log \omega_i \\
+  \mbox{s.t.}\quad & \sum_{i=1}^n \omega_i\cdot \bm g(\bm x_i,u_i;\bm \theta) = 0 \\
+  & \sum_{i=1}^n \omega_i = 1 \\
+  & \omega_i \geq 0, \quad i=1\cdots,n,
+\end{split}
+\end{equation}
+
+which has the form of the weighted empirical likelihood inner optimization problem, and $\bm \omega= (\omega_1,\cdots,\omega_n)$ can be updated as given by equations (\ref{eq:omegas}) to (\ref{eq:optim}).
+
+\end{itemize}
+
+\hypertarget{continuity-correction-of-empirical-likelihood-with-right-censored-outcomes}{%
+\subsubsection{Continuity Correction of Empirical Likelihood with Right-Censored Outcomes}\label{continuity-correction-of-empirical-likelihood-with-right-censored-outcomes}}
+
+It turns out that the log of equation (\ref{eq:elcens}) (log CEL) is not a continuous function in \(\bm \theta\), so that direct optimization of log CEL is difficult to achieve.
+
+In order to obtain an estimate in this case, one could use Markov Chain Monte Carlo or global optimization algorithm such as simulated annealing, which are both time-consuming. Here we consider a revision of the log CEL function, so that one can employ gradient-based optimization algorithms.
+
+The log CEL can be expanded as follows
+\begin{equation}
+\begin{split}
+\ell_{\textrm{CEL}}(\bm \theta) &= \sum_{i=1}^n \Bigl[\delta_i\log(\omega_i(\bm \theta)) +
+  (1-\delta_i)\log(\sum_{j:e_j \geq e_i} \omega_j(\bm \theta))\Bigr] \\
+  &= \sum_{i=1}^n \Bigl[\delta_i\log(\omega_i(\bm \theta)) +
+    (1-\delta_i)\log(\sum_{j=1}^n \mathfrak 1(e_j(\bm \theta) \geq e_i(\bm \theta)) \cdot \omega_j(\bm \theta))\Bigr].
+\end{split}
+\label{eq:logel_orig}
+\end{equation}
+
+We can see that the discontinuity of \(\ell_{\textrm{CEL}}(\bm \theta)\) in (\ref{eq:logel_orig}) is due to an indicator function. To correct this discontinuity, we replace the indicator function by a continuous approximation.
+
+Let \(S\) be a transformed sigmoid function, i.e.,
+\begin{equation}\label{eq:sigmoid}
+  S(x; s) = \frac{1}{1+\exp(s\cdot x)},
+\end{equation}
+where \(s > 0\) is a smoothing parameter. A plot of the function is given in Figure \ref{fig:smoothfun}. This function is radially symmetric around the point \((0,0.5)\).
+
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=0.5\textwidth]{smoothfun}
+\caption{Smooth function for indicator function $\mathfrak 1(x\leq 0)$.}
+\label{fig:smoothfun}
+\end{figure}
+
+Specifically, we use
+\begin{equation}\label{eq:indsmooth}
+  S_{ij}(\bm \theta;s) := S(e_i(\bm \theta)-e_j(\bm \theta);s)
+  = \frac{1}{1+\exp(s\cdot(e_i(\bm \theta)-e_j(\bm \theta)))}.
+\end{equation}
+Notice that as long as \(e_i(\bm \theta)\) is a continuous function of \(\bm \theta\) for all \(i=1,\cdots,n\), then (\ref{eq:indsmooth}) is indeed a continuous function of \(\bm \theta\).
+
+The log smoothed censored EL (log SCEL) is then defined as
+\begin{equation}\label{eq:logel_smoo}
+  \ell_{\SCEL}(\bm \theta) = \sum_{i=1}^n \Bigl[\delta_i\log(w_i(\bm \theta)) +
+    (1-\delta_i)\log(\sum_{j=1}^n S_{ij}(\bm \theta;s)\cdot w_j(\bm \theta))\Bigr].
+\end{equation}
+
+\hypertarget{illustrations}{%
+\section{Illustrations}\label{illustrations}}
+
+\pkg{flexEL} provides implementations of estimating equations for mean and quantile regression models based on the following location-scale model:
+
+\begin{equation} \label{md:lsmod}
+  y_i = \bm x_i'\bm \beta+ \sigma\cdot\exp(\bm z_i'\bm \gamma)\cdot\varepsilon_i, \quad i=1,\cdots,n.
+\end{equation}
+
+\hypertarget{mean-regression}{%
+\subsection{Mean Regression}\label{mean-regression}}
+
+\begin{itemize}
+\item
+  Show users how to create their own \texttt{Gfun} and use this from \proglang{R}.
+\item
+  Can include gradient-based optimization here as well. I suggest to use \texttt{optim(method\ =\ "BFGS")} for optimization, not \texttt{nlm()} (it's just more complicated/annoying). I would say use \texttt{nlminb()} which is way faster than \texttt{optim()}, but for some reason R Core suggests to use the other optimizers instead\ldots{}
+\end{itemize}
+
+\hypertarget{quantile-regression}{%
+\subsection{Quantile Regression}\label{quantile-regression}}
+
+\begin{itemize}
+\tightlist
+\item
+  What it is, smoothness correction, present built-in function for this.
+\end{itemize}
+
+For the location-scale model \eqref{md:lsmod}, the \(\tau\times 100\%\) conditional quantile of \(y_i\) is
+\begin{equation} \label{eq:lsqr}
+  Q_{\tau}(y_i|\bm x_i) = \bm x_i' \bm \beta+ \sigma\cdot\exp(\bm z_i' \bm \gamma)\cdot\nu_{\tau}.
+\end{equation}
+
+In this case, for parameters \(\bm \beta,\bm \gamma\) and \(\sigma\), we adopt the same estimating equation as in the mean regression case. For the quantile parameter \(\nu_{\tau}\), we rely on the ``check function" introduced by Koenker and Bassett Jr (1978), which is defined as
+\begin{equation}\label{eq:check}
+\rho_\tau(u) = u\cdot(\tau - \mathfrak 1 \{u \le 0\}),
+\end{equation}
+where \(\mathfrak 1\{\cdot\}\) is the indicator function.
+
+If the \(\tau\)-th quantile value of \(\varepsilon_i\stackrel {\textrm{iid}}{\sim}(0,1)\) is \(\nu_{\tau}\), then \(\varepsilon_i-\nu_{\tau}\) has \(\tau\)-th quantile value \(0\). The estimator of \(\nu_{\tau}\) is then defined as
+\begin{equation}\label{eq:nueq}
+  \hat\nu_{\tau} = \mathop{\mathrm{arg\,min}}_{\tilde\nu_{\tau}} \textrm{E}\Biggl[\rho_{\tau}\Bigl(\frac{y-\bm x'\bm \beta}{\sigma\cdot\exp(\bm z'\gamma)}-\tilde\nu_{\tau}\Bigr)\Biggr].
+\end{equation}
+
+As before, we use the first order optimality condition of (\ref{eq:nueq}) to obtain the estimating equation for \(\nu_{\tau}\). Therefore, we obtain all the moment conditions for quantile regression as follows
+\begin{equation} \label{eq:qrls}
+\begin{split}
+  \textrm{E}\Bigl[\frac{y-\bm x'\bm \beta}{\exp(2\bm z'\bm \gamma)}\cdot\bm x\Bigr] &= 0 \\
+  \textrm{E}\Bigl[\bigl(1-\frac{(y-\bm x'\bm \beta)^2}{\sigma^2\cdot\exp(2\bm z'\bm \gamma)}\bigr)\cdot\bm z\Bigr] &= 0 \\
+  \textrm{E}\Bigl[\frac{(y-\bm x'\bm \beta)^2}{\sigma^2\cdot\exp(2\bm z'\bm \gamma)}-1\Bigr] &= 0 \\
+  \textrm{E}\Bigl[\rho'_{\tau}\bigl(\frac{y-\bm x'\bm \beta}{\sigma\cdot\exp(\bm z'\bm \gamma)}-\nu_{\tau}\bigr)\Bigr] &= 0.
+\end{split}
+\end{equation}
+
+\hypertarget{built-in-models}{%
+\subsection{Built-in Models}\label{built-in-models}}
+
+\begin{itemize}
+\item
+  We have a bunch of these: quantile vs mean regression, and location vs location-scale.
+\item
+  Censoring as well.
+\item
+  Should we put all this in the Methods section? Have separate illustrations for some or all?
+\end{itemize}
+
+\hypertarget{bayesian-el}{%
+\subsection{Bayesian EL}\label{bayesian-el}}
+
+\begin{itemize}
+\item
+  Good to illustrate with \proglang{Stan} NUTS algorithm, because we've implemented it already and \proglang{Stan} is a really good autodiff engine + best NUTS implementation.
+\item
+  Can illustrate with the example from the JRSSB EL-HMC paper.
+\end{itemize}
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+\begin{itemize}
+\tightlist
+\item
+  Everything below here are just tests for using JSS Markdown.
+\end{itemize}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\hypertarget{ref-chaudhuri-et-al2017}{}%
+Chaudhuri, Sanjay, Debashis Mondal, and Teng Yin. 2017. {``Hamiltonian Monte Carlo Sampling in Bayesian Empirical Likelihood Computation.''} \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)} 79 (1): 293--320.
+
+\leavevmode\hypertarget{ref-chen-et-al2008}{}%
+Chen, Jiahua, Asokan Mulayath Variyath, and Bovas Abraham. 2008. {``Adjusted Empirical Likelihood and Its Properties.''} \emph{Journal of Computational and Graphical Statistics} 17 (2): 426--43.
+
+\leavevmode\hypertarget{ref-efron1981}{}%
+Efron, Bradley. 1981. {``Nonparametric Standard Errors and Confidence Intervals.''} \emph{Canadian Journal of Statistics} 9 (2): 139--58.
+
+\leavevmode\hypertarget{ref-he-et-al2016}{}%
+He, Shuyuan, Wei Liang, Junshan Shen, and Grace Yang. 2016. {``Empirical Likelihood for Right Censored Lifetime Data.''} \emph{Journal of the American Statistical Association} 111 (514): 646--55.
+
+\leavevmode\hypertarget{ref-koenker-bassett1978}{}%
+Koenker, Roger, and Gilbert Bassett Jr. 1978. {``Regression Quantiles.''} \emph{Econometrica: Journal of the Econometric Society}, 33--50.
+
+\leavevmode\hypertarget{ref-kolaczyk1994}{}%
+Kolaczyk, Eric D. 1994. {``Empirical Likelihood for Generalized Linear Models.''} \emph{Statistica Sinica}, 199--218.
+
+\leavevmode\hypertarget{ref-lazar2003}{}%
+Lazar, Nicole A. 2003. {``Bayesian Empirical Likelihood.''} \emph{Biometrika} 90 (2): 319--26.
+
+\leavevmode\hypertarget{ref-li-wang2003}{}%
+Li, Gang, and Qi-Hua Wang. 2003. {``Empirical Likelihood Regression Analysis for Right Censored Data.''} \emph{Statistica Sinica}, 51--68.
+
+\leavevmode\hypertarget{ref-newey-smith2004}{}%
+Newey, Whitney K, and Richard J Smith. 2004. {``Higher Order Properties of GMM and Generalized Empirical Likelihood Estimators.''} \emph{Econometrica} 72 (1): 219--55.
+
+\leavevmode\hypertarget{ref-ning-et-al2013}{}%
+Ning, J, J Qin, M Asgharian, and Y Shen. 2013. {``Empirical Likelihood-Based Confidence Intervals for Length-Biased Data.''} \emph{Statistics in Medicine} 32 (13): 2278--91.
+
+\leavevmode\hypertarget{ref-owen1988}{}%
+Owen, Art. 1988. {``Empirical Likelihood Ratio Confidence Intervals for a Single Functional.''} \emph{Biometrika} 75 (2): 237--49.
+
+\leavevmode\hypertarget{ref-owen1990}{}%
+---------. 1990. {``Empirical Likelihood Ratio Confidence Regions.''} \emph{The Annals of Statistics}, 90--120.
+
+\leavevmode\hypertarget{ref-owen1991}{}%
+---------. 1991. {``Empirical Likelihood for Linear Models.''} \emph{The Annals of Statistics}, 1725--47.
+
+\leavevmode\hypertarget{ref-qin-lawless1994}{}%
+Qin, Jin, and Jerry Lawless. 1994. {``Empirical Likelihood and General Estimating Equations.''} \emph{The Annals of Statistics}, 300--325.
+
+\leavevmode\hypertarget{ref-schennach2005}{}%
+Schennach, Susanne M. 2005. {``Bayesian Exponentially Tilted Empirical Likelihood.''} \emph{Biometrika} 92 (1): 31--46.
+
+\leavevmode\hypertarget{ref-schennach2007}{}%
+---------. 2007. {``Point Estimation with Exponentially Tilted Empirical Likelihood.''} \emph{The Annals of Statistics}, 634--72.
+
+\leavevmode\hypertarget{ref-shen-et-al2016}{}%
+Shen, Junshan, Kam Chuen Yuen, and Chunling Liu. 2016. {``Empirical Likelihood Confidence Regions for One-or Two-Samples with Doubly Censored Data.''} \emph{Computational Statistics \& Data Analysis} 93: 285--93.
+
+\leavevmode\hypertarget{ref-thomas-grunkemeier1975}{}%
+Thomas, David R, and Gary L Grunkemeier. 1975. {``Confidence Interval Estimation of Survival Probabilities for Censored Data.''} \emph{Journal of the American Statistical Association} 70 (352): 865--71.
+
+\leavevmode\hypertarget{ref-zhou2005}{}%
+Zhou, Mai. 2005. {``Empirical Likelihood Ratio with Arbitrarily Censored/Truncated Data by EM Algorithm.''} \emph{Journal of Computational and Graphical Statistics} 14 (3): 643--56.
+
+\leavevmode\hypertarget{ref-zhou-et-al2012}{}%
+Zhou, Mai, Mi-Ok Kim, and Arne C Bathke. 2012. {``Empirical Likelihood Analysis for the Heteroscedastic Accelerated Failure Time Model.''} \emph{Statistica Sinica}, 295--316.
+
+\leavevmode\hypertarget{ref-zhou-li2008}{}%
+Zhou, Mai, and Gang Li. 2008. {``Empirical Likelihood Analysis of the Buckley--James Estimator.''} \emph{Journal of Multivariate Analysis} 99 (4): 649--64.
+
+\end{CSLReferences}
+
+\end{document}
