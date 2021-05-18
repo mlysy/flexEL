@@ -92,7 +92,9 @@ void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
 /// 
 // [[Rcpp::export]]
 Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
+  // std::cout << "beginning of GenEL_lambda_nr" << std::endl;
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  // std::cout << "GEL created." << std::endl;
   bool supp_adj = GEL->get_supp_adj();
   int n_obs = G.cols();
   int n_eqs = G.rows();

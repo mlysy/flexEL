@@ -5,6 +5,10 @@ source("el_rfuns.R")
 
 ntest <- 5
 
+if(!identical(Sys.getenv("NOT_CRAN"), "true")) {
+  set.seed(1)
+}
+
 # ---- lambda_nr -----
 
 # nconv <- 0

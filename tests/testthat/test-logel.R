@@ -1,5 +1,5 @@
 # ---- testing logel implementation in R and C++ are equal ----
-
+library(flexEL)
 source("el_rfuns.R")
 
 # library(testthat) # not loaded automatically

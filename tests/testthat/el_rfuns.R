@@ -552,7 +552,7 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
     omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
     
     weights <- evalWeights_R(deltas, omegas, epsilons)
-    print(weights)
+    # print(weights)
     # message("new weights logel: ", sum(weights*log(omegas)))
     return(sum(weights*log(omegas)))
     # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))

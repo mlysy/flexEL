@@ -321,10 +321,10 @@ namespace flexEL {
                                 const Ref<const MatrixXd>& G,
                                 const Ref<const VectorXd>& delta,
                                 const Ref<const VectorXd>& epsilon) {
-    std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
+    // std::cout << "omega_hat: omega = " << omega.transpose() << std::endl;
     // Need to have a valid starting value if the last one is not valid in MCMC
     if (omega != omega) { // if there is nan in omega
-      std::cout << "omega_hat: resetting omega_." << std::endl;
+      // std::cout << "omega_hat: resetting omega_." << std::endl;
       omega = omega_init_;
     }
     int em_iter;
@@ -416,7 +416,7 @@ namespace flexEL {
     VectorXd weights(n_obs2_);
     if (!smooth_) {
       eval_weights(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
-      std::cout << "weights = " << weights.transpose() << std::endl;
+      // std::cout << "weights = " << weights.transpose() << std::endl;
     } else{
       eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
     }

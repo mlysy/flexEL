@@ -6,11 +6,6 @@
 
 using namespace Rcpp;
 
-#ifdef RCPP_USE_GLOBAL_ROSTREAM
-Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
-Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
-#endif
-
 // CensEL_ctor
 SEXP CensEL_ctor(int n_obs, int n_eqs);
 RcppExport SEXP _flexEL_CensEL_ctor(SEXP n_obsSEXP, SEXP n_eqsSEXP) {
