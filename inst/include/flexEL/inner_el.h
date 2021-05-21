@@ -71,8 +71,9 @@ namespace flexEL {
     int nr_iter_; // actual number of iterations
     double rel_tol_; // relative tolerance
     double nr_err_; // actual relative error
-    bool supp_adj_; // whether do support adjustment or not
-    double supp_a_; // tuning parameter for support currection
+    bool supp_adj_; // whether do support correction or not
+    double supp_a_; // tuning parameter for support correction
+    double weight_adj_; // weight of the additional observation under support correction
     VectorXd lambda0_; // initial lambda in Newton-Raphson iterations
         
     // // log_star and its derivatives for the EL dual problem
@@ -107,6 +108,7 @@ namespace flexEL {
     /// Set the support adjustment flag.
     void set_supp_adj(bool supp_adj, double a);
     void set_supp_adj(bool supp_adj);
+    void set_weight_adj(double weight_adj);
     /// Set the initial value for Newton-Raphson algorithm.
     void set_lambda0(const Ref<const VectorXd>& lambda0);
     /// Get the diagnostics for the last Newton-Raphson run.
@@ -161,9 +163,10 @@ namespace flexEL {
     n_obs_ = n_obs;
     n_eqs_ = n_eqs;
     n_obs1_ = n_obs_+1; // space for augmented G
-    // support adjustment
-    supp_adj_ = false;
-    n_obs2_ = n_obs_+supp_adj_;
+    // // support adjustment
+    // supp_adj_ = false;
+    // n_obs2_ = n_obs_+supp_adj_;
+    // weight_adj = 1.0;
     // initialization of log_star constants
     // trunc_ = 1.0 / n_obs_;
     // aa_ = -.5 * n_obs_*n_obs_;
@@ -193,6 +196,7 @@ namespace flexEL {
     set_max_iter(100);
     set_rel_tol(1e-7);
     set_supp_adj(false);
+    set_weight_adj(1.0);
     set_lambda0(VectorXd::Zero(n_eqs_));
   }
 
@@ -220,6 +224,11 @@ namespace flexEL {
   }
   inline void GenEL::set_supp_adj(bool supp_adj) {
     set_supp_adj(supp_adj, std::max(1.0,0.5*log(n_obs_)));
+    return;
+  }
+  
+  inline void GenEL::set_weight_adj(double weight_adj) {
+    weight_adj_ = weight_adj;
     return;
   }
 
@@ -463,12 +472,18 @@ namespace flexEL {
                              const Ref<const VectorXd>& weights) {
     Ref<const MatrixXd> G_eff = supp_G(G);
     double sum_weights = weights.sum();
-    norm_weights_.head(n_obs_) = weights;
-    if(supp_adj_) {
-      norm_weights_(n_obs_) = 1.0;
-      sum_weights += 1.0;
+    norm_weights_.head(n_obs_) = weights; // TODO: can we assign n_obs2_ rather than n_obs_?
+    // TODO: should this not be performed??
+    // if(supp_adj_) {
+    //   norm_weights_(n_obs_) = 1.0;
+    //   sum_weights += 1.0;
+    // }
+    if (supp_adj_) {
+      norm_weights_(n_obs_) = weight_adj_;
+      sum_weights += weight_adj_;
     }
     norm_weights_.head(n_obs2_) /= sum_weights;
+    // std::cout << "norm_weights_ = " << norm_weights_.transpose() << std::endl;
     return logel_impl(G_eff, norm_weights_.head(n_obs2_), sum_weights);
   }
 

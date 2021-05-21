@@ -420,7 +420,8 @@ namespace flexEL {
     } else{
       eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
     }
-    double logel = GEL.logel(G, weights);
+    GEL.set_weight_adj(weights(n_obs_));
+    double logel = GEL.logel(G, weights.head(n_obs_));
     // omega_hat(omega, G, delta_.head(n_obs2_), epsilon_.head(n_obs2_));
     // std::cout << "omega = " << omega.transpose() << std::endl;
     // std::cout << "delta_.head(n_obs2_) = " << delta_.head(n_obs2_).transpose() << std::endl;

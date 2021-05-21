@@ -239,7 +239,7 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
 # G is nObs x nEqs
 # Note: if adjust G (using support adjustment), pass the adjusted G to this function and set adjust to TRUE
 omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
-                           max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
+                           max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
@@ -388,7 +388,10 @@ logEL_smooth_R <- function(omegas, epsilons, deltas, s = 10, adjust=FALSE) {
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-  return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+  
+  weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, adjust)
+  return(sum(weights*log(omegas)))
+  # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
 }
 
 # smoothed evalWeight function with sigmoid function (more vectorized version)
@@ -420,7 +423,7 @@ evalWeights_smooth_R <- function(deltas, omegas, epsilons, s=10, support = FALSE
 
 # using smoothed objective function in EM
 omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
-                                  max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3,
+                                  max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3,
                                   verbose=FALSE, dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)

@@ -95,6 +95,8 @@ GenEL <- R6::R6Class(
         GenEL_set_supp_adj(private$.GEL, private$.supp_adj, private$.supp_adj_a)
       }
     }
+    
+    # TODO: add weight_adj and also set it in set_supp_adj below too (CONTINUE HERE)
   ),
   
   public = list(
@@ -139,7 +141,7 @@ GenEL <- R6::R6Class(
     },
     
     #' @description Calculate the solution of the dual problem of maximum log EL problem.
-    #' @param G        A matrix of dimension `n_eqs x n_obs`.
+    #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A numeric vector of length `n_eqs`.
     lambda_nr = function(G, verbose = FALSE) {
@@ -148,7 +150,7 @@ GenEL <- R6::R6Class(
     },
     
     #' @description Calculate the probability vector base on the given G matrix.
-    #' @param G        A matrix of dimension `n_obs x n_eqs`.
+    #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A probability vector of length `n_obs + supp_adj`.
     omega_hat = function(G, verbose = FALSE) {
@@ -158,15 +160,30 @@ GenEL <- R6::R6Class(
     },
     
     #' @description Calculate the log empirical likelihood base on the given G matrix.
-    #' @param G       A matrix of dimension `n_eqs x n_obs`.
+    #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
     #' @return A scalar.
     logel = function(G) {
       private$check_G(G)
       GenEL_logel(private$.GEL, t(G))
     },
     
+    #' @description Calculate the log empirical likelihood base on the given G matrix.
+    #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @param weight  A numeric vector of length `n_obs` containing non-negative values.
+    #' @return A scalar.
+    weighted_logel = function(G, weights) {
+      private$check_G(G)
+      if (length(weights) != ncol(G)) {
+        stop("Length of `weights` does not match the number of columns of `G`.")
+      }
+      if (any(weights < 0)) {
+        stop("`weights` should contain only non-negative values.")
+      }
+      GenEL_weighted_logel(private$.GEL, t(G), weights)
+    },
+    
     #' @description Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
-    #' @param G        A matrix of dimension `n_eqs x n_obs`.
+    #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A list of three elements.
     logel_grad = function(G, verbose = FALSE) {

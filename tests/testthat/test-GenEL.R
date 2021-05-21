@@ -1,13 +1,10 @@
-
+# library(testthat)
+# library(flexEL)
 context("GenEL")
 
 source("el_rfuns.R")
 
 ntest <- 5
-
-if(!identical(Sys.getenv("NOT_CRAN"), "true")) {
-  set.seed(1)
-}
 
 # ---- lambda_nr -----
 
@@ -186,8 +183,10 @@ test_that("logel with given convergence settings", {
     gel$rel_tol <- rel_tol
     G <- matrix(rnorm(n*p),n,p)
     logel_cpp <- gel$logel(G)
+    # logel_cpp
     omegahat_R <- omega_hat_R(G, max_iter = max_iter, rel_tol = rel_tol)
     logel_R <- logEL_R(omegahat_R)
+    # logel_R
     if (check_res(logel_R) & check_res(logel_cpp)) {
       # nconv <<- nconv + 1
       expect_equal(logel_cpp, logel_R)

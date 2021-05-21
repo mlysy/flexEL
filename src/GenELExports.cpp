@@ -182,7 +182,7 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
 //   return log_el;
 // }
 
-/// Calculate the log empirical likelihood base on the given probability vector.
+/// Calculate the log empirical likelihood base on the given G matrix.
 /// 
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
@@ -190,6 +190,18 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
 double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G);
+  return log_el;
+}
+
+/// Calculate the weighted log empirical likelihood base on the given G matrix and weights.
+/// 
+/// @param[in] pGEL    `externalptr` pointer to GenEL object. 
+/// @param[in] G        Moment matrix of size `n_eqs x (n_obs + supp_adj)`.
+/// @param[in] weights  Weight vector of length `n_obs + supp_adj`.
+// [[Rcpp::export]]
+double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  double log_el = GEL->logel(G, weights);
   return log_el;
 }
 

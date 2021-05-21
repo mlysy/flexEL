@@ -97,6 +97,10 @@ GenEL_logel <- function(pGEL, G) {
     .Call(`_flexEL_GenEL_logel`, pGEL, G)
 }
 
+GenEL_weighted_logel <- function(pGEL, G, weights) {
+    .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights)
+}
+
 GenEL_Logel_grad <- function(pGEL, G, verbose) {
     .Call(`_flexEL_GenEL_Logel_grad`, pGEL, G, verbose)
 }

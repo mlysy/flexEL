@@ -1,14 +1,10 @@
-library(testthat)
-library(flexEL)
+# library(testthat)
+# library(flexEL)
 context("CensEL")
 
 source("el_rfuns.R")
 
 ntest <- 5
-
-if(!identical(Sys.getenv("NOT_CRAN"), "true")) {
-  set.seed(1)
-}
 
 # ---- eval_weights ----
 
@@ -25,7 +21,9 @@ test_that("eval_weights with default settings", {
     omega <- runif(n, 0, 1)
     omega <- omega/sum(omega)
     weights_cpp <- cel$eval_weights(delta, epsilon, omega)
+    # weights_cpp
     weights_R <- evalWeights_R(delta, omega, epsilon)
+    # weights_R
     # flexEL::.EvalWeights(omega, delta, epsilon, FALSE)
     expect_equal(weights_cpp, weights_R)
   }
@@ -107,51 +105,22 @@ test_that("omega_hat with default settings", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    cel <- CensEL$new(n, p)
     G <- matrix(rnorm(n*p),n,p)
     delta <- rep(1,n)
     numcens <- sample(round(n/2),1)
     censinds <- sample(n,numcens)
     delta[censinds] <- 0
     epsilon <- rnorm(n)
+    cel <- CensEL$new(n, p)
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon)
-    # omega_R_lst$omegas
-    range(omega_cpp-omega_R_lst$omegas)
-    # omega_R_lst$conv
-    if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
-      # nconv <<- nconv + 1
-      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-4)
-    }
-  }
-})
-# nconv
-
-# nconv <- 0
-test_that("omega_hat with support correction", {
-  for (ii in 1:ntest) {
-    n <- sample(10:20,1)
-    p <- sample(1:(n-2), 1)
-    adj_a <- runif(1, 1, 5)
-    cel <- CensEL$new(n, p)
-    cel$supp_adj <- TRUE
-    cel$supp_adj_a <- adj_a
-    G <- matrix(rnorm(n*p),n,p)
-    delta <- rep(1,n)
-    numcens <- sample(round(n/2),1)
-    censinds <- sample(n,numcens)
-    delta[censinds] <- 0
-    epsilon <- rnorm(n)
-    omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    # omega_cpp
-    omega_R_lst <- omega_hat_EM_R(adjG_R(G, adj_a), deltas = delta, epsilons = epsilon, adjust = TRUE)
     # omega_R_lst$omegas
     # range(omega_cpp-omega_R_lst$omegas)
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
       # nconv <<- nconv + 1
-      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-4)
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-3)
     }
   }
 })
@@ -162,20 +131,20 @@ test_that("omega_hat with given convergence settings", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
-    max_iter <- sample(c(100, 200, 500), 1)
-    rel_tol <- runif(1, 1e-7, 1e-4)
-    abs_tol <- runif(1, 1e-4, 1e-3)
-    cel <- CensEL$new(n, p)
-    cel$max_iter_nr <- max_iter
-    cel$rel_tol <- rel_tol
-    cel$max_iter_em <- max_iter
-    cel$abs_tol <- abs_tol
     G <- matrix(rnorm(n*p),n,p)
     delta <- rep(1,n)
     numcens <- sample(round(n/2),1)
     censinds <- sample(n,numcens)
     delta[censinds] <- 0
     epsilon <- rnorm(n)
+    max_iter <- sample(c(100, 200, 500), 1)
+    rel_tol <- runif(1, 1e-7, 1e-5)
+    abs_tol <- runif(1, 1e-4, 1e-3)
+    cel <- CensEL$new(n, p)
+    cel$max_iter_nr <- max_iter
+    cel$rel_tol <- rel_tol
+    cel$max_iter_em <- max_iter
+    cel$abs_tol <- abs_tol
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon, 
@@ -185,7 +154,65 @@ test_that("omega_hat with given convergence settings", {
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
       # nconv <<- nconv + 1
-      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-4)
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-3)
+    }
+  }
+})
+# nconv
+
+# nconv <- 0
+test_that("omega_hat with support correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
+    adj_a <- runif(1, 1, 5)
+    cel <- CensEL$new(n, p)
+    cel$supp_adj <- TRUE
+    cel$supp_adj_a <- adj_a
+    omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
+    # omega_cpp
+    omega_R_lst <- omega_hat_EM_R(adjG_R(G, adj_a), deltas = delta, epsilons = epsilon, adjust = TRUE)
+    # omega_R_lst$omegas
+    # range(omega_cpp-omega_R_lst$omegas)
+    # omega_R_lst$conv
+    if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
+      # nconv <<- nconv + 1
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-3)
+    }
+  }
+})
+# nconv
+
+# nconv <- 0
+test_that("omega_hat with continuity correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
+    s <- runif(1, 1, min(n, 100))
+    cel <- CensEL$new(n, p)
+    cel$smooth <- TRUE
+    cel$smooth_s <- s
+    omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
+    # omega_cpp
+    omega_R_lst <- omega_hat_EM_smooth_R(G, deltas = delta, epsilons = epsilon, s = s)
+    # omega_R_lst$omegas
+    # range(omega_cpp-omega_R_lst$omegas)
+    # omega_R_lst$conv
+    if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
+      # nconv <<- nconv + 1
+      expect_equal(omega_cpp, omega_R_lst$omegas, tolerance = 1e-3)
     }
   }
 })
@@ -196,8 +223,14 @@ test_that("omega_hat with given convergence settings and support correction", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
     p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
     max_iter <- sample(c(100, 200, 500), 1)
-    rel_tol <- runif(1, 1e-7, 1e-4)
+    rel_tol <- runif(1, 1e-7, 1e-5)
     abs_tol <- runif(1, 1e-4, 1e-3)
     adj_a <- runif(1, 1, 5)
     cel <- CensEL$new(n, p)
@@ -207,12 +240,6 @@ test_that("omega_hat with given convergence settings and support correction", {
     cel$abs_tol <- abs_tol
     cel$supp_adj <- TRUE
     cel$supp_adj_a <- adj_a
-    G <- matrix(rnorm(n*p),n,p)
-    delta <- rep(1,n)
-    numcens <- sample(round(n/2),1)
-    censinds <- sample(n,numcens)
-    delta[censinds] <- 0
-    epsilon <- rnorm(n)
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     omega_R_lst <- omega_hat_EM_R(adjG_R(G, adj_a), deltas = delta, epsilons = epsilon, adjust = TRUE,
@@ -247,14 +274,14 @@ test_that("logel with default settings", {
     censinds <- sample(n,numcens)
     delta[censinds] <- 0
     epsilon <- rnorm(n)
-    cel$omega_hat(G, delta = delta, epsilon = epsilon)
+    # cel$omega_hat(G, delta = delta, epsilon = epsilon)
     logel_cpp <- cel$logel(G, delta = delta, epsilon = epsilon)
     # logel_cpp
     omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon)
     # omega_R_lst$omegas
     logel_R <- logEL_R(omega_R_lst$omegas, epsilon, delta)
     # logel_R
-    range(logel_cpp-logel_R)
+    # range(logel_cpp-logel_R)
     # omega_R_lst$conv
     if (check_res(logel_cpp) & check_res(logel_R)) {
       # nconv <<- nconv + 1
@@ -263,3 +290,66 @@ test_that("logel with default settings", {
   }
 })
 # nconv
+
+# nconv <- 0
+test_that("logel with support correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
+    adj_a <- runif(1, 1, 5)
+    cel <- CensEL$new(n, p)
+    cel$supp_adj <- TRUE
+    cel$supp_adj_a <- adj_a
+    omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
+    # omega_cpp
+    logel_cpp <- cel$logel(G, delta, epsilon)
+    omega_R_lst <- omega_hat_EM_R(adjG_R(G, adj_a), deltas = delta, epsilons = epsilon, adjust = TRUE)
+    # omega_R_lst$omegas
+    logel_R <- logEL_R(omega_R_lst$omegas, epsilon, delta, adjust = TRUE)
+    # logel_cpp - logel_R
+    if (check_res(logel_cpp) & check_res(logel_R)) {
+      # nconv <<- nconv + 1
+      expect_equal(logel_cpp, logel_R, tolerance = 1e-3)
+    }
+  }
+})
+# nconv
+
+# nconv <- 0
+test_that("logel with continuity correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    G <- matrix(rnorm(n*p),n,p)
+    delta <- rep(1,n)
+    numcens <- sample(round(n/2),1)
+    censinds <- sample(n,numcens)
+    delta[censinds] <- 0
+    epsilon <- rnorm(n)
+    s <- runif(1, 1, min(n, 100))
+    cel <- CensEL$new(n, p)
+    cel$smooth <- TRUE
+    cel$smooth_s <- s
+    omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
+    # omega_cpp
+    omega_R_lst <- omega_hat_EM_smooth_R(G, deltas = delta, epsilons = epsilon, s = s)
+    omega_R_lst$omegas
+    # range(omega_cpp-omega_R_lst$omegas)
+    logel_cpp <- cel$logel(G, delta, epsilon)
+    logel_R <- logEL_smooth_R(omega_R_lst$omegas, epsilon, delta, s)
+    logel_cpp-logel_R
+    # omega_R_lst$conv
+    if (check_res(logel_cpp) & check_res(logel_R)) {
+      # nconv <<- nconv + 1
+      expect_equal(logel_cpp, logel_R, tolerance = 1e-3)
+    }
+  }
+})
+# nconv
+
