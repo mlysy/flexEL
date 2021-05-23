@@ -55,7 +55,6 @@ namespace flexEL {
                          const Ref<const VectorXd>& omega,
                          const Ref<const VectorXd>& epsilon);
     
-    
   public:
     
     /// Constructor.
@@ -95,25 +94,25 @@ namespace flexEL {
     /// Get the relative tolerance.
     double get_abs_tol();
     
-    /// Calculate weights according to epsilons
+    /// Calculate weights for EM algorithm.
     void eval_weights(Ref<VectorXd> weights,
                       const Ref<const VectorXd>& delta,
                       const Ref<const VectorXd>& epsilon,
                       const Ref<const VectorXd>& omega);
+    
+    /// Calculate weights for EM algorithm with continuity correction.
     void eval_weights_smooth(Ref<VectorXd> weights,
                              const Ref<const VectorXd>& delta,
                              const Ref<const VectorXd>& epsilon,
                              const Ref<const VectorXd>& omega);
     
+    /// Calculate the profile probability weights.
     void omega_hat(Ref<VectorXd> omega,
                    const Ref<const MatrixXd>& G,
                    const Ref<const VectorXd>& delta,
                    const Ref<const VectorXd>& epsilon);
     
-    // double logel_omega(const Ref<const VectorXd>& delta,
-    //                    const Ref<const VectorXd>& epsilon,
-    //                    const Ref<const VectorXd>& omega);
-    
+    /// Calculate the empirical loglikelihood.
     double logel(const Ref<const MatrixXd>& G,
                  const Ref<const VectorXd>& delta,
                  const Ref<const VectorXd>& epsilon);
@@ -163,12 +162,14 @@ namespace flexEL {
     return;
   }
   
-  /// @param[in] rel_tol Relative tolerance for the EM algorithm.
+  /// @param[in] abs_tol Relative tolerance for the EM algorithm.
   inline void CensEL::set_abs_tol(double abs_tol) {
     abs_tol_ = abs_tol;
     return;
   }
   
+  /// @param[in] supp_adj Whether do support correction or not.
+  /// @param[in] a        A multiplier to the additional estimating equation.
   inline void CensEL::set_supp_adj(bool supp_adj, double a) {
     supp_adj_ = supp_adj; 
     supp_a_ = a; 
@@ -181,29 +182,34 @@ namespace flexEL {
     return;
   }
   
+  /// @param[in] supp_adj Whether do support correction or not.
   inline void CensEL::set_supp_adj(bool supp_adj) {
     set_supp_adj(supp_adj, std::max(1.0,0.5*log(n_obs_)));
     return;
   }
   
+  /// @param[in] smooth Whether do continuity correction or not.
+  /// @param[in] s      Tuning parameter for continuity correction.
   inline void CensEL::set_smooth(bool smooth, double s) {
     smooth_ = smooth; 
     smooth_s_ = s; 
     return;
   }
   
+  /// @param[in] smooth Whether do continuity correction or not.
   inline void CensEL::set_smooth(bool smooth) {
     set_smooth(smooth, 10); 
     return;
   }
   
+  /// @param[in] lambda0 Initial value of lambda of length `n_eqs`.
   inline void CensEL::set_lambda0(const Ref<const VectorXd>& lambda0) {
     GEL.set_lambda0(lambda0);
     return;
   }
   
-  /// @param[out] nr_iter Number of Newton-Raphson iterations.
-  /// @param[out] nr_err Maximum relative difference between elements of `lambda` in the last two Newton-Raphson steps.
+  /// @param[out] em_iter Number of EM iterations.
+  /// @param[out] em_err Maximum relative difference between the value of logel in the last two EM steps.
   inline void CensEL::get_diag(int& em_iter, double& em_err) {
     // GEL.get_diag(nr_iter, nr_err);
     em_iter = em_iter_;
@@ -317,6 +323,9 @@ namespace flexEL {
     weights = delta_.array() + psot_.array();
   }
   
+  /// @param[out] omega  Probability vector of length `n_obs + supp_adj`.
+  /// @param[in] G       Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+  /// @param[in] delta   Vector of censoring indicators of length `n_obs` or `n_obs + supp_adj` following same logic as above.
   inline void CensEL::omega_hat(Ref<VectorXd> omega,
                                 const Ref<const MatrixXd>& G,
                                 const Ref<const VectorXd>& delta,
@@ -401,8 +410,8 @@ namespace flexEL {
   //   return logel;
   // }
   
-  /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
-  /// @param[in] delta Censoring indicator vector of length `n_obs`.
+  /// @param[in] G       Moment matrix of size `n_eqs x n_obs`. 
+  /// @param[in] delta   Censoring indicator vector of length `n_obs`.
   /// @param[in] epsilon Residual vector of length `n_obs`.
   inline double CensEL::logel(const Ref<const MatrixXd>& G,
                               const Ref<const VectorXd>& delta,
@@ -420,7 +429,7 @@ namespace flexEL {
     } else{
       eval_weights_smooth(weights, delta.head(n_obs_), epsilon.head(n_obs_), omega);
     }
-    GEL.set_weight_adj(weights(n_obs_));
+    if (supp_adj_) GEL.set_weight_adj(weights(n_obs_));
     double logel = GEL.logel(G, weights.head(n_obs_));
     // omega_hat(omega, G, delta_.head(n_obs2_), epsilon_.head(n_obs2_));
     // std::cout << "omega = " << omega.transpose() << std::endl;

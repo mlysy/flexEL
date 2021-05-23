@@ -93,12 +93,12 @@ GenEL_omega_hat <- function(pGEL, lambda, G) {
     .Call(`_flexEL_GenEL_omega_hat`, pGEL, lambda, G)
 }
 
-GenEL_logel <- function(pGEL, G) {
-    .Call(`_flexEL_GenEL_logel`, pGEL, G)
+GenEL_logel <- function(pGEL, G, verbose) {
+    .Call(`_flexEL_GenEL_logel`, pGEL, G, verbose)
 }
 
-GenEL_weighted_logel <- function(pGEL, G, weights) {
-    .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights)
+GenEL_weighted_logel <- function(pGEL, G, weights, verbose) {
+    .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights, verbose)
 }
 
 GenEL_Logel_grad <- function(pGEL, G, verbose) {

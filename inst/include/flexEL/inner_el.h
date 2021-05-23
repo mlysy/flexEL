@@ -232,7 +232,7 @@ namespace flexEL {
     return;
   }
 
-  /// @param[in] lambda0 Initialization vector of size `n_eqs`.
+  /// @param[in] lambda0 Initial value of lambda of length `n_eqs`.
   inline void GenEL::set_lambda0(const Ref<const VectorXd>& lambda0) {
     lambda0_ = lambda0;
     return;
@@ -413,8 +413,6 @@ namespace flexEL {
   /// @param[in] lambda Dual problem vector of size `n_eqs`.  
   /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
   /// @param[in] norm_weights Vector of weights of length `n_obs` or `n_obs + supp_adj` following same logic as above.  Normalized to sum to one.
-  ///
-  /// @note Due to the difficulty of creating Eigen "pointers", current hack is to explicitly tell lambda_nr_impl whether to use external or internal `G` and `norm_weights`.
   inline void GenEL::omega_hat(Ref<VectorXd> omega,
                                const Ref<const VectorXd>& lambda,
                                const Ref<const MatrixXd>& G,

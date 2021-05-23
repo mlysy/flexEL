@@ -187,9 +187,15 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
 // [[Rcpp::export]]
-double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G) {
+double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G);
+  if(verbose) {
+    int n_iter;
+    double max_err;
+    GEL->get_diag(n_iter, max_err);
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
   return log_el;
 }
 
@@ -199,9 +205,15 @@ double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G) {
 /// @param[in] G        Moment matrix of size `n_eqs x (n_obs + supp_adj)`.
 /// @param[in] weights  Weight vector of length `n_obs + supp_adj`.
 // [[Rcpp::export]]
-double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights) {
+double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G, weights);
+  if(verbose) {
+    int n_iter;
+    double max_err;
+    GEL->get_diag(n_iter, max_err);
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
   return log_el;
 }
 

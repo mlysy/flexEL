@@ -278,27 +278,29 @@ BEGIN_RCPP
 END_RCPP
 }
 // GenEL_logel
-double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G);
-RcppExport SEXP _flexEL_GenEL_logel(SEXP pGELSEXP, SEXP GSEXP) {
+double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G, bool verbose);
+RcppExport SEXP _flexEL_GenEL_logel(SEXP pGELSEXP, SEXP GSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    rcpp_result_gen = Rcpp::wrap(GenEL_logel(pGEL, G));
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_logel(pGEL, G, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // GenEL_weighted_logel
-double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights);
-RcppExport SEXP _flexEL_GenEL_weighted_logel(SEXP pGELSEXP, SEXP GSEXP, SEXP weightsSEXP) {
+double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights, bool verbose);
+RcppExport SEXP _flexEL_GenEL_weighted_logel(SEXP pGELSEXP, SEXP GSEXP, SEXP weightsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(GenEL_weighted_logel(pGEL, G, weights));
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_weighted_logel(pGEL, G, weights, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -605,8 +607,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_get_n_eqs", (DL_FUNC) &_flexEL_GenEL_get_n_eqs, 1},
     {"_flexEL_GenEL_get_supp_adj", (DL_FUNC) &_flexEL_GenEL_get_supp_adj, 1},
     {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 3},
-    {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 2},
-    {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 3},
+    {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 3},
+    {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 4},
     {"_flexEL_GenEL_Logel_grad", (DL_FUNC) &_flexEL_GenEL_Logel_grad, 3},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {"_flexEL_LambdaNR", (DL_FUNC) &_flexEL_LambdaNR, 6},

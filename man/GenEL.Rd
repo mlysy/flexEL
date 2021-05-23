@@ -177,7 +177,7 @@ A probability vector of length \code{n_obs + supp_adj}.
 \subsection{Method \code{logel()}}{
 Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -197,7 +197,7 @@ A scalar.
 \subsection{Method \code{weighted_logel()}}{
 Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$weighted_logel(G, weights)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$weighted_logel(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
