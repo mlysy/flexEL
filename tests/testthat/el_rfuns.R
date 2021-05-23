@@ -436,10 +436,10 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     # return(rep(NaN,length(deltas)))
     return(list(conv=FALSE, omegas=rep(NaN,length(deltas))))
   }
-  if (adjust) {
-    epsilons <- c(epsilons,-Inf)
-    deltas <- c(deltas,0)
-  }
+  # if (adjust) {
+  #   epsilons <- c(epsilons,-Inf)
+  #   deltas <- c(deltas,0)
+  # }
   logelOld <- logEL_smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
 
   # for debug
@@ -453,7 +453,11 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
-    weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, support = adjust)
+    if (adjust) {
+      weights <- evalWeights_smooth_R(c(deltas,0), omegas, c(epsilons, -Inf), s, support = adjust)
+    } else {
+      weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, support = adjust)
+    }
     # message(paste0(weights, collapse = " "))
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
