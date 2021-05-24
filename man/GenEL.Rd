@@ -105,9 +105,9 @@ Set more than one options together.
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$set_opts(
   max_iter = 100,
   rel_tol = 1e-07,
-  lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL)),
   supp_adj = FALSE,
-  supp_adj_a = NULL
+  supp_adj_a = NULL,
+  lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL))
 )}\if{html}{\out{</div>}}
 }
 
@@ -118,11 +118,11 @@ Set more than one options together.
 
 \item{\code{rel_tol}}{A small positive number controlling accuracy at convergence.}
 
-\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
-
 \item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
 
 \item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+
+\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
 }
 \if{html}{\out{</div>}}
 }

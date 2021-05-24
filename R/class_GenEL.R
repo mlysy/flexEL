@@ -128,16 +128,16 @@ GenEL <- R6::R6Class(
     #' @description Set more than one options together.
     #' @param max_iter   A positive integer controlling the maximum number of iterations.
     #' @param rel_tol    A small positive number controlling accuracy at convergence.
-    #' @param lambda0    Initialization vector of size `n_eqs`.
     #' @param supp_adj   A boolean indicating whether to conduct support correction or not.
     #' @param supp_adj_a Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
+    #' @param lambda0    Initialization vector of size `n_eqs`.
     set_opts = function(max_iter = 100, rel_tol = 1e-7, 
-                        lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL)), 
-                        supp_adj = FALSE, supp_adj_a = NULL) {
+                        supp_adj = FALSE, supp_adj_a = NULL,
+                        lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL))) {
       self$max_iter <- max_iter
       self$rel_tol <- rel_tol
-      self$lambda0 <- lambda0
       self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a)
+      self$lambda0 <- lambda0
     },
     
     #' @description Calculate the solution of the dual problem of maximum log EL problem.

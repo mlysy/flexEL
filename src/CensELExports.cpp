@@ -73,6 +73,19 @@ void CensEL_set_abs_tol(SEXP pCEL, int abs_tol) {
   return;
 }
 
+/// Set the initial value of lambda.
+///
+/// @param[in] pCEL      `externalptr` pointer to CensEL object. 
+/// @param[in] lambda0   Initial value of lambda.
+///
+// [[Rcpp::export]]
+void CensEL_set_lambda0(SEXP pCEL, Eigen::VectorXd lambda0) {
+  Rcpp::XPtr<flexEL::CensEL> CEL(pCEL);
+  CEL->set_lambda0(lambda0);
+  return;
+}
+
+
 /// Getter for n_obs.
 ///
 /// @param[in] pGEL   `externalptr` pointer to CensEL object. 

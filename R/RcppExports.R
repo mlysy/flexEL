@@ -21,6 +21,10 @@ CensEL_set_abs_tol <- function(pCEL, abs_tol) {
     invisible(.Call(`_flexEL_CensEL_set_abs_tol`, pCEL, abs_tol))
 }
 
+CensEL_set_lambda0 <- function(pCEL, lambda0) {
+    invisible(.Call(`_flexEL_CensEL_set_lambda0`, pCEL, lambda0))
+}
+
 CensEL_get_n_obs <- function(pGEL) {
     .Call(`_flexEL_CensEL_get_n_obs`, pGEL)
 }

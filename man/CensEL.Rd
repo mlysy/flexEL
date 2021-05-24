@@ -16,6 +16,7 @@ A general EL object.
 \itemize{
 \item \href{#method-new}{\code{CensEL$new()}}
 \item \href{#method-set_supp_adj}{\code{CensEL$set_supp_adj()}}
+\item \href{#method-set_smooth}{\code{CensEL$set_smooth()}}
 \item \href{#method-set_opts}{\code{CensEL$set_opts()}}
 \item \href{#method-eval_weights}{\code{CensEL$eval_weights()}}
 \item \href{#method-omega_hat}{\code{CensEL$omega_hat()}}
@@ -83,11 +84,14 @@ Create a new CensEL object.
 
 \item{\code{value}}{Missing or a boolean indicating whether to conduct support correction or not.}
 
-\item{\code{value}}{Missing or a scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+\item{\code{value}}{Missing or a positive scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
 
-\item{\code{value}}{Missing or a boolean indicating whether to conduct continuity correction or not.}
+\item{\code{value}}{Missing or a boolean indicating whether to conduct continuity
+correction or not. The tuning parameter for continuity correction is
+default to 10.}
 
-\item{\code{value}}{Missing or a boolean indicating whether to conduct continuity correction or not.}
+\item{\code{value}}{Missing or a positive scalar for tuning the extent of continuity
+correction. The smaller the value, the more smooth it makes.}
 }
 \if{html}{\out{</div>}}
 }
@@ -110,6 +114,25 @@ Set the support correction flag and support correction factor.
 \item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
 
 \item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_smooth"></a>}}
+\if{latex}{\out{\hypertarget{method-set_smooth}{}}}
+\subsection{Method \code{set_smooth()}}{
+Set the support correction flag and support correction factor.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_smooth(smooth = FALSE, smooth_s = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{smooth}}{A boolean indicating whether to conduct support correction or not.}
+
+\item{\code{smooth_s}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -142,7 +165,7 @@ Set more than one options together.
 
 \item{\code{abs_tol}}{A small positive number controlling accuracy at convergence for the EM algorithm.}
 
-\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
+\item{\code{lambda0}}{Initial value of lambda of length \code{n_eqs}.}
 
 \item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
 
@@ -155,19 +178,49 @@ Set more than one options together.
 \if{html}{\out{<a id="method-eval_weights"></a>}}
 \if{latex}{\out{\hypertarget{method-eval_weights}{}}}
 \subsection{Method \code{eval_weights()}}{
+Calculate the weights corresponding to the censored loglikelihood with EM algorithm.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$eval_weights(delta, epsilon, omega)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delta}}{A vector of censoring indicators of length \code{n_obs}, where
+0 means censored and 1 means observed. With support correction, the last
+entry of delta will be assumed to be 0.}
+
+\item{\code{epsilon}}{A vector of residuals of length \code{n_obs}. With support
+correction, the last entry of epsilon will be assumed to be -Inf.}
+
+\item{\code{omega}}{A probability vector of length \code{n_obs + supp_adj}. with
+support correction, last entry of omega is assumed to correspond to
+the additional estimating equation.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-omega_hat"></a>}}
 \if{latex}{\out{\hypertarget{method-omega_hat}{}}}
 \subsection{Method \code{omega_hat()}}{
+Calculate the probability vector base on the given G matrix,
+censoring indicator, and residuals.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$omega_hat(G, delta, epsilon)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{A matrix of dimension \verb{n_obs x n_eqs}.}
+
+\item{\code{delta}}{A vector of censoring indicators where 0 means censored and 1 means observed.}
+
+\item{\code{epsilon}}{A vector of residuals.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-logel"></a>}}
@@ -181,7 +234,7 @@ Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A matrix of dimension \verb{n_eqs x n_obs}.}
+\item{\code{G}}{A matrix of dimension \verb{n_obs x n_eqs}.}
 }
 \if{html}{\out{</div>}}
 }

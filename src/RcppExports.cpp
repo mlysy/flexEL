@@ -62,6 +62,17 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// CensEL_set_lambda0
+void CensEL_set_lambda0(SEXP pCEL, Eigen::VectorXd lambda0);
+RcppExport SEXP _flexEL_CensEL_set_lambda0(SEXP pCELSEXP, SEXP lambda0SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
+    CensEL_set_lambda0(pCEL, lambda0);
+    return R_NilValue;
+END_RCPP
+}
 // CensEL_get_n_obs
 int CensEL_get_n_obs(SEXP pGEL);
 RcppExport SEXP _flexEL_CensEL_get_n_obs(SEXP pGELSEXP) {
@@ -589,6 +600,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_CensEL_set_max_iter_em", (DL_FUNC) &_flexEL_CensEL_set_max_iter_em, 2},
     {"_flexEL_CensEL_set_rel_tol", (DL_FUNC) &_flexEL_CensEL_set_rel_tol, 2},
     {"_flexEL_CensEL_set_abs_tol", (DL_FUNC) &_flexEL_CensEL_set_abs_tol, 2},
+    {"_flexEL_CensEL_set_lambda0", (DL_FUNC) &_flexEL_CensEL_set_lambda0, 2},
     {"_flexEL_CensEL_get_n_obs", (DL_FUNC) &_flexEL_CensEL_get_n_obs, 1},
     {"_flexEL_CensEL_get_n_eqs", (DL_FUNC) &_flexEL_CensEL_get_n_eqs, 1},
     {"_flexEL_CensEL_get_supp_adj", (DL_FUNC) &_flexEL_CensEL_get_supp_adj, 1},

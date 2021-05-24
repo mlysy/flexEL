@@ -1,6 +1,7 @@
 #' R6 class for EL regression where response is under right censoring.
 #' 
 #' A general EL object.
+#' 
 #' @export
 CensEL <- R6::R6Class(
   
@@ -112,7 +113,7 @@ CensEL <- R6::R6Class(
     },
     
     #' @description Access or reset the value of support corection factor.
-    #' @param value Missing or a scalar. Defaults to `max(1.0, log(n_obs)/2)`.
+    #' @param value Missing or a positive scalar. Defaults to `max(1.0, log(n_obs)/2)`.
     supp_adj_a = function(value) {
       if (missing(value)) private$.supp_adj_a
       else if (!is.numeric(value) | value <= 0) {
@@ -125,7 +126,9 @@ CensEL <- R6::R6Class(
     },
     
     #' @description Access or reset the continuity correction flag.
-    #' @param value Missing or a boolean indicating whether to conduct continuity correction or not.
+    #' @param value Missing or a boolean indicating whether to conduct continuity 
+    #'   correction or not. The tuning parameter for continuity correction is 
+    #'   default to 10.
     smooth = function(value) {
       if (missing(value)) private$.smooth
       else if (!is.logical(value)) {
@@ -139,7 +142,8 @@ CensEL <- R6::R6Class(
     },
     
     #' @description Access or reset the continuity correction flag.
-    #' @param value Missing or a boolean indicating whether to conduct continuity correction or not.
+    #' @param value Missing or a positive scalar for tuning the extent of continuity 
+    #'   correction. The smaller the value, the more smooth it makes.
     smooth_s = function(value) {
       if (missing(value)) private$.smooth_s
       else if (!is.numeric(value) | value <= 0) {
@@ -160,6 +164,9 @@ CensEL <- R6::R6Class(
     #' @param n_eqs Number of (moment constraint) equations.
     #' @return A `CensEL` object.
     initialize = function(n_obs, n_eqs) {
+      if (n_obs <= 0 | n_eqs <= 0 | n_obs %% 1 != 0 | n_eqs %% 1 != 0) {
+        stop("`n_obs` and `n_eqs` must be positive integers.")
+      }
       private$.CEL <- CensEL_ctor(n_obs, n_eqs)
       private$.lambda0 <- rep(0, n_eqs)
     },
@@ -179,12 +186,27 @@ CensEL <- R6::R6Class(
       CensEL_set_supp_adj(private$.CEL, supp_adj, supp_adj_a)
     },
     
+    #' @description Set the support correction flag and support correction factor.
+    #' @param smooth     A boolean indicating whether to conduct support correction or not.
+    #' @param smooth_s   Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
+    set_smooth = function(smooth = FALSE, smooth_s = NULL) {
+      if (!is.logical(smooth)) {
+        stop("`smooth` must be a boolean.")
+      }
+      else if (!is.null(smooth_s)) {
+        if (!is.numeric(smooth_s) | smooth_s <= 0) {
+          stop("`s` must be a positive number if not NULL.")
+        }
+      }
+      CensEL_set_smooth(private$.CEL, smooth, smooth_s)
+    },
+    
     #' @description Set more than one options together.
     #' @param max_iter_nr   A positive integer controlling the maximum number of iterations for the Newton-Raphson algorithm.
     #' @param rel_tol       A small positive number controlling accuracy at convergence for the Newton-Raphson algorithm.
     #' @param max_iter_em   A positive integer controlling the maximum number of iterations for the EM algorithm.
     #' @param abs_tol       A small positive number controlling accuracy at convergence for the EM algorithm.
-    #' @param lambda0       Initialization vector of size `n_eqs`.
+    #' @param lambda0       Initial value of lambda of length `n_eqs`.
     #' @param supp_adj      A boolean indicating whether to conduct support correction or not.
     #' @param supp_adj_a    Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
     set_opts = function(max_iter_nr = 100, rel_tol = 1e-7, 
@@ -199,23 +221,60 @@ CensEL <- R6::R6Class(
       self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a)
     },
     
+    #' @description Calculate the weights corresponding to the censored loglikelihood with EM algorithm.
+    #' @param delta   A vector of censoring indicators of length `n_obs`, where 
+    #'   0 means censored and 1 means observed. With support correction, the last 
+    #'   entry of delta will be assumed to be 0.
+    #' @param epsilon A vector of residuals of length `n_obs`. With support 
+    #'   correction, the last entry of epsilon will be assumed to be -Inf.
+    #' @param omega   A probability vector of length `n_obs + supp_adj`. with 
+    #'   support correction, last entry of omega is assumed to correspond to 
+    #'   the additional estimating equation.
     eval_weights = function(delta, epsilon, omega) {
+      if (!all(delta %in% c(0,1))) {
+        stop("`delta` must contain only 0 or 1s.")
+      }
+      if (sum(omega) != 1 & !all(omega >= 0 & omega <= 1)) {
+        stop("`omega` must be a probability vector.")
+      }
+      if (!self$supp_adj & 
+          (length(delta) != length(epsilon) | length(delta) != length(omega))) {
+        stop("Without support correction, `delta`, `epsilon`, and `omega` must have the same length.")
+      } else if (self$supp_adj &
+                 (length(delta) + 1 != length(omega) | length(epsilon) + 1 != length(omega))) {
+        stop("With support correction, length of `delta` and `omega` must be the same, and 1 less than the length of `omega`.")
+      }
       CensEL_eval_weights(private$.CEL, delta, epsilon, omega)
     },
     
+    #' @description Calculate the probability vector base on the given G matrix, 
+    #'   censoring indicator, and residuals.
+    #' @param G       A matrix of dimension `n_obs x n_eqs`.
+    #' @param delta   A vector of censoring indicators where 0 means censored and 1 means observed.
+    #' @param epsilon A vector of residuals.
     omega_hat = function(G, delta, epsilon) {
       private$check_G(G)
+      if (!all(delta %in% c(0,1))) {
+        stop("`delta` must contain only 0 or 1s.")
+      }
+      if (length(delta) != nrow(G) | length(epsilon) != nrow(G)) {
+        stop("`delta` and `epsilon` must have the same length and should be equal to the number of columns of `G`.")
+      }
       CensEL_omega_hat(private$.CEL, t(G), delta, epsilon)
     },
     
     #' @description Calculate the log empirical likelihood base on the given G matrix.
-    #' @param G       A matrix of dimension `n_eqs x n_obs`.
+    #' @param G       A matrix of dimension `n_obs x n_eqs`.
     #' @return A scalar.
     logel = function(G, delta, epsilon) {
       private$check_G(G)
+      if (!all(delta %in% c(0,1))) {
+        stop("`delta` must contain only 0 or 1s.")
+      }
+      if (length(delta) != nrow(G) | length(epsilon) != nrow(G) ) {
+        stop("`delta` and `epsilon` must have the same length and should be equal to the number of columns of `G`.")
+      }
       CensEL_logel(private$.CEL, t(G), delta, epsilon)
     }
-    
   )
-  
 )

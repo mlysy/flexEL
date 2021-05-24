@@ -415,10 +415,8 @@ test_that("logel with given convergence settings", {
     rel_tol <- runif(1, 1e-7, 1e-5)
     abs_tol <- runif(1, 1e-4, 1e-3)
     cel <- CensEL$new(n, p)
-    cel$max_iter_nr <- max_iter
-    cel$rel_tol <- rel_tol
-    cel$max_iter_em <- max_iter
-    cel$abs_tol <- abs_tol
+    cel$set_opts(max_iter_nr = max_iter, rel_tol = rel_tol,
+                 max_iter_em = max_iter, abs_tol = abs_tol)
     # cel$omega_hat(G, delta = delta, epsilon = epsilon)
     logel_cpp <- cel$logel(G, delta = delta, epsilon = epsilon)
     # logel_cpp
@@ -450,8 +448,7 @@ test_that("logel with support correction", {
     epsilon <- rnorm(n)
     adj_a <- runif(1, 1, 5)
     cel <- CensEL$new(n, p)
-    cel$supp_adj <- TRUE
-    cel$supp_adj_a <- adj_a
+    cel$set_supp_adj(supp_adj = TRUE, supp_adj_a = adj_a)
     # omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     logel_cpp <- cel$logel(G, delta, epsilon)
@@ -480,8 +477,7 @@ test_that("logel with continuity correction", {
     epsilon <- rnorm(n)
     s <- runif(1, 1, min(n, 100))
     cel <- CensEL$new(n, p)
-    cel$smooth <- TRUE
-    cel$smooth_s <- s
+    cel$set_smooth(smooth = TRUE, smooth_s = s)
     # omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     omega_R_lst <- omega_hat_EM_smooth_R(G, deltas = delta, epsilons = epsilon, s = s)
@@ -513,10 +509,8 @@ test_that("logel with support and continuity correction", {
     adj_a <- runif(1, 1, 5)
     s <- runif(1, 1, min(n, 100))
     cel <- CensEL$new(n, p)
-    cel$supp_adj <- TRUE
-    cel$supp_adj_a <- adj_a
-    cel$smooth <- TRUE
-    cel$smooth_s <- s
+    cel$set_supp_adj(supp_adj = TRUE, supp_adj_a = adj_a)
+    cel$set_smooth(smooth = TRUE, smooth_s = s)
     # omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     logel_cpp <- cel$logel(G, delta, epsilon)
@@ -550,12 +544,9 @@ test_that("logel with given convergence settings and support correction", {
     abs_tol <- runif(1, 1e-4, 1e-3)
     adj_a <- runif(1, 1, 5)
     cel <- CensEL$new(n, p)
-    cel$max_iter_nr <- max_iter
-    cel$rel_tol <- rel_tol
-    cel$max_iter_em <- max_iter
-    cel$abs_tol <- abs_tol
-    cel$supp_adj <- TRUE
-    cel$supp_adj_a <- adj_a
+    cel$set_opts(max_iter_nr = max_iter, rel_tol = rel_tol,
+                 max_iter_em = max_iter, abs_tol = abs_tol)
+    cel$set_supp_adj(supp_adj = TRUE, supp_adj_a = adj_a)
     # omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     logel_cpp <- cel$logel(G, delta = delta, epsilon = epsilon)
     # logel_cpp
@@ -591,12 +582,9 @@ test_that("logel with given convergence settings and continuity correction", {
     abs_tol <- runif(1, 1e-4, 1e-3)
     s <- runif(1, 1, min(n, 100))
     cel <- CensEL$new(n, p)
-    cel$max_iter_nr <- max_iter
-    cel$rel_tol <- rel_tol
-    cel$max_iter_em <- max_iter
-    cel$abs_tol <- abs_tol
-    cel$smooth <- TRUE
-    cel$smooth_s <- s
+    cel$set_opts(max_iter_nr = max_iter, rel_tol = rel_tol,
+                 max_iter_em = max_iter, abs_tol = abs_tol)
+    cel$set_smooth(smooth = TRUE, smooth_s = s)
     # omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     omega_R_lst <- omega_hat_EM_smooth_R(G, deltas = delta, epsilons = epsilon, s = s,
@@ -632,14 +620,10 @@ test_that("logel with given convergence settings, support and continuity correct
     adj_a <- runif(1, 1, 5)
     s <- runif(1, 1, min(n, 100))
     cel <- CensEL$new(n, p)
-    cel$max_iter_nr <- max_iter
-    cel$rel_tol <- rel_tol
-    cel$max_iter_em <- max_iter
-    cel$abs_tol <- abs_tol
-    cel$supp_adj <- TRUE
-    cel$supp_adj_a <- adj_a
-    cel$smooth <- TRUE
-    cel$smooth_s <- s
+    cel$set_opts(max_iter_nr = max_iter, rel_tol = rel_tol,
+                 max_iter_em = max_iter, abs_tol = abs_tol)
+    cel$set_supp_adj(supp_adj = TRUE, supp_adj_a = adj_a)
+    cel$set_smooth(smooth = TRUE, smooth_s = s)
     # omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
     logel_cpp <- cel$logel(G, delta, epsilon)
