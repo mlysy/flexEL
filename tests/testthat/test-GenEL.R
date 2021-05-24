@@ -59,10 +59,8 @@ test_that("lambda_nr with given convergence settings and support correction", {
     rel_tol <- runif(1, 1e-6, 1e-2)
     adj_a <- runif(1, 1, 5)
     gel <- GenEL$new(n, p)
-    gel$max_iter <- max_iter
-    gel$rel_tol <- rel_tol
-    gel$supp_adj <- TRUE
-    gel$supp_adj_a <- adj_a
+    gel$set_opts(max_iter = max_iter, rel_tol = rel_tol,
+                 supp_adj = TRUE, supp_adj_a = adj_a)
     G <- matrix(rnorm(n*p),n,p)
     lambda_cpp <- gel$lambda_nr(G, verbose = FALSE)
     lambda_R_lst <- lambdaNR_R(adjG_R(G, adj_a), max_iter = max_iter, rel_tol = rel_tol)
@@ -129,10 +127,8 @@ test_that("omega_hat with default settings and support correction", {
     rel_tol <- runif(1, 1e-6, 1e-2)
     adj_a <- runif(1, 1, 5)
     gel <- GenEL$new(n, p)
-    gel$max_iter <- max_iter
-    gel$rel_tol <- rel_tol
-    gel$supp_adj <- TRUE
-    gel$supp_adj_a <- adj_a
+    gel$set_opts(max_iter = max_iter, rel_tol = rel_tol,
+                 supp_adj = TRUE, supp_adj_a = adj_a)
     G <- matrix(rnorm(n*p),n,p)
     omega_cpp <- gel$omega_hat(G)
     omega_R <- omega_hat_R(adjG_R(G, adj_a), adjust = TRUE,
@@ -203,10 +199,8 @@ test_that("logel with given convergence settings and support correction", {
     rel_tol <- runif(1, 1e-6, 1e-2)
     adj_a <- runif(1, 1, 5)
     gel <- GenEL$new(n, p)
-    gel$max_iter <- max_iter
-    gel$rel_tol <- rel_tol
-    gel$supp_adj <- TRUE
-    gel$supp_adj_a <- adj_a
+    gel$set_opts(max_iter = max_iter, rel_tol = rel_tol,
+                 supp_adj = TRUE, supp_adj_a = adj_a)
     G <- matrix(rnorm(n*p),n,p)
     logel_cpp <- gel$logel(G)
     omegahat_R <- omega_hat_R(adjG_R(G, adj_a), max_iter = max_iter, rel_tol = rel_tol)
@@ -274,10 +268,8 @@ test_that("dldG with given convergence settings and support correction", {
     rel_tol <- runif(1, 1e-5, 1e-3)
     adj_a <- runif(1, 1, 5)
     gel <- GenEL$new(n, p)
-    gel$max_iter <- max_iter
-    gel$rel_tol <- rel_tol
-    gel$supp_adj <- TRUE
-    gel$supp_adj_a <- adj_a
+    gel$set_opts(max_iter = max_iter, rel_tol = rel_tol,
+                 supp_adj = TRUE, supp_adj_a = adj_a)
     G <- matrix(rnorm(n*p),n,p)
     dldG_cpp <- gel$logel_grad(G)$dldG
     # dldG_cpp
@@ -290,11 +282,10 @@ test_that("dldG with given convergence settings and support correction", {
                                  rep(NA, (nrow(G) + 1) * ncol(G))
                                }), nrow = nrow(G), ncol = ncol(G))
     # dldG_nd
+    range(dldG_cpp-dldG_nd)
     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
       # nconv <<- nconv + 1
-      expect_equal(dldG_cpp, dldG_nd, tolerance = 0.0025)
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
     }
   }
 })
-
-

@@ -2,14 +2,14 @@
 % Please edit documentation in R/class_CensEL.R
 \name{CensEL}
 \alias{CensEL}
-\title{R6 class for EL regression where response is under right censoring.}
+\title{Constructor and methods for EL regression where responses are under right censoring.}
 \description{
-R6 class for EL regression where response is under right censoring.
+Constructor and methods for EL regression where responses are under right censoring.
 
-R6 class for EL regression where response is under right censoring.
+Constructor and methods for EL regression where responses are under right censoring.
 }
 \details{
-A general EL object.
+R6 class for EL regression with right-censored responses.
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -34,16 +34,20 @@ Check the dimension of G is what is expected.
 Access or reset the initial value of lambda.
 
 
-Access or reset the value of the maximum number of iterations for the Newton-Raphson algorithm.
+Access or reset the value of the maximum number of
+iterations for the Newton-Raphson algorithm.
 
 
-Access or reset the value of relative tolerance controlling the accuracy at convergence of the Newton-Raphson algorithm.
+Access or reset the value of relative tolerance controlling
+the accuracy at convergence of the Newton-Raphson algorithm.
 
 
-Access or reset the value of the maximum number of iterations for the EM algorithm.
+Access or reset the value of the maximum number of
+iterations for the EM algorithm.
 
 
-Access or reset the value of absolute tolerance controlling the accuracy at convergence of the EM algorithm.
+Access or reset the value of absolute tolerance controlling
+the accuracy at convergence of the EM algorithm.
 
 
 Access or reset the support correction flag.
@@ -72,7 +76,7 @@ Create a new CensEL object.
 
 \item{\code{G}}{A numeric matrix.}
 
-\item{\code{value}}{Missing or a vector of length \code{n_eqs}.}
+\item{\code{value}}{Missing or a vector of length \code{n_eqs} (default to a vector of 0).}
 
 \item{\code{value}}{Missing or a positive integer (default to 100).}
 
@@ -82,16 +86,19 @@ Create a new CensEL object.
 
 \item{\code{value}}{Missing or a small positive number (default to 1e-3).}
 
-\item{\code{value}}{Missing or a boolean indicating whether to conduct support correction or not.}
+\item{\code{value}}{Missing or a boolean indicating whether to conduct support
+correction or not (default to FALSE).}
 
-\item{\code{value}}{Missing or a positive scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+\item{\code{value}}{Missing or a positive scalar (default to
+\code{max(1.0, log(n_obs)/2)}).}
 
 \item{\code{value}}{Missing or a boolean indicating whether to conduct continuity
-correction or not. The tuning parameter for continuity correction is
-default to 10.}
+correction or not (default to FALSE). If set to TRUE, the tuning
+parameter for continuity correction is default to 10.}
 
-\item{\code{value}}{Missing or a positive scalar for tuning the extent of continuity
-correction. The smaller the value, the more smooth it makes.}
+\item{\code{value}}{Missing or a positive scalar for tuning the extent of
+continuity correction (default to 10). The smaller the value, the more
+smooth it makes.}
 }
 \if{html}{\out{</div>}}
 }
@@ -148,9 +155,11 @@ Set more than one options together.
   rel_tol = 1e-07,
   max_iter_em = 100,
   abs_tol = 0.001,
-  lambda0 = rep(0, CensEL_get_n_eqs(private$.CEL)),
   supp_adj = FALSE,
-  supp_adj_a = NULL
+  supp_adj_a = NULL,
+  smooth = FALSE,
+  smooth_s = NULL,
+  lambda0 = rep(0, CensEL_get_n_eqs(private$.CEL))
 )}\if{html}{\out{</div>}}
 }
 
@@ -165,11 +174,15 @@ Set more than one options together.
 
 \item{\code{abs_tol}}{A small positive number controlling accuracy at convergence for the EM algorithm.}
 
-\item{\code{lambda0}}{Initial value of lambda of length \code{n_eqs}.}
-
 \item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
 
 \item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+
+\item{\code{smooth}}{A boolean indicating whether to conduct support correction or not.}
+
+\item{\code{smooth_s}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+
+\item{\code{lambda0}}{Initial value of lambda of length \code{n_eqs}.}
 }
 \if{html}{\out{</div>}}
 }

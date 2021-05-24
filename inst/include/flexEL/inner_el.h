@@ -106,8 +106,9 @@ namespace flexEL {
     /// Set the relative tolerance for the Newton-Raphson algorithm.
     void set_rel_tol(double rel_tol);
     /// Set the support adjustment flag.
-    void set_supp_adj(bool supp_adj, double a);
+    void set_supp_adj(bool supp_adj, double a, double weight_adj);
     void set_supp_adj(bool supp_adj);
+    void set_supp_adj_a(double a);
     void set_weight_adj(double weight_adj);
     /// Set the initial value for Newton-Raphson algorithm.
     void set_lambda0(const Ref<const VectorXd>& lambda0);
@@ -214,16 +215,24 @@ namespace flexEL {
 
   /// Reference: J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).
   ///
-  /// @param[in] supp_adj Whether or not to enable support adjustment.
-  /// @param[in] a Support adjustment factor.  Defaults to `max(1.0, log(n_obs)/2)`.
-  inline void GenEL::set_supp_adj(bool supp_adj, double a) {
+  /// @param[in] supp_adj   Whether or not to enable support adjustment.
+  /// @param[in] a          Support adjustment factor.  Defaults to `max(1.0, log(n_obs)/2)`.
+  /// @param[in] weight_adj Weight for the fake observation under weighted log EL.
+  inline void GenEL::set_supp_adj(bool supp_adj, double a, double weight_adj) {
     supp_adj_ = supp_adj;
     supp_a_ = a;
+    weight_adj_ = weight_adj;
     n_obs2_ = n_obs_+supp_adj_;
     return;
   }
+  
   inline void GenEL::set_supp_adj(bool supp_adj) {
-    set_supp_adj(supp_adj, std::max(1.0,0.5*log(n_obs_)));
+    set_supp_adj(supp_adj, std::max(1.0,0.5*log(n_obs_)), 1.0);
+    return;
+  }
+  
+  inline void GenEL::set_supp_adj_a(double a) {
+    supp_a_ = a;
     return;
   }
   

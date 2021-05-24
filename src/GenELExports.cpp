@@ -60,14 +60,18 @@ void GenEL_set_rel_tol(SEXP pGEL, double rel_tol) {
 // [[Rcpp::export]]
 void GenEL_set_supp_adj(SEXP pGEL, 
                         bool supp_adj, 
-                        Rcpp::Nullable<Rcpp::NumericVector> a_ = R_NilValue) {
+                        Rcpp::Nullable<Rcpp::NumericVector> a_ = R_NilValue,
+                        Rcpp::Nullable<Rcpp::NumericVector> weight_adj_ = R_NilValue) {
   // TODO: is there a better way to handle optional scalar argument?
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-  if (a_.isNull()) {
-    GEL->set_supp_adj(supp_adj);
-  } else{
+  GEL->set_supp_adj(supp_adj);
+  if (a_.isNotNull()) {
     Rcpp::NumericVector a(a_);
-    GEL->set_supp_adj(supp_adj, a[0]);
+    GEL->set_supp_adj_a(a[0]);
+  }
+  if (weight_adj_.isNotNull()) {
+    Rcpp::NumericVector weight_adj(weight_adj_);
+    GEL->set_weight_adj(weight_adj[0]);
   }
   return;
 }

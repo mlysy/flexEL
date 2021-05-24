@@ -174,7 +174,7 @@ namespace flexEL {
     supp_adj_ = supp_adj; 
     supp_a_ = a; 
     n_obs2_ = n_obs_+supp_adj_;
-    GEL.set_supp_adj(supp_adj_, supp_a_);
+    GEL.set_supp_adj(supp_adj_, supp_a_, 1.0);
     if (supp_adj) {
       epsilon_.tail(1)(0) = -INFINITY;
       delta_.tail(1)(0) = 0;

@@ -47,6 +47,10 @@ Access or reset the support correction flag.
 Access or reset the value of support corection factor.
 
 
+Access or reset the value of the weight for the additional
+fake observation under support correction.
+
+
 Create a new GenEL object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
@@ -65,11 +69,15 @@ Create a new GenEL object.
 
 \item{\code{value}}{Missing or a small positive number (default to 1e-7).}
 
-\item{\code{value}}{Missing or a vector of length \code{n_eqs}.}
+\item{\code{value}}{Missing or a vector of length \code{n_eqs} (default to a vector
+of 0).}
 
-\item{\code{value}}{Missing or a boolean indicating whether to conduct support correction or not.}
+\item{\code{value}}{Missing or a boolean indicating whether to conduct support
+correction or not (default to FALSE).}
 
-\item{\code{value}}{Missing or a scalar. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+\item{\code{value}}{Missing or a scalar (defaults to \code{max(1.0, log(n_obs)/2)}).}
+
+\item{\code{value}}{Missing or a scalar (default to NULL).}
 }
 \if{html}{\out{</div>}}
 }
@@ -83,7 +91,7 @@ A \code{GenEL} object.
 \subsection{Method \code{set_supp_adj()}}{
 Set the support correction flag and support correction factor.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL, weight_adj = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -91,7 +99,9 @@ Set the support correction flag and support correction factor.
 \describe{
 \item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
 
-\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+\item{\code{supp_adj_a}}{Support adjustment factor (default to \code{max(1.0, log(n_obs)/2)}).}
+
+\item{\code{weight_adj}}{Weight under weighted log EL (default to 1.0).}
 }
 \if{html}{\out{</div>}}
 }
@@ -107,6 +117,7 @@ Set more than one options together.
   rel_tol = 1e-07,
   supp_adj = FALSE,
   supp_adj_a = NULL,
+  weight_adj = NULL,
   lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL))
 )}\if{html}{\out{</div>}}
 }
@@ -121,6 +132,8 @@ Set more than one options together.
 \item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
 
 \item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+
+\item{\code{weight_adj}}{Weight under weighted log EL (default to 1.0).}
 
 \item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
 }

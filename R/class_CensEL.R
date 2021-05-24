@@ -1,6 +1,6 @@
-#' R6 class for EL regression where response is under right censoring.
+#' Constructor and methods for EL regression where responses are under right censoring.
 #' 
-#' A general EL object.
+#' R6 class for EL regression with right-censored responses.
 #' 
 #' @export
 CensEL <- R6::R6Class(
@@ -33,7 +33,7 @@ CensEL <- R6::R6Class(
   active = list(
     
     #' @description Access or reset the initial value of lambda.
-    #' @param value Missing or a vector of length `n_eqs`.
+    #' @param value Missing or a vector of length `n_eqs` (default to a vector of 0).
     lambda0 = function(value) {
       if (missing(value)) private$.lambda0
       else {
@@ -46,7 +46,8 @@ CensEL <- R6::R6Class(
       }
     },
     
-    #' @description Access or reset the value of the maximum number of iterations for the Newton-Raphson algorithm.
+    #' @description Access or reset the value of the maximum number of 
+    #'   iterations for the Newton-Raphson algorithm.
     #' @param value Missing or a positive integer (default to 100).
     max_iter_nr = function(value) {
       if (missing(value)) private$.max_iter_nr
@@ -59,7 +60,8 @@ CensEL <- R6::R6Class(
       }
     },
     
-    #' @description Access or reset the value of relative tolerance controlling the accuracy at convergence of the Newton-Raphson algorithm.
+    #' @description Access or reset the value of relative tolerance controlling 
+    #'   the accuracy at convergence of the Newton-Raphson algorithm.
     #' @param value Missing or a small positive number (default to 1e-7).
     rel_tol = function(value) {
       if (missing(value)) private$.rel_tol
@@ -72,7 +74,8 @@ CensEL <- R6::R6Class(
       }
     },
     
-    #' @description Access or reset the value of the maximum number of iterations for the EM algorithm.
+    #' @description Access or reset the value of the maximum number of 
+    #'   iterations for the EM algorithm.
     #' @param value Missing or a positive integer (default to 100).
     max_iter_em = function(value) {
       if (missing(value)) private$.max_iter_em
@@ -85,7 +88,8 @@ CensEL <- R6::R6Class(
       }
     },
     
-    #' @description Access or reset the value of absolute tolerance controlling the accuracy at convergence of the EM algorithm.
+    #' @description Access or reset the value of absolute tolerance controlling 
+    #'   the accuracy at convergence of the EM algorithm.
     #' @param value Missing or a small positive number (default to 1e-3).
     abs_tol = function(value) {
       if (missing(value)) private$.abs_tol
@@ -99,7 +103,8 @@ CensEL <- R6::R6Class(
     },
     
     #' @description Access or reset the support correction flag.
-    #' @param value Missing or a boolean indicating whether to conduct support correction or not.
+    #' @param value Missing or a boolean indicating whether to conduct support 
+    #'   correction or not (default to FALSE).
     supp_adj = function(value) {
       if (missing(value)) private$.supp_adj
       else if (!is.logical(value)) {
@@ -113,7 +118,8 @@ CensEL <- R6::R6Class(
     },
     
     #' @description Access or reset the value of support corection factor.
-    #' @param value Missing or a positive scalar. Defaults to `max(1.0, log(n_obs)/2)`.
+    #' @param value Missing or a positive scalar (default to 
+    #'   `max(1.0, log(n_obs)/2)`).
     supp_adj_a = function(value) {
       if (missing(value)) private$.supp_adj_a
       else if (!is.numeric(value) | value <= 0) {
@@ -127,8 +133,8 @@ CensEL <- R6::R6Class(
     
     #' @description Access or reset the continuity correction flag.
     #' @param value Missing or a boolean indicating whether to conduct continuity 
-    #'   correction or not. The tuning parameter for continuity correction is 
-    #'   default to 10.
+    #'   correction or not (default to FALSE). If set to TRUE, the tuning 
+    #'   parameter for continuity correction is default to 10.
     smooth = function(value) {
       if (missing(value)) private$.smooth
       else if (!is.logical(value)) {
@@ -142,8 +148,9 @@ CensEL <- R6::R6Class(
     },
     
     #' @description Access or reset the continuity correction flag.
-    #' @param value Missing or a positive scalar for tuning the extent of continuity 
-    #'   correction. The smaller the value, the more smooth it makes.
+    #' @param value Missing or a positive scalar for tuning the extent of 
+    #'   continuity correction (default to 10). The smaller the value, the more 
+    #'   smooth it makes.
     smooth_s = function(value) {
       if (missing(value)) private$.smooth_s
       else if (!is.numeric(value) | value <= 0) {
@@ -209,16 +216,20 @@ CensEL <- R6::R6Class(
     #' @param lambda0       Initial value of lambda of length `n_eqs`.
     #' @param supp_adj      A boolean indicating whether to conduct support correction or not.
     #' @param supp_adj_a    Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
+    #' @param smooth     A boolean indicating whether to conduct support correction or not.
+    #' @param smooth_s   Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
     set_opts = function(max_iter_nr = 100, rel_tol = 1e-7, 
                         max_iter_em = 100, abs_tol = 1e-3, 
-                        lambda0 = rep(0, CensEL_get_n_eqs(private$.CEL)), 
-                        supp_adj = FALSE, supp_adj_a = NULL) {
+                        supp_adj = FALSE, supp_adj_a = NULL,
+                        smooth = FALSE, smooth_s = NULL, 
+                        lambda0 = rep(0, CensEL_get_n_eqs(private$.CEL))) {
       self$max_iter_nr <- max_iter_nr
       self$rel_tol <- rel_tol
       self$max_iter_em <- max_iter_em
       self$abs_tol <- abs_tol
-      self$lambda0 <- lambda0
       self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a)
+      self$set_smooth(smooth = smooth, smooth_s = smooth_s)
+      self$lambda0 <- lambda0
     },
     
     #' @description Calculate the weights corresponding to the censored loglikelihood with EM algorithm.

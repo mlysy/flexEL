@@ -15,6 +15,7 @@ GenEL <- R6::R6Class(
     .rel_tol = 1e-7,
     .supp_adj = FALSE,
     .supp_adj_a = NULL,
+    .weight_adj = NULL,
     
     #' @description Check the dimension of G is what is expected.
     #' @param G A numeric matrix.
@@ -56,7 +57,8 @@ GenEL <- R6::R6Class(
     },
     
     #' @description Access or reset the initial value of lambda.
-    #' @param value Missing or a vector of length `n_eqs`.
+    #' @param value Missing or a vector of length `n_eqs` (default to a vector 
+    #'   of 0).
     lambda0 = function(value) {
       if (missing(value)) private$.lambda0
       else {
@@ -70,7 +72,8 @@ GenEL <- R6::R6Class(
     },
     
     #' @description Access or reset the support correction flag.
-    #' @param value Missing or a boolean indicating whether to conduct support correction or not.
+    #' @param value Missing or a boolean indicating whether to conduct support 
+    #'   correction or not (default to FALSE).
     supp_adj = function(value) {
       if (missing(value)) private$.supp_adj
       else if (!is.logical(value)) {
@@ -79,12 +82,16 @@ GenEL <- R6::R6Class(
       else {
         private$.supp_adj <- value
         private$.supp_adj_a <- max(1.0,0.5*log(GenEL_get_n_obs(private$.GEL)))
-        GenEL_set_supp_adj(private$.GEL, private$.supp_adj, private$.supp_adj_a)
+        private$.weight_adj <- 1.0
+        GenEL_set_supp_adj(private$.GEL, 
+                           private$.supp_adj, 
+                           private$.supp_adj_a,
+                           private$.weight_adj)
       }
     },
     
     #' @description Access or reset the value of support corection factor.
-    #' @param value Missing or a scalar. Defaults to `max(1.0, log(n_obs)/2)`.
+    #' @param value Missing or a scalar (defaults to `max(1.0, log(n_obs)/2)`).
     supp_adj_a = function(value) {
       if (missing(value)) private$.supp_adj_a
       else if (!is.numeric(value) | value <= 0) {
@@ -92,7 +99,27 @@ GenEL <- R6::R6Class(
       }
       else {
         private$.supp_adj_a <- value
-        GenEL_set_supp_adj(private$.GEL, private$.supp_adj, private$.supp_adj_a)
+        GenEL_set_supp_adj(private$.GEL, 
+                           private$.supp_adj, 
+                           private$.supp_adj_a,
+                           private$.weight_adj)
+      }
+    },
+    
+    #' @description Access or reset the value of the weight for the additional 
+    #'   fake observation under support correction.
+    #' @param value Missing or a scalar (default to NULL).
+    weight_adj = function(value) {
+      if (missing(value)) private$.weight_adj
+      else if (!is.numeric(value) | value <= 0) {
+        stop("`weight_adj` must be a positive number if not NULL.")
+      }
+      else {
+        private$.weight_adj <- value
+        GenEL_set_supp_adj(private$.GEL, 
+                           private$.supp_adj, 
+                           private$.supp_adj_a, 
+                           private$.weight_adj)
       }
     }
     
@@ -112,17 +139,23 @@ GenEL <- R6::R6Class(
     
     #' @description Set the support correction flag and support correction factor.
     #' @param supp_adj     A boolean indicating whether to conduct support correction or not.
-    #' @param supp_adj_a   Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
-    set_supp_adj = function(supp_adj = FALSE, supp_adj_a = NULL) {
+    #' @param supp_adj_a   Support adjustment factor (default to `max(1.0, log(n_obs)/2)`).
+    #' @param weight_adj   Weight under weighted log EL (default to 1.0).
+    set_supp_adj = function(supp_adj = FALSE, supp_adj_a = NULL, weight_adj = NULL) {
       if (!is.logical(supp_adj)) {
         stop("`supp_adj` must be a boolean.")
       }
-      else if (!is.null(supp_adj_a)) {
+      if (!is.null(supp_adj_a)) {
         if (!is.numeric(supp_adj_a) | supp_adj_a <= 0) {
           stop("`a` must be a positive number if not NULL.")
         }
       }
-      GenEL_set_supp_adj(private$.GEL, supp_adj, supp_adj_a)
+      if (!is.null(weight_adj)) {
+        if (!is.numeric(weight_adj) | weight_adj <= 0) {
+          stop("`weight_adj` must be a positive number if not NULL.")
+        }
+      }
+      GenEL_set_supp_adj(private$.GEL, supp_adj, supp_adj_a, weight_adj)
     },
     
     #' @description Set more than one options together.
@@ -130,13 +163,14 @@ GenEL <- R6::R6Class(
     #' @param rel_tol    A small positive number controlling accuracy at convergence.
     #' @param supp_adj   A boolean indicating whether to conduct support correction or not.
     #' @param supp_adj_a Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
+    #' @param weight_adj   Weight under weighted log EL (default to 1.0).
     #' @param lambda0    Initialization vector of size `n_eqs`.
     set_opts = function(max_iter = 100, rel_tol = 1e-7, 
-                        supp_adj = FALSE, supp_adj_a = NULL,
+                        supp_adj = FALSE, supp_adj_a = NULL, weight_adj = NULL,
                         lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL))) {
       self$max_iter <- max_iter
       self$rel_tol <- rel_tol
-      self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a)
+      self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a, weight_adj = weight_adj)
       self$lambda0 <- lambda0
     },
     

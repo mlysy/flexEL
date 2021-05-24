@@ -207,14 +207,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // GenEL_set_supp_adj
-void GenEL_set_supp_adj(SEXP pGEL, bool supp_adj, Rcpp::Nullable<Rcpp::NumericVector> a_);
-RcppExport SEXP _flexEL_GenEL_set_supp_adj(SEXP pGELSEXP, SEXP supp_adjSEXP, SEXP a_SEXP) {
+void GenEL_set_supp_adj(SEXP pGEL, bool supp_adj, Rcpp::Nullable<Rcpp::NumericVector> a_, Rcpp::Nullable<Rcpp::NumericVector> weight_adj_);
+RcppExport SEXP _flexEL_GenEL_set_supp_adj(SEXP pGELSEXP, SEXP supp_adjSEXP, SEXP a_SEXP, SEXP weight_adj_SEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
     Rcpp::traits::input_parameter< bool >::type supp_adj(supp_adjSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type a_(a_SEXP);
-    GenEL_set_supp_adj(pGEL, supp_adj, a_);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type weight_adj_(weight_adj_SEXP);
+    GenEL_set_supp_adj(pGEL, supp_adj, a_, weight_adj_);
     return R_NilValue;
 END_RCPP
 }
@@ -612,7 +613,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_ctor", (DL_FUNC) &_flexEL_GenEL_ctor, 2},
     {"_flexEL_GenEL_set_max_iter", (DL_FUNC) &_flexEL_GenEL_set_max_iter, 2},
     {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},
-    {"_flexEL_GenEL_set_supp_adj", (DL_FUNC) &_flexEL_GenEL_set_supp_adj, 3},
+    {"_flexEL_GenEL_set_supp_adj", (DL_FUNC) &_flexEL_GenEL_set_supp_adj, 4},
     {"_flexEL_GenEL_set_lambda0", (DL_FUNC) &_flexEL_GenEL_set_lambda0, 2},
     {"_flexEL_GenEL_lambda_nr", (DL_FUNC) &_flexEL_GenEL_lambda_nr, 3},
     {"_flexEL_GenEL_get_n_obs", (DL_FUNC) &_flexEL_GenEL_get_n_obs, 1},

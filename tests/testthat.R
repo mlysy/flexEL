@@ -1,7 +1,7 @@
 library(testthat)
 
 if(!identical(Sys.getenv("NOT_CRAN"), "true")) {
-  set.seed(123)
+  set.seed(230)
 }
 
 test_check("flexEL")

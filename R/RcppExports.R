@@ -69,8 +69,8 @@ GenEL_set_rel_tol <- function(pGEL, rel_tol) {
     invisible(.Call(`_flexEL_GenEL_set_rel_tol`, pGEL, rel_tol))
 }
 
-GenEL_set_supp_adj <- function(pGEL, supp_adj, a_ = NULL) {
-    invisible(.Call(`_flexEL_GenEL_set_supp_adj`, pGEL, supp_adj, a_))
+GenEL_set_supp_adj <- function(pGEL, supp_adj, a_ = NULL, weight_adj_ = NULL) {
+    invisible(.Call(`_flexEL_GenEL_set_supp_adj`, pGEL, supp_adj, a_, weight_adj_))
 }
 
 GenEL_set_lambda0 <- function(pGEL, lambda0) {
