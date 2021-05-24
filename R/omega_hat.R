@@ -1,6 +1,7 @@
 #' Returns the empirical distribution, omegas, from empirical likelihood (EL) maximization.
 #'
 #' @template arg-G
+#' @template arg-lambda0
 #' @template arg-delta
 #' @template arg-eps
 #' @template args-lambda_precision
@@ -9,7 +10,8 @@
 #' @example examples/omega_hat.R
 #' @return Length-`n_eqs` vector for the resulting empirical distribution, omegas, if the optimization algorithm converged; 1/n_obs if did not converge.
 #' @noRd
-omega_hat <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
+omega_hat <- function(G, lambda0 = rep(0, ncol(G)),
+                      delta = NULL, eps = NULL, support = FALSE, sp = 0,
                       max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, 
                       verbose = FALSE) {
   
@@ -21,6 +23,7 @@ omega_hat <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
     #                     verbose = verbose)
     # return(.OmegaHat(t(G), lambda = lambda, support = support))
     return(.OmegaHat(G = t(G), 
+                     lambda0 = lambda0,
                      max_iter = max_iter,
                      rel_tol = rel_tol,
                      support = support,
@@ -34,6 +37,7 @@ omega_hat <- function(G, delta = NULL, eps = NULL, support = FALSE, sp = 0,
     #                     support = support, 
     #                     verbose = verbose)
     omegas_init <- .OmegaHat(G = t(G), 
+                             lambda0 = lambda0,
                              max_iter = max_iter, 
                              rel_tol = rel_tol, 
                              support = support, 

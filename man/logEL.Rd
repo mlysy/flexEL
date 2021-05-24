@@ -6,6 +6,7 @@
 \usage{
 logEL(
   G,
+  lambda0 = rep(0, ncol(G)),
   delta = NULL,
   eps = NULL,
   support = FALSE,
@@ -21,6 +22,8 @@ logEL(
 \arguments{
 \item{G}{\code{nObs x nEqs} constraint matrix in an empirical likelihood framework, where \code{nObs} is the number of observations and \code{nEqs} is the number of constraints.}
 
+\item{lambda0}{A numeric vector of length \code{n_eqs} as the initial value of lambda.}
+
 \item{delta}{Length-\code{nObs} vector of censoring indicators (1 right-censord, 0 not-censored).}
 
 \item{eps}{Length-\code{nObs} vector of residuals.}
@@ -35,7 +38,7 @@ logEL(
 
 \item{abs_tol}{Positive scalar for absolute tolerance of Newton-Raphson steps.}
 
-\item{return_omega}{A boolean indicating whether to return the progability vector omega used to evaluate log EL.}
+\item{return_omega}{A boolean indicating whether to return the probability vector omega used to evaluate log EL.}
 
 \item{return_dldG}{A boolean indicating whether to return the gradient matrix dldG of log EL w.r.t. G.}
 
