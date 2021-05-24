@@ -48,6 +48,7 @@ header-includes:
   - \renewcommand{\E}{\textrm{E}}
   - \newcommand{\EL}{\textrm{EL}}
   - \newcommand{\CEL}{\textrm{CEL}}
+  - \newcommand{\SCEL}{\textrm{SCEL}}
   - \newcommand{\str}[1]{{#1}^{\star}}
   - \DeclareMathOperator*{\argmax}{arg\,max}
   - \DeclareMathOperator*{\argmin}{arg\,min}
@@ -188,28 +189,34 @@ where
 
 In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the parameters accordingly.
 
-With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, with which we can employ a gradient based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to is
+With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, which allows one to employ a gradient based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to $\tth$ can be derived as
 
 \begin{equation}
-\begin{split}
-\dth \log \EL(\tth) &= \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\
-&= \sum_{i=1}^n \frac{q_i}{1 - \lla'g_i} \cdot \dth \lla(\tth)'g_i(\tth) \\
-&= \dth \lla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot g_i(\tth)}{1 - \lla'g_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth),
-\end{split}
+\dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth),
 \end{equation}
 
-where $Q = \sum_{i=1}^n q_i$.  Since substituting \eqref{eq:omegahat} into \eqref{eq:noncensopt} gives
+where $Q = \sum_{i=1}^n q_i$.  
 
-\begin{equation}
-\sum_{i=1}^n \hat \omega_i \cdot g_i = \sum_{i=1}^n \frac{r_i \cdot g_i}{1 - \hat{\lla}'g_i} = 0,
-\end{equation}
+<!-- \begin{equation} -->
+<!-- \begin{split} -->
+<!-- \dth \log \EL(\tth) &= \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\ -->
+<!-- &= \sum_{i=1}^n \frac{q_i}{1 - \lla'g_i} \cdot \dth \lla(\tth)'g_i(\tth) \\ -->
+<!-- &= \dth \lla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot g_i(\tth)}{1 - \lla'g_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth), -->
+<!-- \end{split} -->
+<!-- \end{equation} -->
 
-the first term in the gradient disappears, such that we have
+<!-- Since substituting \eqref{eq:omegahat} into \eqref{eq:noncensopt} gives -->
 
-\begin{equation}
-\dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth).
-\label{eq:gradel}
-\end{equation}
+<!-- \begin{equation} -->
+<!-- \sum_{i=1}^n \hat \omega_i \cdot g_i = \sum_{i=1}^n \frac{r_i \cdot g_i}{1 - \hat{\lla}'g_i} = 0, -->
+<!-- \end{equation} -->
+
+<!-- the first term in the gradient disappears, such that we have -->
+
+<!-- \begin{equation} -->
+<!-- \dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth). -->
+<!-- \label{eq:gradel} -->
+<!-- \end{equation} -->
 
 
 ## Support Correction
@@ -218,7 +225,7 @@ Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary
 
 \begin{equation} \label{eq:noncensoptadj}
 \begin{split}
-  \max_{\w}\quad & \sum_{i=1}^{n+1} \log(\w_i) \\
+  \max_{\w}\quad & \sum_{i=1}^{n+1} q_i \log(\w_i) \\
   \text{s.t.}\quad & \sum_{i=1}^{n+1} \w_i\cdot g_i = 0 \\
   & \sum_{i=1}^{n+1} \w_i = 1 \\
   & \w_i \geq 0, \quad i=1,\cdots,{n+1},
@@ -227,13 +234,13 @@ Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary
 
 where $g_{n+1} = -\frac{a_n}{n} \sum_{i=1}^n g_i$ for some small positive $a_n$.
 
-It is also shown by @chen-et-al2008 that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions.
+It is also shown by @chen-et-al2008 that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions. 
 
 ## Regression with Right-Censored Outcome
 
 ### Empirical Likelihood with Right-Censored Outcome Variable
 
-\pkg{flexEL} handles the situation of right-censored regression, that is, instead of observing outcomes $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. 
+\pkg{flexEL} handles the situation of regression models with right-censored outcomes, that is, instead of observing outcomes $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. 
 
 Consider a general regression model
 \[
@@ -355,6 +362,8 @@ which has the form of the weighted empirical likelihood inner optimization probl
 
 \end{itemize}
 
+With support correction, we can calculate the weight $r_{n+1}$ (before normalization) for the additional $\log w_{n+1}$ by assigning the censoring indicator as $0$ and the residual as $-\inf$. This minimizes the impact of the fake observation on the other observations.
+
 ### Continuity Correction of Empirical Likelihood with Right-Censored Outcomes
 
 It turns out that the log of equation (\ref{eq:elcens}) (log CEL) is not a continuous function in $\tth$, so that direct optimization of log CEL is difficult to achieve.
@@ -412,6 +421,54 @@ The log smoothed censored EL (log SCEL) is then defined as
 - Show users how to create their own `Gfun` and use this from \proglang{R}.  
 
 - Can include gradient-based optimization here as well.  I suggest to use `optim(method = "BFGS")` for optimization, not `nlm()` (it's just more complicated/annoying).  I would say use `nlminb()` which is way faster than `optim()`, but for some reason R Core suggests to use the other optimizers instead...
+
+Users can utilize the provided functions for mean regression, but they can also leverage the EL calculation for their customized models specified by estimating equations. In the later case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (called e.g. `evalG`), or provide the calculation in C++ before wrapping into an \proglang{R} interface. 
+
+Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can either write a function to calculate the gradient at a given parameter value, or give the return value of `evalG` an attribute "gradient". Combining with the gradient of log EL with respect to `G` via chain rule, a user can then use `optim` or `nlm` in \proglang{R} for the parameter estimation. Some examples are given below.
+
+Consider a simple two-parameter linear regression model
+\[
+  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
+\]
+where $\epsilon_i \iid \text{F}(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\text{Var}(\epsilon_i) = 1$.
+
+As the first step, one should design the estimating equations of the parameters and implement a function (`evalG`) that returns the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. 
+
+In this example, the following estimating equation can be used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
+\[
+  \E[(y-x'\beta)\cdot x] = 0,
+\]
+which is
+\[
+  \sum_{i=1}^n w_i\cdot (y_i-x_i^T\beta)\cdot x_i = 0.
+\]
+In other words, the $g$ function is specified as
+\[
+  g(x,y;\beta) = (y-x'\beta)\cdot x.
+\]
+
+This can be implemented in R (called `mr_evalG`) as follows: 
+```{r, echo=TRUE, eval=TRUE}
+mr_evalG <- function(y, X, beta) {
+  tX <- t(X)
+  yXb <- y - c(X %*% beta)
+  G <- sweep(tX, MARGIN = 2, yXb, `*`)
+  return(t(G))
+}
+```
+
+One can also create a function for the corresponding gradient calculation, i.e.,
+```{r, echo=TRUE, eval=TRUE}
+mr_dGdb <- function(y, X, beta) {
+  lx <- split(X, row(X))
+  dg <- lapply(lx, function(x) tcrossprod(x,x))
+  return(dg)
+}
+```
+
+This can be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. $\beta$:
+
+
 
 ## Quantile Regression
 
