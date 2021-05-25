@@ -410,65 +410,27 @@ The log smoothed censored EL (log SCEL) is then defined as
 
 # Illustrations
 
-\pkg{flexEL} provides implementations of estimating equations for mean and quantile regression models based on the following location-scale model:
+- We have a bunch of these: quantile vs mean regression, and location vs location-scale.
+
+- Censoring as well.
+
+\pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
 
 \begin{equation} \label{md:lsmod}
   y_i = \xx_i'\bbe + \s\cdot\exp(\zz_i'\gga)\cdot\e_i, \quad i=1,\cdots,n.
 \end{equation}
 
+Users can also leverage the EL calculation for customized models specified by estimating equations. In this case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (called e.g. `evalG`), or provide the calculation in C++ before wrapping into an \proglang{R} interface. 
+
+Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to `G` via chain rule, a user can then utilize `optim` or `nlm` in \proglang{R} for parameter estimation with gradient-based methods.
+
 ## Mean Regression
 
-- Show users how to create their own `Gfun` and use this from \proglang{R}.  
+TODO: show user how to use built-in mean regression.
 
-- Can include gradient-based optimization here as well.  I suggest to use `optim(method = "BFGS")` for optimization, not `nlm()` (it's just more complicated/annoying).  I would say use `nlminb()` which is way faster than `optim()`, but for some reason R Core suggests to use the other optimizers instead...
+<!-- - Show users how to create their own `Gfun` and use this from \proglang{R}.   -->
 
-Users can utilize the provided functions for mean regression, but they can also leverage the EL calculation for their customized models specified by estimating equations. In the later case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (called e.g. `evalG`), or provide the calculation in C++ before wrapping into an \proglang{R} interface. 
-
-Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can either write a function to calculate the gradient at a given parameter value, or give the return value of `evalG` an attribute "gradient". Combining with the gradient of log EL with respect to `G` via chain rule, a user can then use `optim` or `nlm` in \proglang{R} for the parameter estimation. Some examples are given below.
-
-Consider a simple two-parameter linear regression model
-\[
-  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
-\]
-where $\epsilon_i \iid \text{F}(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\text{Var}(\epsilon_i) = 1$.
-
-As the first step, one should design the estimating equations of the parameters and implement a function (`evalG`) that returns the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. 
-
-In this example, the following estimating equation can be used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
-\[
-  \E[(y-x'\beta)\cdot x] = 0,
-\]
-which is
-\[
-  \sum_{i=1}^n w_i\cdot (y_i-x_i^T\beta)\cdot x_i = 0.
-\]
-In other words, the $g$ function is specified as
-\[
-  g(x,y;\beta) = (y-x'\beta)\cdot x.
-\]
-
-This can be implemented in R (called `mr_evalG`) as follows: 
-```{r, echo=TRUE, eval=TRUE}
-mr_evalG <- function(y, X, beta) {
-  tX <- t(X)
-  yXb <- y - c(X %*% beta)
-  G <- sweep(tX, MARGIN = 2, yXb, `*`)
-  return(t(G))
-}
-```
-
-One can also create a function for the corresponding gradient calculation, i.e.,
-```{r, echo=TRUE, eval=TRUE}
-mr_dGdb <- function(y, X, beta) {
-  lx <- split(X, row(X))
-  dg <- lapply(lx, function(x) tcrossprod(x,x))
-  return(dg)
-}
-```
-
-This can be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. $\beta$:
-
-
+<!-- - Can include gradient-based optimization here as well.  I suggest to use `optim(method = "BFGS")` for optimization, not `nlm()` (it's just more complicated/annoying).  I would say use `nlminb()` which is way faster than `optim()`, but for some reason R Core suggests to use the other optimizers instead... -->
 
 ## Quantile Regression
 
@@ -500,13 +462,86 @@ As before, we use the first order optimality condition of (\ref{eq:nueq}) to obt
 \end{split}
 \end{equation}
 
-## Built-in Models
+## User-defined Model
 
-- We have a bunch of these: quantile vs mean regression, and location vs location-scale.
+The following example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
+\[
+  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
+\]
+where $\epsilon_i \iid \text{F}(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\text{Var}(\epsilon_i) = 1$.
 
-- Censoring as well.
+As the first step, one should design the estimating equations of the parameters and implement a function (`evalG`) that returns the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. 
 
-- Should we put all this in the Methods section?  Have separate illustrations for some or all?
+In this example, the following estimating equation can be used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
+\[
+  \E[(y-x'\beta)\cdot x] = 0,
+\]
+which is
+\[
+  \sum_{i=1}^n w_i\cdot (y_i-x_i^T\beta)\cdot x_i = 0.
+\]
+In other words, the $g$ function is specified as
+\[
+  g(x,y;\beta) = (y-x'\beta)\cdot x.
+\]
+
+This can be implemented in R (called `mr_evalG`) as follows: 
+```{r, echo=TRUE, eval=TRUE}
+mr_evalG_R <- function(y, X, beta) {
+  tX <- t(X)
+  yXb <- y - c(X %*% beta)
+  G <- sweep(tX, MARGIN = 2, yXb, `*`)
+  return(t(G))
+}
+```
+
+With \pkg{flexEL}, the negative log EL can be implemented as:
+```{r, echo=TRUE, eval=TRUE}
+mr_neglogel_R <- function(beta, y, X, gel) {
+  G <- mr_evalG_R(y, X, beta)
+  return(-gel$logel(G))
+}
+```
+
+One may also provide the gradient of `evalG` with respect to the parameters, in this case, it is
+```{r, echo=TRUE, eval=TRUE}
+mr_dGdb_R <- function(y, X, beta) {
+  lx <- split(X, row(X))
+  dg <- lapply(lx, function(x) tcrossprod(x,x))
+  return(dg)
+}
+```
+
+Notice that here the gradient is a 3-dimensional matrix. This can then be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. the parameters, $\beta$:
+```{r, echo=TRUE, eval=TRUE}
+mr_neglogel_grad_R <- function(beta, y, X, gel) {
+  G <- mr_evalG_R(y, X, beta)
+  logel_lst <- gel$logel_grad(G)
+  dldG <- -logel_lst$dldG
+  dGdb <- mr_dGdb_R(y, X, beta)
+  grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
+  for (ii in 1:nrow(dldG)) {
+    grad_mat[ii,] <- dGdb[[ii]] %*% dldG[ii,]
+  }
+  colSums(grad_mat)
+}
+```
+
+Then one can use e.g. `optim` to obtain the estimate of $\beta$:
+```{r, echo=TRUE, eval=TRUE}
+library(flexEL)
+
+# simulate some data
+n <- 500
+X <- cbind(1, rnorm(n))
+beta0 <- c(1, 2)
+eps <- (rchisq(n, df=5)-5)/sqrt(2*5)
+y <- c(X %*% beta0) + eps
+gel <- GenEL$new(n_obs = n, n_eqs = 2)
+
+optim(c(0.5,2.5), fn = mr_neglogel_R, gr = mr_neglogel_grad_R,
+      y, X, gel, method = "BFGS")
+```
 
 ## Bayesian EL
 
