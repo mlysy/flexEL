@@ -4,7 +4,7 @@ context("CensEL")
 
 source("el_rfuns.R")
 
-ntest <- 5
+ntest <- 3
 
 # ---- eval_weights ----
 

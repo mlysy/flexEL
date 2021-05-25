@@ -113,50 +113,6 @@ GenEL_Logel_grad <- function(pGEL, G, verbose) {
     .Call(`_flexEL_adjG`, G, a)
 }
 
-.LambdaNR <- function(G, lambda0, max_iter, rel_tol, support, verbose) {
-    .Call(`_flexEL_LambdaNR`, G, lambda0, max_iter, rel_tol, support, verbose)
-}
-
-.OmegaHat <- function(G, lambda0, max_iter, rel_tol, support, verbose) {
-    .Call(`_flexEL_OmegaHat`, G, lambda0, max_iter, rel_tol, support, verbose)
-}
-
-.LogEL <- function(omegas, support) {
-    .Call(`_flexEL_LogEL`, omegas, support)
-}
-
-.LogELGrad <- function(G, lambda0, max_iter, rel_tol, support = FALSE, verbose = FALSE) {
-    .Call(`_flexEL_LogELGrad`, G, lambda0, max_iter, rel_tol, support, verbose)
-}
-
-.EvalWeights <- function(omegas, deltas, epsilons, support) {
-    .Call(`_flexEL_EvalWeights`, omegas, deltas, epsilons, support)
-}
-
-.LambdaNRCens <- function(G, weights, max_iter, rel_tol, support, verbose) {
-    .Call(`_flexEL_LambdaNRCens`, G, weights, max_iter, rel_tol, support, verbose)
-}
-
-.OmegaHatEM <- function(G, omegas_init, deltas, epsilons, max_iter, rel_tol, abs_tol, support, verbose) {
-    .Call(`_flexEL_OmegaHatEM`, G, omegas_init, deltas, epsilons, max_iter, rel_tol, abs_tol, support, verbose)
-}
-
-.LogELCens <- function(omegas, deltas, epsilons, support) {
-    .Call(`_flexEL_LogELCens`, omegas, deltas, epsilons, support)
-}
-
-.LogELSmooth <- function(omegas, deltas, epsilons, sp, support) {
-    .Call(`_flexEL_LogELSmooth`, omegas, deltas, epsilons, sp, support)
-}
-
-.EvalWeightsSmooth <- function(omegas, deltas, epsilons, sp, support) {
-    .Call(`_flexEL_EvalWeightsSmooth`, omegas, deltas, epsilons, sp, support)
-}
-
-.OmegaHatEMSmooth <- function(G, omegas_init, deltas, epsilons, sp, max_iter, rel_tol, abs_tol, support, verbose) {
-    .Call(`_flexEL_OmegaHatEMSmooth`, G, omegas_init, deltas, epsilons, sp, max_iter, rel_tol, abs_tol, support, verbose)
-}
-
 .MeanRegEvalG <- function(y, X, beta) {
     .Call(`_flexEL_MeanReg_evalG`, y, X, beta)
 }

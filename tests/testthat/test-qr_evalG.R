@@ -6,7 +6,7 @@ source("reg_models.R")
 # library(testthat) # not loaded automatically
 context("qr_evalG")
 
-ntest <- 50
+ntest <- 5
 
 test_that("qr_evalG_R == qr_evalG_cpp", {
     for(ii in 1:ntest) {
