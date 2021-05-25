@@ -329,18 +329,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// adjG
-Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a);
-RcppExport SEXP _flexEL_adjG(SEXP GSEXP, SEXP aSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    rcpp_result_gen = Rcpp::wrap(adjG(G, a));
-    return rcpp_result_gen;
-END_RCPP
-}
 // MeanReg_evalG
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta);
 RcppExport SEXP _flexEL_MeanReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
@@ -421,6 +409,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// adjG
+Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a);
+RcppExport SEXP _flexEL_adjG(SEXP GSEXP, SEXP aSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    rcpp_result_gen = Rcpp::wrap(adjG(G, a));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_CensEL_ctor", (DL_FUNC) &_flexEL_CensEL_ctor, 2},
@@ -450,12 +450,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 3},
     {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 4},
     {"_flexEL_GenEL_Logel_grad", (DL_FUNC) &_flexEL_GenEL_Logel_grad, 3},
-    {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {"_flexEL_MeanReg_evalG", (DL_FUNC) &_flexEL_MeanReg_evalG, 3},
     {"_flexEL_MeanRegLS_EvalG", (DL_FUNC) &_flexEL_MeanRegLS_EvalG, 6},
     {"_flexEL_QuantRegEvalG", (DL_FUNC) &_flexEL_QuantRegEvalG, 4},
     {"_flexEL_QuantRegLSEvalG", (DL_FUNC) &_flexEL_QuantRegLSEvalG, 8},
     {"_flexEL_QuantRegLSEvalGSmooth", (DL_FUNC) &_flexEL_QuantRegLSEvalGSmooth, 9},
+    {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
     {NULL, NULL, 0}
 };
 

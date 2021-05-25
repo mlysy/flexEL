@@ -109,10 +109,6 @@ GenEL_Logel_grad <- function(pGEL, G, verbose) {
     .Call(`_flexEL_GenEL_Logel_grad`, pGEL, G, verbose)
 }
 
-.adjG <- function(G, a) {
-    .Call(`_flexEL_adjG`, G, a)
-}
-
 .MeanRegEvalG <- function(y, X, beta) {
     .Call(`_flexEL_MeanReg_evalG`, y, X, beta)
 }
@@ -131,5 +127,9 @@ GenEL_Logel_grad <- function(pGEL, G, verbose) {
 
 .QuantRegLSEvalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, nu, s) {
     .Call(`_flexEL_QuantRegLSEvalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, nu, s)
+}
+
+.adjG <- function(G, a) {
+    .Call(`_flexEL_adjG`, G, a)
 }
 
