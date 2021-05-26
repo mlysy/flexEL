@@ -1,35 +1,30 @@
-// // [[Rcpp::depends("flexEL")]]
-// 
-// #include <Rcpp.h>
-// #include <RcppEigen.h>
-// #include <flexEL/inner_el.h>
-// #include <flexEL/mean_reg_model.h> // using mean regression as an example, this could be your model C++ header file
-// 
-// // [[Rcpp::export]]
-// double example_logEL(int N = 20) {
-// 
-//   Rcpp::NumericVector bb = Rcpp::NumericVector::create(1.0, 2.0);
-//   Eigen::VectorXd bet = Rcpp::as<Eigen::Map<Eigen::VectorXd> >(bb);
-//   
-//   Rcpp::NumericVector ee = Rcpp::rnorm(N);
-//   Eigen::VectorXd eps = Rcpp::as<Eigen::Map<Eigen::VectorXd> >(ee);
-//   
-//   Eigen::MatrixXd X = Eigen::MatrixXd::Random(2,N);
-//   
-//   Eigen::VectorXd y = bet.transpose() * X + eps;
-//   
-//   // instantiate the model and EL objects
-//   flexEL::MeanRegModel MR(y, X); // instantiate a mean regression object
-//   flexEL::InnerEL EL(MR.get_n_obs(), MR.get_n_eqs()); // instantiate an EL object with dimention of G matrix
-//   bool support = true;
-//   EL.set_opts(support); // set support correction
-//   
-//   // evaluate EL for a particular beta
-//   Eigen::VectorXd beta = Eigen::VectorXd::Random(2);
-//   MR.EvalG(EL.get_ref_G(), beta);
-//   int n_iter;
-//   double max_err;
-//   EL.LambdaNR(n_iter, max_err);
-//   EL.EvalOmegas();
-//   return(EL.LogEL());
-// }
+// [[Rcpp::depends("flexEL")]]
+// [[Rcpp::depends("RcppEigen")]]
+
+#include <Rcpp.h>
+#include <RcppEigen.h>
+#include <flexEL/inner_el.h>
+#include <flexEL/mean_reg_model.h>
+
+// [[Rcpp::export]]
+double example_logel(Eigen::VectorXd beta,
+                     Eigen::MatrixXd X,
+                     Eigen::VectorXd y,
+                     bool verbose) {
+  flexEL::MeanRegModel MR(y, X);
+  int n_obs = MR.get_n_obs();
+  int n_eqs = MR.get_n_eqs();
+  MatrixXd G = MatrixXd::Zero(MR.get_n_eqs(), MR.get_n_obs());
+  MR.EvalG(G, beta);
+  // std::cout << "G = \n" << G << std::endl;
+  flexEL::GenEL GEL(n_obs, n_eqs);
+  GEL.set_supp_adj(true); // turn on support correction
+  double logel = GEL.logel(G);
+  if(verbose) {
+    int n_iter;
+    double max_err;
+    GEL.get_diag(n_iter, max_err);
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
+  return(logel);
+}
