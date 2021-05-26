@@ -2,14 +2,11 @@
 #'
 #' @template args-y_X_Z
 #' @param alpha A numeric vector of quantile levels of length \code{n_qts}.
-#' @param Beta A numeric matrix of dimension \code{n_bet} x \code{n_qts}. Each column of \code{Beta} 
-#'   is a vector of coefficients in the location function.
-#' @param Gamma A An numeric matrix of dimension \code{n_gam} x \code{n_qts}. Each column of \code{Beta} 
-#'   is a vector of coefficients in the scale function.
-#' @param Sig2 A positive numeric vector of length \code{n_qts} where each element' square root is 
-#'   the scale parameter in the scale function corresponding to the quantile level.
-#' @param Nu A numeric vector of quantile values of length \code{n_qts} corresponding to each alpha.
-#' @param sp A positive scalar as the smoothing parameter. If `sp = 0`, then no smoothing is performed.
+#' @param beta  A numeric matrix of length \code{n_bet}.
+#' @param gamma A An numeric matrix of dimension \code{n_gam}.
+#' @param sig2  A positive scalar whose square root isthe scale parameter in the scale function.
+#' @param nu A numeric vector of quantile values of length \code{n_qts} corresponding to each alpha.
+#' @param s A positive scalar as the smoothing parameter. If `s = NULL`, then no smoothing is performed.
 #' @details Assuming data were generated from 
 #' ```
 #' y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
@@ -36,27 +33,20 @@
 #' @return A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 2}.
 #' @example examples/qrls_evalG.R
 #' @export qrls_evalG
-qrls_evalG <- function(y, X, Z, alpha, Beta, Gamma, Sig2, Nu, sp = 0) {
+qrls_evalG <- function(y, X, Z, alpha, beta, gamma, sig2, nu, s = NULL) {
   
   # checks
-  if (sp < 0) stop("s must be positive.")
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
   
-  # if input is for single quantile and Beta, Gamma are vectors, convert to matrix form
-  if (length(alpha) == 1 && is.vector(Beta)) Beta <- matrix(Beta,length(Beta),1)
-  if (length(alpha) == 1 && is.vector(Gamma)) Gamma <- matrix(Gamma,length(Gamma),1)
-  if (length(alpha) > 1 && (is.vector(Beta) || is.vector(Gamma))) {
-    stop("Parameters must be in matrix form when alpha has more than one entry.")
-  }
-  
   # the first entry of alpha passed to the C++ function is the number of quantile levels
   alpha <- c(length(alpha), alpha)
-  if (sp == 0) {
-    return(t(.QuantRegLSEvalG(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu)))
+  if (is.null(s)) {
+    return(t(.QuantRegLSEvalG(y, t(X), t(Z), alpha, beta, gamma, sig2, nu)))
   }
   else {
-    return(t(.QuantRegLSEvalGSmooth(y, t(X), t(Z), alpha, Beta, Gamma, Sig2, Nu, sp)))
+    if (s <= 0) stop("s must be a positive scalar.")
+    return(t(.QuantRegLSEvalGSmooth(y, t(X), t(Z), alpha, beta, gamma, sig2, nu, s)))
   }
 }

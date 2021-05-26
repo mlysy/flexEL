@@ -15,7 +15,7 @@
 #' ```
 #' min_beta (y - X*beta)'(y - X*beta)
 #' ```
-#' The above minimization problem is equavalent to setting it's first derivative 
+#' The above minimization problem is equivalent to setting it's first derivative 
 #' w.r.t `beta` to 0, i.e.,
 #' ```
 #' X'*(y - X*beta) = 0

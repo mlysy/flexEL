@@ -16,23 +16,22 @@ using namespace Eigen;
 
 /* ------ exported functions ------ */
 
-// double tau
 /**
  * @brief Calculate the G matrix for regular quantile regression model.
  * 
  * @param[in] y        Responses of length <code>n_obs</code>.
  * @param[in] X        Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
  * @param[in] tauArr   A numeric array of quantile levels.
- * @param[in] beta     Coefficient vector of length <code>nBet</code> in linear location function.
+ * @param[in] Beta     Coefficient vector of length <code>nBet</code> in linear location function.
  */
 // [[Rcpp::export(".QuantRegEvalG")]]
 Eigen::MatrixXd QuantRegEvalG(Eigen::VectorXd y, 
                               Eigen::MatrixXd X,
                               Eigen::VectorXd tauArr, 
-                              Eigen::VectorXd beta) {
+                              Eigen::MatrixXd Beta) {
   flexEL::QuantRegModel QR(y, X, tauArr.data());
   MatrixXd G = MatrixXd::Zero(QR.get_n_eqs(), QR.get_n_obs()); // G in C++ is n_eqs * n_obs
-  QR.EvalG(G, beta);
+  QR.EvalG(G, Beta);
   return(G);
 }
 
@@ -60,6 +59,28 @@ Eigen::MatrixXd QuantRegLSEvalG(Eigen::VectorXd y,
   flexEL::QuantRegModel QR(y, X, Z, tauArr.data());
   MatrixXd G = MatrixXd::Zero(QR.get_n_eqs(), QR.get_n_obs()); // G in C++ is n_eqs * n_obs
   QR.EvalG(G, beta, gamma, sig2, nu);
+  return(G);
+}
+
+/**
+ * @brief Calculate the G matrix for regular quantile regression model.
+ * 
+ * @param[in] y        Responses of length <code>n_obs</code>.
+ * @param[in] X        Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param[in] tauArr   A numeric array of quantile levels.
+ * @param[in] Beta     Coefficient vector of length <code>nBet</code> in linear location function.
+ */
+// [[Rcpp::export(".QuantRegEvalGSmooth")]]
+Eigen::MatrixXd QuantRegEvalGSmooth(Eigen::VectorXd y, 
+                                    Eigen::MatrixXd X,
+                                    Eigen::VectorXd tauArr, 
+                                    Eigen::MatrixXd Beta,
+                                    double s) {
+  flexEL::QuantRegModel QR(y, X, tauArr.data());
+  // std::cout << "n_obs = " << QR.get_n_obs() << std::endl;
+  // std::cout << "n_eqs = " << QR.get_n_eqs() << std::endl;
+  MatrixXd G = MatrixXd::Zero(QR.get_n_eqs(), QR.get_n_obs()); // G in C++ is n_eqs * n_obs
+  QR.EvalGSmooth(G, Beta, s);
   return(G);
 }
 
