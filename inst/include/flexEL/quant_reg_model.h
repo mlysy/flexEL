@@ -78,6 +78,9 @@ namespace flexEL {
                const Ref<const VectorXd>& gamma,
                const double& sig2, // sig2 should be a scalar
                const Ref<const VectorXd>& nu);
+    void EvalGSmooth(Ref<MatrixXd> G, 
+                     const Ref<const MatrixXd>& Beta, 
+                     const double s);
     void EvalGSmooth(Ref<MatrixXd> G,
                      const Ref<const VectorXd>& beta,
                      const Ref<const VectorXd>& gamma,
@@ -290,6 +293,31 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G,
     }
   }
   G = tG_.transpose();
+}
+
+// multiple quantile case (location model)
+/**
+ * @brief Evaluate G matrix for quantile regression location model.
+ * 
+ * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] Beta     Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function.
+ */
+inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G, 
+                                               const Ref<const MatrixXd>& Beta,
+                                               const double s) {
+  // stack multiple "Gs" for each quantile level
+  // std::cout << "n_bet_ = " << n_bet_ << std::endl;
+  for(int jj=0; jj<n_qts_; jj++) {
+    // std::cout << "** jj = " << jj << std::endl;
+    for(int ii=0; ii<y_.size(); ii++) {
+      // std::cout << "y_(ii) = " << y_(ii) << std::endl;
+      // std::cout << "X_.col(ii) = " << X_.col(ii).transpose() << std::endl;
+      // std::cout << "Beta.col(jj) = " << Beta.col(jj).transpose() << std::endl;
+      // std::cout << "s = " << s << std::endl;
+      // std::cout << "phi_tau_smooth(y_(ii)-X_.col(ii).transpose()*Beta.col(jj), tau[jj], s) = " << phi_tau_smooth(y_(ii)-X_.col(ii).transpose()*Beta.col(jj), tau[jj], s) << std::endl;
+      G.block(jj*n_bet_,ii,n_bet_,1) = phi_tau_smooth(y_(ii)-X_.col(ii).transpose()*Beta.col(jj), tau[jj], s)*X_.col(ii);
+    }
+  }
 }
 
 /**

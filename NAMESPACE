@@ -2,8 +2,6 @@
 
 export(CensEL)
 export(GenEL)
-export(lambdaNR)
-export(logEL)
 export(mr_evalG)
 export(mrls_evalG)
 export(qr_evalG)

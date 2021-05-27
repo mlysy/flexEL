@@ -4,7 +4,7 @@ context("GenEL")
 
 source("el_rfuns.R")
 
-ntest <- 5
+ntest <- 3
 
 # ---- lambda_nr -----
 
@@ -228,7 +228,7 @@ test_that("dldG with default settings", {
                                }), nrow = nrow(G), ncol = ncol(G))
     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
       # nconv <<- nconv + 1
-      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-3)
     }
   }
 })
@@ -254,7 +254,7 @@ test_that("dldG with given convergence settings", {
                                }), nrow = nrow(G), ncol = ncol(G))
     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
       # nconv <<- nconv + 1
-      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-3)
     }
   }
 })
@@ -285,7 +285,7 @@ test_that("dldG with given convergence settings and support correction", {
     range(dldG_cpp-dldG_nd)
     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
       # nconv <<- nconv + 1
-      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-4)
+      expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-3)
     }
   }
 })

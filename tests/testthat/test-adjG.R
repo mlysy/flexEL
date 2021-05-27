@@ -1,10 +1,9 @@
-
 source("el_rfuns.R")
 
 # library(testthat) # not loaded automatically
 context("adjG")
 
-ntest <- 50
+ntest <- 5
 
 test_that("adjG_R == adjR_cpp", {
   for(ii in 1:ntest) {
