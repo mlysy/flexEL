@@ -12,11 +12,11 @@ author:
       - Ontario, Canada
     email: \email{mlysy@uwaterloo.ca}
 abstract: >
-  Here is the abstract.
+  This paper introduces \pkg{flexEL}, a fast and flexible framework for implementing and calibrating empirical likelihood models. In particular, it provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the "Eigen" linear algebra library. The package also provides functions for implementing right-censored regression models, where the inner optimization is conducted via an expectation-maximation algirithm. Users may interface with the library through \proglang{R} or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
 keywords:
   # at least one keyword must be supplied
-  formatted: [keywords, not capitalized, "\\proglang{Java}"]
-  plain:     [keywords, not capitalized, Java]
+  formatted: [empirical likelihood, quantile regression, EM algorithm, right-censoring, location-scale model, "\\proglang{R}"]
+  plain:     [empirical likelihood, quantile regression, EM algorithm, right-censoring, location-scale model, R]
 date: "`r Sys.Date()`"
 documentclass: jss
 classoption: article
@@ -410,11 +410,9 @@ The log smoothed censored EL (log SCEL) is then defined as
 
 # Software Design and Illustrations
 
-<!-- - We have a bunch of these: quantile vs mean regression, and location vs location-scale. -->
+The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users. 
 
-<!-- - Censoring as well. -->
-
-The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users. The package's source code is written as a header-only library in C++ using object-oriented programming, but it also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. In this section, we describe how a user can interact with the package either in C++ or \proglang{R}.
+The package's source code is written as a header-only library in C++ using object-oriented programming. The main class `GenEL` provides the core computations of weighted log empirical likelihood. `CensEL` class utilizes `GenEL` and contains the EM algorithm for right-censored EL computations. The package also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. This section describes how a user can interact with the package either in C++ or \proglang{R}.
 
 In terms of built-in models, \pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
 
@@ -428,20 +426,64 @@ as well as the common location model:
   y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.
 \end{equation}
 
-Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (called e.g. `evalG`), or provide the calculation in C++ before wrapping into an \proglang{R} interface. 
+Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (call it e.g. `evalG`), or implement the calculation in C++ before wrapping into an \proglang{R} interface. 
 
 Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to `G` via chain rule, a user can then utilize `optim` or `nlm` in \proglang{R} for parameter estimation with gradient-based methods.
 
 ## Mean Regression
 
-TODO: show user how to use built-in mean regression in C++ (see example.cpp in flexEL.Rmd) ?
+In this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
+
+The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp:
+```{r, echo = FALSE, results = "asis"}
+cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
+```
+
+After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
+```{r, warn=FALSE, include=TRUE, eval=TRUE}
+Rcpp::sourceCpp("mr_neglogel.cpp")
+bb <- c(1,2)
+n_obs <- 200
+n_eqs <- 2
+X <- cbind(1, rnorm(n_obs))
+eps <- rnorm(n_obs)
+y <- c(X %*% bb + eps)
+# mr_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)
+nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
+```
+
+If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
 
 ```{r, echo=TRUE, eval=TRUE}
 library(flexEL)
-mr_neg_logel <- function(beta, y, X, gel) {
+mr_neglogel <- function(beta, y, X, gel) {
   G <- flexEL::mr_evalG(y, X, beta)
   return(-gel$logel(G))
 }
+
+gel <- flexEL::GenEL$new(n_obs, n_eqs) # initalize an GenEL object
+gel$supp_adj <- TRUE # turn on support correction
+
+nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
+```
+The usage is similar with right-censored outcomes, e.g. using \proglang{R}:
+```{r, echo=TRUE, eval=TRUE}
+mr_neglogcel <- function(beta, y_obs, X, cel) {
+  G <- flexEL::mr_evalG(y, X, beta)
+  -gel$logel(G)
+}
+
+cel <- flexEL::CensEL$new(n_obs, n_eqs)
+cel$supp_adj <- TRUE
+cel$smooth <- TRUE # turn on continuity correction
+cel$smooth_s <- 1 # set tuning parameter for continuity correction
+
+z <- rnorm(2*mean(y), n = n_obs) # censoring variable
+delta <- y <= z # censoring indicators
+y_obs <- y
+y_obs[!delta] <- z[!delta]
+
+nlm(mr_neglogcel, c(1,2), y_obs, X, cel)
 ```
 
 <!-- - Show users how to create their own `Gfun` and use this from \proglang{R}.   -->
@@ -455,7 +497,7 @@ For the location-scale model \eqref{md:lsmod}, the $\tau\times 100\%$ conditiona
   Q_{\tau}(y_i|\xx_i) = \xx_i' \bbe + \s\cdot\exp(\zz_i' \gga)\cdot\nu_{\tau}.
 \end{equation}
 
-In this case, for parameters $\bbe,\gga$ and $\s$, we adopt the same estimating equation as in the mean regression case. For the quantile parameter $\nu_{\tau}$, we rely on the ``check function" introduced by @koenker-bassett1978, which is defined as
+In this case, for parameters $\bbe,\gga$ and $\s$, we adopt the same estimating equation as in the mean regression case. For the quantile parameter $\nu_{\tau}$, we rely on the "check function" introduced by @koenker-bassett1978, which is defined as
 \begin{equation}\label{eq:check}
 \rho_\tau(u) = u\cdot(\tau - \mathfrak 1 \{u \le 0\}),
 \end{equation}
@@ -476,17 +518,18 @@ As before, we use the first order optimality condition of (\ref{eq:nueq}) to obt
 \end{split}
 \end{equation}
 
-Notice that the indicator function used by the ``check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as @chen2007, splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply. That is, we modify \eqref{eq:check} as follows:
+Notice that the indicator function used by the "check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as @chen2007, splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply here as well. That is, we modify \eqref{eq:check} as follows:
 
 \begin{equation}
-\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)).
+\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)),
 \end{equation}
+where $S$ is defined as in \eqref{eq:sigmoid}.
 
-TODO: show user how to use this model in R?
+Usage of quantile regression in \pkg{flexEL} is very similar to mean regression in the last section. Moreover, one can simultaneously estimte parameters at multiple quantile levels both with the location and location-scale models. With the location model, both the intercept and the slope parameters can be different at different quantile levels. Essentially, the `G` matrix is obtained by stacking together multiple `G` matrices each at one quantile level. This is one advantage of quantile regression when heteroscedasticity presents. With the location-scale model, only the quantile parameter $\nu_{\tau}$ is different at different quantile levels, since heteroscedasticity can be handled by the scale function.
 
 ## User-defined Model
 
-The following example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
+The following toy example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
 \[
   y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
 \]
@@ -500,16 +543,16 @@ In this example, the following estimating equation can be used, which has a rang
 \]
 which is
 \[
-  \sum_{i=1}^n w_i\cdot (y_i-x_i^T\beta)\cdot x_i = 0.
+  \sum_{i=1}^n w_i\cdot (y_i-x_i'\beta)\cdot x_i = 0.
 \]
 In other words, the $g$ function is specified as
 \[
   g(x,y;\beta) = (y-x'\beta)\cdot x.
 \]
 
-This can be implemented in R (called `mr_evalG`) as follows: 
+This can be implemented in R (called `mr2_evalG`) as follows: 
 ```{r, echo=TRUE, eval=TRUE}
-mr_evalG_R <- function(y, X, beta) {
+mr2_evalG <- function(y, X, beta) {
   tX <- t(X)
   yXb <- y - c(X %*% beta)
   G <- sweep(tX, MARGIN = 2, yXb, `*`)
@@ -519,15 +562,15 @@ mr_evalG_R <- function(y, X, beta) {
 
 With \pkg{flexEL}, the negative log EL can be implemented as:
 ```{r, echo=TRUE, eval=TRUE}
-mr_neglogel_R <- function(beta, y, X, gel) {
-  G <- mr_evalG_R(y, X, beta)
+mr2_neglogel <- function(beta, y, X, gel) {
+  G <- mr2_evalG(y, X, beta)
   return(-gel$logel(G))
 }
 ```
 
-One may also provide the gradient of `evalG` with respect to the parameters, in this case, it is
+One may also provide the gradient of `mr2_evalG` with respect to the parameters, in this case, it is
 ```{r, echo=TRUE, eval=TRUE}
-mr_dGdb_R <- function(y, X, beta) {
+mr2_dGdb <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) tcrossprod(x,x))
   return(dg)
@@ -536,11 +579,11 @@ mr_dGdb_R <- function(y, X, beta) {
 
 Notice that here the gradient is a 3-dimensional matrix. This can then be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. the parameters, $\beta$:
 ```{r, echo=TRUE, eval=TRUE}
-mr_neglogel_grad_R <- function(beta, y, X, gel) {
-  G <- mr_evalG_R(y, X, beta)
+mr2_neglogel_grad <- function(beta, y, X, gel) {
+  G <- mr2_evalG(y, X, beta)
   logel_lst <- gel$logel_grad(G)
   dldG <- -logel_lst$dldG
-  dGdb <- mr_dGdb_R(y, X, beta)
+  dGdb <- mr2_dGdb(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:nrow(dldG)) {
     grad_mat[ii,] <- dGdb[[ii]] %*% dldG[ii,]
@@ -554,16 +597,20 @@ Then one can use e.g. `optim` to obtain the estimate of $\beta$:
 library(flexEL)
 
 # simulate some data
-n <- 500
+n <- 200
 X <- cbind(1, rnorm(n))
 beta0 <- c(1, 2)
 eps <- (rchisq(n, df=5)-5)/sqrt(2*5)
 y <- c(X %*% beta0) + eps
-gel <- GenEL$new(n_obs = n, n_eqs = 2)
 
-optim(c(0.5,2.5), fn = mr_neglogel_R, gr = mr_neglogel_grad_R,
+gel <- GenEL$new(n_obs = n, n_eqs = 2)
+gel$supp_adj <- TRUE
+
+optim(c(0.5,2.5), fn = mr2_neglogel, gr = mr2_neglogel_grad,
       y, X, gel, method = "BFGS")
 ```
+
+Alternatively, a user can implement the `G` matrix and gradient calculations in C++ and follows the example in the mean regression section where instead of including `flexEL/mean_reg_model.h`, include the user defined C++ header file.
 
 ## Bayesian EL
 
@@ -573,5 +620,4 @@ optim(c(0.5,2.5), fn = mr_neglogel_R, gr = mr_neglogel_grad_R,
 
 # Conclusion
 
-- Everything below here are just tests for using JSS Markdown.
 

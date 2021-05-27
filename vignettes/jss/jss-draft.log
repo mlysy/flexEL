@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  27 MAY 2021 11:49
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  27 MAY 2021 16:01
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -752,18 +752,18 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [8 <./smoothfun.pdf>]
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 485.
+ (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmss' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
 pdfTeX warning (font expansion): font should be expanded before its first use
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 497.
-(/usr/local/texlive/2018/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 509.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 533.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 9
@@ -775,10 +775,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [10]
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 584.
- (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/ts1lmtt.fd
-File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 11
  []
@@ -789,53 +785,72 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-pdfTeX warning (font expansion): font should be expanded before its first use
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 13
  []
 
 [13]
-Underfull \hbox (badness 10000) in paragraph at lines 757--757
-
- []
-
-LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 757.
-
-Package caption Warning: Unused \captionsetup[table] on input line 155.
-See the caption package documentation for explanation.
-
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 757.
-
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 720.
+ (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/ts1lmtt.fd
+File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 14 []
  []
 
 [14]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 757.
+pdfTeX warning (font expansion): font should be expanded before its first use
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 15
+ []
+
+[15]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/lmr/m/n/10.95 16 []
+ []
+
+[16]
+Underfull \hbox (badness 10000) in paragraph at lines 892--892
+
+ []
+
+LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 892.
+
+Package caption Warning: Unused \captionsetup[table] on input line 155.
+See the caption package documentation for explanation.
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 892.
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[] \T1/lmr/m/n/10.95 17
+ []
+
+[17]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 892.
  (./jss-draft.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 757.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 757.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 892.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 892.
 Package rerunfilecheck Info: File `jss-draft.out' has not changed.
-(rerunfilecheck)             Checksum: F4229F55F45843D8DCB1CF67DF1BBC5E;1690.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 757.
+(rerunfilecheck)             Checksum: 1184AD8D3CB0279BE44EF0475B300E6A;1682.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 892.
  ) 
 Here is how much of TeX's memory you used:
- 11073 strings out of 492649
- 170625 string characters out of 6129622
- 293208 words of memory out of 5000000
- 14535 multiletter control sequences out of 15000+600000
- 100143 words of font info for 120 fonts, out of 8000000 for 9000
+ 11086 strings out of 492649
+ 170746 string characters out of 6129622
+ 294661 words of memory out of 5000000
+ 14537 multiletter control sequences out of 15000+600000
+ 106384 words of font info for 127 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,19n,39p,1037b,393s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/euler/eufm10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmb10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2018/texmf-dist/f
+ 36i,19n,39p,1037b,453s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/euler/eufm10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmb10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2018/texmf-dist/f
 onts/type1/public/lm/lmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmmib10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmr6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmri12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmro10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmss10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></usr/lo
 cal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on jss-draft.pdf (14 pages, 461127 bytes).
+Output written on jss-draft.pdf (17 pages, 473240 bytes).
 PDF statistics:
- 379 PDF objects out of 1000 (max. 8388607)
- 332 compressed objects within 4 object streams
- 111 named destinations out of 1000 (max. 500000)
+ 390 PDF objects out of 1000 (max. 8388607)
+ 340 compressed objects within 4 object streams
+ 112 named destinations out of 1000 (max. 500000)
  12411 words of extra memory for PDF output out of 14400 (max. 10000000)
 

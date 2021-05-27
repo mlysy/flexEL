@@ -125,11 +125,11 @@ Shimeng Huang\\University of Waterloo \And Martin Lysy\\University of Waterloo
 \Plaintitle{flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling}
 
 \Abstract{
-Here is the abstract.
+This paper introduces \pkg{flexEL}, a fast and flexible framework for implementing and calibrating empirical likelihood models. In particular, it provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the ``Eigen'' linear algebra library. The package also provides functions for implementing right-censored regression models, where the inner optimization is conducted via an expectation-maximation algirithm. Users may interface with the library through \proglang{R} or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
 }
 
-\Keywords{keywords, not capitalized, \proglang{Java}}
-\Plainkeywords{keywords, not capitalized, Java}
+\Keywords{empirical likelihood, quantile regression, EM algorithm, right-censoring, location-scale model, \proglang{R}}
+\Plainkeywords{empirical likelihood, quantile regression, EM algorithm, right-censoring, location-scale model, R}
 
 %% publication information
 %% \Volume{50}
@@ -194,7 +194,7 @@ Here is the abstract.
 \maketitle
 
 % % \begin{abstract}
-% Here is the abstract.
+% This paper introduces \pkg{flexEL}, a fast and flexible framework for implementing and calibrating empirical likelihood models. In particular, it provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the ``Eigen'' linear algebra library. The package also provides functions for implementing right-censored regression models, where the inner optimization is conducted via an expectation-maximation algirithm. Users may interface with the library through \proglang{R} or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
 % \end{abstract}
 %
 \hypertarget{introduction}{%
@@ -480,7 +480,9 @@ The log smoothed censored EL (log SCEL) is then defined as
 \hypertarget{software-design-and-illustrations}{%
 \section{Software Design and Illustrations}\label{software-design-and-illustrations}}
 
-The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users. The package's source code is written as a header-only library in C++ using object-oriented programming, but it also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. In this section, we describe how a user can interact with the package either in C++ or \proglang{R}.
+The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users.
+
+The package's source code is written as a header-only library in C++ using object-oriented programming. The main class \texttt{GenEL} provides the core computations of weighted log empirical likelihood. \texttt{CensEL} class utilizes \texttt{GenEL} and contains the EM algorithm for right-censored EL computations. The package also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. This section describes how a user can interact with the package either in C++ or \proglang{R}.
 
 In terms of built-in models, \pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
 
@@ -494,24 +496,157 @@ as well as the common location model:
   y_i = \bm x_i'\bm \beta+ \varepsilon_i, \quad i=1,\cdots,n.
 \end{equation}
 
-Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the \texttt{G} matrix given the value of the parameters (called e.g.~\texttt{evalG}), or provide the calculation in C++ before wrapping into an \proglang{R} interface.
+Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the \texttt{G} matrix given the value of the parameters (call it e.g.~\texttt{evalG}), or implement the calculation in C++ before wrapping into an \proglang{R} interface.
 
 Several optimization routines are available in \proglang{R}. If analytic gradient of \texttt{G} with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to \texttt{G} via chain rule, a user can then utilize \texttt{optim} or \texttt{nlm} in \proglang{R} for parameter estimation with gradient-based methods.
 
 \hypertarget{mean-regression}{%
 \subsection{Mean Regression}\label{mean-regression}}
 
-TODO: show user how to use built-in mean regression in C++ (see example.cpp in flexEL.Rmd) ?
+In this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}.
+
+The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{// [[Rcpp::depends("flexEL")]]}
+\CommentTok{// [[Rcpp::depends("RcppEigen")]]}
+
+\PreprocessorTok{\#include }\ImportTok{\textless{}Rcpp.h\textgreater{}}
+\PreprocessorTok{\#include }\ImportTok{\textless{}RcppEigen.h\textgreater{}}
+\PreprocessorTok{\#include }\ImportTok{\textless{}flexEL/inner\_el.h\textgreater{}}
+\PreprocessorTok{\#include }\ImportTok{\textless{}flexEL/mean\_reg\_model.h\textgreater{}}
+
+\CommentTok{// [[Rcpp::export]]}
+\DataTypeTok{double}\NormalTok{ mr\_neglogel(Eigen::VectorXd beta,}
+\NormalTok{                   Eigen::VectorXd y,}
+\NormalTok{                   Eigen::MatrixXd X,}
+                   \DataTypeTok{bool}\NormalTok{ verbose) \{}
+\NormalTok{  flexEL::MeanRegModel MR(y, X); }\CommentTok{// initiate MeanRegModel object with data}
+  \DataTypeTok{int}\NormalTok{ n\_obs = MR.get\_n\_obs();}
+  \DataTypeTok{int}\NormalTok{ n\_eqs = MR.get\_n\_eqs();}
+\NormalTok{  MatrixXd G = MatrixXd::Zero(n\_eqs, n\_obs);}
+\NormalTok{  MR.EvalG(G, beta); }\CommentTok{// obtain G matrix given certain parameter values}
+\NormalTok{  flexEL::GenEL GEL(n\_obs, n\_eqs); }\CommentTok{// initiate GenEL object given dimensions}
+\NormalTok{  GEL.set\_supp\_adj(true); }\CommentTok{// turn on support correction}
+  \DataTypeTok{double}\NormalTok{ logel = GEL.logel(G); }\CommentTok{// obtain log EL}
+  \ControlFlowTok{if}\NormalTok{(verbose) \{}
+    \DataTypeTok{int}\NormalTok{ n\_iter;}
+    \DataTypeTok{double}\NormalTok{ max\_err;}
+\NormalTok{    GEL.get\_diag(n\_iter, max\_err); }\CommentTok{// get diagnostics}
+\NormalTok{    Rprintf(}\StringTok{"n\_iter = \%i, max\_err = \%f}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{, n\_iter, max\_err);}
+\NormalTok{  \}}
+  \ControlFlowTok{return}\NormalTok{({-}logel);}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+After sourcing the function into \proglang{R} with Rcpp, one can then use e.g.~\texttt{nlm} for negative log EL minimization. The following uses simulated data to illustrate this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ Rcpp}\SpecialCharTok{::}\FunctionTok{sourceCpp}\NormalTok{(}\StringTok{"mr\_neglogel.cpp"}\NormalTok{)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ bb }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n\_obs }\OtherTok{\textless{}{-}} \DecValTok{200}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n\_eqs }\OtherTok{\textless{}{-}} \DecValTok{2}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ X }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rnorm}\NormalTok{(n\_obs))}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ eps }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(n\_obs)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(X }\SpecialCharTok{\%*\%}\NormalTok{ bb }\SpecialCharTok{+}\NormalTok{ eps)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \CommentTok{\# mr\_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y, }\FunctionTok{t}\NormalTok{(X), }\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$minimum
+[1] 1065.964
+
+$estimate
+[1] 1.053295 1.984396
+
+$gradient
+[1]  5.612592e-05 -1.127475e-04
+
+$code
+[1] 1
+
+$iterations
+[1] 6
+\end{verbatim}
+
+If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{library}\NormalTok{(flexEL)}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_neg\_logel }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_neglogel }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
 \SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\FunctionTok{mr\_evalG}\NormalTok{(y, X, beta)}
 \SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G))}
 \SpecialCharTok{+}\NormalTok{  \}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(n\_obs, n\_eqs) }\CommentTok{\# initalize an GenEL object}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE} \CommentTok{\# turn on support correction}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y, X, gel)}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+$minimum
+[1] 1065.964
+
+$estimate
+[1] 1.053295 1.984396
+
+$gradient
+[1]  5.612592e-05 -1.127475e-04
+
+$code
+[1] 1
+
+$iterations
+[1] 6
+\end{verbatim}
+
+The usage is similar with right-censored outcomes, e.g.~using \proglang{R}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_neglogcel }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y\_obs, X, cel) \{}
+\SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\FunctionTok{mr\_evalG}\NormalTok{(y, X, beta)}
+\SpecialCharTok{+}    \SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G)}
+\SpecialCharTok{+}\NormalTok{  \}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{CensEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(n\_obs, n\_eqs)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{smooth }\OtherTok{\textless{}{-}} \ConstantTok{TRUE} \CommentTok{\# turn on continuity correction}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{smooth\_s }\OtherTok{\textless{}{-}} \DecValTok{1} \CommentTok{\# set tuning parameter for continuity correction}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ z }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{2}\SpecialCharTok{*}\FunctionTok{mean}\NormalTok{(y), }\AttributeTok{n =}\NormalTok{ n\_obs) }\CommentTok{\# censoring variable}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ delta }\OtherTok{\textless{}{-}}\NormalTok{ y }\SpecialCharTok{\textless{}=}\NormalTok{ z }\CommentTok{\# censoring indicators}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y\_obs }\OtherTok{\textless{}{-}}\NormalTok{ y}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y\_obs[}\SpecialCharTok{!}\NormalTok{delta] }\OtherTok{\textless{}{-}}\NormalTok{ z[}\SpecialCharTok{!}\NormalTok{delta]}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogcel, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), y\_obs, X, cel)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$minimum
+[1] 1065.964
+
+$estimate
+[1] 1.053295 1.984397
+
+$gradient
+[1]  1.597430e-05 -2.841603e-05
+
+$code
+[1] 1
+
+$iterations
+[1] 4
+\end{verbatim}
 
 \hypertarget{quantile-regression}{%
 \subsection{Quantile Regression}\label{quantile-regression}}
@@ -521,7 +656,7 @@ For the location-scale model \eqref{md:lsmod}, the \(\tau\times 100\%\) conditio
   Q_{\tau}(y_i|\bm x_i) = \bm x_i' \bm \beta+ \sigma\cdot\exp(\bm z_i' \bm \gamma)\cdot\nu_{\tau}.
 \end{equation}
 
-In this case, for parameters \(\bm \beta,\bm \gamma\) and \(\sigma\), we adopt the same estimating equation as in the mean regression case. For the quantile parameter \(\nu_{\tau}\), we rely on the ``check function" introduced by Koenker and Bassett Jr (1978), which is defined as
+In this case, for parameters \(\bm \beta,\bm \gamma\) and \(\sigma\), we adopt the same estimating equation as in the mean regression case. For the quantile parameter \(\nu_{\tau}\), we rely on the ``check function'' introduced by Koenker and Bassett Jr (1978), which is defined as
 \begin{equation}\label{eq:check}
 \rho_\tau(u) = u\cdot(\tau - \mathfrak 1 \{u \le 0\}),
 \end{equation}
@@ -542,18 +677,19 @@ As before, we use the first order optimality condition of (\ref{eq:nueq}) to obt
 \end{split}
 \end{equation}
 
-Notice that the indicator function used by the ``check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as C. Chen (2007), splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply. That is, we modify \eqref{eq:check} as follows:
+Notice that the indicator function used by the ``check function'' is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as C. Chen (2007), splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply here as well. That is, we modify \eqref{eq:check} as follows:
 
 \begin{equation}
-\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)).
+\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)),
 \end{equation}
+where \(S\) is defined as in \eqref{eq:sigmoid}.
 
-TODO: show user how to use this model in R?
+Usage of quantile regression in \pkg{flexEL} is very similar to mean regression in the last section. Moreover, one can simultaneously estimte parameters at multiple quantile levels both with the location and location-scale models. With the location model, both the intercept and the slope parameters can be different at different quantile levels. Essentially, the \texttt{G} matrix is obtained by stacking together multiple \texttt{G} matrices each at one quantile level. This is one advantage of quantile regression when heteroscedasticity presents. With the location-scale model, only the quantile parameter \(\nu_{\tau}\) is different at different quantile levels, since heteroscedasticity can be handled by the scale function.
 
 \hypertarget{user-defined-model}{%
 \subsection{User-defined Model}\label{user-defined-model}}
 
-The following example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
+The following toy example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
 \[
   y_i = \beta_0 + \beta_1x_i + \varepsilon_i, \quad i=1,\cdots,n,
 \]
@@ -567,18 +703,18 @@ In this example, the following estimating equation can be used, which has a rang
 \]
 which is
 \[
-  \sum_{i=1}^n w_i\cdot (y_i-x_i^T\beta)\cdot x_i = 0.
+  \sum_{i=1}^n w_i\cdot (y_i-x_i'\beta)\cdot x_i = 0.
 \]
 In other words, the \(g\) function is specified as
 \[
   g(x,y;\beta) = (y-x'\beta)\cdot x.
 \]
 
-This can be implemented in R (called \texttt{mr\_evalG}) as follows:
+This can be implemented in R (called \texttt{mr2\_evalG}) as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_evalG\_R }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, X, beta) \{}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr2\_evalG }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, X, beta) \{}
 \SpecialCharTok{+}\NormalTok{    tX }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(X)}
 \SpecialCharTok{+}\NormalTok{    yXb }\OtherTok{\textless{}{-}}\NormalTok{ y }\SpecialCharTok{{-}} \FunctionTok{c}\NormalTok{(X }\SpecialCharTok{\%*\%}\NormalTok{ beta)}
 \SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}} \FunctionTok{sweep}\NormalTok{(tX, }\AttributeTok{MARGIN =} \DecValTok{2}\NormalTok{, yXb, }\StringTok{\textasciigrave{}}\AttributeTok{*}\StringTok{\textasciigrave{}}\NormalTok{)}
@@ -591,18 +727,18 @@ With \pkg{flexEL}, the negative log EL can be implemented as:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_neglogel\_R }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
-\SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}} \FunctionTok{mr\_evalG\_R}\NormalTok{(y, X, beta)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr2\_neglogel }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
+\SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}} \FunctionTok{mr2\_evalG}\NormalTok{(y, X, beta)}
 \SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G))}
 \SpecialCharTok{+}\NormalTok{  \}}
 \end{Highlighting}
 \end{Shaded}
 
-One may also provide the gradient of \texttt{evalG} with respect to the parameters, in this case, it is
+One may also provide the gradient of \texttt{mr2\_evalG} with respect to the parameters, in this case, it is
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_dGdb\_R }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, X, beta) \{}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr2\_dGdb }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, X, beta) \{}
 \SpecialCharTok{+}\NormalTok{    lx }\OtherTok{\textless{}{-}} \FunctionTok{split}\NormalTok{(X, }\FunctionTok{row}\NormalTok{(X))}
 \SpecialCharTok{+}\NormalTok{    dg }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(lx, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{tcrossprod}\NormalTok{(x,x))}
 \SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(dg)}
@@ -614,11 +750,11 @@ Notice that here the gradient is a 3-dimensional matrix. This can then be combin
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_neglogel\_grad\_R }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
-\SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}} \FunctionTok{mr\_evalG\_R}\NormalTok{(y, X, beta)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr2\_neglogel\_grad }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
+\SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}} \FunctionTok{mr2\_evalG}\NormalTok{(y, X, beta)}
 \SpecialCharTok{+}\NormalTok{    logel\_lst }\OtherTok{\textless{}{-}}\NormalTok{ gel}\SpecialCharTok{$}\FunctionTok{logel\_grad}\NormalTok{(G)}
 \SpecialCharTok{+}\NormalTok{    dldG }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\NormalTok{logel\_lst}\SpecialCharTok{$}\NormalTok{dldG}
-\SpecialCharTok{+}\NormalTok{    dGdb }\OtherTok{\textless{}{-}} \FunctionTok{mr\_dGdb\_R}\NormalTok{(y, X, beta)}
+\SpecialCharTok{+}\NormalTok{    dGdb }\OtherTok{\textless{}{-}} \FunctionTok{mr2\_dGdb}\NormalTok{(y, X, beta)}
 \SpecialCharTok{+}\NormalTok{    grad\_mat }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\ConstantTok{NA}\NormalTok{, }\AttributeTok{nrow =} \FunctionTok{nrow}\NormalTok{(dldG), }\AttributeTok{ncol =} \FunctionTok{ncol}\NormalTok{(dldG))}
 \SpecialCharTok{+}    \ControlFlowTok{for}\NormalTok{ (ii }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(dldG)) \{}
 \SpecialCharTok{+}\NormalTok{      grad\_mat[ii,] }\OtherTok{\textless{}{-}}\NormalTok{ dGdb[[ii]] }\SpecialCharTok{\%*\%}\NormalTok{ dldG[ii,]}
@@ -635,14 +771,16 @@ Then one can use e.g.~\texttt{optim} to obtain the estimate of \(\beta\):
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{library}\NormalTok{(flexEL)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \CommentTok{\# simulate some data}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n }\OtherTok{\textless{}{-}} \DecValTok{500}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n }\OtherTok{\textless{}{-}} \DecValTok{200}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ X }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rnorm}\NormalTok{(n))}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ beta0 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ eps }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{rchisq}\NormalTok{(n, }\AttributeTok{df=}\DecValTok{5}\NormalTok{)}\SpecialCharTok{{-}}\DecValTok{5}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sqrt}\NormalTok{(}\DecValTok{2}\SpecialCharTok{*}\DecValTok{5}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(X }\SpecialCharTok{\%*\%}\NormalTok{ beta0) }\SpecialCharTok{+}\NormalTok{ eps}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{optim}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{), }\AttributeTok{fn =}\NormalTok{ mr\_neglogel\_R, }\AttributeTok{gr =}\NormalTok{ mr\_neglogel\_grad\_R,}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{optim}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{), }\AttributeTok{fn =}\NormalTok{ mr2\_neglogel, }\AttributeTok{gr =}\NormalTok{ mr2\_neglogel\_grad,}
 \SpecialCharTok{+}\NormalTok{        y, X, gel, }\AttributeTok{method =} \StringTok{"BFGS"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -652,11 +790,11 @@ $par
 [1] 0.5 2.5
 
 $value
-[1] 3301.447
+[1] 1105.29
 
 $counts
 function gradient
-      27        1
+      25        1
 
 $convergence
 [1] 0
@@ -664,6 +802,8 @@ $convergence
 $message
 NULL
 \end{verbatim}
+
+Alternatively, a user can implement the \texttt{G} matrix and gradient calculations in C++ and follows the example in the mean regression section where instead of including \texttt{flexEL/mean\_reg\_model.h}, include the user defined C++ header file.
 
 \hypertarget{bayesian-el}{%
 \subsection{Bayesian EL}\label{bayesian-el}}
@@ -676,13 +816,8 @@ NULL
 \end{itemize}
 
 \hypertarget{conclusion}{%
-\section{Conclusion}\label{conclusion}}
-
-\begin{itemize}
-\tightlist
-\item
-  Everything below here are just tests for using JSS Markdown.
-\end{itemize}
+\section*{Conclusion}\label{conclusion}}
+\addcontentsline{toc}{section}{Conclusion}
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}

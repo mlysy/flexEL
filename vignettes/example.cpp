@@ -16,7 +16,6 @@ double example_logel(Eigen::VectorXd beta,
   int n_eqs = MR.get_n_eqs();
   MatrixXd G = MatrixXd::Zero(MR.get_n_eqs(), MR.get_n_obs());
   MR.EvalG(G, beta);
-  // std::cout << "G = \n" << G << std::endl;
   flexEL::GenEL GEL(n_obs, n_eqs);
   GEL.set_supp_adj(true); // turn on support correction
   double logel = GEL.logel(G);
