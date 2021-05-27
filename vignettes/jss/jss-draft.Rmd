@@ -442,12 +442,11 @@ cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
 After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
 ```{r, warn=FALSE, include=TRUE, eval=TRUE}
 Rcpp::sourceCpp("mr_neglogel.cpp")
-bb <- c(1,2)
-n_obs <- 200
-n_eqs <- 2
-X <- cbind(1, rnorm(n_obs))
-eps <- rnorm(n_obs)
-y <- c(X %*% bb + eps)
+beta0 <- c(1,2)
+n <- 200
+X <- cbind(1, rnorm(n))
+eps <- rnorm(n)
+y <- c(X %*% beta0 + eps)
 # mr_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)
 nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
 ```
@@ -461,7 +460,7 @@ mr_neglogel <- function(beta, y, X, gel) {
   return(-gel$logel(G))
 }
 
-gel <- flexEL::GenEL$new(n_obs, n_eqs) # initalize an GenEL object
+gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initalize an GenEL object
 gel$supp_adj <- TRUE # turn on support correction
 
 nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
@@ -473,17 +472,17 @@ mr_neglogcel <- function(beta, y_obs, X, cel) {
   -gel$logel(G)
 }
 
-cel <- flexEL::CensEL$new(n_obs, n_eqs)
+cel <- flexEL::CensEL$new(n_obs = n, n_eqs = 2)
 cel$supp_adj <- TRUE
 cel$smooth <- TRUE # turn on continuity correction
 cel$smooth_s <- 1 # set tuning parameter for continuity correction
 
-z <- rnorm(2*mean(y), n = n_obs) # censoring variable
+z <- rnorm(2*mean(y), n = n) # censoring variable
 delta <- y <= z # censoring indicators
 y_obs <- y
 y_obs[!delta] <- z[!delta]
 
-nlm(mr_neglogcel, c(1,2), y_obs, X, cel)
+nlm(mr_neglogcel, c(0.75, 1.25), y_obs, X, cel)
 ```
 
 <!-- - Show users how to create their own `Gfun` and use this from \proglang{R}.   -->
@@ -572,7 +571,7 @@ One may also provide the gradient of `mr2_evalG` with respect to the parameters,
 ```{r, echo=TRUE, eval=TRUE}
 mr2_dGdb <- function(y, X, beta) {
   lx <- split(X, row(X))
-  dg <- lapply(lx, function(x) tcrossprod(x,x))
+  dg <- lapply(lx, function(x) -tcrossprod(x,x))
   return(dg)
 }
 ```
@@ -606,7 +605,7 @@ y <- c(X %*% beta0) + eps
 gel <- GenEL$new(n_obs = n, n_eqs = 2)
 gel$supp_adj <- TRUE
 
-optim(c(0.5,2.5), fn = mr2_neglogel, gr = mr2_neglogel_grad,
+optim(c(0.75, 1.25), fn = mr2_neglogel, gr = mr2_neglogel_grad,
       y, X, gel, method = "BFGS")
 ```
 

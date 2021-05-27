@@ -546,12 +546,11 @@ After sourcing the function into \proglang{R} with Rcpp, one can then use e.g.~\
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ Rcpp}\SpecialCharTok{::}\FunctionTok{sourceCpp}\NormalTok{(}\StringTok{"mr\_neglogel.cpp"}\NormalTok{)}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ bb }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n\_obs }\OtherTok{\textless{}{-}} \DecValTok{200}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n\_eqs }\OtherTok{\textless{}{-}} \DecValTok{2}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ X }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rnorm}\NormalTok{(n\_obs))}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ eps }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(n\_obs)}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(X }\SpecialCharTok{\%*\%}\NormalTok{ bb }\SpecialCharTok{+}\NormalTok{ eps)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ beta0 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n }\OtherTok{\textless{}{-}} \DecValTok{200}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ X }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rnorm}\NormalTok{(n))}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ eps }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(n)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(X }\SpecialCharTok{\%*\%}\NormalTok{ beta0 }\SpecialCharTok{+}\NormalTok{ eps)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \CommentTok{\# mr\_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y, }\FunctionTok{t}\NormalTok{(X), }\ConstantTok{FALSE}\NormalTok{)}
 \end{Highlighting}
@@ -562,16 +561,16 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 1.053295 1.984396
+[1] 0.9726822 1.9760279
 
 $gradient
-[1]  5.612592e-05 -1.127475e-04
+[1]  0.0003144578 -0.0001304849
 
 $code
 [1] 1
 
 $iterations
-[1] 6
+[1] 8
 \end{verbatim}
 
 If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
@@ -584,7 +583,7 @@ If a user wishes not to use the C++ API directly, they can write a similar funct
 \SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G))}
 \SpecialCharTok{+}\NormalTok{  \}}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(n\_obs, n\_eqs) }\CommentTok{\# initalize an GenEL object}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{) }\CommentTok{\# initalize an GenEL object}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE} \CommentTok{\# turn on support correction}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y, X, gel)}
@@ -596,16 +595,16 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 1.053295 1.984396
+[1] 0.9726822 1.9760279
 
 $gradient
-[1]  5.612592e-05 -1.127475e-04
+[1]  0.0003144578 -0.0001304849
 
 $code
 [1] 1
 
 $iterations
-[1] 6
+[1] 8
 \end{verbatim}
 
 The usage is similar with right-censored outcomes, e.g.~using \proglang{R}:
@@ -617,17 +616,17 @@ The usage is similar with right-censored outcomes, e.g.~using \proglang{R}:
 \SpecialCharTok{+}    \SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G)}
 \SpecialCharTok{+}\NormalTok{  \}}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{CensEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(n\_obs, n\_eqs)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{CensEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{smooth }\OtherTok{\textless{}{-}} \ConstantTok{TRUE} \CommentTok{\# turn on continuity correction}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{smooth\_s }\OtherTok{\textless{}{-}} \DecValTok{1} \CommentTok{\# set tuning parameter for continuity correction}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ z }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{2}\SpecialCharTok{*}\FunctionTok{mean}\NormalTok{(y), }\AttributeTok{n =}\NormalTok{ n\_obs) }\CommentTok{\# censoring variable}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ z }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{2}\SpecialCharTok{*}\FunctionTok{mean}\NormalTok{(y), }\AttributeTok{n =}\NormalTok{ n) }\CommentTok{\# censoring variable}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ delta }\OtherTok{\textless{}{-}}\NormalTok{ y }\SpecialCharTok{\textless{}=}\NormalTok{ z }\CommentTok{\# censoring indicators}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y\_obs }\OtherTok{\textless{}{-}}\NormalTok{ y}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y\_obs[}\SpecialCharTok{!}\NormalTok{delta] }\OtherTok{\textless{}{-}}\NormalTok{ z[}\SpecialCharTok{!}\NormalTok{delta]}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogcel, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), y\_obs, X, cel)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogcel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y\_obs, X, cel)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -636,16 +635,16 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 1.053295 1.984397
+[1] 0.9726822 1.9760279
 
 $gradient
-[1]  1.597430e-05 -2.841603e-05
+[1]  0.0003144578 -0.0001304849
 
 $code
 [1] 1
 
 $iterations
-[1] 4
+[1] 8
 \end{verbatim}
 
 \hypertarget{quantile-regression}{%
@@ -740,7 +739,7 @@ One may also provide the gradient of \texttt{mr2\_evalG} with respect to the par
 \begin{Highlighting}[]
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr2\_dGdb }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, X, beta) \{}
 \SpecialCharTok{+}\NormalTok{    lx }\OtherTok{\textless{}{-}} \FunctionTok{split}\NormalTok{(X, }\FunctionTok{row}\NormalTok{(X))}
-\SpecialCharTok{+}\NormalTok{    dg }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(lx, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{tcrossprod}\NormalTok{(x,x))}
+\SpecialCharTok{+}\NormalTok{    dg }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(lx, }\ControlFlowTok{function}\NormalTok{(x) }\SpecialCharTok{{-}}\FunctionTok{tcrossprod}\NormalTok{(x,x))}
 \SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(dg)}
 \SpecialCharTok{+}\NormalTok{  \}}
 \end{Highlighting}
@@ -780,21 +779,21 @@ Then one can use e.g.~\texttt{optim} to obtain the estimate of \(\beta\):
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{optim}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{), }\AttributeTok{fn =}\NormalTok{ mr2\_neglogel, }\AttributeTok{gr =}\NormalTok{ mr2\_neglogel\_grad,}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{optim}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), }\AttributeTok{fn =}\NormalTok{ mr2\_neglogel, }\AttributeTok{gr =}\NormalTok{ mr2\_neglogel\_grad,}
 \SpecialCharTok{+}\NormalTok{        y, X, gel, }\AttributeTok{method =} \StringTok{"BFGS"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
 $par
-[1] 0.5 2.5
+[1] 0.8961717 1.9952144
 
 $value
-[1] 1105.29
+[1] 1065.964
 
 $counts
 function gradient
-      25        1
+      37        8
 
 $convergence
 [1] 0
