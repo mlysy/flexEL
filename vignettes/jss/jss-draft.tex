@@ -149,7 +149,7 @@ Here is the abstract.
 
 % %   \title{true}
 %   % % % %   \author{true \\ true}
-%   % % %   %   \date{2021-05-24}
+%   % % %   %   \date{2021-05-27}
 %
 \usepackage{caption}
 \captionsetup[table]{skip=.1em}
@@ -202,7 +202,7 @@ Here is the abstract.
 
 Empirical likelihood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric family of the data, the estimator is in some sense as efficient as a fully parametric model (Qin and Lawless 1994).
 
-The empirical likelihood (EL) approach can be traced back to Thomas and Grunkemeier (1975). Its current framework is mainly developed by Owen (1988), Owen (1990), and Owen (1991), where empirical likelihood ratio statistics is introduced, and the EL method is extended to linear regression models under fixed or random design. Kolaczyk (1994) further generalize the method to be used with generalized linear models. Qin and Lawless (1994) relate estimating equation and empirical likelihood and provide asymptotic properties of the estimator. Chen, Variyath, and Abraham (2008) propose an adjustment to the constraints in the EL framework to ensure the convex hall condition is always satisfied and the theoretical properties are not affected. Moreover, Lazar (2003) explores the validity of using empirical likelihood for Bayesian inference as well as the frequentist properties of the posterior intervals. Chaudhuri, Mondal, and Yin (2017) considers using Hamiltonian Monte Carlo sampling for the Bayesian EL models.
+The empirical likelihood (EL) approach can be traced back to Thomas and Grunkemeier (1975). Its current framework is mainly developed by Owen (1988), Owen (1990), and Owen (1991), where empirical likelihood ratio statistics is introduced, and the EL method is extended to linear regression models under fixed or random design. Kolaczyk (1994) further generalize the method to be used with generalized linear models. Qin and Lawless (1994) relate estimating equation and empirical likelihood and provide asymptotic properties of the estimator. J. Chen, Variyath, and Abraham (2008) propose an adjustment to the constraints in the EL framework to ensure the convex hall condition is always satisfied and the theoretical properties are not affected. Moreover, Lazar (2003) explores the validity of using empirical likelihood for Bayesian inference as well as the frequentist properties of the posterior intervals. Chaudhuri, Mondal, and Yin (2017) considers using Hamiltonian Monte Carlo sampling for the Bayesian EL models.
 
 An approach related to EL is the so-called exponentially tilting (ET) method (Efron 1981). Schennach (2005), and Schennach (2007) propose the exponentially tilted empirical likelihood (ELET) approach, which enjoys the properties of both ET and EL methods. Newey and Smith (2004) also gives the theoretical results relating Generalized Method of Moment (GMM) and Generalized Empirical Likelihood (GEL), their higher order properties, as well as their bias-corrected forms in the absence of length-bias.
 
@@ -210,9 +210,9 @@ For EL with length-biased data, Zhou (2005) proposes an EM algorithm for censore
 
 Given fully observed data, an asymptotic \(\chi^2\) distribution of log EL is valid. When right-censoring is present, the asymptotic distribution is no longer a standard \(\chi^2\) distribution but subject to an unknown scaling factor. He et al. (2016) consider using a special influence functions in the estimating equations to retain a standard \(\chi^2\) distribution. Li and Wang (2003) propose an adjusted EL for linear regression using synthetic data approach. Ning et al. (2013) consider length-biased right-censored data in a non-regression setting for the estimation of mean, quantile and survival function of the population as well as confidence intervals.
 
-Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing softwares are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g.~\pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
+Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing software are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g.~\pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
 
-This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the Newton--Raphson algorithm which is a key step in the EL inner optimization problem. Other than the main functionality of reglular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
+This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the Newton--Raphson algorithm which is a key step in the EL inner optimization problem. Other than the main functionality of regular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
 
 \hypertarget{methodology}{%
 \section{Methodology}\label{methodology}}
@@ -291,7 +291,7 @@ where \(Q = \sum_{i=1}^n q_i\).
 \hypertarget{support-correction}{%
 \subsection{Support Correction}\label{support-correction}}
 
-Let \(g_i = g(\bm x_i;\bm \theta)\) for \(i = 1,\cdots, n\). As mentioned above, a necessary condition of obtaining a unique optimal solution is that \(\bm 0\) is in the convex full of the points \(g_1,\cdots,g_n\) which may not be satisfied with the data. Chen, Variyath, and Abraham (2008) proposes a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+Let \(g_i = g(\bm x_i;\bm \theta)\) for \(i = 1,\cdots, n\). As mentioned above, a necessary condition of obtaining a unique optimal solution is that \(\bm 0\) is in the convex full of the points \(g_1,\cdots,g_n\) which may not be satisfied with the data. J. Chen, Variyath, and Abraham (2008) propose a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
 
 \begin{equation} \label{eq:noncensoptadj}
 \begin{split}
@@ -304,7 +304,7 @@ Let \(g_i = g(\bm x_i;\bm \theta)\) for \(i = 1,\cdots, n\). As mentioned above,
 
 where \(g_{n+1} = -\frac{a_n}{n} \sum_{i=1}^n g_i\) for some small positive \(a_n\).
 
-It is also shown by Chen, Variyath, and Abraham (2008) that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions.
+It is also shown by J. Chen, Variyath, and Abraham (2008) that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions.
 
 \hypertarget{regression-with-right-censored-outcome}{%
 \subsection{Regression with Right-Censored Outcome}\label{regression-with-right-censored-outcome}}
@@ -477,39 +477,44 @@ The log smoothed censored EL (log SCEL) is then defined as
     (1-\delta_i)\log(\sum_{j=1}^n S_{ij}(\bm \theta;s)\cdot w_j(\bm \theta))\Bigr].
 \end{equation}
 
-\hypertarget{illustrations}{%
-\section{Illustrations}\label{illustrations}}
+\hypertarget{software-design-and-illustrations}{%
+\section{Software Design and Illustrations}\label{software-design-and-illustrations}}
 
-\begin{itemize}
-\item
-  We have a bunch of these: quantile vs mean regression, and location vs location-scale.
-\item
-  Censoring as well.
-\end{itemize}
+The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users. The package's source code is written as a header-only library in C++ using object-oriented programming, but it also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. In this section, we describe how a user can interact with the package either in C++ or \proglang{R}.
 
-\pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
+In terms of built-in models, \pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
 
 \begin{equation} \label{md:lsmod}
-  y_i = \bm x_i'\bm \beta+ \sigma\cdot\exp(\bm z_i'\bm \gamma)\cdot\varepsilon_i, \quad i=1,\cdots,n.
+  y_i = \bm x_i'\bm \beta+ \sigma\cdot\exp(\bm z_i'\bm \gamma)\cdot\varepsilon_i, \quad i=1,\cdots,n,
 \end{equation}
 
-Users can also leverage the EL calculation for customized models specified by estimating equations. In this case, a user can either create a function in \proglang{R} that returns the \texttt{G} matrix given the value of the parameters (called e.g.~\texttt{evalG}), or provide the calculation in C++ before wrapping into an \proglang{R} interface.
+as well as the common location model:
+
+\begin{equation} \label{md:lmod}
+  y_i = \bm x_i'\bm \beta+ \varepsilon_i, \quad i=1,\cdots,n.
+\end{equation}
+
+Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the \texttt{G} matrix given the value of the parameters (called e.g.~\texttt{evalG}), or provide the calculation in C++ before wrapping into an \proglang{R} interface.
 
 Several optimization routines are available in \proglang{R}. If analytic gradient of \texttt{G} with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to \texttt{G} via chain rule, a user can then utilize \texttt{optim} or \texttt{nlm} in \proglang{R} for parameter estimation with gradient-based methods.
 
 \hypertarget{mean-regression}{%
 \subsection{Mean Regression}\label{mean-regression}}
 
-TODO: show user how to use built-in mean regression.
+TODO: show user how to use built-in mean regression in C++ (see example.cpp in flexEL.Rmd) ?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{library}\NormalTok{(flexEL)}
+\NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ mr\_neg\_logel }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(beta, y, X, gel) \{}
+\SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\FunctionTok{mr\_evalG}\NormalTok{(y, X, beta)}
+\SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G))}
+\SpecialCharTok{+}\NormalTok{  \}}
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{quantile-regression}{%
 \subsection{Quantile Regression}\label{quantile-regression}}
-
-\begin{itemize}
-\tightlist
-\item
-  What it is, smoothness correction, present built-in function for this.
-\end{itemize}
 
 For the location-scale model \eqref{md:lsmod}, the \(\tau\times 100\%\) conditional quantile of \(y_i\) is
 \begin{equation} \label{eq:lsqr}
@@ -536,6 +541,14 @@ As before, we use the first order optimality condition of (\ref{eq:nueq}) to obt
   \textrm{E}\Bigl[\rho'_{\tau}\bigl(\frac{y-\bm x'\bm \beta}{\sigma\cdot\exp(\bm z'\bm \gamma)}-\nu_{\tau}\bigr)\Bigr] &= 0.
 \end{split}
 \end{equation}
+
+Notice that the indicator function used by the ``check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as C. Chen (2007), splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply. That is, we modify \eqref{eq:check} as follows:
+
+\begin{equation}
+\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)).
+\end{equation}
+
+TODO: show user how to use this model in R?
 
 \hypertarget{user-defined-model}{%
 \subsection{User-defined Model}\label{user-defined-model}}
@@ -639,7 +652,7 @@ $par
 [1] 0.5 2.5
 
 $value
-[1] 3260.748
+[1] 3301.447
 
 $counts
 function gradient
@@ -675,6 +688,9 @@ NULL
 \begin{CSLReferences}{1}{0}
 \leavevmode\hypertarget{ref-chaudhuri-et-al2017}{}%
 Chaudhuri, Sanjay, Debashis Mondal, and Teng Yin. 2017. {``Hamiltonian Monte Carlo Sampling in Bayesian Empirical Likelihood Computation.''} \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)} 79 (1): 293--320.
+
+\leavevmode\hypertarget{ref-chen2007}{}%
+Chen, Colin. 2007. {``A Finite Smoothing Algorithm for Quantile Regression.''} \emph{Journal of Computational and Graphical Statistics} 16 (1): 136--64.
 
 \leavevmode\hypertarget{ref-chen-et-al2008}{}%
 Chen, Jiahua, Asokan Mulayath Variyath, and Bovas Abraham. 2008. {``Adjusted Empirical Likelihood and Its Properties.''} \emph{Journal of Computational and Graphical Statistics} 17 (2): 426--43.

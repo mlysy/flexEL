@@ -221,7 +221,7 @@ where $Q = \sum_{i=1}^n q_i$.
 
 ## Support Correction
 
-Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 proposes a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 propose a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
 
 \begin{equation} \label{eq:noncensoptadj}
 \begin{split}
@@ -408,33 +408,47 @@ The log smoothed censored EL (log SCEL) is then defined as
     (1-\delta_i)\log(\sum_{j=1}^n S_{ij}(\tth;s)\cdot w_j(\tth))\Bigr].
 \end{equation}
 
-# Illustrations
+# Software Design and Illustrations
 
-- We have a bunch of these: quantile vs mean regression, and location vs location-scale.
+<!-- - We have a bunch of these: quantile vs mean regression, and location vs location-scale. -->
 
-- Censoring as well.
+<!-- - Censoring as well. -->
 
-\pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
+The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users. The package's source code is written as a header-only library in C++ using object-oriented programming, but it also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. In this section, we describe how a user can interact with the package either in C++ or \proglang{R}.
+
+In terms of built-in models, \pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
 
 \begin{equation} \label{md:lsmod}
-  y_i = \xx_i'\bbe + \s\cdot\exp(\zz_i'\gga)\cdot\e_i, \quad i=1,\cdots,n.
+  y_i = \xx_i'\bbe + \s\cdot\exp(\zz_i'\gga)\cdot\e_i, \quad i=1,\cdots,n,
 \end{equation}
 
-Users can also leverage the EL calculation for customized models specified by estimating equations. In this case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (called e.g. `evalG`), or provide the calculation in C++ before wrapping into an \proglang{R} interface. 
+as well as the common location model:
+
+\begin{equation} \label{md:lmod}
+  y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.
+\end{equation}
+
+Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (called e.g. `evalG`), or provide the calculation in C++ before wrapping into an \proglang{R} interface. 
 
 Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to `G` via chain rule, a user can then utilize `optim` or `nlm` in \proglang{R} for parameter estimation with gradient-based methods.
 
 ## Mean Regression
 
-TODO: show user how to use built-in mean regression.
+TODO: show user how to use built-in mean regression in C++ (see example.cpp in flexEL.Rmd) ?
+
+```{r, echo=TRUE, eval=TRUE}
+library(flexEL)
+mr_neg_logel <- function(beta, y, X, gel) {
+  G <- flexEL::mr_evalG(y, X, beta)
+  return(-gel$logel(G))
+}
+```
 
 <!-- - Show users how to create their own `Gfun` and use this from \proglang{R}.   -->
 
 <!-- - Can include gradient-based optimization here as well.  I suggest to use `optim(method = "BFGS")` for optimization, not `nlm()` (it's just more complicated/annoying).  I would say use `nlminb()` which is way faster than `optim()`, but for some reason R Core suggests to use the other optimizers instead... -->
 
 ## Quantile Regression
-
-- What it is, smoothness correction, present built-in function for this.
 
 For the location-scale model \eqref{md:lsmod}, the $\tau\times 100\%$ conditional quantile of $y_i$ is
 \begin{equation} \label{eq:lsqr}
@@ -461,6 +475,14 @@ As before, we use the first order optimality condition of (\ref{eq:nueq}) to obt
   \E\Bigl[\rho'_{\tau}\bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\gga)}-\nu_{\tau}\bigr)\Bigr] &= 0.
 \end{split}
 \end{equation}
+
+Notice that the indicator function used by the ``check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as @chen2007, splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply. That is, we modify \eqref{eq:check} as follows:
+
+\begin{equation}
+\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)).
+\end{equation}
+
+TODO: show user how to use this model in R?
 
 ## User-defined Model
 
