@@ -218,7 +218,7 @@ test_that("logel with given convergence settings and support correction", {
 test_that("dldG with default settings", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
-    p <- sample(1:(n-2), 1)
+    p <- sample(1:2, 1)
     gel <- GenEL$new(n, p)
     G <- matrix(rnorm(n*p),n,p)
     dldG_cpp <- gel$logel_grad(G)$dldG
@@ -237,7 +237,7 @@ test_that("dldG with default settings", {
 test_that("dldG with given convergence settings", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
-    p <- sample(1:(n-2), 1)
+    p <- sample(1:2, 1)
     max_iter <- sample(c(100, 200, 500), 1)
     rel_tol <- runif(1, 1e-6, 1e-2)
     gel <- GenEL$new(n, p)
@@ -263,7 +263,7 @@ test_that("dldG with given convergence settings", {
 test_that("dldG with given convergence settings and support correction", {
   for (ii in 1:ntest) {
     n <- sample(10:20,1)
-    p <- sample(1:(n-2), 1)
+    p <- sample(1:2, 1)
     max_iter <- sample(c(100, 200, 500), 1)
     rel_tol <- runif(1, 1e-5, 1e-3)
     adj_a <- runif(1, 1, 5)
