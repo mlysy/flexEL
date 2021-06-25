@@ -6,7 +6,7 @@
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include "inner_elc.h"
+#include "cens_el.h"
 
 //[[Rcpp::depends("RcppEigen")]]
 

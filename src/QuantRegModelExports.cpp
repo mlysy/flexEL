@@ -6,7 +6,7 @@
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include "inner_el.h"
+#include "gen_el.h"
 #include "quant_reg_model.h"
 
 //[[Rcpp::depends("RcppEigen")]]

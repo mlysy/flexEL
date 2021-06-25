@@ -1,7 +1,7 @@
-/// @file inner_el.h
+/// @file gen_el.h
 
-#ifndef INNER_EL_H
-#define INNER_EL_H
+#ifndef GEN_EL_H
+#define GEN_EL_H
 
 // #include <Rcpp.h>
 #include <RcppEigen.h>

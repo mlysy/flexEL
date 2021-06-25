@@ -4,8 +4,8 @@
  * @brief A base class for template classes InnerEL and InnerELC.
  */
 
-#ifndef QUANT_REG_MODEL_h
-#define QUANT_REG_MODEL_h
+#ifndef QUANT_REG_MODEL_H
+#define QUANT_REG_MODEL_H
 
 #include "ind_smooth.h"
 

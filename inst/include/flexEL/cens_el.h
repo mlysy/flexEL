@@ -1,10 +1,10 @@
-/// @file inner_elc.h
+/// @file cens_el.h
 
-#ifndef INNER_ELC_H
-#define INNER_ELC_H
+#ifndef CENS_EL_H
+#define CENS_EL_H
 
 #include <RcppEigen.h>
-#include "inner_el.h"
+#include "gen_el.h"
 #include "sort_order.h"
 #include "ind_smooth.h" 
 
