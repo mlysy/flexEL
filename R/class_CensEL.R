@@ -1,6 +1,6 @@
-#' Constructor and methods for EL regression where responses are under right censoring.
+#' @title Right-censored regression EL class.
 #' 
-#' R6 class for EL regression with right-censored responses.
+#' @description R6 class for EL regression with right-censored responses.
 #' 
 #' @export
 CensEL <- R6::R6Class(

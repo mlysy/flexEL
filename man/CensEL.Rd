@@ -2,13 +2,8 @@
 % Please edit documentation in R/class_CensEL.R
 \name{CensEL}
 \alias{CensEL}
-\title{Constructor and methods for EL regression where responses are under right censoring.}
+\title{Right-censored regression EL class.}
 \description{
-Constructor and methods for EL regression where responses are under right censoring.
-
-Constructor and methods for EL regression where responses are under right censoring.
-}
-\details{
 R6 class for EL regression with right-censored responses.
 }
 \section{Active bindings}{

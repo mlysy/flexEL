@@ -2,13 +2,8 @@
 % Please edit documentation in R/class_GenEL.R
 \name{GenEL}
 \alias{GenEL}
-\title{Constructor and methods for general EL objects.}
+\title{General EL objects}
 \description{
-Constructor and methods for general EL objects.
-
-Constructor and methods for general EL objects.
-}
-\details{
 R6 class for EL with general moment specification.
 }
 \section{Active bindings}{

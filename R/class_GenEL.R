@@ -1,6 +1,6 @@
-#' Constructor and methods for general EL objects.
+#' @title General EL objects
 #'
-#' R6 class for EL with general moment specification.
+#' @description R6 class for EL with general moment specification.
 #'
 #' @export
 GenEL <- R6::R6Class(
