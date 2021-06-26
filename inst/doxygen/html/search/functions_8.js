@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['omegahat',['OmegaHat',['../inner__el__exports_8cpp.html#a3027495066e62448cfc11ed44e3aa536',1,'inner_el_exports.cpp']]],
-  ['omegahatem',['OmegaHatEM',['../inner__elc__exports_8cpp.html#a95cf5bf8d4bb6acb579884fc2e78110b',1,'inner_elc_exports.cpp']]],
-  ['omegahatemsmooth',['OmegaHatEMSmooth',['../inner__elc__exports_8cpp.html#ad26c123e15e400bd8fd808cd0fd52ea1',1,'inner_elc_exports.cpp']]],
-  ['operator_28_29',['operator()',['../classflex_e_l_1_1compare__acc__vec.html#aa0fcedf513fe1391fc5c6c24d2a0ec1c',1,'flexEL::compare_acc_vec']]]
+  ['quantregmodel',['QuantRegModel',['../classflex_e_l_1_1_quant_reg_model.html#afaa106e9a62440d1afc090e8f9543ad1',1,'flexEL::QuantRegModel::QuantRegModel()'],['../classflex_e_l_1_1_quant_reg_model.html#a1621f71616bf2f44b0340610b59252c5',1,'flexEL::QuantRegModel::QuantRegModel(int n_obs, int n_eqs)'],['../classflex_e_l_1_1_quant_reg_model.html#a2b5d4f1132ea844b2d48340a72949375',1,'flexEL::QuantRegModel::QuantRegModel(const Ref&lt; const VectorXd &gt; &amp;y, const Ref&lt; const MatrixXd &gt; &amp;X, void *params)'],['../classflex_e_l_1_1_quant_reg_model.html#ac1d79c3b00413ab24dbd00839254f8df',1,'flexEL::QuantRegModel::QuantRegModel(const Ref&lt; const VectorXd &gt; &amp;y, const Ref&lt; const MatrixXd &gt; &amp;X, const Ref&lt; const MatrixXd &gt; &amp;Z, void *params)']]]
 ];

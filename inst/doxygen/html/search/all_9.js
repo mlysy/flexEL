@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['n_5feqs_5f',['n_eqs_',['../classflex_e_l_1_1_mean_reg_model.html#a374ed4ae05fdaff6e2872ed8bf25c367',1,'flexEL::MeanRegModel::n_eqs_()'],['../classflex_e_l_1_1_quant_reg_model.html#a217788036a93b67201733f6accbae445',1,'flexEL::QuantRegModel::n_eqs_()']]],
-  ['n_5fobs_5f',['n_obs_',['../classflex_e_l_1_1_mean_reg_model.html#a32e77dc0186b6e70b749c85ce7a27c67',1,'flexEL::MeanRegModel::n_obs_()'],['../classflex_e_l_1_1_quant_reg_model.html#a239a1c9812804c7c854b0daef7483475',1,'flexEL::QuantRegModel::n_obs_()']]]
+  ['omega_5fhat',['omega_hat',['../classflex_e_l_1_1_cens_e_l.html#a7122eea074ca3840fa3962cc65882d59',1,'flexEL::CensEL::omega_hat()'],['../classflex_e_l_1_1_gen_e_l.html#a74eb2088f2a4593d6fc8663c66e1fd90',1,'flexEL::GenEL::omega_hat()']]],
+  ['operator_28_29',['operator()',['../classflex_e_l_1_1compare__acc__vec.html#aa0fcedf513fe1391fc5c6c24d2a0ec1c',1,'flexEL::compare_acc_vec']]]
 ];

@@ -1,4 +1,28 @@
 var searchData=
 [
-  ['flexel',['flexEL',['../namespaceflex_e_l.html',1,'']]]
+  ['gen_5fel_2eh',['gen_el.h',['../gen__el_8h.html',1,'']]],
+  ['genel',['GenEL',['../classflex_e_l_1_1_gen_e_l.html',1,'flexEL::GenEL'],['../classflex_e_l_1_1_gen_e_l.html#a8697dec53901849fc85bd2875057784e',1,'flexEL::GenEL::GenEL()']]],
+  ['genel_5fctor',['GenEL_ctor',['../_gen_e_l_exports_8cpp.html#a8ee396be606fae9f6be4b9aba283d7dd',1,'GenELExports.cpp']]],
+  ['genel_5fget_5fn_5feqs',['GenEL_get_n_eqs',['../_gen_e_l_exports_8cpp.html#a08b71fc47017d1983bc1436c6afb5aab',1,'GenELExports.cpp']]],
+  ['genel_5fget_5fn_5fobs',['GenEL_get_n_obs',['../_gen_e_l_exports_8cpp.html#a2a861881e2c1fd52f02fb35968c155c0',1,'GenELExports.cpp']]],
+  ['genel_5fget_5fsupp_5fadj',['GenEL_get_supp_adj',['../_gen_e_l_exports_8cpp.html#a2cb52e56e8c7f9ce7344f769cff29eab',1,'GenELExports.cpp']]],
+  ['genel_5flambda_5fnr',['GenEL_lambda_nr',['../_gen_e_l_exports_8cpp.html#ab20815938da345bab2b59d5a9ebc83cf',1,'GenELExports.cpp']]],
+  ['genel_5flogel',['GenEL_logel',['../_gen_e_l_exports_8cpp.html#acf2a9664d403dacfd1879f24b3263ceb',1,'GenELExports.cpp']]],
+  ['genel_5flogel_5fgrad',['GenEL_Logel_grad',['../_gen_e_l_exports_8cpp.html#aa65a18e07c630407a7b25fe377eb68e3',1,'GenELExports.cpp']]],
+  ['genel_5fomega_5fhat',['GenEL_omega_hat',['../_gen_e_l_exports_8cpp.html#a97e825879f08ac534abf9755edaaba83',1,'GenELExports.cpp']]],
+  ['genel_5fset_5flambda0',['GenEL_set_lambda0',['../_gen_e_l_exports_8cpp.html#a6f33968687105ec5ed0a29b9499e6024',1,'GenELExports.cpp']]],
+  ['genel_5fset_5fmax_5fiter',['GenEL_set_max_iter',['../_gen_e_l_exports_8cpp.html#a4843af80713a575f8beaf2f0c1afdc2a',1,'GenELExports.cpp']]],
+  ['genel_5fset_5frel_5ftol',['GenEL_set_rel_tol',['../_gen_e_l_exports_8cpp.html#aebfd4915eb3fa4ffd4fba6f09c3970f7',1,'GenELExports.cpp']]],
+  ['genel_5fset_5fsupp_5fadj',['GenEL_set_supp_adj',['../_gen_e_l_exports_8cpp.html#a14facc7828ab4098c5d5e0e72c4c0f6a',1,'GenELExports.cpp']]],
+  ['genel_5fweighted_5flogel',['GenEL_weighted_logel',['../_gen_e_l_exports_8cpp.html#ab5f383416fe8dc3c69da414f03121399',1,'GenELExports.cpp']]],
+  ['genelexports_2ecpp',['GenELExports.cpp',['../_gen_e_l_exports_8cpp.html',1,'']]],
+  ['get_5fabs_5ftol',['get_abs_tol',['../classflex_e_l_1_1_cens_e_l.html#adb0440f2aa7264545ee3c8f23ec1ef12',1,'flexEL::CensEL']]],
+  ['get_5fdiag',['get_diag',['../classflex_e_l_1_1_cens_e_l.html#a30335aa3df228ac928c18d3c35387d0d',1,'flexEL::CensEL::get_diag()'],['../classflex_e_l_1_1_gen_e_l.html#ac179cb3f651afdf3b04530bc67c0f1f4',1,'flexEL::GenEL::get_diag()']]],
+  ['get_5fmax_5fiter',['get_max_iter',['../classflex_e_l_1_1_gen_e_l.html#a526fd36391541e4a2ec1edcf5b514e22',1,'flexEL::GenEL']]],
+  ['get_5fmax_5fiter_5fem',['get_max_iter_em',['../classflex_e_l_1_1_cens_e_l.html#aa7f37b56a680c8a04951a2b386ce1204',1,'flexEL::CensEL']]],
+  ['get_5fmax_5fiter_5fnr',['get_max_iter_nr',['../classflex_e_l_1_1_cens_e_l.html#a6c9ab6461613f30559877b761833e7ae',1,'flexEL::CensEL']]],
+  ['get_5fn_5feqs',['get_n_eqs',['../classflex_e_l_1_1_cens_e_l.html#a6746876a187d768d418aee5d557fb026',1,'flexEL::CensEL::get_n_eqs()'],['../classflex_e_l_1_1_gen_e_l.html#a0af0a8efa0ba99b0f2d3d1b794a460dc',1,'flexEL::GenEL::get_n_eqs()'],['../classflex_e_l_1_1_mean_reg_model.html#ae43485d90d3db8d18a04047ca520bef4',1,'flexEL::MeanRegModel::get_n_eqs()'],['../classflex_e_l_1_1_quant_reg_model.html#a6e15056aa973ee7163d3796e397cfc6f',1,'flexEL::QuantRegModel::get_n_eqs()']]],
+  ['get_5fn_5fobs',['get_n_obs',['../classflex_e_l_1_1_cens_e_l.html#a439bb0ba13278726a0302ef8bf7fa9dc',1,'flexEL::CensEL::get_n_obs()'],['../classflex_e_l_1_1_gen_e_l.html#a6566885e0a8faff4ca0a054024856a9d',1,'flexEL::GenEL::get_n_obs()'],['../classflex_e_l_1_1_mean_reg_model.html#a2f062f2341a12e77a65d378fa146c4c7',1,'flexEL::MeanRegModel::get_n_obs()'],['../classflex_e_l_1_1_quant_reg_model.html#aae4779cbf06ead9bbcf31589625618ef',1,'flexEL::QuantRegModel::get_n_obs()']]],
+  ['get_5frel_5ftol',['get_rel_tol',['../classflex_e_l_1_1_cens_e_l.html#aa0bb00a763e734c235c239d84b08b49c',1,'flexEL::CensEL::get_rel_tol()'],['../classflex_e_l_1_1_gen_e_l.html#ac2c678abe1a2af77e56258c477baf722',1,'flexEL::GenEL::get_rel_tol()']]],
+  ['get_5fsupp_5fadj',['get_supp_adj',['../classflex_e_l_1_1_cens_e_l.html#a8d6c6bcb4ef37d828622dc8461ecab51',1,'flexEL::CensEL::get_supp_adj()'],['../classflex_e_l_1_1_gen_e_l.html#ab72a2ae19c7c22c0e4518114d8920705',1,'flexEL::GenEL::get_supp_adj()']]]
 ];

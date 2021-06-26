@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['sort_5forder_2eh',['sort_order.h',['../sort__order_8h.html',1,'']]]
+  ['quant_5freg_5fmodel_2eh',['quant_reg_model.h',['../quant__reg__model_8h.html',1,'']]]
 ];
