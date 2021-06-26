@@ -11,6 +11,32 @@ Constructor and methods for general EL objects.
 \details{
 R6 class for EL with general moment specification.
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{max_iter}}{Access or reset the value of the maximum number of
+iterations. The value must be a positive integer (default to 100).}
+
+\item{\code{rel_tol}}{Access or reset the value of relative tolerance
+controlling the accuracy at convergence. The value must be a small
+positive number (default to 1e-7).}
+
+\item{\code{lambda0}}{Access or reset the initial value of lambda. The value
+must be a vector of length \code{n_eqs} (default to a vector of 0).}
+
+\item{\code{supp_adj}}{Access or reset the support correction flag. The value
+must be a boolean indicating whether to conduct support correction or
+not (default to FALSE).}
+
+\item{\code{supp_adj_a}}{Access or reset the value of support corection factor.
+The value must be a scalar (defaults to \code{max(1.0, log(n_obs)/2)}).}
+
+\item{\code{weight_adj}}{Access or reset the value of the weight for the
+additional fake observation under support correction. The value must
+be a scalar (default to NULL).}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -32,25 +58,6 @@ R6 class for EL with general moment specification.
 Check the dimension of G is what is expected.
 
 
-Access or reset the value of the maximum number of iterations.
-
-
-Access or reset the value of relative tolerance controlling the accuracy at convergence..
-
-
-Access or reset the initial value of lambda.
-
-
-Access or reset the support correction flag.
-
-
-Access or reset the value of support corection factor.
-
-
-Access or reset the value of the weight for the additional
-fake observation under support correction.
-
-
 Create a new GenEL object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
@@ -64,20 +71,6 @@ Create a new GenEL object.
 \item{\code{n_eqs}}{Number of (moment constraint) equations.}
 
 \item{\code{G}}{A numeric matrix.}
-
-\item{\code{value}}{Missing or a positive integer (default to 100).}
-
-\item{\code{value}}{Missing or a small positive number (default to 1e-7).}
-
-\item{\code{value}}{Missing or a vector of length \code{n_eqs} (default to a vector
-of 0).}
-
-\item{\code{value}}{Missing or a boolean indicating whether to conduct support
-correction or not (default to FALSE).}
-
-\item{\code{value}}{Missing or a scalar (defaults to \code{max(1.0, log(n_obs)/2)}).}
-
-\item{\code{value}}{Missing or a scalar (default to NULL).}
 }
 \if{html}{\out{</div>}}
 }
@@ -197,6 +190,8 @@ Calculate the log empirical likelihood base on the given G matrix.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
+
+\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
 }
 \if{html}{\out{</div>}}
 }
@@ -218,7 +213,9 @@ Calculate the log empirical likelihood base on the given G matrix.
 \describe{
 \item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
 
-\item{\code{weight}}{A numeric vector of length \code{n_obs} containing non-negative values.}
+\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
+
+\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
 }
 \if{html}{\out{</div>}}
 }

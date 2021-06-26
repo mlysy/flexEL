@@ -11,6 +11,47 @@ Constructor and methods for EL regression where responses are under right censor
 \details{
 R6 class for EL regression with right-censored responses.
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{lambda0}}{Access or reset the initial value of lambda. The value
+must be a vector of length \code{n_eqs} (default to a vector of 0).}
+
+\item{\code{max_iter_nr}}{Access or reset the value of the maximum number of
+iterations for the Newton-Raphson algorithm. The value must be a
+positive integer (default to 100).}
+
+\item{\code{rel_tol}}{Access or reset the value of relative tolerance controlling
+the accuracy at convergence of the Newton-Raphson algorithm. The value
+must be a small positive number (default to 1e-7).}
+
+\item{\code{max_iter_em}}{Access or reset the value of the maximum number of
+iterations for the EM algorithm. The value must be a positive integer
+(default to 100).}
+
+\item{\code{abs_tol}}{Access or reset the value of absolute tolerance controlling
+the accuracy at convergence of the EM algorithm. The value must be
+a small positive number (default to 1e-3).}
+
+\item{\code{supp_adj}}{Access or reset the support correction flag. The value
+must be a boolean indicating whether to conduct support correction or
+not (default to FALSE).}
+
+\item{\code{supp_adj_a}}{Access or reset the value of support corection factor.
+The value must be a positive scalar (default to \code{max(1.0, log(n_obs)/2)}).}
+
+\item{\code{smooth}}{Access or reset the continuity correction flag. The value
+must be a boolean indicating whether to conduct continuity
+correction or not (default to FALSE). If set to \code{TRUE}, the tuning
+parameter for continuity correction is default to 10.}
+
+\item{\code{smooth_s}}{Access or reset the continuity correction flag. The value
+must be a positive scalar for tuning the extent of
+continuity correction (default to 10). The smaller the value, the more
+smooth it makes.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -31,37 +72,6 @@ R6 class for EL regression with right-censored responses.
 Check the dimension of G is what is expected.
 
 
-Access or reset the initial value of lambda.
-
-
-Access or reset the value of the maximum number of
-iterations for the Newton-Raphson algorithm.
-
-
-Access or reset the value of relative tolerance controlling
-the accuracy at convergence of the Newton-Raphson algorithm.
-
-
-Access or reset the value of the maximum number of
-iterations for the EM algorithm.
-
-
-Access or reset the value of absolute tolerance controlling
-the accuracy at convergence of the EM algorithm.
-
-
-Access or reset the support correction flag.
-
-
-Access or reset the value of support corection factor.
-
-
-Access or reset the continuity correction flag.
-
-
-Access or reset the continuity correction flag.
-
-
 Create a new CensEL object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
@@ -75,30 +85,6 @@ Create a new CensEL object.
 \item{\code{n_eqs}}{Number of (moment constraint) equations.}
 
 \item{\code{G}}{A numeric matrix.}
-
-\item{\code{value}}{Missing or a vector of length \code{n_eqs} (default to a vector of 0).}
-
-\item{\code{value}}{Missing or a positive integer (default to 100).}
-
-\item{\code{value}}{Missing or a small positive number (default to 1e-7).}
-
-\item{\code{value}}{Missing or a positive integer (default to 100).}
-
-\item{\code{value}}{Missing or a small positive number (default to 1e-3).}
-
-\item{\code{value}}{Missing or a boolean indicating whether to conduct support
-correction or not (default to FALSE).}
-
-\item{\code{value}}{Missing or a positive scalar (default to
-\code{max(1.0, log(n_obs)/2)}).}
-
-\item{\code{value}}{Missing or a boolean indicating whether to conduct continuity
-correction or not (default to FALSE). If set to TRUE, the tuning
-parameter for continuity correction is default to 10.}
-
-\item{\code{value}}{Missing or a positive scalar for tuning the extent of
-continuity correction (default to 10). The smaller the value, the more
-smooth it makes.}
 }
 \if{html}{\out{</div>}}
 }
@@ -248,6 +234,12 @@ Calculate the log empirical likelihood base on the given G matrix.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{G}}{A matrix of dimension \verb{n_obs x n_eqs}.}
+
+\item{\code{delta}}{A vector of censoring indicators of length \code{n_obs}, where
+0 means censored and 1 means observed. With support correction, the last
+entry of delta will be assumed to be 0.}
+
+\item{\code{epsilon}}{A vector of residuals.}
 }
 \if{html}{\out{</div>}}
 }

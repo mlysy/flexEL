@@ -30,8 +30,8 @@ GenEL <- R6::R6Class(
 
   active = list(
 
-    #' @description Access or reset the value of the maximum number of iterations.
-    #' @param value Missing or a positive integer (default to 100).
+    #' @field max_iter Access or reset the value of the maximum number of 
+    #'   iterations. The value must be a positive integer (default to 100).
     max_iter = function(value) {
       if (missing(value)) private$.max_iter
       else if (!is.numeric(value) | value <= 0) {
@@ -43,8 +43,9 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @description Access or reset the value of relative tolerance controlling the accuracy at convergence..
-    #' @param value Missing or a small positive number (default to 1e-7).
+    #' @field rel_tol Access or reset the value of relative tolerance 
+    #'   controlling the accuracy at convergence. The value must be a small 
+    #'   positive number (default to 1e-7).
     rel_tol = function(value) {
       if (missing(value)) private$.rel_tol
       else if (!is.numeric(value) | value <= 0) {
@@ -56,9 +57,8 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @description Access or reset the initial value of lambda.
-    #' @param value Missing or a vector of length `n_eqs` (default to a vector
-    #'   of 0).
+    #' @field lambda0 Access or reset the initial value of lambda. The value 
+    #'   must be a vector of length `n_eqs` (default to a vector of 0).
     lambda0 = function(value) {
       if (missing(value)) private$.lambda0
       else {
@@ -71,9 +71,9 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @description Access or reset the support correction flag.
-    #' @param value Missing or a boolean indicating whether to conduct support
-    #'   correction or not (default to FALSE).
+    #' @field supp_adj Access or reset the support correction flag. The value 
+    #'   must be a boolean indicating whether to conduct support correction or 
+    #'   not (default to FALSE).
     supp_adj = function(value) {
       if (missing(value)) private$.supp_adj
       else {
@@ -87,8 +87,8 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @description Access or reset the value of support corection factor.
-    #' @param value Missing or a scalar (defaults to `max(1.0, log(n_obs)/2)`).
+    #' @field supp_adj_a Access or reset the value of support corection factor. 
+    #'   The value must be a scalar (defaults to `max(1.0, log(n_obs)/2)`).
     supp_adj_a = function(value) {
       if (missing(value)) private$.supp_adj_a
       else if (!is.null(value) && (!is.numeric(value) || value <= 0)) {
@@ -103,9 +103,9 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @description Access or reset the value of the weight for the additional
-    #'   fake observation under support correction.
-    #' @param value Missing or a scalar (default to NULL).
+    #' @field weight_adj Access or reset the value of the weight for the 
+    #'   additional fake observation under support correction. The value must 
+    #'   be a scalar (default to NULL).
     weight_adj = function(value) {
       if (missing(value)) private$.weight_adj
       else if (!is.null(value) && (!is.numeric(value) || value <= 0)) {
@@ -119,8 +119,6 @@ GenEL <- R6::R6Class(
                            private$.weight_adj)
       }
     }
-
-    # TODO: add weight_adj and also set it in set_supp_adj below too (CONTINUE HERE)
   ),
 
   public = list(
@@ -144,20 +142,6 @@ GenEL <- R6::R6Class(
       self$supp_adj <- supp_adj
       self$supp_adj_a <- supp_adj_a
       self$weight_adj <- weight_adj
-      ## if (!is.logical(supp_adj)) {
-      ##   stop("`supp_adj` must be a boolean.")
-      ## }
-      ## if (!is.null(supp_adj_a)) {
-      ##   if (!is.numeric(supp_adj_a) | supp_adj_a <= 0) {
-      ##     stop("`a` must be a positive number if not NULL.")
-      ##   }
-      ## }
-      ## if (!is.null(weight_adj)) {
-      ##   if (!is.numeric(weight_adj) | weight_adj <= 0) {
-      ##     stop("`weight_adj` must be a positive number if not NULL.")
-      ##   }
-      ## }
-      ## GenEL_set_supp_adj(private$.GEL, supp_adj, supp_adj_a, weight_adj)
     },
 
     #' @description Set more than one options together.
@@ -197,6 +181,7 @@ GenEL <- R6::R6Class(
 
     #' @description Calculate the log empirical likelihood base on the given G matrix.
     #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @param verbose A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A scalar.
     logel = function(G, verbose = FALSE) {
       private$check_G(G)
@@ -205,7 +190,8 @@ GenEL <- R6::R6Class(
 
     #' @description Calculate the log empirical likelihood base on the given G matrix.
     #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
-    #' @param weight  A numeric vector of length `n_obs` containing non-negative values.
+    #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
+    #' @param verbose A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A scalar.
     weighted_logel = function(G, weights, verbose = FALSE) {
       private$check_G(G)
