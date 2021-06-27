@@ -230,19 +230,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// GenEL_lambda_nr
-Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose);
-RcppExport SEXP _flexEL_GenEL_lambda_nr(SEXP pGELSEXP, SEXP GSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(GenEL_lambda_nr(pGEL, G, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
 // GenEL_get_n_obs
 int GenEL_get_n_obs(SEXP pGEL);
 RcppExport SEXP _flexEL_GenEL_get_n_obs(SEXP pGELSEXP) {
@@ -276,16 +263,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// GenEL_lambda_nr
+Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights, bool verbose);
+RcppExport SEXP _flexEL_GenEL_lambda_nr(SEXP pGELSEXP, SEXP GSEXP, SEXP weightsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_lambda_nr(pGEL, G, weights, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GenEL_omega_hat
-Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, Eigen::VectorXd lambda, Eigen::MatrixXd G);
-RcppExport SEXP _flexEL_GenEL_omega_hat(SEXP pGELSEXP, SEXP lambdaSEXP, SEXP GSEXP) {
+Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, Eigen::VectorXd lambda, Eigen::MatrixXd G, Eigen::VectorXd weights);
+RcppExport SEXP _flexEL_GenEL_omega_hat(SEXP pGELSEXP, SEXP lambdaSEXP, SEXP GSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    rcpp_result_gen = Rcpp::wrap(GenEL_omega_hat(pGEL, lambda, G));
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_omega_hat(pGEL, lambda, G, weights));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -471,11 +473,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},
     {"_flexEL_GenEL_set_supp_adj", (DL_FUNC) &_flexEL_GenEL_set_supp_adj, 4},
     {"_flexEL_GenEL_set_lambda0", (DL_FUNC) &_flexEL_GenEL_set_lambda0, 2},
-    {"_flexEL_GenEL_lambda_nr", (DL_FUNC) &_flexEL_GenEL_lambda_nr, 3},
     {"_flexEL_GenEL_get_n_obs", (DL_FUNC) &_flexEL_GenEL_get_n_obs, 1},
     {"_flexEL_GenEL_get_n_eqs", (DL_FUNC) &_flexEL_GenEL_get_n_eqs, 1},
     {"_flexEL_GenEL_get_supp_adj", (DL_FUNC) &_flexEL_GenEL_get_supp_adj, 1},
-    {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 3},
+    {"_flexEL_GenEL_lambda_nr", (DL_FUNC) &_flexEL_GenEL_lambda_nr, 4},
+    {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 4},
     {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 3},
     {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 4},
     {"_flexEL_GenEL_logel_grad", (DL_FUNC) &_flexEL_GenEL_logel_grad, 3},

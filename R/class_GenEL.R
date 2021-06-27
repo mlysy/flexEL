@@ -161,22 +161,45 @@ GenEL <- R6::R6Class(
     },
 
     #' @description Calculate the solution of the dual problem of maximum log EL problem.
-    #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
+    #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A numeric vector of length `n_eqs`.
-    lambda_nr = function(G, verbose = FALSE) {
+    lambda_nr = function(G, weights, verbose = FALSE) {
       private$check_G(G)
-      GenEL_lambda_nr(private$.GEL, t(G), verbose)
+      n_obs <- GenEL_get_n_obs(private$.GEL)
+      if (missing(weights) || is.null(weights)) {
+        
+        weights <- rep(1.0/(n_obs), n_obs)
+      }
+      if (length(weights) != n_obs) {
+        stop("Length of `weights` does not equal to the number of obserations.")
+      }
+      if (any(weights < 0)) {
+        stop("`weights` should contain only non-negative values.")
+      }
+      GenEL_lambda_nr(private$.GEL, t(G), weights, verbose)
     },
 
     #' @description Calculate the probability vector base on the given G matrix.
     #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
+    #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A probability vector of length `n_obs + supp_adj`.
-    omega_hat = function(G, verbose = FALSE) {
+    omega_hat = function(G, weights, verbose = FALSE) {
       private$check_G(G)
-      lambda <- self$lambda_nr(G, verbose)
-      GenEL_omega_hat(private$.GEL, lambda, t(G))
+      n_obs <- GenEL_get_n_obs(private$.GEL)
+      if (missing(weights) || is.null(weights)) {
+        weights <- rep(1.0/(n_obs), n_obs)
+      }
+      if (length(weights) != n_obs) {
+        stop("Length of `weights` does not equal to the number of obserations.")
+      }
+      if (any(weights < 0)) {
+        stop("`weights` should contain only non-negative values.")
+      }
+      lambda <- self$lambda_nr(G = G, weights = weights, verbose = verbose)
+      GenEL_omega_hat(private$.GEL, lambda, t(G), weights)
     },
 
     #' @description Calculate the log empirical likelihood base on the given G matrix.
@@ -189,13 +212,13 @@ GenEL <- R6::R6Class(
     },
 
     #' @description Calculate the log empirical likelihood base on the given G matrix.
-    #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @param G       A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param verbose A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A scalar.
     weighted_logel = function(G, weights, verbose = FALSE) {
       private$check_G(G)
-      if (length(weights) != ncol(G)) {
+      if (length(weights) != nrow(G)) {
         stop("Length of `weights` does not match the number of columns of `G`.")
       }
       if (any(weights < 0)) {
@@ -205,7 +228,7 @@ GenEL <- R6::R6Class(
     },
 
     #' @description Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
-    #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A list of two elements.
     logel_grad = function(G, verbose = FALSE) {
@@ -220,7 +243,7 @@ GenEL <- R6::R6Class(
     #' @return A list of three elements.
     weighted_logel_grad = function(G, weights, verbose = FALSE) {
       private$check_G(G)
-      if (length(weights) != ncol(G)) {
+      if (length(weights) != nrow(G)) {
         stop("Length of `weights` does not match the number of columns of `G`.")
       }
       if (any(weights < 0)) {

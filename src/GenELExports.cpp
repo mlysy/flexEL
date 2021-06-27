@@ -88,6 +88,39 @@ void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
   return;
 }
 
+/// Getter for n_obs.
+///
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
+///
+// [[Rcpp::export]]
+int GenEL_get_n_obs(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_obs = GEL->get_n_obs();
+  return n_obs;
+}
+
+/// Getter for n_eqs.
+///
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
+/// 
+// [[Rcpp::export]]
+int GenEL_get_n_eqs(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_eqs = GEL->get_n_eqs();
+  return n_eqs;
+}
+
+/// Getter for supp_adj.
+///
+/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
+///
+// [[Rcpp::export]]
+bool GenEL_get_supp_adj(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  bool supp_adj = GEL->get_supp_adj();
+  return supp_adj;
+}
+
 /// Solve the dual problem via Newton-Raphson algorithm.
 ///
 /// @param[in] pGEL     `externalptr` pointer to GenEL object. 
@@ -95,16 +128,17 @@ void GenEL_set_lambda0(SEXP pGEL, Eigen::VectorXd lambda0) {
 /// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
 /// 
 // [[Rcpp::export]]
-Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
-  // std::cout << "beginning of GenEL_lambda_nr" << std::endl;
+Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, 
+                                Eigen::MatrixXd G, 
+                                Eigen::VectorXd weights, 
+                                bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-  // std::cout << "GEL created." << std::endl;
-  bool supp_adj = GEL->get_supp_adj();
-  int n_obs = G.cols();
+  // bool supp_adj = GEL->get_supp_adj();
+  // int n_obs = G.cols();
   int n_eqs = G.rows();
   Eigen::VectorXd lambda(n_eqs);
-  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
-  // std::cout << "GenEL_lambda_nr: norm_weights = " << norm_weights.transpose() << std::endl;
+  // Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  Eigen::VectorXd norm_weights = weights/weights.sum();
   GEL->lambda_nr(lambda, G, norm_weights);
   int n_iter;
   double max_err;
@@ -122,76 +156,36 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   return lambda;
 }
 
-/// Getter for n_obs.
-///
-/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
-// [[Rcpp::export]]
-int GenEL_get_n_obs(SEXP pGEL) {
-  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-  int n_obs = GEL->get_n_obs();
-  return n_obs;
-}
-
-/// Getter for n_eqs.
-///
-/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
-// [[Rcpp::export]]
-int GenEL_get_n_eqs(SEXP pGEL) {
-  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-  int n_eqs = GEL->get_n_eqs();
-  return n_eqs;
-}
-
-/// Getter for supp_adj.
-///
-/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
-// [[Rcpp::export]]
-bool GenEL_get_supp_adj(SEXP pGEL) {
-  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-  bool supp_adj = GEL->get_supp_adj();
-  return supp_adj;
-}
-
 /// Calculate the probability vector base on the given G matrix.
 /// 
 /// @param[in] pGEL     `externalptr` pointer to GenEL object. 
 /// @param[in] lambda   Dual problem vector of size `n_eqs`.  
 /// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+///
 // [[Rcpp::export]]
 Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, 
                                 Eigen::VectorXd lambda,
-                                Eigen::MatrixXd G) {
+                                Eigen::MatrixXd G,
+                                Eigen::VectorXd weights) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   int n_obs = GEL->get_n_obs(); // G.cols() should be the same value, check in R side
   bool supp_adj = GEL->get_supp_adj();
   Eigen::VectorXd omega(n_obs + supp_adj);
-  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  // Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+  Eigen::VectorXd norm_weights = weights/weights.sum();
   GEL->omega_hat(omega, lambda, G, norm_weights);
   return omega;
 }
-
-// /// Calculate the log empirical likelihood base on the given probability vector.
-// /// 
-// /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
-// /// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
-// // [[Rcpp::export]]
-// double GenEL_logel_omega(SEXP pGEL,
-//                          Eigen::VectorXd omega) {
-//   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
-//   int n_obs = GEL->get_n_obs(); // length of omega should be the same, check in R side
-//   bool supp_adj = GEL->get_supp_adj();
-//   Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
-//   double sum_weights = double(n_obs + supp_adj);
-//   double log_el = GEL->logel_omega(omega, norm_weights, sum_weights);
-//   return log_el;
-// }
 
 /// Calculate the log empirical likelihood base on the given G matrix.
 /// 
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
+/// 
 // [[Rcpp::export]]
-double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
+double GenEL_logel(SEXP pGEL, 
+                   Eigen::MatrixXd G,
+                   bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G);
   if(verbose) {
@@ -208,6 +202,7 @@ double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] G        Moment matrix of size `n_eqs x (n_obs + supp_adj)`.
 /// @param[in] weights  Weight vector of length `n_obs`.
+///
 // [[Rcpp::export]]
 double GenEL_weighted_logel(SEXP pGEL, 
                             Eigen::MatrixXd G, 
@@ -229,6 +224,7 @@ double GenEL_weighted_logel(SEXP pGEL,
 /// @param[in] pGEL      `externalptr` pointer to GenEL object.
 /// @param[in] G         Moment matrix of size `n_eqs x n_obs`.
 /// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+///
 // [[Rcpp::export]]
 Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
@@ -252,6 +248,7 @@ Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
 /// @param[in] G        Moment matrix of size `n_eqs x n_obs`.
 /// @param[in] weights  Weight vector of length `n_obs`.
 /// @param[in] verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+///
 // [[Rcpp::export]]
 Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL, 
                                      Eigen::MatrixXd G, 

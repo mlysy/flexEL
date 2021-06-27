@@ -16,8 +16,8 @@ namespace flexEL {
   /// @param[in] c Polynomial coefficient of degree zero.
   ///
   /// @return Value of the log-star function.
-  inline double log_star(double x,
-			 double trunc, double a, double b, double c) {
+  inline double log_star(double x, 
+                         double trunc, double a, double b, double c) {
     if(x >= trunc) {
       return(log(x));
     } else {
@@ -33,8 +33,8 @@ namespace flexEL {
   /// @param[in] b Polynomial coefficient of degree one.
   ///
   /// @return Value of the first derivative of the log-star function.
-  inline double log_star1(double x,
-			  double trunc, double a, double b) {
+  inline double log_star1(double x, 
+                          double trunc, double a, double b) {
     if(x >= trunc) {
       return(1.0/x);
     } 

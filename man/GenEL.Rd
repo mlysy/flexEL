@@ -135,13 +135,15 @@ Set more than one options together.
 \subsection{Method \code{lambda_nr()}}{
 Calculate the solution of the dual problem of maximum log EL problem.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
+\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
+
+\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
 \item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
 }
@@ -157,13 +159,15 @@ A numeric vector of length \code{n_eqs}.
 \subsection{Method \code{omega_hat()}}{
 Calculate the probability vector base on the given G matrix.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
+
+\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
 \item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
 }
@@ -207,7 +211,7 @@ Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
+\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
@@ -231,7 +235,7 @@ Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
+\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
 
 \item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
 }
