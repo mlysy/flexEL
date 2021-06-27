@@ -137,16 +137,19 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 <tr class="memdesc:a9dfd173f4591499d879ef82c45f24ada"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the empirical loglikelihood given the probability weights.  <a href="#a9dfd173f4591499d879ef82c45f24ada">More...</a><br /></td></tr>
 <tr class="separator:a9dfd173f4591499d879ef82c45f24ada"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a392e456dc0ac560aa9c300f1dedfbf41"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_gen_e_l.html#a392e456dc0ac560aa9c300f1dedfbf41">logel</a> (const Ref&lt; const MatrixXd &gt; &amp;G)</td></tr>
-<tr class="memdesc:a392e456dc0ac560aa9c300f1dedfbf41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the empirical loglikelihood.  <a href="#a392e456dc0ac560aa9c300f1dedfbf41">More...</a><br /></td></tr>
+<tr class="memdesc:a392e456dc0ac560aa9c300f1dedfbf41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the unweighted empirical loglikelihood.  <a href="#a392e456dc0ac560aa9c300f1dedfbf41">More...</a><br /></td></tr>
 <tr class="separator:a392e456dc0ac560aa9c300f1dedfbf41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27c97dcc6834be1f767065af6aebd07c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_gen_e_l.html#a27c97dcc6834be1f767065af6aebd07c">logel</a> (const Ref&lt; const MatrixXd &gt; &amp;G, const Ref&lt; const VectorXd &gt; &amp;weights)</td></tr>
+<tr class="memdesc:a27c97dcc6834be1f767065af6aebd07c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weighted empirical loglikelihood.  <a href="#a27c97dcc6834be1f767065af6aebd07c">More...</a><br /></td></tr>
 <tr class="separator:a27c97dcc6834be1f767065af6aebd07c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54cfd8b196dfd04b233e21d689e01b89"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_gen_e_l.html#a54cfd8b196dfd04b233e21d689e01b89">logel_grad</a> (Ref&lt; MatrixXd &gt; dldG, const Ref&lt; const MatrixXd &gt; &amp;G)</td></tr>
-<tr class="memdesc:a54cfd8b196dfd04b233e21d689e01b89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the gradient of the empirical loglikelihood.  <a href="#a54cfd8b196dfd04b233e21d689e01b89">More...</a><br /></td></tr>
+<tr class="memdesc:a54cfd8b196dfd04b233e21d689e01b89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the gradient of the unweighted empirical loglikelihood.  <a href="#a54cfd8b196dfd04b233e21d689e01b89">More...</a><br /></td></tr>
 <tr class="separator:a54cfd8b196dfd04b233e21d689e01b89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a842c49fd53b56bb4794007eda663e4fc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_gen_e_l.html#a842c49fd53b56bb4794007eda663e4fc">logel_grad</a> (Ref&lt; MatrixXd &gt; dldG, const Ref&lt; const MatrixXd &gt; &amp;G, const Ref&lt; const VectorXd &gt; &amp;weights)</td></tr>
+<tr class="memdesc:a842c49fd53b56bb4794007eda663e4fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the gradient of the weighted empirical loglikelihood.  <a href="#a842c49fd53b56bb4794007eda663e4fc">More...</a><br /></td></tr>
 <tr class="separator:a842c49fd53b56bb4794007eda663e4fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4945b573ec4155af0bb5147c739f5722"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_gen_e_l.html#a4945b573ec4155af0bb5147c739f5722">logel_grad</a> (Ref&lt; MatrixXd &gt; dldG, const Ref&lt; const VectorXd &gt; &amp;omega, const Ref&lt; const VectorXd &gt; &amp;lambda, double sum_weights)</td></tr>
+<tr class="memdesc:a4945b573ec4155af0bb5147c739f5722"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the gradient of the empirical loglikelihood.  <a href="#a4945b573ec4155af0bb5147c739f5722">More...</a><br /></td></tr>
 <tr class="separator:a4945b573ec4155af0bb5147c739f5722"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -320,7 +323,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 </table>
 </div><div class="memdoc">
 
-<p>Calculate the empirical loglikelihood. </p>
+<p>Calculate the unweighted empirical loglikelihood. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>Moment matrix of size <code>n_eqs x n_obs</code>. </td></tr>
@@ -364,6 +367,8 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Calculate the weighted empirical loglikelihood. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>Moment matrix of size <code>n_eqs x n_obs</code>. </td></tr>
@@ -409,7 +414,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 </table>
 </div><div class="memdoc">
 
-<p>Calculate the gradient of the empirical loglikelihood. </p>
+<p>Calculate the gradient of the unweighted empirical loglikelihood. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dldG</td><td>Matrix of size <code>n_eqs x n_obs</code> containing the gradient of logel with respect to G. </td></tr>
@@ -460,6 +465,8 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Calculate the gradient of the weighted empirical loglikelihood. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dldG</td><td>Matrix of size <code>n_eqs x n_obs</code> containing the gradient of logel with respect to G. </td></tr>
@@ -516,6 +523,8 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Calculate the gradient of the empirical loglikelihood. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dldG</td><td>Matrix of size <code>n_eqs x n_obs</code> containing the gradient of logel with respect to G. </td></tr>
@@ -820,6 +829,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 </div><div class="memdoc">
 
 <p>Set the support adjustment flag. </p>
+<p class="">Reference: J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">supp_adj</td><td>Whether or not to enable support adjustment. </td></tr>
@@ -854,6 +864,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 </div><div class="memdoc">
 
 <p>Set the support adjustment tuning parameter. </p>
+<p class="">Reference: J. Chen, A. M. Variyath, and B. Abraham. Adjusted empirical likelihood and its properties. Journal of Computational and Graphical Statistics, 17(2):426–443, 2008).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>Support adjustment factor. Defaults to <code>max(1.0, log(n_obs)/2)</code>. </td></tr>
