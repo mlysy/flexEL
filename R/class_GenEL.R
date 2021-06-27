@@ -201,55 +201,49 @@ GenEL <- R6::R6Class(
       lambda <- self$lambda_nr(G = G, weights = weights, verbose = verbose)
       GenEL_omega_hat(private$.GEL, lambda, t(G), weights)
     },
-
+    
     #' @description Calculate the log empirical likelihood base on the given G matrix.
     #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
-    #' @param verbose A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
-    #' @return A scalar.
-    logel = function(G, verbose = FALSE) {
-      private$check_G(G)
-      GenEL_logel(private$.GEL, t(G), verbose)
-    },
-
-    #' @description Calculate the log empirical likelihood base on the given G matrix.
-    #' @param G       A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param verbose A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
     #' @return A scalar.
-    weighted_logel = function(G, weights, verbose = FALSE) {
+    logel = function(G, weights, verbose = FALSE) {
       private$check_G(G)
-      if (length(weights) != nrow(G)) {
-        stop("Length of `weights` does not match the number of columns of `G`.")
+      if (missing(weights) || is.null(weights)) {
+        GenEL_logel(private$.GEL, t(G), verbose)
       }
-      if (any(weights < 0)) {
-        stop("`weights` should contain only non-negative values.")
+      else {
+        n_obs <- GenEL_get_n_obs(private$.GEL)
+        if (length(weights) != n_obs) {
+          stop("Length of `weights` does not equal to the number of obserations.")
+        }
+        if (any(weights < 0)) {
+          stop("`weights` should contain only non-negative values.")
+        }
+        GenEL_weighted_logel(private$.GEL, t(G), weights, verbose)
       }
-      GenEL_weighted_logel(private$.GEL, t(G), weights, verbose)
-    },
-
-    #' @description Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
-    #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
-    #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
-    #' @return A list of two elements.
-    logel_grad = function(G, verbose = FALSE) {
-      private$check_G(G)
-      GenEL_logel_grad(private$.GEL, t(G), verbose)
     },
     
-    #' @description Calculate weighted log EL and the derivative of weighted log EL w.r.t. G evaluated at G.
-    #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @description Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
+    #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
-    #' @return A list of three elements.
-    weighted_logel_grad = function(G, weights, verbose = FALSE) {
+    #' @return A list of two elements.
+    logel_grad = function(G, weights, verbose = FALSE) {
       private$check_G(G)
-      if (length(weights) != nrow(G)) {
-        stop("Length of `weights` does not match the number of columns of `G`.")
+      if (missing(weights) || is.null(weights)) {
+        GenEL_logel_grad(private$.GEL, t(G), verbose)
       }
-      if (any(weights < 0)) {
-        stop("`weights` should contain only non-negative values.")
+      else {
+        n_obs <- GenEL_get_n_obs(private$.GEL)
+        if (length(weights) != n_obs) {
+          stop("Length of `weights` does not equal to the number of obserations.")
+        }
+        if (any(weights < 0)) {
+          stop("`weights` should contain only non-negative values.")
+        }
+        GenEL_weighted_logel_grad(private$.GEL, t(G), weights, verbose)
       }
-      GenEL_weighted_logel_grad(private$.GEL, t(G), weights, verbose)
     }
   )
 )

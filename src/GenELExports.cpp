@@ -302,7 +302,3 @@ Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL,
 //                             Rcpp::Named("dldG") = dldG.transpose(),
 //                             Rcpp::Named("omega") = omega);
 // }
-
-
-
-  

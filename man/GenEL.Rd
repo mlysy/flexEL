@@ -41,9 +41,7 @@ be a scalar (default to NULL).}
 \item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
 \item \href{#method-omega_hat}{\code{GenEL$omega_hat()}}
 \item \href{#method-logel}{\code{GenEL$logel()}}
-\item \href{#method-weighted_logel}{\code{GenEL$weighted_logel()}}
 \item \href{#method-logel_grad}{\code{GenEL$logel_grad()}}
-\item \href{#method-weighted_logel_grad}{\code{GenEL$weighted_logel_grad()}}
 \item \href{#method-clone}{\code{GenEL$clone()}}
 }
 }
@@ -183,35 +181,13 @@ A probability vector of length \code{n_obs + supp_adj}.
 \subsection{Method \code{logel()}}{
 Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
-
-\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A scalar.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-weighted_logel"></a>}}
-\if{latex}{\out{\hypertarget{method-weighted_logel}{}}}
-\subsection{Method \code{weighted_logel()}}{
-Calculate the log empirical likelihood base on the given G matrix.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$weighted_logel(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
@@ -229,35 +205,13 @@ A scalar.
 \subsection{Method \code{logel_grad()}}{
 Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
-
-\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A list of two elements.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-weighted_logel_grad"></a>}}
-\if{latex}{\out{\hypertarget{method-weighted_logel_grad}{}}}
-\subsection{Method \code{weighted_logel_grad()}}{
-Calculate weighted log EL and the derivative of weighted log EL w.r.t. G evaluated at G.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$weighted_logel_grad(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
@@ -266,7 +220,7 @@ Calculate weighted log EL and the derivative of weighted log EL w.r.t. G evaluat
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A list of three elements.
+A list of two elements.
 }
 }
 \if{html}{\out{<hr>}}
