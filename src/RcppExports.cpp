@@ -316,16 +316,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// GenEL_Logel_grad
-Rcpp::List GenEL_Logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose);
-RcppExport SEXP _flexEL_GenEL_Logel_grad(SEXP pGELSEXP, SEXP GSEXP, SEXP verboseSEXP) {
+// GenEL_logel_grad
+Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose);
+RcppExport SEXP _flexEL_GenEL_logel_grad(SEXP pGELSEXP, SEXP GSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(GenEL_Logel_grad(pGEL, G, verbose));
+    rcpp_result_gen = Rcpp::wrap(GenEL_logel_grad(pGEL, G, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// GenEL_weighted_logel_grad
+Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights, bool verbose);
+RcppExport SEXP _flexEL_GenEL_weighted_logel_grad(SEXP pGELSEXP, SEXP GSEXP, SEXP weightsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_weighted_logel_grad(pGEL, G, weights, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -464,7 +478,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 3},
     {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 3},
     {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 4},
-    {"_flexEL_GenEL_Logel_grad", (DL_FUNC) &_flexEL_GenEL_Logel_grad, 3},
+    {"_flexEL_GenEL_logel_grad", (DL_FUNC) &_flexEL_GenEL_logel_grad, 3},
+    {"_flexEL_GenEL_weighted_logel_grad", (DL_FUNC) &_flexEL_GenEL_weighted_logel_grad, 4},
     {"_flexEL_MeanReg_evalG", (DL_FUNC) &_flexEL_MeanReg_evalG, 3},
     {"_flexEL_MeanRegLS_EvalG", (DL_FUNC) &_flexEL_MeanRegLS_EvalG, 6},
     {"_flexEL_QuantRegEvalG", (DL_FUNC) &_flexEL_QuantRegEvalG, 4},

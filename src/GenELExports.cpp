@@ -207,9 +207,12 @@ double GenEL_logel(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
 /// 
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] G        Moment matrix of size `n_eqs x (n_obs + supp_adj)`.
-/// @param[in] weights  Weight vector of length `n_obs + supp_adj`.
+/// @param[in] weights  Weight vector of length `n_obs`.
 // [[Rcpp::export]]
-double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weights, bool verbose) {
+double GenEL_weighted_logel(SEXP pGEL, 
+                            Eigen::MatrixXd G, 
+                            Eigen::VectorXd weights, 
+                            bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G, weights);
   if(verbose) {
@@ -222,38 +225,86 @@ double GenEL_weighted_logel(SEXP pGEL, Eigen::MatrixXd G, Eigen::VectorXd weight
 }
 
 /// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
-/// 
-/// @param[in] pGEL   `externalptr` pointer to GenEL object. 
-/// @param[in] G      Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+///
+/// @param[in] pGEL      `externalptr` pointer to GenEL object.
+/// @param[in] G         Moment matrix of size `n_eqs x n_obs`.
 /// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
 // [[Rcpp::export]]
-Rcpp::List GenEL_Logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
+Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   int n_eqs = GEL->get_n_eqs();
   int n_obs = GEL->get_n_obs();
-  bool supp_adj = GEL->get_supp_adj();
-  int n_iter;
-  double max_err;
-  // bool not_conv;
-  double logel;
-  Eigen::VectorXd lambda(n_eqs);
-  Eigen::VectorXd omega(n_obs + supp_adj);
-  Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
-  double sum_weights = double(n_obs + supp_adj);
   Eigen::MatrixXd dldG(n_eqs, n_obs);
-  GEL->lambda_nr(lambda, G, norm_weights);
-  GEL->get_diag(n_iter, max_err);
-  if(verbose) {
+  double log_el = GEL->logel_grad(dldG, G);
+  if (verbose) {
+    int n_iter;
+    double max_err;
+    GEL->get_diag(n_iter, max_err);
     Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
   }
-  GEL->omega_hat(omega, lambda, G, norm_weights);
-  logel = GEL->logel_omega(omega, norm_weights, sum_weights);
-  GEL->logel_grad(dldG, omega, lambda, sum_weights);
-  
-  return Rcpp::List::create(Rcpp::Named("logel") = logel,
-                            Rcpp::Named("dldG") = dldG.transpose(),
-                            Rcpp::Named("omega") = omega);
+  return Rcpp::List::create(Rcpp::Named("logel") = log_el,
+                            Rcpp::Named("dldG") = dldG.transpose());
 }
+
+/// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+///
+/// @param[in] pGEL     `externalptr` pointer to GenEL object.
+/// @param[in] G        Moment matrix of size `n_eqs x n_obs`.
+/// @param[in] weights  Weight vector of length `n_obs`.
+/// @param[in] verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+// [[Rcpp::export]]
+Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL, 
+                                     Eigen::MatrixXd G, 
+                                     Eigen::VectorXd weights,
+                                     bool verbose) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_eqs = GEL->get_n_eqs();
+  int n_obs = GEL->get_n_obs();
+  Eigen::MatrixXd dldG(n_eqs, n_obs);
+  double log_el = GEL->logel_grad(dldG, G, weights);
+  if (verbose) {
+    int n_iter;
+    double max_err;
+    GEL->get_diag(n_iter, max_err);
+    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  }
+  return Rcpp::List::create(Rcpp::Named("logel") = log_el,
+                            Rcpp::Named("dldG") = dldG.transpose());
+}
+
+// /// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+// /// 
+// /// @param[in] pGEL   `externalptr` pointer to GenEL object. 
+// /// @param[in] G      Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+// /// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+// // [[Rcpp::export]]
+// Rcpp::List GenEL_Logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
+//   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+//   int n_eqs = GEL->get_n_eqs();
+//   int n_obs = GEL->get_n_obs();
+//   bool supp_adj = GEL->get_supp_adj();
+//   int n_iter;
+//   double max_err;
+//   // bool not_conv;
+//   double logel;
+//   Eigen::VectorXd lambda(n_eqs);
+//   Eigen::VectorXd omega(n_obs + supp_adj);
+//   Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
+//   double sum_weights = double(n_obs + supp_adj);
+//   Eigen::MatrixXd dldG(n_eqs, n_obs);
+//   GEL->lambda_nr(lambda, G, norm_weights);
+//   GEL->get_diag(n_iter, max_err);
+//   if(verbose) {
+//     Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+//   }
+//   GEL->omega_hat(omega, lambda, G, norm_weights);
+//   logel = GEL->logel_omega(omega, norm_weights, sum_weights);
+//   GEL->logel_grad(dldG, omega, lambda, sum_weights);
+//   
+//   return Rcpp::List::create(Rcpp::Named("logel") = logel,
+//                             Rcpp::Named("dldG") = dldG.transpose(),
+//                             Rcpp::Named("omega") = omega);
+// }
 
 
 

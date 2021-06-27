@@ -580,6 +580,22 @@ logEL_G_R <- function(G, max_iter = 100, rel_tol = 1e-7) {
   }
 }
 
+# TODO: lambdaNR_R should be updated to take weights
+weighted_logEL_G_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7) {
+  lambda_lst <- lambdaNR_R(G, max_iter, rel_tol)
+  if (!lambda_lst$convergence) return(NA)
+  else {
+    lambda <- lambda_lst$lambda
+    omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
+    sum_weights <- sum(weights)
+    norm_weights <- weights/sum_weights
+    neglogel <- sum(norm_weights*log(omega))
+    dldG <- length(omega) * t(lambda %*% t(omega)) * sum_weights
+    attr(neglogel, "gradient") <- dldG
+    return(neglogel)
+  }
+}
+
 logEL_adjG_R <- function(G, max_iter = 100, rel_tol = 1e-7, 
                          an = max(1, 0.5*log(nrow(G)))) {
   n <- nrow(G)

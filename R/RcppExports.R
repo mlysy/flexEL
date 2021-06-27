@@ -105,8 +105,12 @@ GenEL_weighted_logel <- function(pGEL, G, weights, verbose) {
     .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights, verbose)
 }
 
-GenEL_Logel_grad <- function(pGEL, G, verbose) {
-    .Call(`_flexEL_GenEL_Logel_grad`, pGEL, G, verbose)
+GenEL_logel_grad <- function(pGEL, G, verbose) {
+    .Call(`_flexEL_GenEL_logel_grad`, pGEL, G, verbose)
+}
+
+GenEL_weighted_logel_grad <- function(pGEL, G, weights, verbose) {
+    .Call(`_flexEL_GenEL_weighted_logel_grad`, pGEL, G, weights, verbose)
 }
 
 .MeanRegEvalG <- function(y, X, beta) {

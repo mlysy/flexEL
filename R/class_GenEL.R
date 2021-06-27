@@ -204,13 +204,29 @@ GenEL <- R6::R6Class(
       GenEL_weighted_logel(private$.GEL, t(G), weights, verbose)
     },
 
-    #' @description Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+    #' @description Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
     #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
     #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
-    #' @return A list of three elements.
+    #' @return A list of two elements.
     logel_grad = function(G, verbose = FALSE) {
       private$check_G(G)
-      GenEL_Logel_grad(private$.GEL, t(G), verbose)
+      GenEL_logel_grad(private$.GEL, t(G), verbose)
+    },
+    
+    #' @description Calculate weighted log EL and the derivative of weighted log EL w.r.t. G evaluated at G.
+    #' @param G        A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
+    #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+    #' @return A list of three elements.
+    weighted_logel_grad = function(G, weights, verbose = FALSE) {
+      private$check_G(G)
+      if (length(weights) != ncol(G)) {
+        stop("Length of `weights` does not match the number of columns of `G`.")
+      }
+      if (any(weights < 0)) {
+        stop("`weights` should contain only non-negative values.")
+      }
+      GenEL_weighted_logel_grad(private$.GEL, t(G), weights, verbose)
     }
   )
 )

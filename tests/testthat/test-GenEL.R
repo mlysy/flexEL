@@ -289,3 +289,30 @@ test_that("dldG with given convergence settings and support correction", {
     }
   }
 })
+
+# # ---- weighted logel_grad ----
+# 
+# # nconv <- 0
+# test_that("dldG with default settings", {
+#   for (ii in 1:ntest) {
+#     n <- sample(10:20,1)
+#     p <- sample(1:2, 1)
+#     gel <- GenEL$new(n, p)
+#     G <- matrix(rnorm(n*p),n,p)
+#     weights <- runif(n, 0, 5)
+#     # weights <- rep(1,n)
+#     dldG_cpp <- gel$weighted_logel_grad(G, weights)$dldG
+#     weighted_logEL_G_R_use <- function(G) {
+#       weighted_logEL_G_R(G, weights)
+#     }
+#     dldG_nd <- matrix(tryCatch(numDeriv::grad(weighted_logEL_G_R_use, G,
+#                                               method.args = list(eps = gel$rel_tol)),
+#                                error = function(e) {
+#                                  rep(NA, nrow(G) * ncol(G))
+#                                }), nrow = nrow(G), ncol = ncol(G))
+#     if (check_res(dldG_cpp) & check_res(dldG_nd)) {
+#       # nconv <<- nconv + 1
+#       expect_equal(dldG_cpp, dldG_nd, tolerance = 1e-3)
+#     }
+#   }
+# })
