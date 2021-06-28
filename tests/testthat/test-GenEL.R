@@ -74,6 +74,87 @@ test_that("lambda_nr with given convergence settings and support correction", {
   }
 })
 
+# ---- lambda_nr with weights ----
+
+# nconv <- 0
+test_that("weighted lambda_nr with default options", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    gel <- GenEL$new(n, p)
+    G <- matrix(rnorm(n*p),n,p)
+    weights <- runif(n, 0, 2)
+    weights <- weights/sum(weights)
+    lambda_cpp <- gel$lambda_nr(G, weights)
+    # lambda_cpp
+    lambda_R_lst <- lambdaNRC_R(G, weights)
+    # lambda_R_lst$lambda
+    if (!lambda_R_lst$convergence) {
+      expect_equal(all(is.na(lambda_cpp)), all(is.na(lambda_R_lst$lambda)))
+    }
+    else {
+      # nconv <<- nconv + 1
+      expect_equal(lambda_cpp, lambda_R_lst$lambda)
+    }
+  }
+})
+
+# nconv <- 0
+test_that("weighted lambda_nr with given convergence settings", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(200, 300, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-4)
+    gel <- GenEL$new(n, p)
+    gel$max_iter <- max_iter
+    gel$rel_tol <- rel_tol
+    G <- matrix(rnorm(n*p),n,p)
+    weights <- runif(n, 0, 2)
+    weights <- weights/sum(weights)
+    lambda_cpp <- gel$lambda_nr(G, weights, verbose = FALSE)
+    # lambda_cpp
+    lambda_R_lst <- lambdaNRC_R(G, weights, max_iter = max_iter, rel_tol = rel_tol)
+    # lambda_R_lst$lambda
+    if (!lambda_R_lst$convergence) {
+      expect_equal(all(is.na(lambda_cpp)), all(is.na(lambda_R_lst$lambda)))
+    }
+    else {
+      # nconv <<- nconv + 1
+      expect_equal(lambda_cpp, lambda_R_lst$lambda)
+    }
+  }
+})
+
+# nconv <- 0
+test_that("weighted lambda_nr with given convergence settings and support correction", {
+  for (ii in 1:ntest) {
+    n <- sample(10:20,1)
+    p <- sample(1:(n-2), 1)
+    max_iter <- sample(c(200, 300, 500), 1)
+    rel_tol <- runif(1, 1e-6, 1e-4)
+    adj_a <- runif(1, 1, 5)
+    gel <- GenEL$new(n, p)
+    gel$set_opts(max_iter = max_iter, rel_tol = rel_tol,
+                 supp_adj = TRUE, supp_adj_a = adj_a)
+    G <- matrix(rnorm(n*p),n,p)
+    weights <- runif(n, 0, 2)
+    weights <- weights/sum(weights)
+    lambda_cpp <- gel$lambda_nr(G, weights, verbose = FALSE)
+    lambda_cpp
+    lambda_R_lst <- lambdaNRC_R(adjG_R(G, adj_a), c(weights * n/(n+1), 1/(n+1)), 
+                                max_iter = max_iter, rel_tol = rel_tol)
+    lambda_R_lst$lambda
+    if (!lambda_R_lst$convergence) {
+      expect_equal(all(is.na(lambda_cpp)), all(is.na(lambda_R_lst$lambda)))
+    }
+    else {
+      # nconv <<- nconv + 1
+      expect_equal(lambda_cpp, lambda_R_lst$lambda)
+    }
+  }
+})
+
 # ---- omega_hat ----
 
 # nconv <- 0

@@ -168,22 +168,26 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     nIter <- ii
     # Q1 and Q2
     Glambda <- t(lambdaOld) %*% G
-    Glambda <- sum(weights) + Glambda
+    Glambda <- sum(weights) - Glambda
     # Q1 <- rep(0,nEqs)
     rho <- rep(NaN,nObs)
     Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
     for (jj in 1:nObs) {
       rho[jj] <- log_sharp1(Glambda[jj], weights[jj])
-      # to avoid numerical problem?
-      if (weights[jj] > rel_tol*nObs) {
-        Q2 <- Q2 + weights[jj]*log_sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
-      }
+      # to avoid numerical problem? (begin)
+      # if (weights[jj] > rel_tol*nObs) {
+      #   Q2 <- Q2 - weights[jj]*log_sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
+      # }
+      # (end)
+      Q2 <- Q2 - weights[jj]*log_sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
     }
-    weights_sav <- weights
-    weights_sav[weights_sav < rel_tol*nObs] <- 0
-    rho[is.infinite(rho) & !weights_sav] <- 0
-    # Q1 <- G %*% (rho * weights)
-    Q1 <- G %*% (rho * weights_sav)
+    # to avoid numerical problem? (begin)
+    # weights_sav <- weights
+    # weights_sav[weights_sav < rel_tol*nObs] <- 0
+    # rho[is.infinite(rho) & !weights_sav] <- 0
+    # Q1 <- G %*% (rho * weights_sav)
+    # (end)
+    Q1 <- G %*% (rho * weights)
     lambdaNew <- lambdaOld - solve(Q2,Q1)
     maxErr <- max_rel_err(lambdaNew, lambdaOld) # maximum relative error
     # message("maxErr = ", maxErr)
@@ -297,10 +301,13 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
       }
     }
     lambdaNew <- lambdaOut$lambda
-    qlg <- c(sum(weights) + lambdaNew %*% t(G))
+    qlg <- c(sum(weights) - lambdaNew %*% t(G))
     omegas <- weights/qlg
     # omegas <- omegas/sum(omegas)
-    if (any(omegas < -rel_tol)) message("omega_hat_EM_R: negative omegas.")
+    if (any(omegas < -rel_tol)) {
+      message("omega_hat_EM_R: negative omegas.")
+      message(print(omegas))
+    }
     omegas <- abs(omegas)
     omegas <- omegas/sum(omegas)
     # err <- max_rel_err(lambdaNew,lambdaOld)
@@ -430,7 +437,8 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
   err <- Inf
   nIter <- 0
   # initialize omegas with uncensored solution
-  omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  # omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  omegas <- rep(1/n, n)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     # return(rep(NaN,length(deltas)))
@@ -473,7 +481,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
       }
     }
     lambdaNew <- lambdaOut$lambda
-    qlg <- c(sum(weights) + lambdaNew %*% t(G))
+    qlg <- c(sum(weights) - lambdaNew %*% t(G))
     omegas <- weights/qlg
     # omegas <- omegas/sum(omegas)
     if (any(omegas < -rel_tol)) message("omega_hat_EM_R: negative omegas.")

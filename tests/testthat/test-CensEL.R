@@ -113,9 +113,9 @@ test_that("omega_hat with default settings", {
     epsilon <- rnorm(n)
     cel <- CensEL$new(n, p)
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    # omega_cpp
+    omega_cpp
     omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon)
-    # omega_R_lst$omegas
+    omega_R_lst$omegas
     # range(omega_cpp-omega_R_lst$omegas)
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
@@ -205,9 +205,9 @@ test_that("omega_hat with continuity correction", {
     cel$smooth <- TRUE
     cel$smooth_s <- s
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    # omega_cpp
+    omega_cpp
     omega_R_lst <- omega_hat_EM_smooth_R(G, deltas = delta, epsilons = epsilon, s = s)
-    # omega_R_lst$omegas
+    omega_R_lst$omegas
     # range(omega_cpp-omega_R_lst$omegas)
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
@@ -237,9 +237,10 @@ test_that("omega_hat with support and continuity correction", {
     cel$smooth <- TRUE
     cel$smooth_s <- s
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
-    # omega_cpp
-    omega_R_lst <- omega_hat_EM_smooth_R(adjG_R(G, adj_a), deltas = delta, epsilons = epsilon, s = s, adjust = TRUE)
-    # omega_R_lst$omegas
+    omega_cpp
+    omega_R_lst <- omega_hat_EM_smooth_R(adjG_R(G, adj_a), deltas = delta, 
+                                         epsilons = epsilon, s = s, adjust = TRUE)
+    omega_R_lst$omegas
     # range(omega_cpp-omega_R_lst$omegas)
     # omega_R_lst$conv
     if (!all(is.na(omega_cpp)) & omega_R_lst$conv) {
