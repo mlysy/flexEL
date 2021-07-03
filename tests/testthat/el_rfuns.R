@@ -111,6 +111,26 @@ omega_hat_NC_R <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   return(omegahat)
 }
 
+weighted_omega_hat_R <- function(G, weights, adjust = FALSE,
+                                 max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, 
+                                 verbose = FALSE) {
+  lambdaOut <- lambdaNRC_R(G = G, weights = weights, max_iter, rel_tol, verbose)
+  conv <- lambdaOut$convergence # 1 if converged
+  # message("lambda = ")
+  # print(lambdaOut$lambda)
+  if (!conv) {
+    nObs <- nrow(G)
+    omegahat <- rep(NaN, nObs)
+  }
+  else {
+    lambdahat <- lambdaOut$lambda
+    omegahat <- c(weights/(1-lambdahat %*% t(G)))
+    # omegahat <- c(1/(1-t(lambdahat) %*% t(G)) / sum(1/(1-t(lambdahat) %*% t(G))))
+  }
+  # returns a vector of omegahat
+  return(omegahat)
+}
+
 # ---- EL (with censor) ----
 
 # Note: log_sharp and related are unique to censoring
@@ -152,8 +172,9 @@ QfunCens <- function(lambda, G, weights) {
   return(as.numeric(weights %*% ls))
 }
 
-# R implementation of lambdaNRC
+# R implementation of lambdaNRC (weighted lambdaNR)
 # G is nObs x nEqs
+# weights should be normalized (sum to 1)
 # lambdaOld passed in is for the EM algorithm `_R` to work properly
 lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
@@ -589,17 +610,17 @@ logEL_G_R <- function(G, max_iter = 100, rel_tol = 1e-7) {
 }
 
 weighted_logEL_G_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7) {
-  lambda_lst <- lambdaNRC_R(G, weights, max_iter, rel_tol)
+  sum_weights <- sum(weights)
+  norm_weights <- weights/sum_weights
+  lambda_lst <- lambdaNRC_R(G, norm_weights, max_iter, rel_tol)
   if (!lambda_lst$convergence) return(NA)
   else {
     lambda <- lambda_lst$lambda
-    sum_weights <- sum(weights)
-    norm_weights <- weights/sum_weights
-    omega <- norm_weights *  1/(1 - c(G %*% lambda))
-    neglogel <- sum(norm_weights * log(omega))
-    dldG <- length(omega) * t(lambda %*% t(omega)) * sum_weights
-    attr(neglogel, "gradient") <- dldG
-    return(neglogel)
+    omega <- c(norm_weights/(1 - c(G %*% lambda)))
+    logel <- sum(norm_weights * log(omega)) * sum_weights
+    dldG <- t(lambda %*% t(omega)) * sum_weights
+    attr(logel, "gradient") <- dldG
+    return(logel)
   }
 }
 

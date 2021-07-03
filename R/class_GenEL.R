@@ -169,8 +169,7 @@ GenEL <- R6::R6Class(
       private$check_G(G)
       n_obs <- GenEL_get_n_obs(private$.GEL)
       if (missing(weights) || is.null(weights)) {
-        
-        weights <- rep(1.0/(n_obs), n_obs)
+        weights <- rep(1.0, n_obs)
       }
       if (length(weights) != n_obs) {
         stop("Length of `weights` does not equal to the number of obserations.")
@@ -190,7 +189,7 @@ GenEL <- R6::R6Class(
       private$check_G(G)
       n_obs <- GenEL_get_n_obs(private$.GEL)
       if (missing(weights) || is.null(weights)) {
-        weights <- rep(1.0/(n_obs), n_obs)
+        weights <- rep(1.0, n_obs)
       }
       if (length(weights) != n_obs) {
         stop("Length of `weights` does not equal to the number of obserations.")

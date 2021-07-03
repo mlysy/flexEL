@@ -3,7 +3,7 @@ title: "<code>flexEL</code>: A Fast and Flexible Framework for Empirical Likelih
 author: "Shimeng Huang, Martin Lysy"
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
+  bookdown::html_document2:
     toc: true
 vignette: >
   %\VignetteIndexEntry{flexEL}
@@ -37,9 +37,9 @@ header-include:
 
 ## The Empirical Likelihood Framework
 
-The Empirical Likelhood (EL) framework for regression is a semi-parametric model where inference about the regression parameters is conducted through maximizing the log EL function subject to specified moment conditions or estimating equations. 
+The Empirical Likelihood (EL) framework for regression is a semi-parametric model where inference about the regression parameters is conducted through maximizing the log EL function subject to specified moment conditions or estimating equations. 
 
-In the following two subsections, more details about the basic EL framwork and a modified EL function when the responses are subject to right-censoring are provided.
+In the following two subsections, more details about the basic EL framework and a modified EL function when the responses are subject to right-censoring are provided.
 
 ### Basic EL framework
 
