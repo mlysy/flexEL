@@ -121,6 +121,14 @@ GenEL_weighted_logel_grad <- function(pGEL, G, weights, verbose) {
     .Call(`_flexEL_MeanRegLS_EvalG`, y, X, Z, beta, gamma, sig2)
 }
 
+.MeanRegEvaldGdt <- function(y, X, beta) {
+    .Call(`_flexEL_MeanRegEvaldGdt`, y, X, beta)
+}
+
+.MeanRegLSEvaldGdt <- function(y, X, Z, beta, gamma, sig2) {
+    .Call(`_flexEL_MeanRegLSEvaldGdt`, y, X, Z, beta, gamma, sig2)
+}
+
 .QuantRegEvalG <- function(y, X, tauArr, Beta) {
     .Call(`_flexEL_QuantRegEvalG`, y, X, tauArr, Beta)
 }

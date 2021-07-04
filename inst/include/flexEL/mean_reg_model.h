@@ -29,10 +29,10 @@ class MeanRegModel {
   
   private:
     
-    RowVectorXd yXb_; // y - X*beta
+    RowVectorXd yXb_; // y-X*beta
     RowVectorXd eZg_; // exp(-Z*gamma)
-    RowVectorXd yXbeZg_; // (y - X*beta)*exp(-Z*gamma)
-    RowVectorXd yXbeZg2_; // (y - X*beta)^2*exp(-2*Z*gamma)
+    RowVectorXd yXbeZg_; // (y-X*beta)*exp(-Z*gamma)
+    RowVectorXd yXbeZg2_; // (y-X*beta)^2*exp(-2*Z*gamma)
     MatrixXd tG_; // t(G)
     int n_bet_, n_gam_; // dimensions of beta and gamma
     VectorXd y_; // vector of responses
@@ -62,13 +62,22 @@ class MeanRegModel {
                   const Ref<const MatrixXd>& X,
                   const Ref<const MatrixXd>& Z);
     
-    // evalutate G matrix
-    void EvalG(Ref<MatrixXd> G, 
-               const Ref<const VectorXd>& beta);
-    void EvalG(Ref<MatrixXd> G,
-               const Ref<const VectorXd>& beta,
-               const Ref<const VectorXd>& gamma,
-               const double& sig2);
+    // evaluate G matrix
+    void eval_G(Ref<MatrixXd> G, 
+                const Ref<const VectorXd>& beta);
+    void eval_G(Ref<MatrixXd> G,
+                const Ref<const VectorXd>& beta,
+                const Ref<const VectorXd>& gamma,
+                const double& sig2);
+    
+    // evaluate dGdt 
+    // (p+q+1) x (p+q+1) x n_obs tensor in a (n_obs x (p+q+1)) x (p+q+1) matrix
+    void eval_dGdt(Ref<MatrixXd> dGdt,
+                   const Ref<const VectorXd>& beta);
+    void eval_dGdt(Ref<MatrixXd> dGdt,
+                   const Ref<const VectorXd>& beta,
+                   const Ref<const VectorXd>& gamma,
+                   const double& sig2);
     
     // get functions
     int get_n_obs();
@@ -95,7 +104,7 @@ inline flexEL::MeanRegModel::MeanRegModel(){}
 */
 inline flexEL::MeanRegModel::MeanRegModel(int n_obs, int n_eqs) {
   n_obs_ = n_obs;
-  n_eqs_ = n_eqs; // X gets passed as nBet x n_obs matrix
+  n_eqs_ = n_eqs; // X gets passed as n_bet x n_obs matrix
   // TODO: pre-allocate space for data?
   // y_ = VectorXd::Zero(n_obs_);
 }
@@ -104,14 +113,14 @@ inline flexEL::MeanRegModel::MeanRegModel(int n_obs, int n_eqs) {
  * @brief Constructor for MeanRegModel with data as inputs (location model).
  * 
  * @param[in] y      Responses of length <code>n_obs</code>.
- * @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param[in] X      Covariate matrix of dimension <code>n_bet</code> x <code>n_obs</code>.
  */
 inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
                                           const Ref<const MatrixXd>& X) {
   y_ = y;
   X_ = X;
   n_obs_ = y.size();
-  n_bet_ = X.rows(); // X gets passed as nBet x n_obs matrix
+  n_bet_ = X.rows(); // X gets passed as n_bet x n_obs matrix
   n_gam_ = 0;
   n_eqs_ = n_bet_;
 }
@@ -120,8 +129,8 @@ inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
  * @brief Constructor for MeanRegModel with data as inputs (location-scale model).
  * 
  * @param[in] y      Responses of length <code>n_obs</code>.
- * @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
- * @param[in] Z      Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>.
+ * @param[in] X      Covariate matrix of dimension <code>n_bet</code> x <code>n_obs</code>.
+ * @param[in] Z      Covariate matrix of dimension <code>n_gam</code> x <code>n_obs</code>.
  */
 inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
                                           const Ref<const MatrixXd>& X,
@@ -130,8 +139,8 @@ inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
   X_ = X;
   Z_ = Z;
   n_obs_ = y.size();
-  n_bet_ = X.rows(); // X gets passed as nBet x n_obs matrix
-  n_gam_ = Z.rows(); // Z gets passed as nGam x n_obs matrix
+  n_bet_ = X.rows(); // X gets passed as n_bet x n_obs matrix
+  n_gam_ = Z.rows(); // Z gets passed as n_gam x n_obs matrix
   n_eqs_ = n_bet_+n_gam_+1;
 }
 
@@ -140,14 +149,14 @@ inline flexEL::MeanRegModel::MeanRegModel(const Ref<const VectorXd>& y,
 * @brief Set data for mean regression location model.
 * 
 * @param[in] y      Responses of length <code>n_obs</code>.
-* @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+* @param[in] X      Covariate matrix of dimension <code>n_bet</code> x <code>n_obs</code>.
 */
 inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
                                            const Ref<const MatrixXd>& X) {
   y_ = y;
   X_ = X;
   n_obs_ = y.size();
-  n_bet_ = X.rows(); // X gets passed as nBet x n_obs matrix
+  n_bet_ = X.rows(); // X gets passed as n_bet x n_obs matrix
   n_gam_ = 0;
   n_eqs_ = n_bet_;
 }
@@ -157,8 +166,8 @@ inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
 * @brief Set data for mean regression location-scale model.
 * 
 * @param[in] y      Responses of length <code>n_obs</code>.
-* @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
-* @param[in] Z      Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>.
+* @param[in] X      Covariate matrix of dimension <code>n_bet</code> x <code>n_obs</code>.
+* @param[in] Z      Covariate matrix of dimension <code>n_gam</code> x <code>n_obs</code>.
 */
 inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
                                            const Ref<const MatrixXd>& X,
@@ -167,8 +176,8 @@ inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
   X_ = X;
   Z_ = Z;
   n_obs_ = y.size();
-  n_bet_ = X.rows(); // X gets passed as nBet x n_obs matrix
-  n_gam_ = Z.rows(); // Z gets passed as nGam x n_obs matrix
+  n_bet_ = X.rows(); // X gets passed as n_bet x n_obs matrix
+  n_gam_ = Z.rows(); // Z gets passed as n_gam x n_obs matrix
   n_eqs_ = n_bet_+n_gam_+1;
 }
 
@@ -179,7 +188,7 @@ inline void flexEL::MeanRegModel::set_data(const Ref<const VectorXd>& y,
 * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
 * @param[in] beta     Coefficient vector of length <code>n_bet_</code> in linear location function.
 */
-inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G, const Ref<const VectorXd>& beta) {
+inline void flexEL::MeanRegModel::eval_G(Ref<MatrixXd> G, const Ref<const VectorXd>& beta) {
   yXb_ = y_.transpose() - beta.transpose() * X_;
   tG_ = X_.transpose();
   tG_.array().colwise() *= yXb_.transpose().array();
@@ -191,14 +200,14 @@ inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G, const Ref<const VectorX
 * @brief Evaluate G matrix for mean regression location-scale model.
 *
 * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
-* @param[in] beta     Coefficient vector of length <code>nBet</code> in linear location function.
-* @param[in] gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
+* @param[in] beta     Coefficient vector of length <code>n_bet</code> in linear location function.
+* @param[in] gamma    Coefficient vector of length <code>n_gam</code> in exponential scale function.
 * @param[in] sig2     Scale parameter in scale function.
 */
-inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G, 
-                                        const Ref<const VectorXd>& beta,
-                                        const Ref<const VectorXd>& gamma,
-                                        const double &sig2) {
+inline void flexEL::MeanRegModel::eval_G(Ref<MatrixXd> G, 
+                                         const Ref<const VectorXd>& beta,
+                                         const Ref<const VectorXd>& gamma,
+                                         const double &sig2) {
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
@@ -210,6 +219,62 @@ inline void flexEL::MeanRegModel::EvalG(Ref<MatrixXd> G,
   tG_.block(0,n_bet_,n_obs_,n_gam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array());
   tG_.rightCols(1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
   G = tG_.transpose();
+}
+
+/**
+ * @brief Evaluate derivative of G matrix w.r.t beta for mean regression location model.
+ * 
+ * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] beta     Coefficient vector of length <code>n_bet_</code> in linear location function.
+ */
+inline void flexEL::MeanRegModel::eval_dGdt(Ref<MatrixXd> dGdt, 
+                                            const Ref<const VectorXd>& beta) {
+  for(int ii=0; ii<n_obs_; ii++) {
+    dGdt.block(ii*n_bet_,0,n_bet_,n_bet_) = -X_.col(ii)*X_.col(ii).transpose();
+  }
+}
+
+/**
+ * @brief Evaluate derivative of G matrix w.r.t theta for mean regression location-scale model.
+ *
+ * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] beta     Coefficient vector of length <code>n_bet</code> in linear location function.
+ * @param[in] gamma    Coefficient vector of length <code>n_gam</code> in exponential scale function.
+ * @param[in] sig2     Scale parameter in scale function.
+ */
+inline void flexEL::MeanRegModel::eval_dGdt(Ref<MatrixXd> dGdt,
+                                            const Ref<const VectorXd>& beta,
+                                            const Ref<const VectorXd>& gamma,
+                                            const double& sig2) {
+  eZg_.array() = (-gamma.transpose()*Z_).array().exp();
+  yXb_ = y_.transpose() - beta.transpose() * X_;
+  // std::cout << "eZg_ = " << eZg_.transpose() << std::endl;
+  // std::cout << "yXb_ = " << yXb_.transpose() << std::endl;
+  // std::cout << "yXb_*yXb_ = " << yXb_*yXb_ << std::endl;
+  // std::cout << "sig2*sig2 = " << sig2*sig2 << std::endl;
+  double eZg2_ii;
+  double yXb_ii;
+  for(int ii=0; ii<n_obs_; ii++) {
+    int br_start = ii*(n_bet_+n_gam_+1);
+    eZg2_ii = eZg_(ii)*eZg_(ii);
+    yXb_ii = yXb_(ii);
+    // std::cout << "eZg2_ii = " << eZg2_ii << std::endl;
+    // std::cout << "yXb_ii = " << yXb_ii << std::endl;
+    // dGi/db
+    dGdt.block(br_start,0,n_bet_,n_bet_) = -eZg2_ii*X_.col(ii)*X_.col(ii).transpose();
+    dGdt.block(br_start+n_bet_,0,n_gam_,n_bet_) = 2/sig2*eZg2_ii*yXb_ii*Z_.col(ii)*X_.col(ii).transpose();
+    dGdt.block(br_start+n_bet_+n_gam_,0,1,n_bet_) = -2/sig2*eZg2_ii*yXb_ii*X_.col(ii).transpose();
+    // dGi/dg
+    dGdt.block(br_start,n_bet_,n_bet_,n_gam_) = -2*eZg2_ii*yXb_ii*X_.col(ii)*Z_.col(ii).transpose();
+    dGdt.block(br_start+n_bet_,n_bet_,n_gam_,n_gam_) = 2/sig2*eZg2_ii*yXb_ii*yXb_ii*Z_.col(ii)*Z_.col(ii).transpose();
+    dGdt.block(br_start+n_bet_+n_gam_,n_bet_,1,n_gam_) = -2/sig2*eZg2_ii*yXb_ii*yXb_ii*Z_.col(ii).transpose();
+    // dGi/ds2
+    dGdt.block(br_start,n_bet_+n_gam_,n_bet_,1) = VectorXd::Zero(n_bet_);
+    dGdt.block(br_start+n_bet_,n_bet_+n_gam_,n_gam_,1) = 1/(sig2*sig2)*eZg2_ii*yXb_ii*yXb_ii*Z_.col(ii);
+    // std::cout << "dGi/ds2 = " << -1/(sig2*sig2)*eZg2_ii*yXb_ii*yXb_ii << std::endl;
+    // std::cout << "dGdt.block(br_start+n_bet_+n_gam_,n_bet_+n_gam_,1,1) = " << dGdt.block(br_start+n_bet_+n_gam_,n_bet_+n_gam_,1,1) << std::endl;
+    dGdt.block(br_start+n_bet_+n_gam_,n_bet_+n_gam_,1,1).array() = -1/(sig2*sig2)*eZg2_ii*yXb_ii*yXb_ii;
+  }
 }
 
 /**

@@ -374,6 +374,35 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// MeanRegEvaldGdt
+Eigen::MatrixXd MeanRegEvaldGdt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta);
+RcppExport SEXP _flexEL_MeanRegEvaldGdt(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(MeanRegEvaldGdt(y, X, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// MeanRegLSEvaldGdt
+Eigen::MatrixXd MeanRegLSEvaldGdt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
+RcppExport SEXP _flexEL_MeanRegLSEvaldGdt(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
+    rcpp_result_gen = Rcpp::wrap(MeanRegLSEvaldGdt(y, X, Z, beta, gamma, sig2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // QuantRegEvalG
 Eigen::MatrixXd QuantRegEvalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::MatrixXd Beta);
 RcppExport SEXP _flexEL_QuantRegEvalG(SEXP ySEXP, SEXP XSEXP, SEXP tauArrSEXP, SEXP BetaSEXP) {
@@ -484,6 +513,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_weighted_logel_grad", (DL_FUNC) &_flexEL_GenEL_weighted_logel_grad, 4},
     {"_flexEL_MeanReg_evalG", (DL_FUNC) &_flexEL_MeanReg_evalG, 3},
     {"_flexEL_MeanRegLS_EvalG", (DL_FUNC) &_flexEL_MeanRegLS_EvalG, 6},
+    {"_flexEL_MeanRegEvaldGdt", (DL_FUNC) &_flexEL_MeanRegEvaldGdt, 3},
+    {"_flexEL_MeanRegLSEvaldGdt", (DL_FUNC) &_flexEL_MeanRegLSEvaldGdt, 6},
     {"_flexEL_QuantRegEvalG", (DL_FUNC) &_flexEL_QuantRegEvalG, 4},
     {"_flexEL_QuantRegLSEvalG", (DL_FUNC) &_flexEL_QuantRegLSEvalG, 8},
     {"_flexEL_QuantRegEvalGSmooth", (DL_FUNC) &_flexEL_QuantRegEvalGSmooth, 5},
