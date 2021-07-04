@@ -149,7 +149,7 @@ This paper introduces \pkg{flexEL}, a fast and flexible framework for implementi
 
 % %   \title{true}
 %   % % % %   \author{true \\ true}
-%   % % %   %   \date{2021-05-27}
+%   % % %   %   \date{2021-07-03}
 %
 \usepackage{caption}
 \captionsetup[table]{skip=.1em}
@@ -514,7 +514,7 @@ The following script creates a function in C++ that can be exported to \proglang
 
 \PreprocessorTok{\#include }\ImportTok{\textless{}Rcpp.h\textgreater{}}
 \PreprocessorTok{\#include }\ImportTok{\textless{}RcppEigen.h\textgreater{}}
-\PreprocessorTok{\#include }\ImportTok{\textless{}flexEL/inner\_el.h\textgreater{}}
+\PreprocessorTok{\#include }\ImportTok{\textless{}flexEL/gen\_el.h\textgreater{}}
 \PreprocessorTok{\#include }\ImportTok{\textless{}flexEL/mean\_reg\_model.h\textgreater{}}
 
 \CommentTok{// [[Rcpp::export]]}
@@ -561,16 +561,16 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 0.9726822 1.9760279
+[1] 0.9973199 1.9856691
 
 $gradient
-[1]  0.0003144578 -0.0001304849
+[1] -9.094947e-07 -1.145073e-06
 
 $code
 [1] 1
 
 $iterations
-[1] 8
+[1] 7
 \end{verbatim}
 
 If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
@@ -595,16 +595,16 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 0.9726822 1.9760279
+[1] 0.9973199 1.9856691
 
 $gradient
-[1]  0.0003144578 -0.0001304849
+[1] -9.094947e-07 -1.145073e-06
 
 $code
 [1] 1
 
 $iterations
-[1] 8
+[1] 7
 \end{verbatim}
 
 The usage is similar with right-censored outcomes, e.g.~using \proglang{R}:
@@ -635,16 +635,16 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 0.9726822 1.9760279
+[1] 0.9973199 1.9856691
 
 $gradient
-[1]  0.0003144578 -0.0001304849
+[1] -9.094947e-07 -1.145073e-06
 
 $code
 [1] 1
 
 $iterations
-[1] 8
+[1] 7
 \end{verbatim}
 
 \hypertarget{quantile-regression}{%
@@ -786,14 +786,14 @@ Then one can use e.g.~\texttt{optim} to obtain the estimate of \(\beta\):
 
 \begin{verbatim}
 $par
-[1] 0.8961717 1.9952144
+[1] 1.038329 2.078009
 
 $value
 [1] 1065.964
 
 $counts
 function gradient
-      37        8
+      28        8
 
 $convergence
 [1] 0

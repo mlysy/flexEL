@@ -3,7 +3,7 @@
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <flexEL/inner_el.h>
+#include <flexEL/gen_el.h>
 #include <flexEL/mean_reg_model.h>
 
 // [[Rcpp::export]]
