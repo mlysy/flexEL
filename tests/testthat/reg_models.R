@@ -22,11 +22,10 @@ mrls_evalG_R <- function(y, X, Z, beta, gamma, sig2) {
   yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
   yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
   G[,1:nBeta] <- yXbeZg * eZg * X
-  G[,nBeta+1:nGamma] <- (1-yXbeZg2) * Z
+  G[,nBeta+1:nGamma] <- (1-yXbeZg2/sig2) * Z
   G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
   return(G)
 }
-
 
 # ---- quantile regression ----
 

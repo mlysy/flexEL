@@ -216,7 +216,7 @@ inline void flexEL::MeanRegModel::eval_G(Ref<MatrixXd> G,
   tG_.block(0,0,n_obs_,n_bet_) = X_.transpose();
   tG_.block(0,0,n_obs_,n_bet_).array().colwise() *= yXbeZg_.transpose().array() * eZg_.transpose().array();
   tG_.block(0,n_bet_,n_obs_,n_gam_) = Z_.transpose();
-  tG_.block(0,n_bet_,n_obs_,n_gam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array());
+  tG_.block(0,n_bet_,n_obs_,n_gam_).array().colwise() *= (1.0-yXbeZg2_.transpose().array()/sig2);
   tG_.rightCols(1).array() = 1/sig2*yXbeZg2_.transpose().array()-1;
   G = tG_.transpose();
 }

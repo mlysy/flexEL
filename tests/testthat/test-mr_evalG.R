@@ -30,7 +30,7 @@ reorg_jacobian <- function(jac, n, p) {
   do.call(rbind, lm)
 }
 
-test_that("dGdt matches numDeriv's jacobian", {
+test_that("mr dGdt matches numDeriv's jacobian", {
   for(ii in 1:ntest) {
     # Location model + mean regression
     n <- sample(10:20,1)
