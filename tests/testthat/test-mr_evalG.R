@@ -38,7 +38,7 @@ test_that("mr dGdt matches numDeriv's jacobian", {
     X <- replicate(p, rnorm(n))
     beta0 <- rnorm(p)
     y <- c(X %*% beta0) + rnorm(n) # with N(0,1) error term
-    dGdt_cpp <- flexEL:::.MeanRegEvaldGdt(y, t(X), beta0)
+    dGdt_cpp <- flexEL:::MeanReg_dGdt(y, t(X), beta0)
     mr_evalG_fix <- function(bb) {
       flexEL::mr_evalG(y, X, bb)
     }

@@ -18,7 +18,7 @@ test_that("mrls_evalG_R == mrls_evalG_cpp", {
     beta <- rnorm(p)
     gamma <- rnorm(q)
     sig2 <- abs(rnorm(1)) # scale parameter
-    y <- c(X %*% beta + exp(Z %*% gamma)) + rnorm(n) # with N(0,1) error term
+    y <- c(X %*% beta + sqrt(sig2) * exp(Z %*% gamma)) + rnorm(n) # with N(0,1) error term
     max_iter <- sample(c(2, 10, 100), 1)
     rel_tol <- runif(1, 1e-6, 1e-5)
     # checking G matrix from cpp and R
@@ -48,7 +48,7 @@ test_that("mrls dGdt matches numDeriv's jacobian", {
     gamma <- rnorm(q)
     sig2 <- abs(rnorm(1)) # scale parameter
     y <- c(X %*% beta + exp(Z %*% gamma)) + rnorm(n) # with N(0,1) error term
-    dGdt_cpp <- flexEL:::.MeanRegLSEvaldGdt(y, t(X), t(Z), beta, gamma, sig2)
+    dGdt_cpp <- flexEL:::MeanRegLS_dGdt(y, t(X), t(Z), beta, gamma, sig2)
     mrls_evalG_fix <- function(tt) {
       flexEL::mrls_evalG(y, X, Z, tt[1:p], tt[(p+1):(p+q)], tt[p+q+1])
     }

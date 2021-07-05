@@ -113,20 +113,20 @@ GenEL_weighted_logel_grad <- function(pGEL, G, weights, verbose) {
     .Call(`_flexEL_GenEL_weighted_logel_grad`, pGEL, G, weights, verbose)
 }
 
-.MeanRegEvalG <- function(y, X, beta) {
+MeanReg_evalG <- function(y, X, beta) {
     .Call(`_flexEL_MeanReg_evalG`, y, X, beta)
 }
 
-.MeanRegLSEvalG <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_flexEL_MeanRegLS_EvalG`, y, X, Z, beta, gamma, sig2)
+MeanRegLS_evalG <- function(y, X, Z, beta, gamma, sig2) {
+    .Call(`_flexEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
 }
 
-.MeanRegEvaldGdt <- function(y, X, beta) {
-    .Call(`_flexEL_MeanRegEvaldGdt`, y, X, beta)
+MeanReg_dGdt <- function(y, X, beta) {
+    .Call(`_flexEL_MeanReg_dGdt`, y, X, beta)
 }
 
-.MeanRegLSEvaldGdt <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_flexEL_MeanRegLSEvaldGdt`, y, X, Z, beta, gamma, sig2)
+MeanRegLS_dGdt <- function(y, X, Z, beta, gamma, sig2) {
+    .Call(`_flexEL_MeanRegLS_dGdt`, y, X, Z, beta, gamma, sig2)
 }
 
 .QuantRegEvalG <- function(y, X, tauArr, Beta) {

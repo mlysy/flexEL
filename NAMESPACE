@@ -2,7 +2,10 @@
 
 export(CensEL)
 export(GenEL)
+export(MeanRegEL)
+export(mr_dGdt)
 export(mr_evalG)
+export(mrls_dGdt)
 export(mrls_evalG)
 export(qr_evalG)
 export(qrls_evalG)

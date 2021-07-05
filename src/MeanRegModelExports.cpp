@@ -20,7 +20,7 @@ using namespace Eigen;
  * @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
  * @param[in] beta   Coefficient vector of length <code>n_bet_</code> in linear location function.
  */
-// [[Rcpp::export(".MeanRegEvalG")]]
+// [[Rcpp::export]]
 Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, 
                               Eigen::MatrixXd X, 
                               Eigen::VectorXd beta) {
@@ -40,8 +40,8 @@ Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y,
  * @param[in] gamma  Coefficient vector of length <code>nGam</code> in exponential scale function.
  * @param[in] sig2   Scale parameter in scale function.
  */
-// [[Rcpp::export(".MeanRegLSEvalG")]]
-Eigen::MatrixXd MeanRegLS_EvalG(Eigen::VectorXd y, 
+// [[Rcpp::export]]
+Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, 
                                 Eigen::MatrixXd Z,
                                 Eigen::VectorXd beta, 
@@ -60,8 +60,8 @@ Eigen::MatrixXd MeanRegLS_EvalG(Eigen::VectorXd y,
  * @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
  * @param[in] beta   Coefficient vector of length <code>n_bet_</code> in linear location function.
  */
-// [[Rcpp::export(".MeanRegEvaldGdt")]]
-Eigen::MatrixXd MeanRegEvaldGdt(Eigen::VectorXd y, 
+// [[Rcpp::export]]
+Eigen::MatrixXd MeanReg_dGdt(Eigen::VectorXd y, 
                                 Eigen::MatrixXd X, 
                                 Eigen::VectorXd beta) {
   flexEL::MeanRegModel MR(y, X);
@@ -80,8 +80,8 @@ Eigen::MatrixXd MeanRegEvaldGdt(Eigen::VectorXd y,
  * @param[in] gamma  Coefficient vector of length <code>nGam</code> in exponential scale function.
  * @param[in] sig2   Scale parameter in scale function.
  */
-// [[Rcpp::export(".MeanRegLSEvaldGdt")]]
-Eigen::MatrixXd MeanRegLSEvaldGdt(Eigen::VectorXd y, 
+// [[Rcpp::export]]
+Eigen::MatrixXd MeanRegLS_dGdt(Eigen::VectorXd y, 
                                   Eigen::MatrixXd X, 
                                   Eigen::MatrixXd Z,
                                   Eigen::VectorXd beta, 

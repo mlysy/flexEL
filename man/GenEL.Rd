@@ -2,7 +2,7 @@
 % Please edit documentation in R/class_GenEL.R
 \name{GenEL}
 \alias{GenEL}
-\title{General EL objects}
+\title{General EL class}
 \description{
 R6 class for EL with general moment specification.
 }

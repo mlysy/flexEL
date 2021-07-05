@@ -1,4 +1,4 @@
-#' @title Right-censored regression EL class.
+#' @title Right-censored regression EL class
 #' 
 #' @description R6 class for EL regression with right-censored responses.
 #' 

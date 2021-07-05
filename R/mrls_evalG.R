@@ -21,6 +21,6 @@ mrls_evalG <- function(y, X, Z, beta, gamma, sig2) {
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
   if (nrow(Z) != length(y)) stop("y and Z have inconsistent dimensions.")
-  G <- .MeanRegLSEvalG(y, t(X), t(Z), beta, gamma, sig2)
+  G <- MeanRegLS_evalG(y, t(X), t(Z), beta, gamma, sig2)
   return(t(G))
 }
