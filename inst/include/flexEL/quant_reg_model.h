@@ -14,85 +14,100 @@ using namespace Eigen;
 /* --------------------------------------------------------------------------- */
 
 /**
-* @brief EL namespace
-* 
-* Wrap the exported library components into a namespace called \b el to avoid potential naming conflicts with other libraries or user-defined headers.
-*/
+ * @brief EL namespace
+ * 
+ * Wrap the exported library components into a namespace called \b el to avoid potential naming conflicts with other libraries or user-defined headers.
+ */
 namespace flexEL {
+
+/**
+ * @file       quant_reg_model.h
+ * 
+ * @class      QuantRegModel
+ * 
+ * @brief      A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile regressions.
+ */
+class QuantRegModel {
+private:
   
-  /**
-  * @file       quant_reg_model.h
-  * 
-  * @class      QuantRegModel
-  * 
-  * @brief      A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile regressions.
-  */
-  class QuantRegModel {
-  private:
-    
-    RowVectorXd yXb_;
-    RowVectorXd eZg_;
-    RowVectorXd yXbeZg_;
-    RowVectorXd yXbeZg2_;
-    MatrixXd tG_;
-    int n_bet_, n_gam_, n_qts_; // nQts is the number of quantile levels
-    VectorXd y_;
-    MatrixXd X_;
-    MatrixXd Z_;
-    double *tau; // an array of quantile levels
-    
-    double phi_tau(double u, double tau); 
-    double phi_tau_smooth(double u, double tau, double s); 
-    
-  protected:
-    
-    int n_obs_; /**< number of observations (number of columns of G) */
-    int n_eqs_; /**< number of estimating equations (number of rows of G) */
+  RowVectorXd yXb_;
+  RowVectorXd eZg_;
+  RowVectorXd yXbeZg_;
+  RowVectorXd yXbeZg2_;
+  MatrixXd tG_;
+  int n_bet_, n_gam_, n_qts_; // nQts is the number of quantile levels
+  VectorXd y_;
+  MatrixXd X_;
+  MatrixXd Z_;
+  double *tau; // an array of quantile levels
   
-  public:
-    
-    // constructors
-    QuantRegModel();
-    QuantRegModel(int n_obs, int n_eqs);
-    QuantRegModel(const Ref<const VectorXd>& y,
-                  const Ref<const MatrixXd>& X,
-                  void* params);
-    QuantRegModel(const Ref<const VectorXd>& y,
-                  const Ref<const MatrixXd>& X,
-                  const Ref<const MatrixXd>& Z,
-                  void* params);
-    
-    // set data functions
-    void set_data(const Ref<const VectorXd>& y, 
-                  const Ref<const MatrixXd>& X,
-                  void* params); // set data with default ctor
-    void set_data(const Ref<const VectorXd>& y, 
-                  const Ref<const MatrixXd>& X,
-                  const Ref<const MatrixXd>& Z,
-                  void* params); // set data with default ctor
-    
-    // evaluate G matrix
-    void EvalG(Ref<MatrixXd> G, const Ref<const MatrixXd>& Beta);
-    void EvalG(Ref<MatrixXd> G, 
-               const Ref<const VectorXd>& beta, 
-               const Ref<const VectorXd>& gamma,
-               const double& sig2, // sig2 should be a scalar
-               const Ref<const VectorXd>& nu);
-    void EvalGSmooth(Ref<MatrixXd> G, 
+  double phi_tau(double u, double tau); 
+  double phi_tau_smooth(double u, double tau, double s); 
+  double psi_tau_smooth(double u, double tau, double s); 
+  
+protected:
+  
+  int n_obs_; /**< number of observations (number of columns of G) */
+  int n_eqs_; /**< number of estimating equations (number of rows of G) */
+
+public:
+  
+  // constructors
+  QuantRegModel();
+  QuantRegModel(int n_obs, int n_eqs);
+  QuantRegModel(const Ref<const VectorXd>& y,
+                const Ref<const MatrixXd>& X,
+                void* params);
+  QuantRegModel(const Ref<const VectorXd>& y,
+                const Ref<const MatrixXd>& X,
+                const Ref<const MatrixXd>& Z,
+                void* params);
+  
+  // set data functions
+  void set_data(const Ref<const VectorXd>& y, 
+                const Ref<const MatrixXd>& X,
+                void* params); // set data with default ctor
+  void set_data(const Ref<const VectorXd>& y, 
+                const Ref<const MatrixXd>& X,
+                const Ref<const MatrixXd>& Z,
+                void* params); // set data with default ctor
+  
+  // evaluate G matrix
+  void eval_G(Ref<MatrixXd> G, const Ref<const MatrixXd>& Beta);
+  void eval_G(Ref<MatrixXd> G, 
+              const Ref<const VectorXd>& beta, 
+              const Ref<const VectorXd>& gamma,
+              const double& sig2, // sig2 should be a scalar
+              const Ref<const VectorXd>& nu);
+  void eval_G_smooth(Ref<MatrixXd> G, 
                      const Ref<const MatrixXd>& Beta, 
                      const double s);
-    void EvalGSmooth(Ref<MatrixXd> G,
+  void eval_G_smooth(Ref<MatrixXd> G,
                      const Ref<const VectorXd>& beta,
                      const Ref<const VectorXd>& gamma,
                      const double& sig2, // sig2 should be a scalar
                      const Ref<const VectorXd>& nu,
                      const double s);
-    
-    // get functions
-    int get_n_obs();
-    int get_n_eqs();
-    
-  };
+  
+  // evaluate dGdt
+  void eval_dGdt_smooth(Ref<MatrixXd> dGdt, 
+                        const Ref<const MatrixXd>& Beta, 
+                        const double s);
+  void eval_dGdt_smooth(Ref<MatrixXd> dGdt,
+                        const Ref<const VectorXd>& beta,
+                        const Ref<const VectorXd>& gamma,
+                        const double& sig2, // sig2 should be a scalar
+                        const Ref<const VectorXd>& nu,
+                        const double s);
+  
+  // get functions
+  int get_n_obs();
+  int get_n_eqs();
+  int get_n_bet();
+  int get_n_gam();
+  int get_n_qts();
+  
+};
 }
 
 /* --------------------------------------------------------------------------- */
@@ -101,26 +116,40 @@ namespace flexEL {
 
 // 1st derivative of rho_tau
 /**
-* @brief First derivative of the check function.
-* 
-* @param[in] u     Argument of check function.
-* @param[in] tau   Quantile level (0 < tau < 1).
-*/
+ * @brief First derivative of the check function.
+ * 
+ * @param[in] u     Argument of check function.
+ * @param[in] tau   Quantile level (0 < tau < 1).
+ */
 inline double flexEL::QuantRegModel::phi_tau(double u, double tau) {
-  return((u <= 0) - tau);
+  // return((u <= 0) - tau);
+  return(tau - (u <= 0));
 }
 
 // 1st derivative of rho_tau_smooth
 /**
-* @brief First derivative of the smoothed check function.
-* 
-* @param[in] u     Argument of check function.
-* @param[in] tau   Quantile level  (0 < tau < 1).
-* @param[in] s     Smoothing parameter (s > 0).
-*/
+ * @brief First derivative of the smoothed check function.
+ * 
+ * @param[in] u     Argument of check function.
+ * @param[in] tau   Quantile level  (0 < tau < 1).
+ * @param[in] s     Smoothing parameter (s > 0).
+ */
 inline double flexEL::QuantRegModel::phi_tau_smooth(double u, double tau, double s) {
   return(tau-ind_smooth(u,s)-u*ind1_smooth(u,s));
 }
+
+// 2nd derivative of rho_tau_smooth
+/**
+ * @brief First derivative of the smoothed check function.
+ * 
+ * @param[in] u     Argument of check function.
+ * @param[in] tau   Quantile level  (0 < tau < 1).
+ * @param[in] s     Smoothing parameter (s > 0).
+ */
+inline double flexEL::QuantRegModel::psi_tau_smooth(double u, double tau, double s) {
+  return(-2*ind1_smooth(u,s)-u*ind2_smooth(u,s));
+}
+
 
 /* --------------------------------------------------------------------------- */
 
@@ -128,16 +157,16 @@ inline double flexEL::QuantRegModel::phi_tau_smooth(double u, double tau, double
 
 // ctors
 /**
-* @brief Default constructor for QuantRegModel.
-*/
+ * @brief Default constructor for QuantRegModel.
+ */
 inline flexEL::QuantRegModel::QuantRegModel(){}
 
 /**
-* @brief Constructor for QuantRegModel with dimensions as inputs.
-* 
-* @param[in] n_obs    Number of observations.
-* @param[in] n_eqs    Number of estimating equations.
-*/
+ * @brief Constructor for QuantRegModel with dimensions as inputs.
+ * 
+ * @param[in] n_obs    Number of observations.
+ * @param[in] n_eqs    Number of estimating equations.
+ */
 inline flexEL::QuantRegModel::QuantRegModel(int n_obs, int n_eqs) {
   n_obs_ = n_obs;
   n_eqs_ = n_eqs; // X gets passed as nBet x n_obs matrix
@@ -192,12 +221,12 @@ inline flexEL::QuantRegModel::QuantRegModel(const Ref<const VectorXd>& y,
 
 // set_data (with default ctor)
 /**
-* @brief Set data for quantile regression location model.
-* 
-* @param[in] y      Responses of length <code>n_obs</code>.
-* @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
-* @param[in] params   An array of quantile levels.
-*/
+ * @brief Set data for quantile regression location model.
+ * 
+ * @param[in] y      Responses of length <code>n_obs</code>.
+ * @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param[in] params   An array of quantile levels.
+ */
 inline void flexEL::QuantRegModel::set_data(const Ref<const VectorXd>& y,
                                             const Ref<const MatrixXd>& X,
                                             void* params) {
@@ -215,13 +244,13 @@ inline void flexEL::QuantRegModel::set_data(const Ref<const VectorXd>& y,
 
 // set_data (location-scale model) (with default ctor)
 /**
-* @brief Set data for quantile regression location-scale model.
-* 
-* @param[in] y      Responses of length <code>n_obs</code>.
-* @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
-* @param[in] Z      Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>.
-* @param[in] params   An array of quantile levels.
-*/
+ * @brief Set data for quantile regression location-scale model.
+ * 
+ * @param[in] y      Responses of length <code>n_obs</code>.
+ * @param[in] X      Covariate matrix of dimension <code>nBet</code> x <code>n_obs</code>.
+ * @param[in] Z      Covariate matrix of dimension <code>nGam</code> x <code>n_obs</code>.
+ * @param[in] params   An array of quantile levels.
+ */
 inline void flexEL::QuantRegModel::set_data(const Ref<const VectorXd>& y,
                                             const Ref<const MatrixXd>& X,
                                             const Ref<const MatrixXd>& Z,
@@ -241,12 +270,12 @@ inline void flexEL::QuantRegModel::set_data(const Ref<const VectorXd>& y,
 
 // multiple quantile case (location model)
 /**
-* @brief Evaluate G matrix for quantile regression location model.
-* 
-* @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
-* @param[in] Beta     Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function.
-*/
-inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, const Ref<const MatrixXd>& Beta) {
+ * @brief Evaluate G matrix for quantile regression location model.
+ * 
+ * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] Beta     Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function.
+ */
+inline void flexEL::QuantRegModel::eval_G(Ref<MatrixXd> G, const Ref<const MatrixXd>& Beta) {
   // stack multiple "Gs" for each quantile level
   for(int jj=0; jj<n_qts_; jj++) {
     for(int ii=0; ii<y_.size(); ii++) {
@@ -258,21 +287,21 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, const Ref<const Matrix
 // multiple quantile case (location-scale model)
 // Note: only nu's depend on the quantile level
 /**
-* @brief Evaluate G matrix for quantile regression location-scale model.
-* 
-* @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
-* @param[in] beta     Coefficient vector of length <code>nBet</code> in linear location function.
-* @param[in] gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
-* @param[in] sig2     Scale parameter in scale function.
-* @param[in] nu       Quantile parameters for each quantile level.
-*/
-inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G, 
-                                         const Ref<const VectorXd>& beta,
-                                         const Ref<const VectorXd>& gamma,
-                                         const double& sig2,
-                                         const Ref<const VectorXd>& nu) {
+ * @brief Evaluate G matrix for quantile regression location-scale model.
+ * 
+ * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] beta     Coefficient vector of length <code>nBet</code> in linear location function.
+ * @param[in] gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
+ * @param[in] sig2     Scale parameter in scale function.
+ * @param[in] nu       Quantile parameters for each quantile level.
+ */
+inline void flexEL::QuantRegModel::eval_G(Ref<MatrixXd> G, 
+                                          const Ref<const VectorXd>& beta,
+                                          const Ref<const VectorXd>& gamma,
+                                          const double& sig2,
+                                          const Ref<const VectorXd>& nu) {
   // TODO: warning if negative sig2?
-  // if (sig2 < 0) std::cout << "qrls.EvalG: negative variance." << std::endl;
+  // if (sig2 < 0) std::cout << "qrls.eval_G: negative variance." << std::endl;
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
@@ -302,9 +331,9 @@ inline void flexEL::QuantRegModel::EvalG(Ref<MatrixXd> G,
  * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
  * @param[in] Beta     Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function.
  */
-inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G, 
-                                               const Ref<const MatrixXd>& Beta,
-                                               const double s) {
+inline void flexEL::QuantRegModel::eval_G_smooth(Ref<MatrixXd> G, 
+                                                 const Ref<const MatrixXd>& Beta,
+                                                 const double s) {
   // stack multiple "Gs" for each quantile level
   // std::cout << "n_bet_ = " << n_bet_ << std::endl;
   for(int jj=0; jj<n_qts_; jj++) {
@@ -320,24 +349,42 @@ inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G,
   }
 }
 
+// multiple quantile case (location model)
 /**
-* @brief Evaluate G matrix for quantile regression location-scale model with smoothing.
-* 
-* @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
-* @param[in] beta     Coefficient vector of length <code>nBet</code> in linear location function.
-* @param[in] gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
-* @param[in] sig2     Scale parameter in scale function.
-* @param[in] nu       Quantile parameters for each quantile level.
-* @param[in] s        Smoothing parameter (s > 0).
-*/
-inline void flexEL::QuantRegModel::EvalGSmooth(Ref<MatrixXd> G, 
-                                               const Ref<const VectorXd>& beta,
-                                               const Ref<const VectorXd>& gamma,
-                                               const double& sig2,
-                                               const Ref<const VectorXd>& nu,
-                                               const double s) {
+ * @brief Evaluate G matrix for quantile regression location model.
+ * 
+ * @param[in] dGdt     Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] Beta     Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function.
+ */
+inline void flexEL::QuantRegModel::eval_dGdt_smooth(Ref<MatrixXd> dGdt, 
+                                                    const Ref<const MatrixXd>& Beta,
+                                                    const double s) {
+  // stack multiple "Gs" for each quantile level
+  for(int ii=0; ii<n_obs_; ii++) {
+    for(int jj=0; jj<n_qts_; jj++) {
+      dGdt.block(ii*n_bet_,jj*n_bet_,n_bet_,n_bet_) = -psi_tau_smooth(y_(ii)-X_.col(ii).transpose()*Beta.col(jj), tau[jj], s)*X_.col(ii)*X_.col(ii).transpose();
+    }
+  }
+}
+
+/**
+ * @brief Evaluate G matrix for quantile regression location-scale model with smoothing.
+ * 
+ * @param[in] G        Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved.
+ * @param[in] beta     Coefficient vector of length <code>nBet</code> in linear location function.
+ * @param[in] gamma    Coefficient vector of length <code>nGam</code> in exponential scale function.
+ * @param[in] sig2     Scale parameter in scale function.
+ * @param[in] nu       Quantile parameters for each quantile level.
+ * @param[in] s        Smoothing parameter (s > 0).
+ */
+inline void flexEL::QuantRegModel::eval_G_smooth(Ref<MatrixXd> G, 
+                                                 const Ref<const VectorXd>& beta,
+                                                 const Ref<const VectorXd>& gamma,
+                                                 const double& sig2,
+                                                 const Ref<const VectorXd>& nu,
+                                                 const double s) {
   // TODO: warning if negative sig2?
-  // if (sig2 < 0) std::cout << "qrls.EvalG: negative variance." << std::endl;
+  // if (sig2 < 0) std::cout << "qrls.eval_G: negative variance." << std::endl;
   eZg_.array() = (-gamma.transpose()*Z_).array().exp();
   yXbeZg_.array() = (y_.transpose()-beta.transpose()*X_).array() * eZg_.array();
   yXbeZg2_.array() = yXbeZg_.array()*yXbeZg_.array();
@@ -372,6 +419,27 @@ inline int flexEL::QuantRegModel::get_n_obs() {
  */
 inline int flexEL::QuantRegModel::get_n_eqs() {
   return n_eqs_;
+}
+
+/**
+ * @brief Return the number of quantiles.
+ */
+inline int flexEL::QuantRegModel::get_n_qts() {
+  return n_qts_;
+}
+
+/**
+ * @brief Return the number of parameters in the location function.
+ */
+inline int flexEL::QuantRegModel::get_n_bet() {
+  return n_bet_;
+}
+
+/**
+ * @brief Return the number of parameters in the scale function.
+ */
+inline int flexEL::QuantRegModel::get_n_gam() {
+  return n_gam_;
 }
 
 #endif

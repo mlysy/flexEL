@@ -36,7 +36,8 @@ rho_alpha <- function(u, alpha) {
 
 # 1st derivative of check function
 phi_alpha <- function(u, alpha) {
-  (u <= 0) - alpha
+  # (u <= 0) - alpha
+  alpha - (u <= 0)
 }
 
 # location model
@@ -83,7 +84,7 @@ ind1_smooth_R <- function(x, s=10) {
 
 # 2nd derivative of ind_smooth
 ind2_smooth_R <- function(x, s=10) {
-  return((-s*s*exp(s*x)*(1+exp(s*x))+2*s*s*exp(2*s*x))/(1+exp(s*x))^3)
+  return((-s*s*exp(s*x)*(1+exp(s*x))+2*s*s*exp(2*s*x))/((1+exp(s*x))^3))
 }
 
 # smoothed check function

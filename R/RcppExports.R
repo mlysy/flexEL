@@ -129,20 +129,24 @@ MeanRegLS_dGdt <- function(y, X, Z, beta, gamma, sig2) {
     .Call(`_flexEL_MeanRegLS_dGdt`, y, X, Z, beta, gamma, sig2)
 }
 
-.QuantRegEvalG <- function(y, X, tauArr, Beta) {
-    .Call(`_flexEL_QuantRegEvalG`, y, X, tauArr, Beta)
+QuantReg_evalG <- function(y, X, tauArr, Beta) {
+    .Call(`_flexEL_QuantReg_evalG`, y, X, tauArr, Beta)
 }
 
-.QuantRegLSEvalG <- function(y, X, Z, tauArr, beta, gamma, sig2, nu) {
-    .Call(`_flexEL_QuantRegLSEvalG`, y, X, Z, tauArr, beta, gamma, sig2, nu)
+QuantRegLS_evalG <- function(y, X, Z, tauArr, beta, gamma, sig2, nu) {
+    .Call(`_flexEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, nu)
 }
 
-.QuantRegEvalGSmooth <- function(y, X, tauArr, Beta, s) {
-    .Call(`_flexEL_QuantRegEvalGSmooth`, y, X, tauArr, Beta, s)
+QuantReg_evalG_smooth <- function(y, X, tauArr, Beta, s) {
+    .Call(`_flexEL_QuantReg_evalG_smooth`, y, X, tauArr, Beta, s)
 }
 
-.QuantRegLSEvalGSmooth <- function(y, X, Z, tauArr, beta, gamma, sig2, nu, s) {
-    .Call(`_flexEL_QuantRegLSEvalGSmooth`, y, X, Z, tauArr, beta, gamma, sig2, nu, s)
+QuantReg_dGdt_smooth <- function(y, X, tauArr, Beta, s) {
+    .Call(`_flexEL_QuantReg_dGdt_smooth`, y, X, tauArr, Beta, s)
+}
+
+QuantRegLS_evalG_smooth <- function(y, X, Z, tauArr, beta, gamma, sig2, nu, s) {
+    .Call(`_flexEL_QuantRegLS_evalG_smooth`, y, X, Z, tauArr, beta, gamma, sig2, nu, s)
 }
 
 .adjG <- function(G, a) {

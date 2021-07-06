@@ -43,10 +43,10 @@ qrls_evalG <- function(y, X, Z, alpha, beta, gamma, sig2, nu, s = NULL) {
   # the first entry of alpha passed to the C++ function is the number of quantile levels
   alpha <- c(length(alpha), alpha)
   if (is.null(s)) {
-    return(t(.QuantRegLSEvalG(y, t(X), t(Z), alpha, beta, gamma, sig2, nu)))
+    return(t(QuantRegLS_evalG(y, t(X), t(Z), alpha, beta, gamma, sig2, nu)))
   }
   else {
     if (s <= 0) stop("s must be a positive scalar.")
-    return(t(.QuantRegLSEvalGSmooth(y, t(X), t(Z), alpha, beta, gamma, sig2, nu, s)))
+    return(t(QuantRegLS_evalG_smooth(y, t(X), t(Z), alpha, beta, gamma, sig2, nu, s)))
   }
 }

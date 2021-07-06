@@ -56,10 +56,10 @@ qr_evalG <- function(y, X, alpha, Beta, s = NULL) {
   # the first entry of alpha passed to the C++ function is the number of quantile levels
   alpha <- c(length(alpha), alpha)
   if (is.null(s)) {
-    G <- .QuantRegEvalG(y, t(X), alpha, Beta)
+    G <- QuantReg_evalG(y, t(X), alpha, Beta)
   } else {
     if (s <= 0) stop("`s` must be a positive scalar.")
-    G <- .QuantRegEvalGSmooth(y, t(X), alpha, Beta, s)
+    G <- QuantReg_evalG_smooth(y, t(X), alpha, Beta, s)
   }
   return(t(G))
 }
