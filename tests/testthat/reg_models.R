@@ -37,7 +37,10 @@ rho_alpha <- function(u, alpha) {
 # 1st derivative of check function
 phi_alpha <- function(u, alpha) {
   # (u <= 0) - alpha
-  alpha - (u <= 0)
+  # alpha - (u <= 0)
+  ret_val <- alpha - (u <= 0)
+  ret_val[which(u == 0)] <- 0
+  ret_val
 }
 
 # location model

@@ -93,7 +93,7 @@
 %%% need tightlist which is included in pandoc header
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
+  
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newlength{\csllabelwidth}
@@ -144,13 +144,13 @@ This paper introduces \pkg{flexEL}, a fast and flexible framework for implementi
   University of Waterloo\\
   200 University Avenue West\\Ontario, Canada\\
   E-mail: \email{mlysy@uwaterloo.ca}\\
-
+  
   }
 
 % %   \title{true}
 %   % % % %   \author{true \\ true}
-%   % % %   %   \date{2021-07-03}
-%
+%   % % %   %   \date{2021-10-24}
+% 
 \usepackage{caption}
 \captionsetup[table]{skip=.1em}
 \usepackage{bm}
@@ -196,7 +196,7 @@ This paper introduces \pkg{flexEL}, a fast and flexible framework for implementi
 % % \begin{abstract}
 % This paper introduces \pkg{flexEL}, a fast and flexible framework for implementing and calibrating empirical likelihood models. In particular, it provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the ``Eigen'' linear algebra library. The package also provides functions for implementing right-censored regression models, where the inner optimization is conducted via an expectation-maximation algirithm. Users may interface with the library through \proglang{R} or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
 % \end{abstract}
-%
+% 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
@@ -267,8 +267,8 @@ where
 \begin{equation}
 \begin{aligned}
 \hat{\bm \lambda}(\bm \theta) &= \mathop{\mathrm{arg\,max}}_{\bm \lambda(\bm \theta)} \sum_{i=1}^n r_i\ {\log}^{\star}\left(1 - \bm \lambda'(\bm \theta) g(\bm x_i;\bm \theta); r_i\right), \\
-{\log}^{\star}(x; r) &=
-\begin{cases}
+{\log}^{\star}(x; r) &= 
+\begin{cases} 
 \log(x) & x \ge r \\
 - \frac{1}{2} (x/r)^2 + 2 (x/r) - \frac{3}{2} + \log r & x < r.
 \end{cases}
@@ -526,7 +526,7 @@ The following script creates a function in C++ that can be exported to \proglang
   \DataTypeTok{int}\NormalTok{ n\_obs = MR.get\_n\_obs();}
   \DataTypeTok{int}\NormalTok{ n\_eqs = MR.get\_n\_eqs();}
 \NormalTok{  MatrixXd G = MatrixXd::Zero(n\_eqs, n\_obs);}
-\NormalTok{  MR.EvalG(G, beta); }\CommentTok{// obtain G matrix given certain parameter values}
+\NormalTok{  MR.eval\_G(G, beta); }\CommentTok{// obtain G matrix given certain parameter values}
 \NormalTok{  flexEL::GenEL GEL(n\_obs, n\_eqs); }\CommentTok{// initiate GenEL object given dimensions}
 \NormalTok{  GEL.set\_supp\_adj(true); }\CommentTok{// turn on support correction}
   \DataTypeTok{double}\NormalTok{ logel = GEL.logel(G); }\CommentTok{// obtain log EL}
@@ -561,10 +561,10 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 0.9973199 1.9856691
+[1] 1.106670 1.956879
 
 $gradient
-[1] -9.094947e-07 -1.145073e-06
+[1] 3.102409e-05 3.288233e-05
 
 $code
 [1] 1
@@ -582,10 +582,10 @@ If a user wishes not to use the C++ API directly, they can write a similar funct
 \SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\FunctionTok{mr\_evalG}\NormalTok{(y, X, beta)}
 \SpecialCharTok{+}    \FunctionTok{return}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G))}
 \SpecialCharTok{+}\NormalTok{  \}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{) }\CommentTok{\# initalize an GenEL object}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE} \CommentTok{\# turn on support correction}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y, X, gel)}
 \end{Highlighting}
 \end{Shaded}
@@ -595,10 +595,10 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 0.9973199 1.9856691
+[1] 1.106670 1.956879
 
 $gradient
-[1] -9.094947e-07 -1.145073e-06
+[1] 3.102409e-05 3.288233e-05
 
 $code
 [1] 1
@@ -615,17 +615,17 @@ The usage is similar with right-censored outcomes, e.g.~using \proglang{R}:
 \SpecialCharTok{+}\NormalTok{    G }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\FunctionTok{mr\_evalG}\NormalTok{(y, X, beta)}
 \SpecialCharTok{+}    \SpecialCharTok{{-}}\NormalTok{gel}\SpecialCharTok{$}\FunctionTok{logel}\NormalTok{(G)}
 \SpecialCharTok{+}\NormalTok{  \}}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel }\OtherTok{\textless{}{-}}\NormalTok{ flexEL}\SpecialCharTok{::}\NormalTok{CensEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{smooth }\OtherTok{\textless{}{-}} \ConstantTok{TRUE} \CommentTok{\# turn on continuity correction}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ cel}\SpecialCharTok{$}\NormalTok{smooth\_s }\OtherTok{\textless{}{-}} \DecValTok{1} \CommentTok{\# set tuning parameter for continuity correction}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ z }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{2}\SpecialCharTok{*}\FunctionTok{mean}\NormalTok{(y), }\AttributeTok{n =}\NormalTok{ n) }\CommentTok{\# censoring variable}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ delta }\OtherTok{\textless{}{-}}\NormalTok{ y }\SpecialCharTok{\textless{}=}\NormalTok{ z }\CommentTok{\# censoring indicators}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y\_obs }\OtherTok{\textless{}{-}}\NormalTok{ y}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y\_obs[}\SpecialCharTok{!}\NormalTok{delta] }\OtherTok{\textless{}{-}}\NormalTok{ z[}\SpecialCharTok{!}\NormalTok{delta]}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{nlm}\NormalTok{(mr\_neglogcel, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), y\_obs, X, cel)}
 \end{Highlighting}
 \end{Shaded}
@@ -635,10 +635,10 @@ $minimum
 [1] 1065.964
 
 $estimate
-[1] 0.9973199 1.9856691
+[1] 1.106670 1.956879
 
 $gradient
-[1] -9.094947e-07 -1.145073e-06
+[1] 3.102409e-05 3.288233e-05
 
 $code
 [1] 1
@@ -690,7 +690,7 @@ Usage of quantile regression in \pkg{flexEL} is very similar to mean regression 
 
 The following toy example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
 \[
-  y_i = \beta_0 + \beta_1x_i + \varepsilon_i, \quad i=1,\cdots,n,
+  y_i = \beta_0 + \beta_1x_i + \varepsilon_i, \quad i=1,\cdots,n, 
 \]
 where \(\epsilon_i \stackrel {\textrm{iid}}{\sim}\text{F}(\epsilon)\) such that \(\textrm{E}(\epsilon_i) = 0\) and \(\text{Var}(\epsilon_i) = 1\).
 
@@ -768,17 +768,17 @@ Then one can use e.g.~\texttt{optim} to obtain the estimate of \(\beta\):
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{library}\NormalTok{(flexEL)}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \CommentTok{\# simulate some data}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ n }\OtherTok{\textless{}{-}} \DecValTok{200}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ X }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rnorm}\NormalTok{(n))}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ beta0 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ eps }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{rchisq}\NormalTok{(n, }\AttributeTok{df=}\DecValTok{5}\NormalTok{)}\SpecialCharTok{{-}}\DecValTok{5}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sqrt}\NormalTok{(}\DecValTok{2}\SpecialCharTok{*}\DecValTok{5}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(X }\SpecialCharTok{\%*\%}\NormalTok{ beta0) }\SpecialCharTok{+}\NormalTok{ eps}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel }\OtherTok{\textless{}{-}}\NormalTok{ GenEL}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\AttributeTok{n\_obs =}\NormalTok{ n, }\AttributeTok{n\_eqs =} \DecValTok{2}\NormalTok{)}
 \NormalTok{R}\SpecialCharTok{\textgreater{}}\NormalTok{ gel}\SpecialCharTok{$}\NormalTok{supp\_adj }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
-\NormalTok{R}\SpecialCharTok{\textgreater{}}
+\NormalTok{R}\SpecialCharTok{\textgreater{}} 
 \NormalTok{R}\SpecialCharTok{\textgreater{}} \FunctionTok{optim}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.75}\NormalTok{, }\FloatTok{1.25}\NormalTok{), }\AttributeTok{fn =}\NormalTok{ mr2\_neglogel, }\AttributeTok{gr =}\NormalTok{ mr2\_neglogel\_grad,}
 \SpecialCharTok{+}\NormalTok{        y, X, gel, }\AttributeTok{method =} \StringTok{"BFGS"}\NormalTok{)}
 \end{Highlighting}
@@ -786,14 +786,14 @@ Then one can use e.g.~\texttt{optim} to obtain the estimate of \(\beta\):
 
 \begin{verbatim}
 $par
-[1] 1.038329 2.078009
+[1] 1.040541 1.948419
 
 $value
 [1] 1065.964
 
 $counts
-function gradient
-      28        8
+function gradient 
+      37       10 
 
 $convergence
 [1] 0

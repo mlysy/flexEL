@@ -111,7 +111,7 @@ With `er_evalG_R` we can obtain a $G$ matrix for any given $\beta$. This functio
 
 To find the estimate of $\beta$, we can use optimization algorithms in R such as `nlm` or `optim`. These functions require a starting value of the parameters to be optimized. In the above linear regression case, we can use `lm` in R, which assumes $\epsilon_i\iid\N(0,1)$ but nonetheless should be able to provide a good starting point. 
 
-Here, for the convience of using the minimization algorithm `nlm`, we implement the negative log EL:
+Here, for the convenience of using the minimization algorithm `nlm`, we implement the negative log EL:
 ```{r, echo=TRUE, eval=TRUE}
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem

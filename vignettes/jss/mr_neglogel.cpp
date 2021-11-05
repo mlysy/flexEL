@@ -15,7 +15,7 @@ double mr_neglogel(Eigen::VectorXd beta,
   int n_obs = MR.get_n_obs();
   int n_eqs = MR.get_n_eqs();
   MatrixXd G = MatrixXd::Zero(n_eqs, n_obs);
-  MR.EvalG(G, beta); // obtain G matrix given certain parameter values
+  MR.eval_G(G, beta); // obtain G matrix given certain parameter values
   flexEL::GenEL GEL(n_obs, n_eqs); // initiate GenEL object given dimensions
   GEL.set_supp_adj(true); // turn on support correction
   double logel = GEL.logel(G); // obtain log EL
