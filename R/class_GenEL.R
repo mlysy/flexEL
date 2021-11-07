@@ -123,7 +123,7 @@ GenEL <- R6::R6Class(
 
   public = list(
 
-    #' @description Create a new GenEL object.
+    #' @description Create a new `GenEL` object.
     #' @param n_obs Number of observations.
     #' @param n_eqs Number of (moment constraint) equations.
     #' @return A `GenEL` object.

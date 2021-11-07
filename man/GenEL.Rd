@@ -52,7 +52,7 @@ be a scalar (default to NULL).}
 Check the dimension of G is what is expected.
 
 
-Create a new GenEL object.
+Create a new \code{GenEL} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
 }

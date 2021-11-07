@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.10.24)  24 OCT 2021 22:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.10.24)  7 NOV 2021 20:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -668,20 +668,11 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [7]
-
-! LaTeX Error: File `smoothfun' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.462 ...egraphics[width=0.5\textwidth]{smoothfun}
-                                                  
-I could not locate the file with any of these extensions:
-.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPEG,.JBIG2,.JB2,.eps
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
+<smoothfun.png, id=167, 583.17876pt x 594.22pt>
+File: smoothfun.png Graphic file (type png)
+<use smoothfun.png>
+Package pdftex.def Info: smoothfun.png  used on input line 462.
+(pdftex.def)             Requested size: 221.32687pt x 225.5158pt.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 8 []
@@ -693,14 +684,14 @@ LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 4
  (/Users/shimenghuang/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 533.
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/lmr/m/n/10.95 9
  []
 
-[9]
+[9 <./smoothfun.png>]
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 533.
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/lmr/m/n/10.95 10 []
  []
@@ -767,10 +758,10 @@ Package rerunfilecheck Info: File `jss-draft.out' has not changed.
 (rerunfilecheck)             Checksum: 0D2631D3999B56A6B220F9283BBA0841;3217.
  ) 
 Here is how much of TeX's memory you used:
- 12164 strings out of 480539
- 186369 string characters out of 5901387
- 490147 words of memory out of 5000000
- 29450 multiletter control sequences out of 15000+600000
+ 12130 strings out of 480539
+ 185867 string characters out of 5901387
+ 490148 words of memory out of 5000000
+ 29426 multiletter control sequences out of 15000+600000
  498945 words of font info for 87 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,19n,80p,1056b,469s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -806,10 +797,10 @@ X/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/shimenghuang/Library/Tiny
 TeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></Users/shimenghuang/Library/T
 inyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></Users/shimen
 ghuang/Library/TinyTeX/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on jss-draft.pdf (17 pages, 493488 bytes).
+Output written on jss-draft.pdf (17 pages, 513381 bytes).
 PDF statistics:
- 413 PDF objects out of 1000 (max. 8388607)
- 336 compressed objects within 4 object streams
+ 416 PDF objects out of 1000 (max. 8388607)
+ 337 compressed objects within 4 object streams
  112 named destinations out of 1000 (max. 500000)
- 118 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 123 words of extra memory for PDF output out of 10000 (max. 10000000)
 

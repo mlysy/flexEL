@@ -390,7 +390,7 @@ Let $S$ be a transformed sigmoid function, i.e.,
 where $s > 0$ is a smoothing parameter. A plot of the function is given in Figure \ref{fig:smoothfun}. This function is radially symmetric around the point $(0,0.5)$.
 \begin{figure}[hbt!]
 \centering
-\includegraphics[width=0.5\textwidth]{smoothfun}
+\includegraphics[width=0.5\textwidth]{smoothfun.png}
 \caption{Smooth function for indicator function $\mathfrak 1(x\leq 0)$.}
 \label{fig:smoothfun}
 \end{figure}

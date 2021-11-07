@@ -4,9 +4,9 @@
 #' @param alpha A numeric vector of quantile levels of length \code{n_qts}.
 #' @param beta  A numeric matrix of length \code{n_bet}.
 #' @param gamma A An numeric matrix of dimension \code{n_gam}.
-#' @param sig2  A positive scalar whose square root isthe scale parameter in the scale function.
+#' @param sig2  A positive scalar whose square root is the scale parameter in the scale function.
 #' @param nu A numeric vector of quantile values of length \code{n_qts} corresponding to each alpha.
-#' @param s A positive scalar as the smoothing parameter. If `s = NULL`, then no smoothing is performed.
+#' @template arg-sp
 #' @details Assuming data were generated from 
 #' ```
 #' y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,

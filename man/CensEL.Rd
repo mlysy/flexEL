@@ -67,7 +67,7 @@ smooth it makes.}
 Check the dimension of G is what is expected.
 
 
-Create a new CensEL object.
+Create a new \code{CensEL} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CensEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
 }

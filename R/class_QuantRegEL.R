@@ -1,6 +1,6 @@
 #' @title Quantile regression EL class
 #'
-#' @description R6 class for EL with mean regression moment specification.
+#' @description R6 class for EL with location or location-scale quantile regression moment specification.
 #'
 #' @export
 QuantRegEL <- R6::R6Class(
@@ -20,14 +20,25 @@ QuantRegEL <- R6::R6Class(
     .n_gam = NULL,
     .n_eqs = NULL,
     .delta = NULL,
-    .s = NULL # smooth parameter
+    .sp = NULL # smoothing parameter
   ),
   
   public = list(
     
-    initialize = function(y, X, Z = NULL, delta = NULL, alpha, s = 0, el_opts = NULL) {
+    #' @description Create a new `QuantRegEL` object. This class can be used for 
+    #'   either non-censored or right-censored data, and location or location 
+    #'   mean regression models.
+    #' @template args-y_X_Z
+    #' @template arg-delta
+    #' @param alpha A numeric vector of quantile levels of length \code{n_qts}.
+    #' @template arg-sp
+    #' @param el_opts A list of options for the `GenEL` or `CensEL` object. 
+    #'   See `set_opts` method in the corresponding class.
+    #' @return A `QuantRegEL` object.
+    #' @seealso [flexEL::GenEL$set_opts()], [flexEL::CensEL$set_opts()]
+    initialize = function(y, X, Z = NULL, delta = NULL, alpha, sp = 0, el_opts = NULL) {
       private$.alpha = alpha
-      private$.s = s
+      private$.sp = sp
       if (length(y) != nrow(X)) {
         stop("Number of observations in y must equal to that in X.")
       }
@@ -63,6 +74,10 @@ QuantRegEL <- R6::R6Class(
       }
     },
     
+    #' @description Evaluate the G matrix for a given parameter value.
+    #' @param theta Length-\code{n_eqs} vector of parameters for a location or location-scale model. This vector should correspond to `beta` for a location regression model, or concatenated `beta`, `gamma`, and `sig2` for a location-scale regression model, in this order.
+    #' @return A numeric matrix of dimension `n_obs x n_eqs`.
+    #' @seealso [flexEL::qr_evalG()], [flexEL::qrls_evalG()]
     eval_G = function(theta) {
       
       if (length(theta) != private$.n_eqs) {
@@ -70,7 +85,7 @@ QuantRegEL <- R6::R6Class(
       }
       
       if (!private$.is_ls) {
-        qr_evalG(private$.y, private$.X, private$.alpha, theta, private$.s)
+        qr_evalG(private$.y, private$.X, private$.alpha, theta, private$.sp)
       }
       else {
         beta <- theta[1:private$.n_bet]
@@ -80,10 +95,19 @@ QuantRegEL <- R6::R6Class(
           stop("Scale parameter must be a positive number.")
         }
         qrls_evalG(private$.y, private$.X, private$.Z, 
-                   beta, gamma, sig2, private$.alpha, private$.s)
+                   beta, gamma, sig2, private$.alpha, private$.sp)
       }
     },
     
+    #' @description Calculate the log empirical likelihood base on the given 
+    #'   parameter value and in the non-censoring case can also return the 
+    #'   gradient.
+    #' @param theta Length-\code{n_eqs} vector of parameters for a location or location-scale model. This vector should correspond to `beta` for a location regression model, or concatenated `beta`, `gamma`, and `sig2` for a location-scale regression model, in this order.
+    #' @param grad_out If `TRUE`, add gradient as an attribute to the return value.
+    #' @param negate If `TRUE`, calculate the negative log likelihood.
+    #' @return A scalar with a possible attribute.
+    #' @seealso [flexEL::GenEL$logel()], [flexEL::CensEL$logel()], 
+    #'   [flexEL::GenEL$logel_grad()], [flexEL::CensEL$logel_grad()]
     logel = function(theta, grad_out = TRUE, negate = TRUE) {
       
       # calculate G matrix 
@@ -118,6 +142,15 @@ QuantRegEL <- R6::R6Class(
       return(lel)
     },
     
+    #' @description Calculate the gradient of log empirical likelihood at the 
+    #'   given parameter value for non-censoring data, can also return the 
+    #'   log empirical likelihood.
+    #' @param theta Length-\code{n_eqs} vector of parameters for a location or location-scale model. This vector should correspond to `beta` for a location regression model, or concatenated `beta`, `gamma`, and `sig2` for a location-scale regression model, in this order.
+    #' @param logel_out If `TRUE`, add log empirical likelihood as an attribute 
+    #'   to the return value.
+    #' @param negate If `TRUE`, calculate the gradient of negative log likelihood.
+    #' @seealso [flexEL::GenEL$logel()], [flexEL::CensEL$logel()], 
+    #'   [flexEL::GenEL$logel_grad()], [flexEL::CensEL$logel_grad()]
     logel_grad = function(theta, logel_out = FALSE, negate = TRUE) {
       
       # calculate G matrix 
@@ -133,7 +166,7 @@ QuantRegEL <- R6::R6Class(
       
       # calculate dGdt
       if (!private$.is_ls) {
-        dGdt <- qr_dGdt(private$.y, private$.X, theta, private$.alpha, private$.s)
+        dGdt <- qr_dGdt(private$.y, private$.X, theta, private$.alpha, private$.sp)
       }
       else {
         beta <- theta[1:private$.n_bet]
@@ -159,6 +192,9 @@ QuantRegEL <- R6::R6Class(
       return(dldt)
     },
     
+    #' @description Returns the `GenEL` or `CensEL` object for inspection or 
+    #'   debugging purposes.
+    #' @return A `GenEL` or `CensEL` object.
     get_el_obj = function() {
       return(private$.el_obj)
     }

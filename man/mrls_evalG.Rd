@@ -12,7 +12,7 @@ is the number of observations.}
 
 \item{X}{A numeric matrix of covariates in the location function of dimension
 \code{n_obs} x \code{n_bet} where \code{n_obs} is the number of observations and
-\code{b_bet} is the number of location function's coefficients (length of \code{beta}).}
+\code{n_bet} is the number of location function's coefficients (length of \code{beta}).}
 
 \item{Z}{A numeric matrix of covariates in the scale function of dimension
 \code{n-obs} x \code{n_gam} where \code{n_obs} is the number of observations and

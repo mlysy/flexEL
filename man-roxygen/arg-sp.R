@@ -1,1 +1,1 @@
-#' @param sp A positive scalar as smoothing parameter.
+#' @param sp A positive scalar as the smoothing parameter. If `s = NULL`, then no smoothing is performed.

@@ -1,0 +1,1 @@
+#' @param theta Length-\code{n_eqs} vector of parameters for a location or location-scale model. This vector should correspond to `beta` for a location regression model, or concatenated `beta`, `gamma`, and `sig2` for a location-scale regression model, in this order.

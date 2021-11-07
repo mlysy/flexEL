@@ -162,7 +162,7 @@ CensEL <- R6::R6Class(
   
   public = list(
     
-    #' @description Create a new CensEL object.
+    #' @description Create a new `CensEL` object.
     #' @param n_obs Number of observations.
     #' @param n_eqs Number of (moment constraint) equations.
     #' @return A `CensEL` object.

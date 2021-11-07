@@ -12,7 +12,7 @@ is the number of observations.}
 
 \item{X}{A numeric matrix of covariates in the location function of dimension
 \code{n_obs} x \code{n_bet} where \code{n_obs} is the number of observations and
-\code{b_bet} is the number of location function's coefficients (length of \code{beta}).}
+\code{n_bet} is the number of location function's coefficients (length of \code{beta}).}
 
 \item{Z}{A numeric matrix of covariates in the scale function of dimension
 \code{n-obs} x \code{n_gam} where \code{n_obs} is the number of observations and
@@ -24,11 +24,11 @@ is the number of observations.}
 
 \item{gamma}{A An numeric matrix of dimension \code{n_gam}.}
 
-\item{sig2}{A positive scalar whose square root isthe scale parameter in the scale function.}
+\item{sig2}{A positive scalar whose square root is the scale parameter in the scale function.}
 
 \item{nu}{A numeric vector of quantile values of length \code{n_qts} corresponding to each alpha.}
 
-\item{s}{A positive scalar as the smoothing parameter. If \code{s = NULL}, then no smoothing is performed.}
+\item{sp}{A positive scalar as the smoothing parameter. If \code{s = NULL}, then no smoothing is performed.}
 }
 \value{
 A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 2}.

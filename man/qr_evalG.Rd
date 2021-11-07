@@ -4,7 +4,7 @@
 \alias{qr_evalG}
 \title{Evaluate the G matrix for a quantile regression model.}
 \usage{
-qr_evalG(y, X, alpha, Beta, s = NULL)
+qr_evalG(y, X, alpha, Beta, sp = NULL)
 }
 \arguments{
 \item{y}{A numeric vector of resoponses of length \code{n_obs} where \code{n_obs}
@@ -16,10 +16,12 @@ of coefficients (length of \code{beta}). \code{X} should contain a column of \co
 explicitly and the corresponding element of \code{beta} (a column of \code{Beta})
 corresponds to the quantile value of \code{eps} at that quantile level.}
 
-\item{alpha}{a vector of quantile levels.}
+\item{alpha}{A numeric vector of quantile levels of length \code{n_qts}.}
 
 \item{Beta}{A numeric matrix of dimension \code{n_bet} x \code{n_qts}, each
 column corresponds to the parameters at the specific quantile levels.}
+
+\item{sp}{A positive scalar as the smoothing parameter. If \code{s = NULL}, then no smoothing is performed.}
 }
 \value{
 A numeric matrix of dimension \code{n_obs} x (\code{n_bet} x \code{n_qts}).
