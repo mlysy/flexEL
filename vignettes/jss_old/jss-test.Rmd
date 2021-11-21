@@ -22,33 +22,53 @@ keywords:
 date: "`r Sys.Date()`"
 documentclass: jss
 classoption: article
+header-includes:
+  - \usepackage{caption}
+  - \captionsetup[table]{skip=.1em}
 output: 
-  bookdown::pdf_document2:
+  bookdown::pdf_book:
     toc: false
     template: jss-template.tex
-    includes:
-      in_header: jss-includes.tex
-    citation_package: natbib
-    # keep_tex: true
+    keep_tex: true
+    keep_md: true
     highlight: tango
+    # highlight_bw: false
+    md_extensions: +tex_math_dollars
+    # latex_engine: xelatex
+  html_document:
+    keep_md: true
 ---
 
 ```{r setup, include = FALSE}
 library(knitr)
+## knitr::knit_hooks$set(
+##   prompt = function(before, options, envir) {
+##     eng <- options$engine
+##     if(eng %in% c("sh", "bash")) {
+##       pr <- "$ "
+##     } else if(eng == "R") {
+##       pr <- "R> "
+##     } else {
+##       pr <- "> "
+##     }
+##     options(prompt = pr)
+## })
+## options(prompt = "R> ",
+##         continue = "+  ",
+##         width = 70,
+##         useFancyQuotes = FALSE)
 knitr::opts_chunk$set(comment="",
                       prompt = TRUE,
                       R.options = list(prompt = "R> ",
                                        continue = "+  ",
                                        width = 70,
                                        useFancyQuotes = FALSE))
-
-#' Embed arbitary code files and typset them correctly. 
 embed_file <- function(file, lang) {
   cat(paste0("```", lang), readLines(file), "```", sep = "\n")
 }
 ```
 
-# Numbering {#sec:arbitrary}
+# Numbering
 
 ## Equations
 
@@ -82,30 +102,16 @@ knitr::kable(head(mtcars[, 1:8], 5), booktabs = TRUE,
              caption = "A table of the first 5 rows of the mtcars data.")
 ```
 
-## Sections
+# Embedded Files
 
-Can use built-in labels, as in Section \@ref(tables), or custom labels, as in Section \@ref(sec:arbitrary).  The latter is highly recommended.
+<!-- ## C++ File -->
 
-# Math in Headings
-
-**Solved**.  Here's an example:
-
-\subsection[C++ File alpha + beta]{\proglang{C++} File $\alpha + \beta$}
-
-Below describes the old problem and workaround.
+\subsection[C++ File alpha + beta]{C++ File $\alpha + \beta$}
 
 - LaTeX in heading doesn't seem to work.  [Here's](https://github.com/jgm/pandoc/issues/3555) how far I got with this.
 - In fact, seems to be a pure LaTeX problem, in that `latexmk` compile of tex output takes several tries to get it right.
 - Working solution: Use `\subsection[plaintext]{latex}` instead of Markdown section.
-- ~~New problem: `\tightlist` not defined...~~
-
-# Citations
-
-The work of @Zeileis+Kleiber+Jackman:2008 has been cited multiple times [@Chambers+Hastie:1992].
-
-# Embedded Files
-
-## C++ File
+- New problem: `\tightlist` not defined...
 
 ```{r, echo = FALSE, results = "asis"}
 embed_file("foo.h", "cpp")
@@ -116,19 +122,3 @@ embed_file("foo.h", "cpp")
 ```{r, echo = FALSE, results = "asis"}
 embed_file("foo.Rmd", "bash")
 ```
-
-<!-- references -->
-
-\bibliography{refs}
-
-<!-- appendix -->
-
-# (APPENDIX) Appendix {-}
-
-# More information
-
-This will be Appendix A.
-
-# One more thing
-
-This will be Appendix B.

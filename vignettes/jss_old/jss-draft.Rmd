@@ -29,18 +29,37 @@ output:
     citation_package: natbib
     # keep_tex: true
     highlight: tango
+bibliography: references.bib  
 ---
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
 
 ```{r setup, include = FALSE}
 library(knitr)
+## knitr::knit_hooks$set(
+##   prompt = function(before, options, envir) {
+##     eng <- options$engine
+##     if(eng %in% c("sh", "bash")) {
+##       pr <- "$ "
+##     } else if(eng == "R") {
+##       pr <- "R> "
+##     } else {
+##       pr <- "> "
+##     }
+##     options(prompt = pr)
+## })
+## options(prompt = "R> ",
+##         continue = "+  ",
+##         width = 70,
+##         useFancyQuotes = FALSE)
 knitr::opts_chunk$set(comment="",
                       prompt = TRUE,
                       R.options = list(prompt = "R> ",
                                        continue = "+  ",
                                        width = 70,
                                        useFancyQuotes = FALSE))
-
-#' Embed arbitary code files and typset them correctly. 
 embed_file <- function(file, lang) {
   cat(paste0("```", lang), readLines(file), "```", sep = "\n")
 }
@@ -63,7 +82,7 @@ Given fully observed data, an asymptotic $\chi^2$ distribution of log EL is vali
 Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing software are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g. \pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
 
 This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the Newton–Raphson algorithm which is a key step in the EL inner optimization problem. Other than the main functionality of regular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
-
+	
 # Methodology
 
 ## Basics
@@ -135,6 +154,28 @@ With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the grad
 \end{equation}
 
 where $Q = \sum_{i=1}^n q_i$.  
+
+<!-- \begin{equation} -->
+<!-- \begin{split} -->
+<!-- \dth \log \EL(\tth) &= \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\ -->
+<!-- &= \sum_{i=1}^n \frac{q_i}{1 - \lla'g_i} \cdot \dth \lla(\tth)'g_i(\tth) \\ -->
+<!-- &= \dth \lla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot g_i(\tth)}{1 - \lla'g_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth), -->
+<!-- \end{split} -->
+<!-- \end{equation} -->
+
+<!-- Since substituting \eqref{eq:omegahat} into \eqref{eq:noncensopt} gives -->
+
+<!-- \begin{equation} -->
+<!-- \sum_{i=1}^n \hat \omega_i \cdot g_i = \sum_{i=1}^n \frac{r_i \cdot g_i}{1 - \hat{\lla}'g_i} = 0, -->
+<!-- \end{equation} -->
+
+<!-- the first term in the gradient disappears, such that we have -->
+
+<!-- \begin{equation} -->
+<!-- \dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth). -->
+<!-- \label{eq:gradel} -->
+<!-- \end{equation} -->
+
 
 ## Support Correction
 
@@ -537,4 +578,3 @@ Alternatively, a user can implement the `G` matrix and gradient calculations in 
 # Conclusion
 
 
-\bibliography{references}
