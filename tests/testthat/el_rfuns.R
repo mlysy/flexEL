@@ -1,11 +1,12 @@
-# ---- helper functions ---- 
+# ---- helper functions ----
 
 # maximum relative error
 max_rel_err <- function(lambdaNew, lambdaOld) {
   # Note: for stability (using the same tolerance as in C++ implementation)
-  if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
-  relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
-  return(max(relErr))
+  ## if (max(abs(lambdaNew - lambdaOld)) < 1e-10) return(0)
+  ## relErr <- abs((lambdaNew - lambdaOld) / (lambdaNew + lambdaOld))
+  ## return(max(relErr))
+  max(abs(lambdaNew - lambdaOld)/(.1 + abs(lambdaNew + lambdaOld)))
 }
 
 # adjusted EM by chen-et-al2008
@@ -54,7 +55,7 @@ Qfun <- function(lambda, G) {
 
 # R implementation of lambdaNR
 # G is nObs x nEqs
-lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE, 
+lambdaNR_R <- function(G, max_iter=100, rel_tol=1e-7, verbose = FALSE,
                        lambdaOld = NULL) {
   G <- t(G)
   nObs <- ncol(G)
@@ -110,6 +111,26 @@ omega_hat_NC_R <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
   return(omegahat)
 }
 
+weighted_omega_hat_R <- function(G, weights, adjust = FALSE,
+                                 max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, 
+                                 verbose = FALSE) {
+  lambdaOut <- lambdaNRC_R(G = G, weights = weights, max_iter, rel_tol, verbose)
+  conv <- lambdaOut$convergence # 1 if converged
+  # message("lambda = ")
+  # print(lambdaOut$lambda)
+  if (!conv) {
+    nObs <- nrow(G)
+    omegahat <- rep(NaN, nObs)
+  }
+  else {
+    lambdahat <- lambdaOut$lambda
+    omegahat <- c(weights/(1-lambdahat %*% t(G)))
+    # omegahat <- c(1/(1-t(lambdahat) %*% t(G)) / sum(1/(1-t(lambdahat) %*% t(G))))
+  }
+  # returns a vector of omegahat
+  return(omegahat)
+}
+
 # ---- EL (with censor) ----
 
 # Note: log_sharp and related are unique to censoring
@@ -151,8 +172,9 @@ QfunCens <- function(lambda, G, weights) {
   return(as.numeric(weights %*% ls))
 }
 
-# R implementation of lambdaNRC
-# G is nObs x nEqs 
+# R implementation of lambdaNRC (weighted lambdaNR)
+# G is nObs x nEqs
+# weights should be normalized (sum to 1)
 # lambdaOld passed in is for the EM algorithm `_R` to work properly
 lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FALSE,
                         lambdaOld = NULL) {
@@ -167,22 +189,26 @@ lambdaNRC_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7, verbose = FA
     nIter <- ii
     # Q1 and Q2
     Glambda <- t(lambdaOld) %*% G
-    Glambda <- sum(weights) + Glambda
+    Glambda <- sum(weights) - Glambda
     # Q1 <- rep(0,nEqs)
     rho <- rep(NaN,nObs)
     Q2 <- matrix(rep(0,nEqs*nEqs), nEqs, nEqs)
     for (jj in 1:nObs) {
       rho[jj] <- log_sharp1(Glambda[jj], weights[jj])
-      # to avoid numerical problem?
-      if (weights[jj] > rel_tol*nObs) {
-        Q2 <- Q2 + weights[jj]*log_sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
-      }
+      # to avoid numerical problem? (begin)
+      # if (weights[jj] > rel_tol*nObs) {
+      #   Q2 <- Q2 - weights[jj]*log_sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
+      # }
+      # (end)
+      Q2 <- Q2 - weights[jj]*log_sharp2(Glambda[jj], weights[jj])*(G[,jj] %*% t(G[,jj]))
     }
-    weights_sav <- weights
-    weights_sav[weights_sav < rel_tol*nObs] <- 0
-    rho[is.infinite(rho) & !weights_sav] <- 0 
-    # Q1 <- G %*% (rho * weights)
-    Q1 <- G %*% (rho * weights_sav)
+    # to avoid numerical problem? (begin)
+    # weights_sav <- weights
+    # weights_sav[weights_sav < rel_tol*nObs] <- 0
+    # rho[is.infinite(rho) & !weights_sav] <- 0
+    # Q1 <- G %*% (rho * weights_sav)
+    # (end)
+    Q1 <- G %*% (rho * weights)
     lambdaNew <- lambdaOld - solve(Q2,Q1)
     maxErr <- max_rel_err(lambdaNew, lambdaOld) # maximum relative error
     # message("maxErr = ", maxErr)
@@ -213,9 +239,9 @@ evalPsos_R <- function(ii, epsOrd, omegas) {
   return(psos)
 }
 
-# calculate the weights for the weighted (censored) EL problem 
+# calculate the weights for the weighted (censored) EL problem
 evalWeights_R <- function(deltas, omegas, epsilons) {
-  nObs <- length(omegas)
+  nObs <- length(deltas)
   epsOrd <- order(epsilons)
   # message("epsOrd = ")
   # print(epsOrd-1)
@@ -224,29 +250,30 @@ evalWeights_R <- function(deltas, omegas, epsilons) {
     for (jj in 1:nObs) {
       kk <- epsOrd[jj]
       if (deltas[kk] == 0) {
+        # print(evalPsos_R(kk, epsOrd, omegas))
         psots[ii] <- psots[ii] + omegas[ii]/evalPsos_R(kk, epsOrd, omegas)
       }
       if (kk == ii) break
     }
   }
-  # the weights have the order as the original sample 
+  # the weights have the order as the original sample
   weights <- deltas + psots
   return(weights)
 }
 
-# G is nObs x nEqs 
-# TODO: rel_tol should be called abs_tol now -- using absolute error for diff in logEL
+# G is nObs x nEqs
 # Note: if adjust G (using support adjustment), pass the adjusted G to this function and set adjust to TRUE
-omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE, 
-                           max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
+omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
+                           max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, verbose=FALSE,
                            dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
   # lambdaNew <- rep(0,m)
   nIter <- 0
-  # initialize omegas with uncensored solution 
-  omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  # # initialize omegas with uncensored solution
+  # omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  omegas <- rep(1/n, n)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     # return(rep(NaN,length(deltas)))
@@ -257,9 +284,14 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     deltas <- c(deltas,0)
   }
   # omegasOld <- omegas
-  logelOld <- logEL_R(omegas,epsilons,deltas)
+  logelOld <- logEL_R(omegas, epsilons, deltas)
   # message("logelOld = ", logelOld)
   
+  # weights <- evalWeights_R(deltas, omegas, epsilons)
+  # weights <- weights/sum(weights)
+  # print(weights/sum(weights))
+  # message("logelOld2 = ", sum(weights*log(omegas)))
+
   # for debug
   if (dbg) {
     omegamMat <- matrix(NA,nrow=n,ncol=max_iter+1)
@@ -267,13 +299,16 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     logels <- c(logelOld)
     artome <- c()
   }
-  
+
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
     weights <- evalWeights_R(deltas, omegas, epsilons)
-    # message("weights = ")
+    weights <- weights/sum(weights)
     # print(weights)
+    # if (ii == 1) {
+    #   print(weights)
+    # }
     # M step:
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     # TODO: what if not converged ?? use a random weights and continue ?
@@ -287,24 +322,27 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
       }
     }
     lambdaNew <- lambdaOut$lambda
-    qlg <- c(sum(weights) + lambdaNew %*% t(G))
+    qlg <- c(sum(weights) - lambdaNew %*% t(G))
     omegas <- weights/qlg
     # omegas <- omegas/sum(omegas)
-    if (any(omegas < -rel_tol)) message("omega_hat_EM_R: negative omegas.")
+    if (any(omegas < -rel_tol)) {
+      message("omega_hat_EM_R: negative omegas.")
+      message(print(omegas))
+    }
     omegas <- abs(omegas)
     omegas <- omegas/sum(omegas)
     # err <- max_rel_err(lambdaNew,lambdaOld)
     # err <- max_rel_err(omegas,omegasOld)
     logel <- logEL_R(omegas,epsilons,deltas)
     # message("logel = ", logel)
-    
+
     # for debug
     if (dbg) {
       omegamMat[,ii+1] <- omegas
       logels <- c(logels,logel)
       artome <- c(artome,weights[n])
     }
-    
+
     # err <- max_rel_err(logel,logelOld)
     err <- abs(logel-logelOld)
     # if (verbose && nIter %% 20 == 0) {
@@ -316,7 +354,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
     if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged
   if (notconv) {
     # omegas = rep(NaN,n)
     if (dbg) {
@@ -326,7 +364,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
       return(list(conv=FALSE,omegas = rep(NaN,n)))
     }
   }
-  
+
   # for debug
   if (dbg) {
     return(list(conv=TRUE,
@@ -374,11 +412,14 @@ logEL_smooth_R <- function(omegas, epsilons, deltas, s = 10, adjust=FALSE) {
   n <- length(omegas)
   psos <- rep(0,n)
   for (ii in 1:n) {
-    psos[ii] <- evalPsos_smooth_R(ii,omegas,epsilons,s,support = adjust) 
+    psos[ii] <- evalPsos_smooth_R(ii,omegas,epsilons,s,support = adjust)
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-  return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+  
+  weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, adjust)
+  return(sum(weights*log(omegas)))
+  # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
 }
 
 # smoothed evalWeight function with sigmoid function (more vectorized version)
@@ -390,11 +431,13 @@ evalWeights_smooth_R <- function(deltas, omegas, epsilons, s=10, support = FALSE
   for (jj in 1:n) {
     psoss[jj] <- evalPsos_smooth_R(jj,omegas,epsilons,s,support)
   }
+  # print(psoss)
   if (support) {
     for (ii in 1:n) {
       temp <- ind_smooth_R(epsilons-epsilons[ii],s)
       if (ii==n) temp[n] <- ind_smooth_R(0,s)
       psots[ii] <- sum((1-deltas)*temp*omegas[ii]/psoss)
+      # message(psots[ii])
     }
   }
   else {
@@ -407,26 +450,27 @@ evalWeights_smooth_R <- function(deltas, omegas, epsilons, s=10, support = FALSE
 }
 
 # using smoothed objective function in EM
-omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE, 
-                                  max_iter = 200, rel_tol = 1e-7, abs_tol = 1e-3, 
+omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
+                                  max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3,
                                   verbose=FALSE, dbg = FALSE) {
   n <- nrow(G)
   m <- ncol(G)
   err <- Inf
   nIter <- 0
-  # initialize omegas with uncensored solution 
-  omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  # initialize omegas with uncensored solution
+  # omegas <- omega_hat_NC_R(G, max_iter, rel_tol, verbose=FALSE)
+  omegas <- rep(1/n, n)
   if (any(is.nan(omegas))) {
     message("Initial omegas are nans.")
     # return(rep(NaN,length(deltas)))
     return(list(conv=FALSE, omegas=rep(NaN,length(deltas))))
   }
-  if (adjust) {
-    epsilons <- c(epsilons,-Inf)
-    deltas <- c(deltas,0)
-  }
+  # if (adjust) {
+  #   epsilons <- c(epsilons,-Inf)
+  #   deltas <- c(deltas,0)
+  # }
   logelOld <- logEL_smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
-  
+
   # for debug
   if (dbg) {
     omegamMat <- matrix(NA,nrow=n,ncol=max_iter+1)
@@ -434,12 +478,16 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     logels <- c(logelOld)
     artome <- c()
   }
-  
+
   for (ii in 1:max_iter) {
     nIter <- ii
     # E step: calculating weights
-    weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, support = adjust)
-    # print(weights)
+    if (adjust) {
+      weights <- evalWeights_smooth_R(c(deltas,0), omegas, c(epsilons, -Inf), s, support = adjust)
+    } else {
+      weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, support = adjust)
+    }
+    # message(paste0(weights, collapse = " "))
     # M step:
     # lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
     lambdaOut <- lambdaNRC_R(G, weights, max_iter, rel_tol, verbose=FALSE)
@@ -454,14 +502,14 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
       }
     }
     lambdaNew <- lambdaOut$lambda
-    qlg <- c(sum(weights) + lambdaNew %*% t(G))
+    qlg <- c(sum(weights) - lambdaNew %*% t(G))
     omegas <- weights/qlg
     # omegas <- omegas/sum(omegas)
     if (any(omegas < -rel_tol)) message("omega_hat_EM_R: negative omegas.")
     omegas <- abs(omegas)
     omegas <- omegas/sum(omegas)
     logel <- logEL_smooth_R(omegas,epsilons,deltas,s,adjust = adjust)
-    
+
     # for debug
     if (dbg) {
       omegamMat[,ii+1] <- omegas
@@ -477,7 +525,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
     if (err < abs_tol) break
     logelOld <- logel
   }
-  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged 
+  notconv <- (nIter == max_iter && err > abs_tol) # TRUE if not converged
   if (notconv) {
     # omegas = rep(NaN,n)
     if (dbg) {
@@ -487,7 +535,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
       return(list(conv=FALSE,omegas = rep(NaN,n)))
     }
   }
-  
+
   # for debug
   if (dbg) {
     return(list(conv=TRUE,
@@ -512,7 +560,7 @@ omega_hat_R <- function(G, deltas, epsilons, adjust = FALSE,
     omegas <- omega_hat_NC_R(G, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
   }
   else {
-    omegas <- omega_hat_EM_R(G, deltas, epsilons, adjust, 
+    omegas <- omega_hat_EM_R(G, deltas, epsilons, adjust,
                              max_iter=max_iter, rel_tol=rel_tol, abs_tol = abs_tol, verbose=verbose)
   }
   return(c(omegas))
@@ -522,7 +570,7 @@ omega_hat_R <- function(G, deltas, epsilons, adjust = FALSE,
 logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
   if (any(is.nan(omegas))) return(-Inf)
   if (missing(deltas)) {
-    sum(log(omegas))
+    return(sum(log(omegas)))
   }
   else {
     if (adjust) {
@@ -534,30 +582,60 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
     n <- length(omegas)
     psos <- rep(0,n)
     for (ii in 1:n) {
-      psos[ii] <- evalPsos_R(ii, epsOrd, omegas) 
+      psos[ii] <- evalPsos_R(ii, epsOrd, omegas)
     }
     # numerical stability: watch out for extremely small negative values
     omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-    return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
+    
+    weights <- evalWeights_R(deltas, omegas, epsilons)
+    # print(weights)
+    # message("new weights logel: ", sum(weights*log(omegas)))
+    return(sum(weights*log(omegas)))
+    # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
   }
 }
 
-logEL_G_R <- function(G) {
-  lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = FALSE)
-  omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
-  neglogel <- sum(log(omega))
-  dldG <- length(omega) * t(lambda %*% t(omega))
-  attr(neglogel, "gradient") <- dldG
-  return(neglogel)
+logEL_G_R <- function(G, max_iter = 100, rel_tol = 1e-7) {
+  # lambda <- flexEL::lambdaNR(G = G, max_iter = max_iter, rel_tol = rel_tol, support = FALSE)
+  lambda_lst <- lambdaNR_R(G, max_iter, rel_tol)
+  if (!lambda_lst$convergence) return(NA)
+  else {
+    lambda <- lambda_lst$lambda
+    omega <- 1/nrow(G) * 1/(1 - c(G %*% lambda))
+    neglogel <- sum(log(omega))
+    dldG <- length(omega) * t(lambda %*% t(omega))
+    attr(neglogel, "gradient") <- dldG
+    return(neglogel)
+  }
 }
 
-logEL_adjG_R <- function(G) {
+weighted_logEL_G_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7) {
+  sum_weights <- sum(weights)
+  norm_weights <- weights/sum_weights
+  lambda_lst <- lambdaNRC_R(G, norm_weights, max_iter, rel_tol)
+  if (!lambda_lst$convergence) return(NA)
+  else {
+    lambda <- lambda_lst$lambda
+    omega <- c(norm_weights/(1 - c(G %*% lambda)))
+    logel <- sum(norm_weights * log(omega)) * sum_weights
+    dldG <- t(lambda %*% t(omega)) * sum_weights
+    attr(logel, "gradient") <- dldG
+    return(logel)
+  }
+}
+
+logEL_adjG_R <- function(G, max_iter = 100, rel_tol = 1e-7, 
+                         an = max(1, 0.5*log(nrow(G)))) {
   n <- nrow(G)
-  lambda <- flexEL::lambdaNR(G = G, rel_tol = 1e-4, support = TRUE)
-  omega <- flexEL:::omega_hat(G = G, support = TRUE)
+  # lambda <- flexEL::lambdaNR(G = G, max_iter = max_iter, rel_tol = rel_tol, support = TRUE)
+  # omega <- flexEL:::omega_hat(G = G, max_iter = max_iter, rel_tol = rel_tol, support = TRUE)
+  lambda <- lambdaNR_R(adjG_R(G, an), max_iter = max_iter, rel_tol = rel_tol)$lambda
+  G_adj <- adjG_R(G, an)
+  omega <- c(1/(1-t(lambda) %*% t(G_adj)) / sum(1/(1-t(lambda) %*% t(G_adj))))
   neglogel <- sum(log(omega))
-  an <- max(1, 0.5*log(n))
+  # an <- max(1, 0.5*log(n))
   dldGadj <- (n+1) * t(lambda %*% t(omega[1:n])) - (n+1) * omega[n+1]*an/n * rep(1, n) %*% t(lambda)
   attr(neglogel, "gradient") <- dldGadj
   return(neglogel)
 }
+

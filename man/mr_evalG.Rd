@@ -31,17 +31,22 @@ The estimating equations for \code{beta} can be derived based on the least squar
 that is,\preformatted{min_beta (y - X*beta)'(y - X*beta)
 }
 
-The above minimization problem is equavalent to setting it's first derivative
+The above minimization problem is equivalent to setting it's first derivative
 w.r.t \code{beta} to 0, i.e.,\preformatted{X'*(y - X*beta) = 0
 }
 
 The left-hand-side of the above equation is the \code{G} matrix returned by this function.
 }
 \examples{
+## simulate some data ##
 n <- 20
-p <- 4
-X <- replicate(p, rnorm(n))
-beta0 <- rnorm(p)
+p <- 2
+X <- replicate(p-1, rnorm(n))
+X <- cbind(1, X)
+beta0 <- c(1, 2)
 y <- c(X \%*\% beta0) + rnorm(n) # with N(0,1) error term
-mr_evalG(y, X, beta0)
+
+## calculate G matrix given data and certain parameter values ##
+beta <- c(1, 2)
+mr_evalG(y, X, beta)
 }

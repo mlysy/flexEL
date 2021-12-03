@@ -4,7 +4,7 @@
 \alias{qr_evalG}
 \title{Evaluate the G matrix for a quantile regression model.}
 \usage{
-qr_evalG(y, X, alpha, Beta)
+qr_evalG(y, X, alpha, Beta, sp = NULL)
 }
 \arguments{
 \item{y}{A numeric vector of resoponses of length \code{n_obs} where \code{n_obs}
@@ -12,17 +12,19 @@ is the number of observations.}
 
 \item{X}{A numeric matrix of covariates of dimension \code{n_obs} x \code{n_bet}
 where \code{n_obs} is the number of observations and \code{n_bet} is the number
-of coefficients (length of \code{beta}). \code{X} should contain a column of \code{1}s and
-the corresponding element of \code{beta} (a column of \code{Beta}) corresponds to the
-quantile value of \code{eps} at that quantile level.}
+of coefficients (length of \code{beta}). \code{X} should contain a column of \code{1}s
+explicitly and the corresponding element of \code{beta} (a column of \code{Beta})
+corresponds to the quantile value of \code{eps} at that quantile level.}
 
-\item{alpha}{a vector of quantile levels.}
+\item{alpha}{A numeric vector of quantile levels of length \code{n_qts}.}
 
-\item{Beta}{A numeric matrix of dimension \code{n_bet} x \code{n_qts}, each column is a
-vector of coefficients in location model corresponding to the quantile level.}
+\item{Beta}{A numeric matrix of dimension \code{n_bet} x \code{n_qts}, each
+column corresponds to the parameters at the specific quantile levels.}
+
+\item{sp}{A positive scalar as the smoothing parameter. If \code{s = NULL}, then no smoothing is performed.}
 }
 \value{
-A numeric matrix of dimension \code{n_obs} x \code{n_bet}.
+A numeric matrix of dimension \code{n_obs} x (\code{n_bet} x \code{n_qts}).
 }
 \description{
 Evaluate the G matrix for a quantile regression model.
@@ -45,7 +47,7 @@ where \code{alpha} is the quantile level, \verb{1\{\}} is the indicator function
 condition is true and 0 otherwise, and \verb{u_i = y_i - x_i'beta}. That is,\preformatted{min_beta rho(y - X*beta)
 }
 
-The above minimization problem is equavalent to setting it's first derivative
+The above minimization problem is equivalent to setting it's first derivative
 w.r.t \code{beta} to 0, i.e.,\preformatted{phi(y - X*beta) = 0
 }
 
@@ -53,14 +55,24 @@ where \code{phi} is the first derivative of \code{rho}.
 The left-hand-side of the above equation is the \code{G} matrix returned by this function.
 }
 \examples{
+## simulate some data ##
 n <- 20
-p <- 4
-X <- replicate(p, rnorm(n))
-X[1,] <- rep(1,p)
-beta <- rnorm(p)
-alpha <- runif(1)
-y <- c(X \%*\% beta) + rnorm(n) # with N(0,1) error term
-qr_evalG(y, X, alpha, beta)
+p <- 2
+X <- replicate(p-1, rnorm(n))
+X <- cbind(1, X)
+beta0 <- c(1, 2)
+y <- c(X \%*\% beta0) + rnorm(n)
+
+## calculate G matrix given data and certain parameter values ##
+# a single quantile level (with continuity correction)
+alpha <- 0.5
+beta <- c(1, 2)
+qr_evalG(y, X, alpha, beta, s = 1)
+
+# multiple quantile levels (with continuity correction)
+alpha <- c(0.25, 0.75)
+Beta <- cbind(c(0.5, 2), c(1.5, 2)) # each column corresponds to one quantile level
+qr_evalG(y, X, alpha, Beta, s = 1)
 }
 \references{
 G. Basset and R. Koenker. Regression quantiles. Econometrica, 46(1):33–50, 1978.

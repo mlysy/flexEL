@@ -1,1 +1,1 @@
-#' @param omega Length-\code{nObs} probability vector.
+#' @param omega Length-\code{n_obs} probability vector.

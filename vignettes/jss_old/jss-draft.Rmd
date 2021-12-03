@@ -1,0 +1,580 @@
+---
+title:
+  formatted: "\\pkg{flexEL}: A Fast and Flexible Framework for Empirical Likelihood Modeling"
+  plain: "flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling"
+author: 
+  - name: Shimeng Huang
+    affiliation: University of Waterloo
+  - name: Martin Lysy
+    affiliation: University of Waterloo
+    address:
+      - 200 University Avenue West
+      - Ontario, Canada
+    email: \email{mlysy@uwaterloo.ca}
+abstract: >
+  This paper introduces \pkg{flexEL}, a fast and flexible framework for implementing and calibrating empirical likelihood models. In particular, it provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the "Eigen" linear algebra library. The package also provides functions for implementing right-censored regression models, where the inner optimization is conducted via an expectation-maximation algirithm. Users may interface with the library through \proglang{R} or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
+keywords:
+  # at least one keyword must be supplied
+  formatted: [empirical likelihood, quantile regression, EM algorithm, right-censoring, location-scale model, "\\proglang{R}"]
+  plain:     [empirical likelihood, quantile regression, EM algorithm, right-censoring, location-scale model, R]
+date: "`r Sys.Date()`"
+documentclass: jss
+classoption: article
+output: 
+  bookdown::pdf_document2:
+    toc: false
+    template: jss-template.tex
+    includes:
+      in_header: jss-includes.tex
+    citation_package: natbib
+    # keep_tex: true
+    highlight: tango
+bibliography: references.bib  
+---
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r setup, include = FALSE}
+library(knitr)
+## knitr::knit_hooks$set(
+##   prompt = function(before, options, envir) {
+##     eng <- options$engine
+##     if(eng %in% c("sh", "bash")) {
+##       pr <- "$ "
+##     } else if(eng == "R") {
+##       pr <- "R> "
+##     } else {
+##       pr <- "> "
+##     }
+##     options(prompt = pr)
+## })
+## options(prompt = "R> ",
+##         continue = "+  ",
+##         width = 70,
+##         useFancyQuotes = FALSE)
+knitr::opts_chunk$set(comment="",
+                      prompt = TRUE,
+                      R.options = list(prompt = "R> ",
+                                       continue = "+  ",
+                                       width = 70,
+                                       useFancyQuotes = FALSE))
+embed_file <- function(file, lang) {
+  cat(paste0("```", lang), readLines(file), "```", sep = "\n")
+}
+```
+
+# Introduction
+
+Empirical likelihood (EL) method allows statisticians to construct partially specified models via moment conditions. Although an EL model does not assume any parametric family of the data, the estimator is in some sense as efficient as a fully parametric model [@qin-lawless1994].
+
+The empirical likelihood (EL) approach can be traced back to @thomas-grunkemeier1975. Its current framework is mainly developed by @owen1988, @owen1990, and @owen1991, where empirical likelihood ratio statistics is introduced, and the EL method is extended to linear regression models under fixed or random design. @kolaczyk1994 further generalize the method to be used with generalized linear models. @qin-lawless1994 relate estimating equation and empirical likelihood and provide asymptotic properties of the estimator. @chen-et-al2008 propose an adjustment to the constraints in the EL framework to ensure the convex hall condition is always satisfied and the theoretical properties are not affected. Moreover, @lazar2003 explores the validity of using empirical likelihood for Bayesian inference as well as the frequentist properties of the posterior intervals. @chaudhuri-et-al2017 considers using Hamiltonian Monte Carlo sampling for the Bayesian EL models.
+
+<!-- A Bayesian approach to EL considers the pseudo-posterior distribution $p_{\EL}(\tth|Y) \propto \EL(\tth)\pi(\tth)$ where $\pi(\tth)$ is the prior distribution of $\tth$, is usually straightforward to explore by Markov chain Monte Carlo (MCMC) algorithm. However, notice that since EL is not a true likelihood, neither is $p_{\EL}(\tth|Y)$ a true posterior. The consequences of this have been investigated by e.g.  -->
+
+An approach related to EL is the so-called exponentially tilting (ET) method [@efron1981]. @schennach2005, and @schennach2007 propose the exponentially tilted empirical likelihood (ELET) approach, which enjoys the properties of both ET and EL methods. @newey-smith2004 also gives the theoretical results relating Generalized Method of Moment (GMM) and Generalized Empirical Likelihood (GEL), their higher order properties, as well as their bias-corrected forms in the absence of length-bias.
+
+For EL with length-biased data, @zhou2005 proposes an EM algorithm for censored and truncated data under mean type constraints without covariates. @zhou-li2008 combine the empirical likelihood with the Buckley-James estimator which works for regression models. @zhou-et-al2012 revisit the fixed and random design linear regression models but for right-censored data and show that the model works well even with heteroscedastic errors. @shen-et-al2016 develop a different EM algorithm under the EL framework for one- or two- sample doubly censored data.
+
+Given fully observed data, an asymptotic $\chi^2$ distribution of log EL is valid. When right-censoring is present, the asymptotic distribution is no longer a standard $\chi^2$ distribution but subject to an unknown scaling factor. @he-et-al2016 consider using a special influence functions in the estimating equations to retain a standard $\chi^2$ distribution. @li-wang2003 propose an adjusted EL for linear regression using synthetic data approach.  @ning-et-al2013 consider length-biased right-censored data in a non-regression setting for the estimation of mean, quantile and survival function of the population as well as confidence intervals.
+
+Although the EL method has been extended and generalized over the years, there has not been a flexible and efficient software available to the public. The existing software are either written in a high-level programming language for which inner optimization is not efficient, or are designed for specific regression problems (e.g. \pkg{emplik}, \pkg{gelS4}). There is also no software that provides EL method for right-censored data.
+
+This paper describes a framework we designed for EL researchers to develop fast and efficient implementations of their own EL models and related methods. We provide a computationally efficient R package called \pkg{flexEL} which is flexible enough for users to solve any type of regression problems with minimum programming effort. The computational efficiency is achieved by a C++ implementation of the Newton–Raphson algorithm which is a key step in the EL inner optimization problem. Other than the main functionality of regular EL estimation, the package also provides support correction, continuity correction under right-censoring, gradient calculation, as well as various mean and quantile regression models for which the details will be described in the later sections.
+	
+# Methodology
+
+## Basics
+
+Let $\XX = (\xx_1,\cdots,\xx_n)$ where $\xx_i\in\R^d$ be iid observations from an unknown distribution $F_0(\xx)$, about which a parameter of interest $\tth \in \R^p$ is defined as satisfying an $m$-dimensional moment condition:
+\begin{equation} \label{eq:momcond}
+  \E\bigl[\gg(\xx;\tth)\bigr] = 0,
+\end{equation}
+where $\gg(\xx, \tth) = \bigl( g_1(\xx, \tth), \ldots, g_m(\xx, \tth) \bigr)$.
+
+The empirical likelihood $\EL(\tth)$ as the profile likelihood over the distribution function of $\xx$:
+\begin{equation} \label{eq:elF}
+  \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\xx_i),
+\end{equation}
+where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:momcond}.
+
+For any $\tth$, @owen1988 has shown that the maximum of \eqref{eq:elF} can be achieved by focusing on the distribution functions having all mass on the support of the observed data $\xx_1, \cdots, \xx_n$, and the infinite-dimensional profile likelihood \eqref{eq:elF} can be reduced to a finite-dimensional one. 
+
+To have a general notation consistent with the EM algorithm under right-censoring in later sections, we now define \textbf{weighted empirical likelihood}:
+
+\begin{equation}
+  \EL(\tth) = \prod_{i=1}^n \hat{\w_i}(\tth)^{q_i},
+\end{equation}
+
+where $q_i > 0, \forall i=1,\cdots,n$, and the $n$-dimensional vector of probability weights $\hat{\w}(\tth)$ associated with the observations is the solution of an inner optimization problem which will be referred to as \textbf{EL inner optimization}:
+
+\begin{equation} \label{eq:noncensopt}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^n q_i \log(\w_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot g(\xx_i;\tth) = 0 \\
+  & \sum_{i=1}^n \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1,\cdots,n.
+\end{split}
+\end{equation}
+
+When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian function can be set up as 
+\begin{equation} \label{eq:lagrange}
+  \L = \sum_{i=1}^n q_i\log(\w_i) + (\sum_{i=1}^n q_i)\lla'(\sum_{i=1}^n \w_i \cdot g(\xx_i;\tth)) + \mu(1-\sum_{i=1}^n \w_i).
+\end{equation}
+
+Let $r_i = q_i/\sum_{i=1}^n q_i$. Provided that $\bm 0$ is in the convex full of the points $g(\xx_i;\tth),\cdots,g(\xx_n;\tth)$, a unique optimal probability vector exist and can be shown to be
+
+\begin{equation}\label{eq:omegahat}
+  \hat{\w_i}(\tth) = \frac{r_i}{1 - \hat{\lla}'(\tth) g(\xx_i;\tth)},
+\end{equation}
+
+where 
+
+\begin{equation}
+\begin{aligned}
+\hat{\lla}(\tth) &= \argmax_{\lla(\tth)} \sum_{i=1}^n r_i\ \str\log\left(1 - \lla'(\tth) g(\xx_i;\tth); r_i\right), \\
+\str\log(x; r) &= 
+\begin{cases} 
+\log(x) & x \ge r \\
+- \frac{1}{2} (x/r)^2 + 2 (x/r) - \frac{3}{2} + \log r & x < r.
+\end{cases}
+\end{aligned}
+\label{eq:optim}
+\end{equation}
+
+@qin-lawless1994 has shown that $\lla(\tth)$ is a continuous differentiable function of $\tth$ provided that convex hull condition is satisfied with $\tth$ and $\sum_{i=1}^n g(\xx_i;\tth)g'(\xx_i;\tth)$ is positive definite. However, the support of $\tth$ is not necessarily a convex set, as demonstrated by @chaudhuri-et-al2017.
+
+In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 shows that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the parameters accordingly.
+
+With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, which allows one to employ a gradient based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to $\tth$ can be derived as
+
+\begin{equation}
+\dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth),
+\end{equation}
+
+where $Q = \sum_{i=1}^n q_i$.  
+
+<!-- \begin{equation} -->
+<!-- \begin{split} -->
+<!-- \dth \log \EL(\tth) &= \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\ -->
+<!-- &= \sum_{i=1}^n \frac{q_i}{1 - \lla'g_i} \cdot \dth \lla(\tth)'g_i(\tth) \\ -->
+<!-- &= \dth \lla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot g_i(\tth)}{1 - \lla'g_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth), -->
+<!-- \end{split} -->
+<!-- \end{equation} -->
+
+<!-- Since substituting \eqref{eq:omegahat} into \eqref{eq:noncensopt} gives -->
+
+<!-- \begin{equation} -->
+<!-- \sum_{i=1}^n \hat \omega_i \cdot g_i = \sum_{i=1}^n \frac{r_i \cdot g_i}{1 - \hat{\lla}'g_i} = 0, -->
+<!-- \end{equation} -->
+
+<!-- the first term in the gradient disappears, such that we have -->
+
+<!-- \begin{equation} -->
+<!-- \dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth). -->
+<!-- \label{eq:gradel} -->
+<!-- \end{equation} -->
+
+
+## Support Correction
+
+Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 propose a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+
+\begin{equation} \label{eq:noncensoptadj}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^{n+1} q_i \log(\w_i) \\
+  \text{s.t.}\quad & \sum_{i=1}^{n+1} \w_i\cdot g_i = 0 \\
+  & \sum_{i=1}^{n+1} \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1,\cdots,{n+1},
+\end{split}
+\end{equation}
+
+where $g_{n+1} = -\frac{a_n}{n} \sum_{i=1}^n g_i$ for some small positive $a_n$.
+
+It is also shown by @chen-et-al2008 that this approach retains the optimally properties of EL, is faster to compute, and improves coverage probabilities of the confidence regions. 
+
+## Regression with Right-Censored Outcome
+
+### Empirical Likelihood with Right-Censored Outcome Variable
+
+\pkg{flexEL} handles the situation of regression models with right-censored outcomes, that is, instead of observing outcomes $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. 
+
+Consider a general regression model
+\[
+  y_i = f(\xx_i; \tth) + \e_i, \quad i=1,\cdots,n
+\]
+where $\e_i$ follows an unknown distribution with mean $0$ and variance $1$, and independent of $\xx_i$, and $m$-dimensional conditional moment restrictions
+\begin{equation}\label{eq:cmom}
+  \E\bigl[\gg(\xx, \e; \tth) \| \xx\bigr] = 0.
+\end{equation}
+
+We assume that the censoring variable $c_i$ independent of $y_i$. Let's denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s), the complete residuals as $\e_i'$s (corresponding to $y_i'$s). 
+
+The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function $F(\xx,\e) = G(\xx) \cdot H(\e)$, where $G$ and $H$ are the CDFs of $\xx$ and $\e$:
+\begin{equation}\label{eq:celF}
+  \CEL(\tth) = \max_{F \in \mathcal F(\tth)}\prod_{i=1}^n dG(\xx_i) \cdot dH(\e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
+\end{equation}
+where
+\[
+  e_i = e_i(\tth) = \frac{u_i - \mu(\xx_i;\tth)}{\eta(\xx_i;\tth)},
+\]
+and $\mathcal F(\tth)$ is the set of all valid distribution functions satisfying \eqref{eq:cmom}.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\xx)$ is attained as the empirical distribution $\hat G(\xx)$ which puts a point mass of $1/n$ on each covariate observation $\xx_1, \ldots, \xx_n$.  Restricting our attention to $G(\xx)$ uniform on the observed covariates, and considering only the weaker moment condition
+\begin{equation}\label{eq:umom}
+  \E\bigl[\gg(\xx, \e; \tth)\bigr] = 0
+\end{equation}
+(which is true for any $G(\xx)$ if \eqref{eq:cmom} holds), the CEL function reduces to
+\[
+  \CEL(\tth) = \max_{F \in \mathcal F^\star(\tth)}\prod_{i=1}^n dH(e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
+\]
+where $\mathcal F^\star(\tth)$ is the set of all valid distributions $F(\xx, \e)$ satisfying \eqref{eq:umom}.
+
+<!-- The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\ee$: -->
+<!-- \begin{equation} \label{eq:celF} -->
+<!--   \CEL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(e_i)^{\delta_i} [1-\mathrm{d}F(e_i)]^{1-\delta_i}, -->
+<!-- \end{equation} -->
+<!-- where for any given $\tth$, $\mathcal F(\tth)$ is the set of (valid) distribution functions satisfying \eqref{eq:cmom}. -->
+
+It can be shown that with censored observations, it is no longer true that an optimal $F$ has support only on the data points $e_i, i=1,\cdots,n$. However, if we restrict ourselves to this case, we arrive at a finite dimensional problem
+\begin{equation} \label{eq:elcens}
+  \CEL(\tth) = \prod_{i=1}^n \Big[\hat \w_i(\tth)^{\delta_i}(\sum_{j: e_j \geq e_i}\hat \w_i(\tth))^{1-\delta_i}\Big].
+\end{equation}
+
+where similar as before, $\hat\w(\tth)$ is the solution of an inner optimization problem
+
+\begin{equation} \label{eq:elcens_inner}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^n \Big[\delta_i\log(\w_i) + (1-\delta_i)\log(\sum_{j: e_j\geq e_i}\w_i)\Big]\\
+  \text{s.t.}\quad & \sum_{i=1}^n \w_i\cdot g_i(\yy,\xx;\tth) = 0 \\
+  & \sum_{i=1}^n \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1\cdots,n.
+\end{split}
+\end{equation}
+
+Right-censoring is essentially a missing data problem. In \pkg{flexEL}, the right-censored EL problem is solved via an EM algorithm. The algorithm is a generalization of @zhou2005 to regression problems.
+
+### An EM Algorithm
+
+Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{unobserved (latent) variables} are the $\e_i'$s such that $\delta_i = 0$, the \textbf{complete data likelihood} is
+\begin{equation}\label{eq:complike}
+  \ell(\w,\e|\uu) = \sum_{i=1}^n\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)})
+\end{equation}
+
+The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to $\yy$ (vector of all latent variables) conditioned on the observed values, the censoring indicator and the current state of the parameters, and since for $\delta_i = 1$, we know that $u_i=y_i$, we have
+
+\begin{equation}\label{eq:estep}
+\begin{split}
+  \E_{\e|e,\delta,\w_0}\bigl[\ell(\w,\e|e)\bigr]
+  &= \E_{\e|e,\delta,\w_0}\Bigl[\sum_{i=1}^n\delta_i\log(\w_i) +
+  (1-\delta_i)\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)})\Bigr] \\
+  &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) +
+  (1-\delta_i)\sum_{j=1}^n \E_{\e_i|e,\delta,\w_0}[\mathfrak1(\e_i=e_j)]\log(\w_j)\Bigr] \\
+  &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) +
+  (1-\delta_i)\sum_{j=1}^n P_{\e_i|e,\delta,\w_0}(\e_i=e_j)\log(\w_j)\Bigr].
+\end{split}
+\end{equation}
+
+Notice that we can write
+\[
+  \log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)}) =
+  \sum_{i=1}^n \mathfrak 1(\e_i=e_j)\log(\w_j),
+\]
+because for any $i \in \{1,\cdots,n\}$, $\mathfrak 1(\e_i=e_j)=1$ for one and only one $j\in\{1,\cdots,n\}$. Also, the latent $\e_i's$ are independent but not identically distributed, since each of them follows a different categorical distribution (multinomial distribution with one trial).
+
+The conditional distribution in (\ref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass only allocates on the values in a subset of $\{e_1,\cdots,e_n\}$ such that $\mathfrak 1(e_j\geq e_i) = 1$ for $j=1,\cdots,n$, which is still a multinomial distribution.
+\begin{equation}\label{eq:condprob_orig}
+  P_{\e_i|e,\delta,\w_0}(\e_i=e_j) =
+  \frac{\mathfrak 1(e_j\geq e_i)\cdot \w_{0j}}{\sum_{k=1}^n\mathfrak 1(e_k\geq e_i)\cdot\w_{0k}}.
+\end{equation}
+
+Therefore, the EM algorithm iterates between the following two steps:
+
+\begin{itemize}
+\item \textbf{E-step:} Given the observed values and the weights $\w_0$ from the previous iteration, the expectation of the log likelihood is
+\begin{equation}\label{eq:emestep}
+\begin{split}
+  \E_{\e|e,\delta,\w_0}[\ell(\w,\e|e)]
+  &= \sum_{i=1}^n \Big[\delta_i \log \w_i +
+    (1-\delta_i) \sum_{j: e_j\geq e_i} \tilde \w_{ij} \log \w_j\Big] \\
+  &= \sum_{i=1}^n \Big[\delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)
+      \cdot\tilde\w_{ki}\Big]\cdot\log \w_i,
+\end{split}
+\end{equation}
+where
+\[
+  \tilde \w_{ki} = \frac{\w_{0i}}{\sum_{l: e_l\geq e_k}\w_{0l}}, \quad k,i: e_k\leq e_i.
+\]
+
+\item \textbf{M-step:}
+Let $q_i = \delta_i + \sum_{k: e_k\leq e_i} (1-\delta_k)\cdot \tilde \w_{ki}$ for $i=1,\cdots,n$, then the problem becomes
+\begin{equation}\label{eq:emmstep}
+\begin{split}
+  \max_{\w}\quad & \sum_{i=1}^n q_i \log \w_i \\
+  \mbox{s.t.}\quad & \sum_{i=1}^n \w_i\cdot \gg(\xx_i,u_i;\tth) = 0 \\
+  & \sum_{i=1}^n \w_i = 1 \\
+  & \w_i \geq 0, \quad i=1\cdots,n,
+\end{split}
+\end{equation}
+
+which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegahat}) to (\ref{eq:optim}).
+
+\end{itemize}
+
+With support correction, we can calculate the weight $r_{n+1}$ (before normalization) for the additional $\log w_{n+1}$ by assigning the censoring indicator as $0$ and the residual as $-\inf$. This minimizes the impact of the fake observation on the other observations.
+
+### Continuity Correction of Empirical Likelihood with Right-Censored Outcomes
+
+It turns out that the log of equation (\ref{eq:elcens}) (log CEL) is not a continuous function in $\tth$, so that direct optimization of log CEL is difficult to achieve.
+
+In order to obtain an estimate in this case, one could use Markov Chain Monte Carlo or global optimization algorithm such as simulated annealing, which are both time-consuming. Here we consider a revision of the log CEL function, so that one can employ gradient-based optimization algorithms.
+
+The log CEL can be expanded as follows
+\begin{equation}
+\begin{split}
+\ell_{\CEL}(\tth) &= \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) +
+  (1-\delta_i)\log(\sum_{j:e_j \geq e_i} \w_j(\tth))\Bigr] \\
+  &= \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) +
+    (1-\delta_i)\log(\sum_{j=1}^n \mathfrak 1(e_j(\tth) \geq e_i(\tth)) \cdot \w_j(\tth))\Bigr].
+\end{split}
+\label{eq:logel_orig}
+\end{equation}
+
+We can see that the discontinuity of $\ell_{\CEL}(\tth)$ in (\ref{eq:logel_orig}) is due to an indicator function. To correct this discontinuity, we replace the indicator function by a continuous approximation.
+
+Let $S$ be a transformed sigmoid function, i.e.,
+\begin{equation}\label{eq:sigmoid}
+  S(x; s) = \frac{1}{1+\exp(s\cdot x)},
+\end{equation}
+where $s > 0$ is a smoothing parameter. A plot of the function is given in Figure \ref{fig:smoothfun}. This function is radially symmetric around the point $(0,0.5)$.
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=0.5\textwidth]{smoothfun.png}
+\caption{Smooth function for indicator function $\mathfrak 1(x\leq 0)$.}
+\label{fig:smoothfun}
+\end{figure}
+
+Specifically, we use
+\begin{equation}\label{eq:indsmooth}
+  S_{ij}(\tth;s) := S(e_i(\tth)-e_j(\tth);s)
+  = \frac{1}{1+\exp(s\cdot(e_i(\tth)-e_j(\tth)))}.
+\end{equation}
+Notice that as long as $e_i(\tth)$ is a continuous function of $\tth$ for all $i=1,\cdots,n$, then (\ref{eq:indsmooth}) is indeed a continuous function of $\tth$.
+
+The log smoothed censored EL (log SCEL) is then defined as
+\begin{equation}\label{eq:logel_smoo}
+  \ell_{\SCEL}(\tth) = \sum_{i=1}^n \Bigl[\delta_i\log(w_i(\tth)) +
+    (1-\delta_i)\log(\sum_{j=1}^n S_{ij}(\tth;s)\cdot w_j(\tth))\Bigr].
+\end{equation}
+
+# Software Design and Illustrations
+
+The core functionality of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. Other utilities include support correction and continuity correction which are easily turned on and off by the users. 
+
+The package's source code is written as a header-only library in C++ using object-oriented programming. The main class `GenEL` provides the core computations of weighted log empirical likelihood. `CensEL` class utilizes `GenEL` and contains the EM algorithm for right-censored EL computations. The package also provides an \proglang{R} interface mimicking the class structure in C++ based on R6. An R6 object created via the \proglang{R} interface connects to the C++ layer with an external pointer. In this way, fast computation and efficient memory allocation can be achieved. This section describes how a user can interact with the package either in C++ or \proglang{R}.
+
+In terms of built-in models, \pkg{flexEL} provides implementations of estimating equations for mean and quantile regressions based on the following location-scale model:
+
+\begin{equation} \label{md:lsmod}
+  y_i = \xx_i'\bbe + \s\cdot\exp(\zz_i'\gga)\cdot\e_i, \quad i=1,\cdots,n,
+\end{equation}
+
+as well as the common location model:
+
+\begin{equation} \label{md:lmod}
+  y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.
+\end{equation}
+
+Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (call it e.g. `evalG`), or implement the calculation in C++ before wrapping into an \proglang{R} interface. 
+
+Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to `G` via chain rule, a user can then utilize `optim` or `nlm` in \proglang{R} for parameter estimation with gradient-based methods.
+
+## Mean Regression
+
+In this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
+
+The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp:
+```{r, echo = FALSE, results = "asis"}
+cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
+```
+
+After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
+```{r, warn=FALSE, include=TRUE, eval=TRUE}
+Rcpp::sourceCpp("mr_neglogel.cpp")
+beta0 <- c(1,2)
+n <- 200
+X <- cbind(1, rnorm(n))
+eps <- rnorm(n)
+y <- c(X %*% beta0 + eps)
+# mr_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)
+nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
+```
+
+If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
+
+```{r, echo=TRUE, eval=TRUE}
+library(flexEL)
+mr_neglogel <- function(beta, y, X, gel) {
+  G <- flexEL::mr_evalG(y, X, beta)
+  return(-gel$logel(G))
+}
+
+gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initalize an GenEL object
+gel$supp_adj <- TRUE # turn on support correction
+
+nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
+```
+The usage is similar with right-censored outcomes, e.g. using \proglang{R}:
+```{r, echo=TRUE, eval=TRUE}
+mr_neglogcel <- function(beta, y_obs, X, cel) {
+  G <- flexEL::mr_evalG(y, X, beta)
+  -gel$logel(G)
+}
+
+cel <- flexEL::CensEL$new(n_obs = n, n_eqs = 2)
+cel$supp_adj <- TRUE
+cel$smooth <- TRUE # turn on continuity correction
+cel$smooth_s <- 1 # set tuning parameter for continuity correction
+
+z <- rnorm(2*mean(y), n = n) # censoring variable
+delta <- y <= z # censoring indicators
+y_obs <- y
+y_obs[!delta] <- z[!delta]
+
+nlm(mr_neglogcel, c(0.75, 1.25), y_obs, X, cel)
+```
+
+<!-- - Show users how to create their own `Gfun` and use this from \proglang{R}.   -->
+
+<!-- - Can include gradient-based optimization here as well.  I suggest to use `optim(method = "BFGS")` for optimization, not `nlm()` (it's just more complicated/annoying).  I would say use `nlminb()` which is way faster than `optim()`, but for some reason R Core suggests to use the other optimizers instead... -->
+
+## Quantile Regression
+
+For the location-scale model \eqref{md:lsmod}, the $\tau\times 100\%$ conditional quantile of $y_i$ is
+\begin{equation} \label{eq:lsqr}
+  Q_{\tau}(y_i|\xx_i) = \xx_i' \bbe + \s\cdot\exp(\zz_i' \gga)\cdot\nu_{\tau}.
+\end{equation}
+
+In this case, for parameters $\bbe,\gga$ and $\s$, we adopt the same estimating equation as in the mean regression case. For the quantile parameter $\nu_{\tau}$, we rely on the "check function" introduced by @koenker-bassett1978, which is defined as
+\begin{equation}\label{eq:check}
+\rho_\tau(u) = u\cdot(\tau - \mathfrak 1 \{u \le 0\}),
+\end{equation}
+where $\mathfrak 1\{\cdot\}$ is the indicator function.
+
+If the $\tau$-th quantile value of $\e_i\iid(0,1)$ is $\nu_{\tau}$, then $\e_i-\nu_{\tau}$ has $\tau$-th quantile value $0$. The estimator of $\nu_{\tau}$ is then defined as
+\begin{equation}\label{eq:nueq}
+  \hat\nu_{\tau} = \argmin_{\tilde\nu_{\tau}} \E\Biggl[\rho_{\tau}\Bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\g)}-\tilde\nu_{\tau}\Bigr)\Biggr].
+\end{equation}
+
+As before, we use the first order optimality condition of (\ref{eq:nueq}) to obtain the estimating equation for $\nu_{\tau}$. Therefore, we obtain all the moment conditions for quantile regression as follows
+\begin{equation} \label{eq:qrls}
+\begin{split}
+  \E\Bigl[\frac{y-\xx'\bbe}{\exp(2\zz'\gga)}\cdot\xx\Bigr] &= 0 \\
+  \E\Bigl[\bigl(1-\frac{(y-\xx'\bbe)^2}{\s^2\cdot\exp(2\zz'\gga)}\bigr)\cdot\zz\Bigr] &= 0 \\
+  \E\Bigl[\frac{(y-\xx'\bbe)^2}{\s^2\cdot\exp(2\zz'\gga)}-1\Bigr] &= 0 \\
+  \E\Bigl[\rho'_{\tau}\bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\gga)}-\nu_{\tau}\bigr)\Bigr] &= 0.
+\end{split}
+\end{equation}
+
+Notice that the indicator function used by the "check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as @chen2007, splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to apply here as well. That is, we modify \eqref{eq:check} as follows:
+
+\begin{equation}
+\rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)),
+\end{equation}
+where $S$ is defined as in \eqref{eq:sigmoid}.
+
+Usage of quantile regression in \pkg{flexEL} is very similar to mean regression in the last section. Moreover, one can simultaneously estimte parameters at multiple quantile levels both with the location and location-scale models. With the location model, both the intercept and the slope parameters can be different at different quantile levels. Essentially, the `G` matrix is obtained by stacking together multiple `G` matrices each at one quantile level. This is one advantage of quantile regression when heteroscedasticity presents. With the location-scale model, only the quantile parameter $\nu_{\tau}$ is different at different quantile levels, since heteroscedasticity can be handled by the scale function.
+
+## User-defined Model
+
+The following toy example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
+\[
+  y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
+\]
+where $\epsilon_i \iid \text{F}(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\text{Var}(\epsilon_i) = 1$.
+
+As the first step, one should design the estimating equations of the parameters and implement a function (`evalG`) that returns the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. 
+
+In this example, the following estimating equation can be used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
+\[
+  \E[(y-x'\beta)\cdot x] = 0,
+\]
+which is
+\[
+  \sum_{i=1}^n w_i\cdot (y_i-x_i'\beta)\cdot x_i = 0.
+\]
+In other words, the $g$ function is specified as
+\[
+  g(x,y;\beta) = (y-x'\beta)\cdot x.
+\]
+
+This can be implemented in R (called `mr2_evalG`) as follows: 
+```{r, echo=TRUE, eval=TRUE}
+mr2_evalG <- function(y, X, beta) {
+  tX <- t(X)
+  yXb <- y - c(X %*% beta)
+  G <- sweep(tX, MARGIN = 2, yXb, `*`)
+  return(t(G))
+}
+```
+
+With \pkg{flexEL}, the negative log EL can be implemented as:
+```{r, echo=TRUE, eval=TRUE}
+mr2_neglogel <- function(beta, y, X, gel) {
+  G <- mr2_evalG(y, X, beta)
+  return(-gel$logel(G))
+}
+```
+
+One may also provide the gradient of `mr2_evalG` with respect to the parameters, in this case, it is
+```{r, echo=TRUE, eval=TRUE}
+mr2_dGdb <- function(y, X, beta) {
+  lx <- split(X, row(X))
+  dg <- lapply(lx, function(x) -tcrossprod(x,x))
+  return(dg)
+}
+```
+
+Notice that here the gradient is a 3-dimensional matrix. This can then be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. the parameters, $\beta$:
+```{r, echo=TRUE, eval=TRUE}
+mr2_neglogel_grad <- function(beta, y, X, gel) {
+  G <- mr2_evalG(y, X, beta)
+  logel_lst <- gel$logel_grad(G)
+  dldG <- -logel_lst$dldG
+  dGdb <- mr2_dGdb(y, X, beta)
+  grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
+  for (ii in 1:nrow(dldG)) {
+    grad_mat[ii,] <- dGdb[[ii]] %*% dldG[ii,]
+  }
+  colSums(grad_mat)
+}
+```
+
+Then one can use e.g. `optim` to obtain the estimate of $\beta$:
+```{r, echo=TRUE, eval=TRUE}
+library(flexEL)
+
+# simulate some data
+n <- 200
+X <- cbind(1, rnorm(n))
+beta0 <- c(1, 2)
+eps <- (rchisq(n, df=5)-5)/sqrt(2*5)
+y <- c(X %*% beta0) + eps
+
+gel <- GenEL$new(n_obs = n, n_eqs = 2)
+gel$supp_adj <- TRUE
+
+optim(c(0.75, 1.25), fn = mr2_neglogel, gr = mr2_neglogel_grad,
+      y, X, gel, method = "BFGS")
+```
+
+Alternatively, a user can implement the `G` matrix and gradient calculations in C++ and follows the example in the mean regression section where instead of including `flexEL/mean_reg_model.h`, include the user defined C++ header file.
+
+## Bayesian EL
+
+- Good to illustrate with \proglang{Stan} NUTS algorithm, because we've implemented it already and \proglang{Stan} is a really good autodiff engine + best NUTS implementation.
+
+- Can illustrate with the example from the JRSSB EL-HMC paper.
+
+# Conclusion
+
+

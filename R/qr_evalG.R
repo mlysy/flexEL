@@ -3,12 +3,13 @@
 #' @template args-y
 #' @param X A numeric matrix of covariates of dimension \code{n_obs} x \code{n_bet} 
 #'   where \code{n_obs} is the number of observations and \code{n_bet} is the number 
-#'   of coefficients (length of \code{beta}). `X` should contain a column of `1`s and 
-#'   the corresponding element of `beta` (a column of `Beta`) corresponds to the 
-#'   quantile value of `eps` at that quantile level.
-#' @param alpha a vector of quantile levels.
-#' @param Beta A numeric matrix of dimension \code{n_bet} x \code{n_qts}, each column is a 
-#'   vector of coefficients in location model corresponding to the quantile level. 
+#'   of coefficients (length of \code{beta}). `X` should contain a column of `1`s 
+#'   explicitly and the corresponding element of `beta` (a column of `Beta`) 
+#'   corresponds to the quantile value of `eps` at that quantile level.
+#' @param alpha A numeric vector of quantile levels of length \code{n_qts}.
+#' @param Beta A numeric matrix of dimension \code{n_bet} x \code{n_qts}, each 
+#'   column corresponds to the parameters at the specific quantile levels. 
+#' @template arg-sp
 #' @details 
 #' Assuming data were generated from 
 #' ```
@@ -31,7 +32,7 @@
 #' ```
 #' min_beta rho(y - X*beta)
 #' ```
-#' The above minimization problem is equavalent to setting it's first derivative 
+#' The above minimization problem is equivalent to setting it's first derivative 
 #' w.r.t `beta` to 0, i.e.,
 #' ```
 #' phi(y - X*beta) = 0
@@ -39,10 +40,10 @@
 #' where `phi` is the first derivative of `rho`.
 #' The left-hand-side of the above equation is the `G` matrix returned by this function.
 #' @references G. Basset and R. Koenker. Regression quantiles. Econometrica, 46(1):33–50, 1978.
-#' @return A numeric matrix of dimension \code{n_obs} x \code{n_bet}.
+#' @return A numeric matrix of dimension \code{n_obs} x (\code{n_bet} x \code{n_qts}).
 #' @example examples/qr_evalG.R
 #' @export qr_evalG
-qr_evalG <- function(y, X, alpha, Beta) {
+qr_evalG <- function(y, X, alpha, Beta, sp = NULL) {
   
   if (!is.vector(y)) stop("y should be a vector.") # TODO: allow y to be 1d matrix too
   if (nrow(X) != length(y)) stop("y and X have inconsistent dimensions.")
@@ -55,6 +56,11 @@ qr_evalG <- function(y, X, alpha, Beta) {
   
   # the first entry of alpha passed to the C++ function is the number of quantile levels
   alpha <- c(length(alpha), alpha)
-  G <- .QuantRegEvalG(y, t(X), alpha, Beta)
+  if (is.null(sp)) {
+    G <- QuantReg_evalG(y, t(X), alpha, Beta)
+  } else {
+    if (sp <= 0) stop("`sp` must be a positive scalar.")
+    G <- QuantReg_evalG_smooth(y, t(X), alpha, Beta, sp)
+  }
   return(t(G))
 }

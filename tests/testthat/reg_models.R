@@ -22,11 +22,10 @@ mrls_evalG_R <- function(y, X, Z, beta, gamma, sig2) {
   yXbeZg <- c((y - X %*% beta)*eZg) # (y-x'beta)e^{-z'gamma}
   yXbeZg2 <- yXbeZg * yXbeZg # (y-x'beta)^2*e^{-2z'gamma}
   G[,1:nBeta] <- yXbeZg * eZg * X
-  G[,nBeta+1:nGamma] <- (1-yXbeZg2) * Z
+  G[,nBeta+1:nGamma] <- (1-yXbeZg2/sig2) * Z
   G[,nBeta+nGamma+1] <- 1/sig2 * yXbeZg2 - 1;
   return(G)
 }
-
 
 # ---- quantile regression ----
 
@@ -37,7 +36,11 @@ rho_alpha <- function(u, alpha) {
 
 # 1st derivative of check function
 phi_alpha <- function(u, alpha) {
-  (u <= 0) - alpha
+  # (u <= 0) - alpha
+  # alpha - (u <= 0)
+  ret_val <- alpha - (u <= 0)
+  ret_val[which(u == 0)] <- 0
+  ret_val
 }
 
 # location model
@@ -84,7 +87,7 @@ ind1_smooth_R <- function(x, s=10) {
 
 # 2nd derivative of ind_smooth
 ind2_smooth_R <- function(x, s=10) {
-  return((-s*s*exp(s*x)*(1+exp(s*x))+2*s*s*exp(2*s*x))/(1+exp(s*x))^3)
+  return((-s*s*exp(s*x)*(1+exp(s*x))+2*s*s*exp(2*s*x))/((1+exp(s*x))^3))
 }
 
 # smoothed check function

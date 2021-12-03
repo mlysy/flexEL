@@ -1,0 +1,124 @@
+---
+title:
+  formatted: "An \\proglang{R} Markdown Template for JSS Submissions"
+  plain: "An R Markdown Template for JSS Submissions"
+author: 
+  - name: Martin Lysy
+    affiliation: University of Waterloo
+    address:
+      - 200 University Avenue West
+      - Ontario, Canada
+    email: \email{mlysy@uwaterloo.ca}
+  - name: First Student
+    affiliation: University of Waterloo
+  - name: Second Student
+    affiliation: University of Waterloo
+abstract: >
+  Here is the abstract.
+keywords:
+  # at least one keyword must be supplied
+  formatted: [keywords, not capitalized, "\\proglang{Java}"]
+  plain:     [keywords, not capitalized, Java]
+date: "`r Sys.Date()`"
+documentclass: jss
+classoption: article
+header-includes:
+  - \usepackage{caption}
+  - \captionsetup[table]{skip=.1em}
+output: 
+  bookdown::pdf_book:
+    toc: false
+    template: jss-template.tex
+    keep_tex: true
+    keep_md: true
+    highlight: tango
+    # highlight_bw: false
+    md_extensions: +tex_math_dollars
+    # latex_engine: xelatex
+  html_document:
+    keep_md: true
+---
+
+```{r setup, include = FALSE}
+library(knitr)
+## knitr::knit_hooks$set(
+##   prompt = function(before, options, envir) {
+##     eng <- options$engine
+##     if(eng %in% c("sh", "bash")) {
+##       pr <- "$ "
+##     } else if(eng == "R") {
+##       pr <- "R> "
+##     } else {
+##       pr <- "> "
+##     }
+##     options(prompt = pr)
+## })
+## options(prompt = "R> ",
+##         continue = "+  ",
+##         width = 70,
+##         useFancyQuotes = FALSE)
+knitr::opts_chunk$set(comment="",
+                      prompt = TRUE,
+                      R.options = list(prompt = "R> ",
+                                       continue = "+  ",
+                                       width = 70,
+                                       useFancyQuotes = FALSE))
+embed_file <- function(file, lang) {
+  cat(paste0("```", lang), readLines(file), "```", sep = "\n")
+}
+```
+
+# Numbering
+
+## Equations
+
+Here's a reference to equation \@ref(eq:xyz).
+\begin{equation}
+x + y = z.
+(\#eq:xyz)
+\end{equation}
+Here's an unnumbered equation:
+\[
+a/b = c.
+\]
+Here's some inline math: $y = \exp(x^2 - 1)$.
+
+## Figures
+
+Reference to Figure \@ref(fig:plot).  Also an example of embedding \proglang{R} code.
+```{r plot, fig.cap = "A simple plot."}
+x <- {function(y) {
+  y + 1:10
+}}(3)
+x
+plot(x, pch = x, col = x)
+```
+
+## Tables
+
+Reference to Table \@ref(tab:mtcars).
+```{r mtcars, echo = FALSE}
+knitr::kable(head(mtcars[, 1:8], 5), booktabs = TRUE,
+             caption = "A table of the first 5 rows of the mtcars data.")
+```
+
+# Embedded Files
+
+<!-- ## C++ File -->
+
+\subsection[C++ File alpha + beta]{C++ File $\alpha + \beta$}
+
+- LaTeX in heading doesn't seem to work.  [Here's](https://github.com/jgm/pandoc/issues/3555) how far I got with this.
+- In fact, seems to be a pure LaTeX problem, in that `latexmk` compile of tex output takes several tries to get it right.
+- Working solution: Use `\subsection[plaintext]{latex}` instead of Markdown section.
+- New problem: `\tightlist` not defined...
+
+```{r, echo = FALSE, results = "asis"}
+embed_file("foo.h", "cpp")
+```
+
+## R Markdown File
+
+```{r, echo = FALSE, results = "asis"}
+embed_file("foo.Rmd", "bash")
+```

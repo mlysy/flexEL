@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
@@ -74,7 +74,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>A base class for template classes <a class="el" href="classflex_e_l_1_1_inner_e_l.html" title="A template class for empirical likelihood inner optimization calculation with fully observed response...">InnerEL</a> and <a class="el" href="classflex_e_l_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a> to calculate estimating equations for quantile regressions.  
+<p>A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile regressions.  
  <a href="classflex_e_l_1_1_quant_reg_model.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="quant__reg__model_8h_source.html">quant_reg_model.h</a>&gt;</code></p>
@@ -106,6 +106,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8bf22c7925d3b7cfa83e51494f87c50b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_quant_reg_model.html#a8bf22c7925d3b7cfa83e51494f87c50b">EvalG</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;nu)</td></tr>
 <tr class="memdesc:a8bf22c7925d3b7cfa83e51494f87c50b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location-scale model.  <a href="#a8bf22c7925d3b7cfa83e51494f87c50b">More...</a><br /></td></tr>
 <tr class="separator:a8bf22c7925d3b7cfa83e51494f87c50b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37c51bfda7568fa261c12f962fa429a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_quant_reg_model.html#a37c51bfda7568fa261c12f962fa429a6">EvalGSmooth</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const MatrixXd &gt; &amp;Beta, const double s)</td></tr>
+<tr class="memdesc:a37c51bfda7568fa261c12f962fa429a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location model.  <a href="#a37c51bfda7568fa261c12f962fa429a6">More...</a><br /></td></tr>
+<tr class="separator:a37c51bfda7568fa261c12f962fa429a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5fdf4b136cc7bf19fdd525a2bd9e1a51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classflex_e_l_1_1_quant_reg_model.html#a5fdf4b136cc7bf19fdd525a2bd9e1a51">EvalGSmooth</a> (Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;nu, const double s)</td></tr>
 <tr class="memdesc:a5fdf4b136cc7bf19fdd525a2bd9e1a51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate G matrix for quantile regression location-scale model with smoothing.  <a href="#a5fdf4b136cc7bf19fdd525a2bd9e1a51">More...</a><br /></td></tr>
 <tr class="separator:a5fdf4b136cc7bf19fdd525a2bd9e1a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,7 +129,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a217788036a93b67201733f6accbae445"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A base class for template classes <a class="el" href="classflex_e_l_1_1_inner_e_l.html" title="A template class for empirical likelihood inner optimization calculation with fully observed response...">InnerEL</a> and <a class="el" href="classflex_e_l_1_1_inner_e_l_c.html" title="A template class for empirical likelihood inner optimization calculation with right-censored response...">InnerELC</a> to calculate estimating equations for quantile regressions. </p>
+<div class="textblock"><p class="">A base class for template classes InnerEL and InnerELC to calculate estimating equations for quantile regressions. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1621f71616bf2f44b0340610b59252c5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1621f71616bf2f44b0340610b59252c5">&#9670;&nbsp;</a></span>QuantRegModel() <span class="overload">[1/3]</span></h2>
@@ -396,8 +399,59 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a37c51bfda7568fa261c12f962fa429a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37c51bfda7568fa261c12f962fa429a6">&#9670;&nbsp;</a></span>EvalGSmooth() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void flexEL::QuantRegModel::EvalGSmooth </td>
+          <td>(</td>
+          <td class="paramtype">Ref&lt; MatrixXd &gt;&#160;</td>
+          <td class="paramname"><em>G</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Ref&lt; const MatrixXd &gt; &amp;&#160;</td>
+          <td class="paramname"><em>Beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate G matrix for quantile regression location model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">G</td><td>Matrix of dimension <code>n_eqs_ x n_obs_</code> where the calculated result is saved. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Beta</td><td>Matrix of dimension <code>n_eqs_ x n_qts_</code>, each column is a coefficient vector of length <code>n_eqs_</code> in linear location function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a5fdf4b136cc7bf19fdd525a2bd9e1a51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5fdf4b136cc7bf19fdd525a2bd9e1a51">&#9670;&nbsp;</a></span>EvalGSmooth()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fdf4b136cc7bf19fdd525a2bd9e1a51">&#9670;&nbsp;</a></span>EvalGSmooth() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -600,7 +654,7 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>number of estimating equations (number of rows of G) </p>
+<p class="">number of estimating equations (number of rows of G) </p>
 
 </div>
 </div>
@@ -623,12 +677,12 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>number of observations (number of columns of G) </p>
+<p class="">number of observations (number of columns of G) </p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>inst/include/flexEL/<a class="el" href="quant__reg__model_8h_source.html">quant_reg_model.h</a></li>
+<li>/Users/shimenghuang/flexEL/inst/include/flexEL/<a class="el" href="quant__reg__model_8h_source.html">quant_reg_model.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -5,7 +5,7 @@ source("reg_models.R")
 
 context("qrls_evalG_smooth")
 
-ntest <- 50
+ntest <- 5
 
 test_that("qrls_evalG_smooth_R == qrls_evalG_smooth_cpp", {
   for(ii in 1:ntest) {

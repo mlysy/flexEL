@@ -1,0 +1,100 @@
+---
+title: "Weighted Empirical Likelihood"
+author: "Shimeng Huang, Martin Lysy"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Weighted Empirical Likelihood}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: flexEL.bib
+---
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\EL}{EL}
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\bz}{{\bm{0}}}
+\newcommand{\bg}{{\bm{g}}}
+\newcommand{\XX}{{\bm{X}}}
+\newcommand{\xx}{{\bm{x}}}
+\newcommand{\zz}{{\bm{z}}}
+\newcommand{\bbe}{{\bm{\beta}}}
+\newcommand{\bga}{{\bm{\gamma}}}
+\newcommand{\bla}{{\bm{\lambda}}}
+\newcommand{\w}{{\omega}}
+\newcommand{\bom}{{\bm{\omega}}}
+\newcommand{\e}{{\epsilon}}
+\newcommand{\tth}{{\bm{\theta}}}
+\newcommand{\E}{\textrm{E}}
+\newcommand{\F}{\textrm{F}}
+\newcommand{\CEL}{\textrm{CEL}}
+\newcommand{\SCEL}{\textrm{SCEL}}
+\newcommand{\R}{\mathbb R}
+\newcommand{\var}{\textrm{var}}
+\newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
+\newcommand{\N}{\mathcal N}
+\newcommand{\ud}{\mathop{}\!\mathrm{d}}
+\newcommand{\dth}{\frac{\ud}{\ud\tth}}
+
+# Setup
+
+The weighted empirical likelihood (EL) is defined as
+$$
+\log \EL(\tth) = \sum_{i=1}^n q_i \log (\hat \omega_i),
+$$
+where $\hat \bom = \hat \bom(\tth)$ solves the optimization problem
+\begin{equation}
+\max_{\bom} \sum_{i=1}^n q_i \log(\omega_i) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \bom \in \Delta^{n-1},
+\label{eq:wel}
+\end{equation}
+where $\bg_i  = \bg_i(\tth) \in \mathbb R^m$, $q_i > 0$ are the weights, and $\Delta^{n-1} = \{\bom \in \mathbb R^n: \sum_{i=1}^n \omega_i = 1, \omega_i > 0\}$ is the $(n-1)$-dimensional probability simplex.
+
+# Solution
+
+Let $r_i = q_i / \sum_{i=1}^n q_i$.  Then the solution to the weighted EL problem is given by
+\begin{equation}
+\hat \omega_i = \frac{r_i}{1 - \hat \bla'\bg_i}, 
+\label{eq:omegahat}
+\end{equation}
+where
+\begin{equation}
+\begin{aligned}
+\hat \bla & = \argmax_{\bla} \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right), \\
+\log^\star(x; r) & = 
+\begin{cases} 
+\log(x) & x \ge r \\
+- \tfrac 1 2 (x/r)^2 + 2 (x/r) - \tfrac 3 2 + \log r & x < r.
+\end{cases}
+\end{aligned}
+\label{eq:optim}
+\end{equation}
+The convex optimization problem in $\bla$ can be solved by the Newton-Raphson algorithm.
+
+# Gradient
+
+The gradient of the the weighted empirical loglikelihood with respect to $\tt$ is
+$$
+\begin{aligned}
+\dth \log \EL(\tth) & = \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\
+& = \sum_{i=1}^n \frac{q_i}{1 - \bla'\bg_i} \cdot \dth \bla(\tth)'\bg_i(\tth) \\
+& = \dth \bla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot \bg_i(\tth)}{1 - \bla'\bg_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth),
+\end{aligned}
+$$
+where $Q = \sum_{i=1}^n q_i$.  Since substituting \\eqref{eq:omegahat} into \\eqref{eq:wel} gives
+$$
+\sum_{i=1}^n \hat \omega_i \cdot \bg_i = \sum_{i=1}^n \frac{r_i \cdot \bg_i}{1 - \hat \bla'\bg_i} = \bz,
+$$
+the first term in the gradient disappears, such that we have
+\begin{equation}
+\dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth).
+\label{eq:gradel}
+\end{equation}

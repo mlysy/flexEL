@@ -1,9 +1,26 @@
 var searchData=
 [
-  ['evalg',['EvalG',['../classflex_e_l_1_1_mean_reg_model.html#ae819963815649680a67a69670d2c2daf',1,'flexEL::MeanRegModel::EvalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta)'],['../classflex_e_l_1_1_mean_reg_model.html#a34bb2532fd07f09cf40ac6e017571f4a',1,'flexEL::MeanRegModel::EvalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2)'],['../classflex_e_l_1_1_quant_reg_model.html#abe164a568a619f8baa084b7f1a8aaa84',1,'flexEL::QuantRegModel::EvalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const MatrixXd &gt; &amp;Beta)'],['../classflex_e_l_1_1_quant_reg_model.html#a8bf22c7925d3b7cfa83e51494f87c50b',1,'flexEL::QuantRegModel::EvalG(Ref&lt; MatrixXd &gt; G, const Ref&lt; const VectorXd &gt; &amp;beta, const Ref&lt; const VectorXd &gt; &amp;gamma, const double &amp;sig2, const Ref&lt; const VectorXd &gt; &amp;nu)']]],
-  ['evalgsmooth',['EvalGSmooth',['../classflex_e_l_1_1_quant_reg_model.html#a5fdf4b136cc7bf19fdd525a2bd9e1a51',1,'flexEL::QuantRegModel']]],
-  ['evalomegas',['EvalOmegas',['../classflex_e_l_1_1_inner_e_l.html#a727869bd5990ce481602106a7c68fcc9',1,'flexEL::InnerEL::EvalOmegas()'],['../classflex_e_l_1_1_inner_e_l_c.html#abcee203e83a8cd43b19404ffd82971bd',1,'flexEL::InnerELC::EvalOmegas()']]],
-  ['evalomegassmooth',['EvalOmegasSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#a9897806d763c816150fbd03ecbf8671a',1,'flexEL::InnerELC']]],
-  ['evalweights',['EvalWeights',['../classflex_e_l_1_1_inner_e_l_c.html#ac6d5b9f8cf18f08857da59e93c1b3f94',1,'flexEL::InnerELC::EvalWeights()'],['../inner__elc__exports_8cpp.html#a91cc8ddfdbcbd4a50f1254b3d7860fb2',1,'EvalWeights():&#160;inner_elc_exports.cpp']]],
-  ['evalweightssmooth',['EvalWeightsSmooth',['../classflex_e_l_1_1_inner_e_l_c.html#aab9056b87d8a068d3cbb4224801a9a59',1,'flexEL::InnerELC::EvalWeightsSmooth()'],['../inner__elc__exports_8cpp.html#a5ef049e8130ea589648efc058d6d5d11',1,'EvalWeightsSmooth():&#160;inner_elc_exports.cpp']]]
+  ['genel',['GenEL',['../classflex_e_l_1_1_gen_e_l.html#a8697dec53901849fc85bd2875057784e',1,'flexEL::GenEL']]],
+  ['genel_5fctor',['GenEL_ctor',['../_gen_e_l_exports_8cpp.html#a8ee396be606fae9f6be4b9aba283d7dd',1,'GenELExports.cpp']]],
+  ['genel_5fget_5fn_5feqs',['GenEL_get_n_eqs',['../_gen_e_l_exports_8cpp.html#a08b71fc47017d1983bc1436c6afb5aab',1,'GenELExports.cpp']]],
+  ['genel_5fget_5fn_5fobs',['GenEL_get_n_obs',['../_gen_e_l_exports_8cpp.html#a2a861881e2c1fd52f02fb35968c155c0',1,'GenELExports.cpp']]],
+  ['genel_5fget_5fsupp_5fadj',['GenEL_get_supp_adj',['../_gen_e_l_exports_8cpp.html#a2cb52e56e8c7f9ce7344f769cff29eab',1,'GenELExports.cpp']]],
+  ['genel_5flambda_5fnr',['GenEL_lambda_nr',['../_gen_e_l_exports_8cpp.html#ab20815938da345bab2b59d5a9ebc83cf',1,'GenELExports.cpp']]],
+  ['genel_5flogel',['GenEL_logel',['../_gen_e_l_exports_8cpp.html#acf2a9664d403dacfd1879f24b3263ceb',1,'GenELExports.cpp']]],
+  ['genel_5flogel_5fgrad',['GenEL_Logel_grad',['../_gen_e_l_exports_8cpp.html#aa65a18e07c630407a7b25fe377eb68e3',1,'GenELExports.cpp']]],
+  ['genel_5fomega_5fhat',['GenEL_omega_hat',['../_gen_e_l_exports_8cpp.html#a97e825879f08ac534abf9755edaaba83',1,'GenELExports.cpp']]],
+  ['genel_5fset_5flambda0',['GenEL_set_lambda0',['../_gen_e_l_exports_8cpp.html#a6f33968687105ec5ed0a29b9499e6024',1,'GenELExports.cpp']]],
+  ['genel_5fset_5fmax_5fiter',['GenEL_set_max_iter',['../_gen_e_l_exports_8cpp.html#a4843af80713a575f8beaf2f0c1afdc2a',1,'GenELExports.cpp']]],
+  ['genel_5fset_5frel_5ftol',['GenEL_set_rel_tol',['../_gen_e_l_exports_8cpp.html#aebfd4915eb3fa4ffd4fba6f09c3970f7',1,'GenELExports.cpp']]],
+  ['genel_5fset_5fsupp_5fadj',['GenEL_set_supp_adj',['../_gen_e_l_exports_8cpp.html#a14facc7828ab4098c5d5e0e72c4c0f6a',1,'GenELExports.cpp']]],
+  ['genel_5fweighted_5flogel',['GenEL_weighted_logel',['../_gen_e_l_exports_8cpp.html#ab5f383416fe8dc3c69da414f03121399',1,'GenELExports.cpp']]],
+  ['get_5fabs_5ftol',['get_abs_tol',['../classflex_e_l_1_1_cens_e_l.html#adb0440f2aa7264545ee3c8f23ec1ef12',1,'flexEL::CensEL']]],
+  ['get_5fdiag',['get_diag',['../classflex_e_l_1_1_cens_e_l.html#a30335aa3df228ac928c18d3c35387d0d',1,'flexEL::CensEL::get_diag()'],['../classflex_e_l_1_1_gen_e_l.html#ac179cb3f651afdf3b04530bc67c0f1f4',1,'flexEL::GenEL::get_diag()']]],
+  ['get_5fmax_5fiter',['get_max_iter',['../classflex_e_l_1_1_gen_e_l.html#a526fd36391541e4a2ec1edcf5b514e22',1,'flexEL::GenEL']]],
+  ['get_5fmax_5fiter_5fem',['get_max_iter_em',['../classflex_e_l_1_1_cens_e_l.html#aa7f37b56a680c8a04951a2b386ce1204',1,'flexEL::CensEL']]],
+  ['get_5fmax_5fiter_5fnr',['get_max_iter_nr',['../classflex_e_l_1_1_cens_e_l.html#a6c9ab6461613f30559877b761833e7ae',1,'flexEL::CensEL']]],
+  ['get_5fn_5feqs',['get_n_eqs',['../classflex_e_l_1_1_cens_e_l.html#a6746876a187d768d418aee5d557fb026',1,'flexEL::CensEL::get_n_eqs()'],['../classflex_e_l_1_1_gen_e_l.html#a0af0a8efa0ba99b0f2d3d1b794a460dc',1,'flexEL::GenEL::get_n_eqs()'],['../classflex_e_l_1_1_mean_reg_model.html#ae43485d90d3db8d18a04047ca520bef4',1,'flexEL::MeanRegModel::get_n_eqs()'],['../classflex_e_l_1_1_quant_reg_model.html#a6e15056aa973ee7163d3796e397cfc6f',1,'flexEL::QuantRegModel::get_n_eqs()']]],
+  ['get_5fn_5fobs',['get_n_obs',['../classflex_e_l_1_1_cens_e_l.html#a439bb0ba13278726a0302ef8bf7fa9dc',1,'flexEL::CensEL::get_n_obs()'],['../classflex_e_l_1_1_gen_e_l.html#a6566885e0a8faff4ca0a054024856a9d',1,'flexEL::GenEL::get_n_obs()'],['../classflex_e_l_1_1_mean_reg_model.html#a2f062f2341a12e77a65d378fa146c4c7',1,'flexEL::MeanRegModel::get_n_obs()'],['../classflex_e_l_1_1_quant_reg_model.html#aae4779cbf06ead9bbcf31589625618ef',1,'flexEL::QuantRegModel::get_n_obs()']]],
+  ['get_5frel_5ftol',['get_rel_tol',['../classflex_e_l_1_1_cens_e_l.html#aa0bb00a763e734c235c239d84b08b49c',1,'flexEL::CensEL::get_rel_tol()'],['../classflex_e_l_1_1_gen_e_l.html#ac2c678abe1a2af77e56258c477baf722',1,'flexEL::GenEL::get_rel_tol()']]],
+  ['get_5fsupp_5fadj',['get_supp_adj',['../classflex_e_l_1_1_cens_e_l.html#a8d6c6bcb4ef37d828622dc8461ecab51',1,'flexEL::CensEL::get_supp_adj()'],['../classflex_e_l_1_1_gen_e_l.html#ab72a2ae19c7c22c0e4518114d8920705',1,'flexEL::GenEL::get_supp_adj()']]]
 ];

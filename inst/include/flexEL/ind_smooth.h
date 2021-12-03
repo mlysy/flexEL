@@ -33,6 +33,19 @@ namespace flexEL {
     return(-s*sxexp/((1+sxexp)*(1+sxexp)));
   }
 
+   /**
+    * @brief Second derivative of \c ind_smooth.
+    * 
+    * @param[in] x   The value to be evaluated at. 
+    * @param[in] s   A positive number controlling the level of smoothness. The bigger the more smooth.
+    */
+   inline double ind2_smooth(double x, double s) {
+      double sxexp = exp(s*x);
+      double sxexpp1 = 1+sxexp;
+      return(-s*s*sxexp/(sxexpp1*sxexpp1) + 
+             2*s*s*sxexp*sxexp/(sxexpp1*sxexpp1*sxexpp1));
+   }
+
 } // namespace flexEL
 
 #endif
