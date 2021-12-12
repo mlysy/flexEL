@@ -538,36 +538,43 @@ Alternatively, a user can implement the `G` matrix and gradient calculations in 
 
 - Can illustrate with the example from the JRSSB EL-HMC paper.-->
 
-The Bayesian EL(BayesEL) combines the prior information on parameters and the data-driven likelihood to draw inference on the estimand that is defined by estimating equations. With the prior density $\pi(\tth)$ over the support $\Theta$, the posterior is defined as:
+The following sections will present the Bayesian EL(BayesEL) estimation, as well as an example incorporating \pkg{flexEL} and \proglang{Stan}.
+
+The BayesEL method combines the prior information on parameters and the data-driven likelihood to draw inference on the estimand that is defined by estimating equations. With the prior density $\pi(\tth)$ over the support $\Theta$, the posterior is defined as:
 
 $$
 \pi(\tth\mid\xx) = \frac{L(\tth\mid\xx)\pi(\tth)}{\int L(\tth\mid\xx)\pi(\tth) \text{d}\tth}
 \propto \left[ \prod_{i=1}^{n}w_i \right] \cdot \pi(\tth)
 $$
-As the analytic form of $\pi(\tth\mid\xx)$ is generally absent, the MCMC sampling methods can be used to evaluate the behaviour of the posterior distribution and making the inference. However, the fact that the posterior distribution is in a non-parametric manner and the support of the posterior can be irregular confronts the adoption of the Gibbs sampling and the Random walk Metropolis sampling. @chaudhuri-et-al2017 utilized the results from convex analysis and adapted the HMC sampling, a gradient-based method, to overcoming these restraints and solving problems with minimal assumptions. To ensure the HMC sampling work for the BayesEL procedures, the following assumptions must hold:
+As the analytic form of $\pi(\tth\mid\xx)$ is generally absent, the Markov Chain Monte Carlo (MCMC) sampling can be applied to make inference from the posterior distribution. However, the posterior distribution is usually in a non-parametric manner and its support can be irregular, which confronts the adoption of the Gibbs sampling and the Random Walk Metropolis sampling. @chaudhuri-et-al2017 utilized the results from convex analysis and adapted the Hamiltonian Monte Carlo(HMC) sampling, a gradient-based method, to overcoming these restraints and solving problems with minimal assumptions. 
+<!--
+To ensure the HMC sampling work for the BayesEL procedures, the following assumptions must hold:
 
-* $\Theta$ is an open set.
+\begin{assump}
+$\Theta$ is an open set.
+\end{assump}
 
-* $g$ is a smooth function of $\tth$ in $\Theta$, $q \leq d$^[Note that @qin1994empirical assumed $q \geq d$.] and $\Theta_1 = \{\tth \in \Theta: L(\tth) > 0\}$ is non-empty. 
+\begin{assump}
+$g$ is a smooth function of $\tth$ in $\Theta$, $q \leq d$ and $\Theta_1 = \{\tth \in \Theta: L(\tth) > 0\}$ is non-empty. 
+\end{assump}
 
-    If $\Theta_1$ were empty, the EL will never be positive and the BayesEL is no longer beneficial to make statistical inference.
-   
-* The sample size $n > q$ and the matrix $\GG$ has full row rank for any $\tth\in\Theta$
+\begin{assump} 
+The sample size $n > q$ and the matrix $\GG$ has full row rank for any $\tth\in\Theta$
+\end{assump}
 
-* For any fixed $\xx$, suppose at least $q$ elements of $\w$ that are non-zero, then for any fixed $\tth\in\Theta$, the matrix $\sum_{i=1}^n w_i \nabla{\GG(\xx_i)}$ has full row rank, where $\nabla \GG(\xx_i)$ is the $q\times d$ Jacobian matrix.
+\begin{assump}
+For any fixed $\xx$, suppose at least $q$ elements of $\w$ that are non-zero, then for any fixed $\tth\in\Theta$, the matrix $\sum_{i=1}^n w_i \nabla{\GG(\xx_i)}$ has full row rank, where $\nabla \GG(\xx_i)$ is the $q\times d$ Jacobian matrix.
+\end{assump}
 
-* Consider a sequence of points in $\Theta_1$, $\{\tth^{(k)}\}$, such that $\tth^{(k)}$ converges to a boundary point $\tth^{(0)}$ of $\TTh_1$. Assume that $\tth^{(0)}$ lies within $\Theta$ and $L(\tth^{(k)})$ strictly decreases to $L(\tth^{(0)})$. then, for some constant $b(n, \theta^{(0)}) > -1$, we have 
+\begin{assump}
+Consider a sequence of points in $\Theta_1$, $\{\tth^{(k)}\}$, such that $\tth^{(k)}$ converges to a boundary point $\tth^{(0)}$ of $\TTh_1$. Assume that $\tth^{(0)}$ lies within $\Theta$ and $L(\tth^{(k)})$ strictly decreases to $L(\tth^{(0)})$. then, for some constant $b(n, \theta^{(0)}) > -1$, we have 
 $$
 \lim_{k\to \inf} \inf \frac{\log\left[\pi(\tth^{(k-1)})\right]-\log\left[\pi(\tth^{(k)})\right]}{\log\left[L(\tth^{(k-1)})\right]-\log\left[L(\tth^{(k)})\right]} \geq b(n, \theta^{(0)}) 
 $$
+\end{assump}
+-->
 
-  With this assumption, the gradient of the log posterior diverges as the parameter values approach the boundary of $\Theta_1$ from the interior of the support, which is sufficient condition for the leapfrog integrator to propose parameter values inside $\Theta_1$.
-
-For the underlying connotation and implications, extensive discussion and mathematical proof on these imperative assumptions can be found in @chaudhuri-et-al2017. In the next section, we'll discuss why the HMC is of primary interest and how it manages to deal with complex and non-convex boundaries. 
-
-### Hamiltonian Monte Carlo Sampling for Empirical Likelihood
-
-The Hamiltonian Monte Carlo(HMC) sampling employs the Hamiltonian dynamics in the Metropolis algorithm and explores the target distribution rapidly. @Neal2012 visualized the Hamiltonian dynamics as a frictionless puck sliding over a smooth height-varying surface. The potential energy ($\Ua(\theta)$) the puck possesses is proportional to its height ($\theta$), at which the kinetic energy is explicitly defined in physics by $\Ka(p) = \frac{p^2}{2m}$, where $p$ is the momentum at height ($\theta$) and $m$ is the mass of the puck. The major characteristic of the Hamiltonian dynamics is energy conservation: no energy gain/loss of the puck such that $\Ha(\theta, p)$ will remain constant over time, while the allocation of the energy into $\Ua(\theta)$ and $\Ka(p)$ may vary with the movement of the puck over time. 
+The HMC sampling employs the Hamiltonian dynamics in the Metropolis algorithm and explores the target distribution rapidly. @Neal2012 visualized the Hamiltonian dynamics as a frictionless puck sliding over a smooth height-varying surface. The potential energy ($\Ua(\theta)$) the puck possesses is proportional to its height ($\theta$), at which the kinetic energy is explicitly defined in physics by $\Ka(p) = \frac{p^2}{2m}$, where $p$ is the momentum at height ($\theta$) and $m$ is the mass of the puck. The major characteristic of the Hamiltonian dynamics is energy conservation: $\Ha(\theta, p)$ will remain constant over time, while the allocation of the energy into $\Ua(\theta)$ and $\Ka(p)$ may vary with the movement of the puck over time. 
 
 The $d$-dimensional Hamiltonian system consists of $d$ particles deferring to Hamiltonian dynamics. The state of the system at time $t$ can be described by the trajectory $\GGa_t = (\tth_t, \pp_t)$ with position variables $\tth = (\rv \theta d)$ and auxiliary momentum variables $\pp = (\rv p d )$. Then, the Hamiltonian system is characterized by the conservative total energy:
 $$
@@ -590,7 +597,7 @@ The Hamiltonian function $\Ha(\tth, \pp, t)$ can be described by the set of diff
 \der t\tth(t) = + \del{\pp} \Ha(\tth, \pp)=\MM^{-1}\pp, \qquad \der t \pp(t) = - \del{\tth} \Ha(\tth,\pp) = \frac{\nabla \pi(\tth\mid\xx)}{ \pi(\tth\mid\xx)}
 (\#eq:HEQ)
 \end{equation}
-The three fundamental properties of the Hamiltonian dynamics granting the feasible and efficient HMC proposal are: reversible, conservative and volume preserving. The simple intuition behind the reversibility is that the initial state can be traced back from some time $t$, and it guarantees the convergence of HMC. The conservation property makes $\Ha(\tth, \pp)$ constant over the phase space trajectory $\GGa_t = (\tth_t, \pp_t)$, which makes the theoretical acceptance rate of HMC algorithm to be 1. Mathematically, the volume preservation deciphers that the change of variables $\GGa_0 \to \GGa_t$ has a Jacobian of 1
+The three fundamental properties of the Hamiltonian dynamics that grants the feasible and efficient HMC proposal are: reversible, conservative and volume preserving. The simple intuition behind the reversibility is that the initial state can be traced back from some time $t$, and it guarantees the convergence of HMC. The conservation property makes $\Ha(\tth, \pp)$ constant over the phase space trajectory $\GGa_t = (\tth_t, \pp_t)$, which makes the theoretical acceptance rate of HMC algorithm to be 1. Mathematically, the volume preservation deciphers that the change of variables $\GGa_0 \to \GGa_t$ has a Jacobian of 1
 
 $$
 \left| \frac{\partial \GGa_t}{\partial \GGa_0} \right|= 1
@@ -613,18 +620,17 @@ $$
 \alpha=\min\left\{1, \frac{p(\GGa_\prop)}{p(\GGa_0)}\right\}= \min\left\{1, \frac{\exp(\Ha(\GGa_0))}{\exp(\Ha(\GGa_\prop))}\right\}
 $$
 
-Theoretically, the energy conservation states that $\Ha(\GGa_t) = \Ha(\GGa_0)$. Therefore, if the Hamilton's equations (\ref{eq:HEQ}) can be solved analytically such that the proposal will always be accepted. Though the leapfrog integrator is highly accurate, the numerical approximation will bias the proposed trajectory such that the Hamiltonian will not be exactly conservative. Besides, the approximation will not be perfectly reversible in practice due to rounding calculation. In this sense, the $\Ha(\GGa_t)$ will depart away from $\Ha(\GGa_0)$ and the acceptance rate would not achieve 1. By treating the proposal as a stochastic one, the Metropolis acceptance step is embraced to compensate for this deviation. However, this deviation is fairly small and the resulting acceptance probability is relatively high, which makes HMC efficient. 
+The energy conservation suggests that if the Hamilton's equations (\ref{eq:HEQ}) can be solved analytically, the proposal will always be accepted. Though the leapfrog integrator is highly accurate, the numerical approximation will bias the proposed trajectory such that the Hamiltonian will not be exactly conservative. Besides, the approximation will not be perfectly reversible in practice due to rounding calculation. In this sense, the $\Ha(\GGa_t)$ will depart away from $\Ha(\GGa_0)$ and the acceptance rate would not achieve 1. By treating the proposal as a stochastic one, the Metropolis acceptance step is embraced to compensate for this deviation. However, this deviation is fairly small and the resulting acceptance probability is relatively high, which makes HMC efficient. 
 
 @Betancourt2017 explains the geometry of the phase space, i.e the collection of all possible values of the $\GGa_t$ and how the HMC sampling manage to explore regions with large curvature and draw samples from the posterior efficiently. @chaudhuri-et-al2017 derives the sufficient assumptions to make the HMC algorithm works in principle and to keep the successive positions proposed by the leapfrog integrator inside the support of the posterior $\pi(\tth\mid\xx)$. For a posterior with complex and non-convex support, the HMC sampling will keep the proposed trajectories inside the support due to high absolute gradient values of the log-posterior at the boundaries. This makes HMC sampling a powerful alternative to explore a BayesEL posterior.
 
-The HMC has three parameters to be tuned: the mass matrix $\MM$, the discretization step size $\eps$ and the number of steps taken $L$. @Neal2012 gives detailed geometry underlying and discloses the message that the inverse mass matrix corresponds to the variance matrix of the target distribution. In the light of this fact, the mass can be roughly estimated from the inverse variance of the posterior distribution. In practice, it is good to simply set $\diag(\mm)$ as an identity matrix. Intuitively, if the mass matrix is poorly estimated, a smaller step size has to be adopted to ensure the accuracy of the proposal and hence more leapfrog steps have to be taken to ensure the efficiency. In particular, @Matthew2011 pointed out that since HMC's performance is highly sensitive to the a step size $\eps$ and a desired number of steps $L$. If $L$ is too small then the algorithm exhibits undesirable random walk behavior, while if $L$ is too large the algorithm wastes computation. The No-U-Turn Sampler(NUTS) proposed by @Matthew2011 is an extension to HMC that eliminates the need to set the number of steps $L$. Generally speaking, NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. As shown in @Matthew2011, NUTS empirically has an efficient performance as a HMC algorithm that is well tuned.
+The HMC has three parameters to be tuned: the mass matrix $\MM$, the discretization step size $\eps$ and the number of steps taken $L$. @Neal2012 gives detailed geometry underlying and discloses the message that the inverse mass matrix corresponds to the variance matrix of the target distribution. In the light of this fact, the mass can be roughly estimated from the inverse variance of the posterior distribution. In practice, it is good to simply set $\MM$ as an identity matrix. On the other hand, if the mass matrix is poorly estimated, a smaller step size has to be adopted to assure the accuracy of the proposal and, as a result, more leapfrog steps will be taken to ensure the efficiency. 
 
-### stanEL pkg
+@Matthew2011 pointed out that the performance of HMC is highly sensitive to the the step size $\eps$ and the number of steps $L$. If $L$ is too small, the algorithm exhibits undesirable random walk behavior; yet, a large $L$ will lead to a waste of computation. The No-U-Turn Sampler(NUTS), a variant of HMC, will automatically make an appropriate choice of $L$ in each iteration. Generally speaking, NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. As shown in @Matthew2011, NUTS empirically has an efficient performance as a HMC algorithm that is well tuned.
 
-- to-do: job-satis example here!!!! 
+\proglang{Stan} primarily implements NUTS to make Bayesian inference. The following is an BayesEL example that takes advantage of both \pkg{flexEL} and \proglang{Stan}. 
 
-- How to accommodate the job-satis example and so as the application of the stanEL pkg into this section?
-
+- todo: add logistic model here.
 
 # Conclusion
 
