@@ -626,11 +626,40 @@ The energy conservation suggests that if the Hamilton's equations (\ref{eq:HEQ})
 
 The HMC has three parameters to be tuned: the mass matrix $\MM$, the discretization step size $\eps$ and the number of steps taken $L$. @Neal2012 gives detailed geometry underlying and discloses the message that the inverse mass matrix corresponds to the variance matrix of the target distribution. In the light of this fact, the mass can be roughly estimated from the inverse variance of the posterior distribution. In practice, it is good to simply set $\MM$ as an identity matrix. On the other hand, if the mass matrix is poorly estimated, a smaller step size has to be adopted to assure the accuracy of the proposal and, as a result, more leapfrog steps will be taken to ensure the efficiency. 
 
-@Matthew2011 pointed out that the performance of HMC is highly sensitive to the the step size $\eps$ and the number of steps $L$. If $L$ is too small, the algorithm exhibits undesirable random walk behavior; yet, a large $L$ will lead to a waste of computation. The No-U-Turn Sampler(NUTS), a variant of HMC, will automatically make an appropriate choice of $L$ in each iteration. Generally speaking, NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. As shown in @Matthew2011, NUTS empirically has an efficient performance as a HMC algorithm that is well tuned.
+@Matthew2011 points out that the performance of HMC is highly sensitive to the the step size $\eps$ and the number of steps $L$. If $L$ is too small, the algorithm exhibits undesirable random walk behavior; yet, a large $L$ will lead to a waste of computation. The No-U-Turn Sampler(NUTS), a variant of HMC, will automatically make an appropriate choice of $L$ in each iteration. Generally speaking, NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. As shown in @Matthew2011, NUTS empirically has an efficient performance as a HMC algorithm that is well tuned.
 
-\proglang{Stan} primarily implements NUTS to make Bayesian inference. The following is an BayesEL example that takes advantage of both \pkg{flexEL} and \proglang{Stan}. 
+\pkg{stanEL} deciphered the fast gradient calculation provided by \pkg{flexEL} and gain computational
+efficiency as compared to use \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan} with the following user defined script.
 
-- todo: add logistic model here.
+```{r logElopt, echo = FALSE, results = "asis"}
+cat("```hpp", readLines("logEL_opt_stan.hpp"), "```", sep = "\n")
+```
+
+Consider the logistic model with $Y_{i} \sim BIN(1, \rho_i)$, where $n$ is the number of observation: 
+
+$$
+\logit \rho_i = \xx_{i}'\bbe.
+$$
+
+The Bartlett moment conditions are given by
+$$
+E[y_{i} - \rho_{i} ] = 0, \qquad E\left[\frac{(y_{i} - \rho_{i})^2}{\rho_{i}(1-\rho_{i})} - 1  \right] = 0.
+$$
+
+The $\bm{G}_{n\times 2}$ matrix is therefore given by:
+
+$$
+\bm{G}(\bbe) = \begin{bmatrix}
+y_1 - \rho_1              &    \frac{(y_1 - \rho_1)^2}{\rho_1(1 - \rho_1)} -1      \\
+\vdots & \vdots\\
+y_n - \rho_n              &    \frac{(y_n - \rho_n)^2}{\rho_n(1 - \rho_n)} - 1      \\
+\end{bmatrix},
+$$
+Assume the prior distribution is $\bbe \sim \N(0, \sigma_{\beta}^2)$, the following \proglang{Stan} script concludes the corresponding logistic model, where the log posterior calculation will be managed by 'logEL' in \pkg{flexEL}.
+
+```{r logisticStan, echo = FALSE, results = "asis"}
+cat("```stan", readLines("logistic_el.stan"), "```", sep = "\n")
+```
 
 # Conclusion
 
