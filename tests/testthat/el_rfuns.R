@@ -1,5 +1,71 @@
 # ---- helper functions ----
 
+# wrappers to R versions having the same interface as C++
+
+lambda_nr_R <- function(G, max_iter = 100, rel_tol = 1e-7,
+                        supp_adj = FALSE, supp_adj_a, weights = NULL) {
+  if(supp_adj) {
+    G <- adjG_R(G, an = supp_adj_a)
+  }
+  if(is.null(weights)) {
+    ans <- lambdaNR_R(G, max_iter = max_iter, rel_tol = rel_tol)
+  } else {
+    if(supp_adj) weights <- c(weights, 1)
+    weights <- weights/sum(weights)
+    ans <- lambdaNRC_R(G, weights = weights,
+                       max_iter = max_iter, rel_tol = rel_tol)
+  }
+  ans
+}
+
+omega_hat_R <- function(G, max_iter = 100, rel_tol = 1e-7,
+                        supp_adj = FALSE, supp_adj_a, weights = NULL) {
+  if(supp_adj) {
+    G <- adjG_R(G, an = supp_adj_a)
+  }
+  if(is.null(weights)) {
+    ans <- omega_hat_NC_R(G, max_iter = max_iter, rel_tol = rel_tol)
+  } else {
+    if(supp_adj) weights <- c(weights, 1)
+    weights <- weights/sum(weights)
+    ans <- weighted_omega_hat_R(G, weights = weights,
+                                max_iter = max_iter, rel_tol = rel_tol)
+  }
+  ans
+}
+
+logel_R <- function(G, max_iter = 100, rel_tol = 1e-7,
+                    supp_adj = FALSE, supp_adj_a, weights = NULL) {
+  if(supp_adj) {
+    G <- adjG_R(G, an = supp_adj_a)
+  }
+  if(is.null(weights)) {
+    omega_hat <- omega_hat_NC_R(G, max_iter = max_iter, rel_tol = rel_tol)
+    lel <- if(anyNA(omega_hat)) -Inf else sum(log(omega_hat))
+  } else {
+    if(supp_adj) weights <- c(weights, 1)
+    lel <- weighted_logEL_G_R(G, weights = weights,
+                              max_iter = max_iter, rel_tol = rel_tol)
+    lel <- as.numeric(lel)
+  }
+  lel
+}
+
+logel_grad_R <- function(G, max_iter = 100, rel_tol = 1e-7,
+                         supp_adj = FALSE, supp_adj_a, weights = NULL) {
+  n <- nrow(G)
+  p <- ncol(G)
+  fun <- function(G) {
+    logel_R(G, weights = weights,
+            max_iter = max_iter, rel_tol = rel_tol,
+            supp_adj = supp_adj, supp_adj_a = supp_adj_a)
+  }
+  dldG <- tryCatch(numDeriv::grad(fun, G),
+                   error = function(e) rep(NaN, n*p))
+  matrix(dldG, nrow = n, ncol = p)
+}
+
+
 # maximum relative error
 max_rel_err <- function(lambdaNew, lambdaOld) {
   # Note: for stability (using the same tolerance as in C++ implementation)
@@ -112,7 +178,7 @@ omega_hat_NC_R <- function(G, max_iter = 100, rel_tol = 1e-7, verbose = FALSE) {
 }
 
 weighted_omega_hat_R <- function(G, weights, adjust = FALSE,
-                                 max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, 
+                                 max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3,
                                  verbose = FALSE) {
   lambdaOut <- lambdaNRC_R(G = G, weights = weights, max_iter, rel_tol, verbose)
   conv <- lambdaOut$convergence # 1 if converged
@@ -286,7 +352,7 @@ omega_hat_EM_R <- function(G, deltas, epsilons, adjust = FALSE,
   # omegasOld <- omegas
   logelOld <- logEL_R(omegas, epsilons, deltas)
   # message("logelOld = ", logelOld)
-  
+
   # weights <- evalWeights_R(deltas, omegas, epsilons)
   # weights <- weights/sum(weights)
   # print(weights/sum(weights))
@@ -416,7 +482,7 @@ logEL_smooth_R <- function(omegas, epsilons, deltas, s = 10, adjust=FALSE) {
   }
   # numerical stability: watch out for extremely small negative values
   omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-  
+
   weights <- evalWeights_smooth_R(deltas, omegas, epsilons, s, adjust)
   return(sum(weights*log(omegas)))
   # return(sum(deltas*log(omegas)+(1-deltas)*log(psos)))
@@ -554,7 +620,7 @@ omega_hat_EM_smooth_R <- function(G, deltas, epsilons, s=10, adjust = FALSE,
 # ---- wrapper functions ----
 
 # wrapper function for censor and non-censor omega_hat
-omega_hat_R <- function(G, deltas, epsilons, adjust = FALSE,
+omega_hat_cens_R <- function(G, deltas, epsilons, adjust = FALSE,
                         max_iter = 100, rel_tol = 1e-7, abs_tol = 1e-3, verbose = FALSE) {
   if (missing(deltas) && missing(epsilons)) {
     omegas <- omega_hat_NC_R(G, max_iter=max_iter, rel_tol=rel_tol, verbose=verbose)
@@ -586,7 +652,7 @@ logEL_R <- function(omegas, epsilons, deltas, adjust=FALSE) {
     }
     # numerical stability: watch out for extremely small negative values
     omegas[abs(omegas) < 1e-10/length(omegas)] <- 1e-10
-    
+
     weights <- evalWeights_R(deltas, omegas, epsilons)
     # print(weights)
     # message("new weights logel: ", sum(weights*log(omegas)))
@@ -613,7 +679,7 @@ weighted_logEL_G_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7) {
   sum_weights <- sum(weights)
   norm_weights <- weights/sum_weights
   lambda_lst <- lambdaNRC_R(G, norm_weights, max_iter, rel_tol)
-  if (!lambda_lst$convergence) return(NA)
+  if (!lambda_lst$convergence) return(-Inf)
   else {
     lambda <- lambda_lst$lambda
     omega <- c(norm_weights/(1 - c(G %*% lambda)))
@@ -624,7 +690,7 @@ weighted_logEL_G_R <- function(G, weights, max_iter = 100, rel_tol = 1e-7) {
   }
 }
 
-logEL_adjG_R <- function(G, max_iter = 100, rel_tol = 1e-7, 
+logEL_adjG_R <- function(G, max_iter = 100, rel_tol = 1e-7,
                          an = max(1, 0.5*log(nrow(G)))) {
   n <- nrow(G)
   # lambda <- flexEL::lambdaNR(G = G, max_iter = max_iter, rel_tol = rel_tol, support = TRUE)

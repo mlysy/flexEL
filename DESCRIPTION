@@ -11,7 +11,7 @@ Description: Various tools for implementing and calibrating empirical likelihood
 License: GPL (>= 3)
 Imports: Rcpp (>= 0.12.13), numDeriv
 LinkingTo: Rcpp, RcppEigen
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
 Suggests: testthat, MASS, optimCheck, knitr, rmarkdown, RcppEigen
 VignetteBuilder: knitr

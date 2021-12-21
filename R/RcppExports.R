@@ -89,28 +89,32 @@ GenEL_get_supp_adj <- function(pGEL) {
     .Call(`_flexEL_GenEL_get_supp_adj`, pGEL)
 }
 
-GenEL_lambda_nr <- function(pGEL, G, weights, verbose) {
-    .Call(`_flexEL_GenEL_lambda_nr`, pGEL, G, weights, verbose)
+GenEL_get_diag <- function(pGEL) {
+    .Call(`_flexEL_GenEL_get_diag`, pGEL)
+}
+
+GenEL_lambda_nr <- function(pGEL, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_lambda_nr`, pGEL, G, weights, check_conv)
 }
 
 GenEL_omega_hat <- function(pGEL, lambda, G, weights) {
     .Call(`_flexEL_GenEL_omega_hat`, pGEL, lambda, G, weights)
 }
 
-GenEL_logel <- function(pGEL, G, verbose) {
-    .Call(`_flexEL_GenEL_logel`, pGEL, G, verbose)
+GenEL_logel <- function(pGEL, G, check_conv) {
+    .Call(`_flexEL_GenEL_logel`, pGEL, G, check_conv)
 }
 
-GenEL_weighted_logel <- function(pGEL, G, weights, verbose) {
-    .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights, verbose)
+GenEL_weighted_logel <- function(pGEL, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights, check_conv)
 }
 
-GenEL_logel_grad <- function(pGEL, G, verbose) {
-    .Call(`_flexEL_GenEL_logel_grad`, pGEL, G, verbose)
+GenEL_logel_grad <- function(pGEL, G, check_conv) {
+    .Call(`_flexEL_GenEL_logel_grad`, pGEL, G, check_conv)
 }
 
-GenEL_weighted_logel_grad <- function(pGEL, G, weights, verbose) {
-    .Call(`_flexEL_GenEL_weighted_logel_grad`, pGEL, G, weights, verbose)
+GenEL_weighted_logel_grad <- function(pGEL, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_weighted_logel_grad`, pGEL, G, weights, check_conv)
 }
 
 MeanReg_evalG <- function(y, X, beta) {

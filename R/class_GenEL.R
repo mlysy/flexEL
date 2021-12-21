@@ -23,14 +23,25 @@ GenEL <- R6::R6Class(
       n_obs <- GenEL_get_n_obs(private$.GEL)
       n_eqs <- GenEL_get_n_eqs(private$.GEL)
       if (nrow(G) != n_obs | ncol(G) != n_eqs) {
-        stop("Dimension of G matrix must be `n_obs` x `n_eqs`.")
+        stop("Dimension of `G` matrix must be `n_obs` x `n_eqs`.")
+      }
+    },
+
+    #' @description Check the dimension of weights is as expected.
+    #' @param weights A numeric vector.
+    check_weights = function(weights) {
+      if (length(weights) != GenEL_get_n_obs(private$.GEL)) {
+        stop("Length of `weights` does not equal to the number of obserations.")
+      }
+      if (any(weights < 0)) {
+        stop("`weights` should contain only non-negative values.")
       }
     }
   ),
 
   active = list(
 
-    #' @field max_iter Access or reset the value of the maximum number of 
+    #' @field max_iter Access or reset the value of the maximum number of
     #'   iterations. The value must be a positive integer (default to 100).
     max_iter = function(value) {
       if (missing(value)) private$.max_iter
@@ -43,8 +54,8 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @field rel_tol Access or reset the value of relative tolerance 
-    #'   controlling the accuracy at convergence. The value must be a small 
+    #' @field rel_tol Access or reset the value of relative tolerance
+    #'   controlling the accuracy at convergence. The value must be a small
     #'   positive number (default to 1e-7).
     rel_tol = function(value) {
       if (missing(value)) private$.rel_tol
@@ -57,7 +68,7 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @field lambda0 Access or reset the initial value of lambda. The value 
+    #' @field lambda0 Access or reset the initial value of lambda. The value
     #'   must be a vector of length `n_eqs` (default to a vector of 0).
     lambda0 = function(value) {
       if (missing(value)) private$.lambda0
@@ -71,8 +82,8 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @field supp_adj Access or reset the support correction flag. The value 
-    #'   must be a boolean indicating whether to conduct support correction or 
+    #' @field supp_adj Access or reset the support correction flag. The value
+    #'   must be a boolean indicating whether to conduct support correction or
     #'   not (default to FALSE).
     supp_adj = function(value) {
       if (missing(value)) private$.supp_adj
@@ -87,7 +98,7 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @field supp_adj_a Access or reset the value of support corection factor. 
+    #' @field supp_adj_a Access or reset the value of support corection factor.
     #'   The value must be a scalar (defaults to `max(1.0, log(n_obs)/2)`).
     supp_adj_a = function(value) {
       if (missing(value)) private$.supp_adj_a
@@ -103,8 +114,8 @@ GenEL <- R6::R6Class(
       }
     },
 
-    #' @field weight_adj Access or reset the value of the weight for the 
-    #'   additional fake observation under support correction. The value must 
+    #' @field weight_adj Access or reset the value of the weight for the
+    #'   additional fake observation under support correction. The value must
     #'   be a scalar (default to NULL).
     weight_adj = function(value) {
       if (missing(value)) private$.weight_adj
@@ -150,99 +161,101 @@ GenEL <- R6::R6Class(
     #' @param supp_adj   A boolean indicating whether to conduct support correction or not.
     #' @param supp_adj_a Support adjustment factor. Defaults to `max(1.0, log(n_obs)/2)`.
     #' @param weight_adj   Weight under weighted log EL (default to 1.0).
-    #' @param lambda0    Initialization vector of size `n_eqs`.
+    #' @param lambda0    Initialization vector of size `n_eqs`.  Defaults to a vector of zeros.
     set_opts = function(max_iter = 100, rel_tol = 1e-7,
                         supp_adj = FALSE, supp_adj_a = NULL, weight_adj = NULL,
-                        lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL))) {
+                        lambda0 = NULL) {
       self$max_iter <- max_iter
       self$rel_tol <- rel_tol
       self$set_supp_adj(supp_adj = supp_adj, supp_adj_a = supp_adj_a, weight_adj = weight_adj)
+      if(is.null(lambda0)) lambda0 <- rep(0, GenEL_get_n_eqs(private$.GEL))
       self$lambda0 <- lambda0
     },
 
     #' @description Calculate the solution of the dual problem of maximum log EL problem.
     #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
-    #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+    #' @param check_conv  If `TRUE`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of `NaN`s.
     #' @return A numeric vector of length `n_eqs`.
-    lambda_nr = function(G, weights, verbose = FALSE) {
+    lambda_nr = function(G, weights, check_conv = TRUE) {
       private$check_G(G)
       n_obs <- GenEL_get_n_obs(private$.GEL)
       if (missing(weights) || is.null(weights)) {
         weights <- rep(1.0, n_obs)
       }
-      if (length(weights) != n_obs) {
-        stop("Length of `weights` does not equal to the number of obserations.")
-      }
-      if (any(weights < 0)) {
-        stop("`weights` should contain only non-negative values.")
-      }
-      GenEL_lambda_nr(private$.GEL, t(G), weights, verbose)
+      private$check_weights(weights)
+      GenEL_lambda_nr(private$.GEL, t(G), weights, check_conv)
     },
 
     #' @description Calculate the probability vector base on the given G matrix.
     #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
-    #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+    #' @param check_conv  If `TRUE`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of `NaN`s.
     #' @return A probability vector of length `n_obs + supp_adj`.
-    omega_hat = function(G, weights, verbose = FALSE) {
+    omega_hat = function(G, weights, check_conv = TRUE) {
       private$check_G(G)
       n_obs <- GenEL_get_n_obs(private$.GEL)
       if (missing(weights) || is.null(weights)) {
         weights <- rep(1.0, n_obs)
       }
-      if (length(weights) != n_obs) {
-        stop("Length of `weights` does not equal to the number of obserations.")
-      }
-      if (any(weights < 0)) {
-        stop("`weights` should contain only non-negative values.")
-      }
-      lambda <- self$lambda_nr(G = G, weights = weights, verbose = verbose)
+      ## if (length(weights) != n_obs) {
+      ##   stop("Length of `weights` does not equal to the number of obserations.")
+      ## }
+      ## if (any(weights < 0)) {
+      ##   stop("`weights` should contain only non-negative values.")
+      ## }
+      private$check_weights(weights)
+      lambda <- self$lambda_nr(G = G, weights = weights,
+                               check_conv = check_conv)
       GenEL_omega_hat(private$.GEL, lambda, t(G), weights)
     },
-    
+
     #' @description Calculate the log empirical likelihood base on the given G matrix.
     #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
-    #' @param verbose A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+    #' @param check_conv  If `TRUE`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns `-Inf`.
     #' @return A scalar.
-    logel = function(G, weights, verbose = FALSE) {
+    logel = function(G, weights, check_conv = TRUE) {
       private$check_G(G)
       if (missing(weights) || is.null(weights)) {
-        GenEL_logel(private$.GEL, t(G), verbose)
+        ans <- GenEL_logel(private$.GEL, t(G), check_conv)
       }
       else {
-        n_obs <- GenEL_get_n_obs(private$.GEL)
-        if (length(weights) != n_obs) {
-          stop("Length of `weights` does not equal to the number of obserations.")
-        }
-        if (any(weights < 0)) {
-          stop("`weights` should contain only non-negative values.")
-        }
-        GenEL_weighted_logel(private$.GEL, t(G), weights, verbose)
+        ## n_obs <- GenEL_get_n_obs(private$.GEL)
+        ## if (length(weights) != n_obs) {
+        ##   stop("Length of `weights` does not equal to the number of obserations.")
+        ## }
+        ## if (any(weights < 0)) {
+        ##   stop("`weights` should contain only non-negative values.")
+        ## }
+        private$check_weights(weights)
+        GenEL_weighted_logel(private$.GEL, t(G), weights, check_conv)
       }
     },
-    
+
     #' @description Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
     #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
-    #' @param verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+    #' @param check_conv If `TRUE`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of `NaN`s.
     #' @return A list of two elements.
-    logel_grad = function(G, weights, verbose = FALSE) {
+    logel_grad = function(G, weights, check_conv = TRUE) {
       private$check_G(G)
       if (missing(weights) || is.null(weights)) {
-        GenEL_logel_grad(private$.GEL, t(G), verbose)
+        ans <- GenEL_logel_grad(private$.GEL, t(G), check_conv)
       }
       else {
-        n_obs <- GenEL_get_n_obs(private$.GEL)
-        if (length(weights) != n_obs) {
-          stop("Length of `weights` does not equal to the number of obserations.")
-        }
-        if (any(weights < 0)) {
-          stop("`weights` should contain only non-negative values.")
-        }
-        GenEL_weighted_logel_grad(private$.GEL, t(G), weights, verbose)
+        ## n_obs <- GenEL_get_n_obs(private$.GEL)
+        ## if (length(weights) != n_obs) {
+        ##   stop("Length of `weights` does not equal to the number of obserations.")
+        ## }
+        ## if (any(weights < 0)) {
+        ##   stop("`weights` should contain only non-negative values.")
+        ## }
+        private$check_weights(weights)
+        ans <- GenEL_weighted_logel_grad(private$.GEL, t(G), weights, check_conv)
       }
+      ans$dldG <- t(ans$dldG)
+      ans
     }
   )
 )
