@@ -1,17 +1,17 @@
 ---
-title: "<code>flexEL</code>: A Fast and Flexible Framework for Empirical Likelihood Modeling"
+title: "**flexEL**: A Fast and Flexible Framework for Empirical Likelihood Modeling"
 author: "Shimeng Huang, Martin Lysy"
 date: "`r Sys.Date()`"
 output:
-  bookdown::html_document2:
+  bookdown::html_vignette2:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{flexEL}
+  %\VignetteIndexEntry{flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: flexEL.bib
-header-include:
-  - \usepackage{amsmath}
+#header-include:
+#  - \usepackage{amsmath}
 ---
 
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -47,7 +47,7 @@ Suppose we have iid observations $X_1, \ldots, X_n$, $X_i \in \mathbb{R}^d$, suc
 
 The log empirical likelihood function (**log EL** function) is defined by
 \[
-  \ell_{\EL}(\tth) := \log\EL(\tth) = \sum_{i=1}^n \log\hat{\w_i}(\tth),
+  \ell_{\EL}(\tth) := \log\EL(\tth) = \sum_{i=1}^n \log\hat{\w}_i(\tth),
 \]
 where for any given $\tth$, the $n$-dimensional probability weights vector $\hat{\w}(\tth)$ associated with the observations is the solution of the optimization problem
 \[
@@ -115,7 +115,7 @@ Here, for the convenience of using the minimization algorithm `nlm`, we implemen
 ```{r, echo=TRUE, eval=TRUE}
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
-  return(-flexEL::logEL(G = G, support = FALSE)) # support correction not on
+  return(-flexEL::logEL(G = G, supp_adj = FALSE)) # support correction not on
 }
 ```
 
@@ -150,9 +150,9 @@ mr_dGdb_R <- function(y, X, beta) {
 
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
-  res_lst <- flexEL::logEL(G, support = FALSE, return_dldG = TRUE) 
+  res_lst <- flexEL::logEL(G, supp_adj = FALSE, grad = TRUE) 
   neglogel <- -res_lst$logel
-  dldG <- -res_lst$dldG
+  dldG <- -res_lst$grad
   dGdb <- mr_dGdb_R(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:ncol(dldG)) {
@@ -298,7 +298,7 @@ n_eqs <- 2
 X <- cbind(1, rnorm(n_obs))
 eps <- rnorm(n_obs)
 y <- X %*% bb + eps
-example_logel(c(0.75, 1.25), t(X), y, verbose = TRUE)
+example_logel(c(0.75, 1.25), X, y)
 ```
 
 There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder.
