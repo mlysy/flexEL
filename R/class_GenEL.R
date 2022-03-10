@@ -18,7 +18,7 @@ GenEL <- R6::R6Class(
     .weight_adj = NULL,
 
     #' @description Check the dimension of G is what is expected.
-    #' @param G A numeric matrix.
+    #' @template arg-G
     check_G = function(G) {
       n_obs <- GenEL_get_n_obs(private$.GEL)
       n_eqs <- GenEL_get_n_eqs(private$.GEL)
@@ -210,8 +210,8 @@ GenEL <- R6::R6Class(
       GenEL_omega_hat(private$.GEL, lambda, t(G), weights)
     },
 
-    #' @description Calculate the log empirical likelihood base on the given G matrix.
-    #' @param G       A numeric matrix of dimension `n_eqs x n_obs`.
+    #' @description Calculate the log empirical likelihood for a given `G` matrix.
+    #' @param G       A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param check_conv  If `TRUE`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns `-Inf`.
     #' @return A scalar.
@@ -237,7 +237,7 @@ GenEL <- R6::R6Class(
     #' @param G        A numeric matrix of dimension `n_obs x n_eqs`.
     #' @param weights  A numeric vector of length `n_obs` containing non-negative values.
     #' @param check_conv If `TRUE`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of `NaN`s.
-    #' @return A list of two elements.
+    #' @return A list with elements `logel` and `grad`, the latter being a matrix of size `n_obs x n_eqs`.
     logel_grad = function(G, weights, check_conv = TRUE) {
       private$check_G(G)
       if (missing(weights) || is.null(weights)) {
@@ -254,7 +254,7 @@ GenEL <- R6::R6Class(
         private$check_weights(weights)
         ans <- GenEL_weighted_logel_grad(private$.GEL, t(G), weights, check_conv)
       }
-      ans$dldG <- t(ans$dldG)
+      ans$grad <- t(ans$grad)
       ans
     }
   )

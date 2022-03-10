@@ -1,13 +1,15 @@
 Package: flexEL
 Type: Package
 Title: Flexible Empirical Likelihood Methods for Regression
-Version: 0.0.0.1
-Date: 2020-08-18
+Version: 0.0.1.9000
+Date: 2022-03-10
 Authors@R: c(person("Shimeng", "Huang", role = c("aut"),
                     email = "dora.huang.sunshine@gmail.com"),
              person("Martin", "Lysy", role = c("aut", "cre"),
                     email = "mlysy@uwaterloo.ca"))
 Description: Various tools for implementing and calibrating empirical likelihood models.  In particular, provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the 'Eigen' linear algebra library.   Also provides functions for implementing right-censored regression models, where the inner optimization is conducted via expectation-maximation.  Users may interface with the library through R or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
+URL: https://github.com/mlysy/flexEL
+BugReports: https://github.com/mlysy/flexEL/issues
 License: GPL (>= 3)
 Imports: Rcpp (>= 0.12.13), numDeriv
 LinkingTo: Rcpp, RcppEigen

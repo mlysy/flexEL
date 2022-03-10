@@ -265,7 +265,7 @@ Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool check_conv) {
     dldG.setConstant(std::numeric_limits<double>::quiet_NaN());
   }
   return Rcpp::List::create(Rcpp::Named("logel") = log_el,
-                            Rcpp::Named("dldG") = dldG);
+                            Rcpp::Named("grad") = dldG);
 }
 
 /// Calculate the weighted log EL and its gradient with respect to `G`.
