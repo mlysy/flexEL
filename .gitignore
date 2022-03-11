@@ -15,3 +15,5 @@ Meta
 
 # osx
 *.DS_Store
+/doc/
+/Meta/

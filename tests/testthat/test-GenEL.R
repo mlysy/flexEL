@@ -69,7 +69,7 @@ test_that("R and C++ implementations of methods are the same.", {
       expect_equal(lel_cpp, lel_R)
     }
     if(test_cases$method[ii] == "logel_grad") {
-      dldG_cpp <- do.call(gel$logel_grad, el_args)$dldG
+      dldG_cpp <- do.call(gel$logel_grad, el_args)$grad
       dldG_R <- do.call(logel_grad_R, args = c(el_opts, el_args))
       expect_equal(dldG_cpp, dldG_R, tolerance = 1e-4)
     }

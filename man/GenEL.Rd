@@ -67,8 +67,6 @@ Create a new \code{GenEL} object.
 
 \item{\code{n_eqs}}{Number of (moment constraint) equations.}
 
-\item{\code{G}}{A numeric matrix.}
-
 \item{\code{weights}}{A numeric vector.}
 }
 \if{html}{\out{</div>}}
@@ -184,7 +182,7 @@ A probability vector of length \code{n_obs + supp_adj}.
 \if{html}{\out{<a id="method-logel"></a>}}
 \if{latex}{\out{\hypertarget{method-logel}{}}}
 \subsection{Method \code{logel()}}{
-Calculate the log empirical likelihood base on the given G matrix.
+Calculate the log empirical likelihood for a given \code{G} matrix.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
@@ -192,7 +190,7 @@ Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_eqs x n_obs}.}
+\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
@@ -225,7 +223,7 @@ Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A list of two elements.
+A list with elements \code{logel} and \code{grad}, the latter being a matrix of size \verb{n_obs x n_eqs}.
 }
 }
 \if{html}{\out{<hr>}}

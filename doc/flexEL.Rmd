@@ -1,17 +1,17 @@
 ---
-title: "<code>flexEL</code>: A Fast and Flexible Framework for Empirical Likelihood Modeling"
+title: "**flexEL**: A Fast and Flexible Framework for Empirical Likelihood Modeling"
 author: "Shimeng Huang, Martin Lysy"
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
+  bookdown::html_vignette2:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{flexEL}
+  %\VignetteIndexEntry{flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: flexEL.bib
-header-include:
-  - \usepackage{amsmath}
+#header-include:
+#  - \usepackage{amsmath}
 ---
 
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -37,9 +37,9 @@ header-include:
 
 ## The Empirical Likelihood Framework
 
-The Empirical Likelhood (EL) framework for regression is a semi-parametric model where inference about the regression parameters is conducted through maximizing the log EL function subject to specified moment conditions or estimating equations. 
+The Empirical Likelihood (EL) framework for regression is a semi-parametric model where inference about the regression parameters is conducted through maximizing the log EL function subject to specified moment conditions or estimating equations. 
 
-In the following two subsections, more details about the basic EL framwork and a modified EL function when the responses are subject to right-censoring are provided.
+In the following two subsections, more details about the basic EL framework and a modified EL function when the responses are subject to right-censoring are provided.
 
 ### Basic EL framework
 
@@ -47,7 +47,7 @@ Suppose we have iid observations $X_1, \ldots, X_n$, $X_i \in \mathbb{R}^d$, suc
 
 The log empirical likelihood function (**log EL** function) is defined by
 \[
-  \ell_{\EL}(\tth) := \log\EL(\tth) = \sum_{i=1}^n \log\hat{\w_i}(\tth),
+  \ell_{\EL}(\tth) := \log\EL(\tth) = \sum_{i=1}^n \log\hat{\w}_i(\tth),
 \]
 where for any given $\tth$, the $n$-dimensional probability weights vector $\hat{\w}(\tth)$ associated with the observations is the solution of the optimization problem
 \[
@@ -111,11 +111,11 @@ With `er_evalG_R` we can obtain a $G$ matrix for any given $\beta$. This functio
 
 To find the estimate of $\beta$, we can use optimization algorithms in R such as `nlm` or `optim`. These functions require a starting value of the parameters to be optimized. In the above linear regression case, we can use `lm` in R, which assumes $\epsilon_i\iid\N(0,1)$ but nonetheless should be able to provide a good starting point. 
 
-Here, for the convience of using the minimization algorithm `nlm`, we implement the negative log EL:
+Here, for the convenience of using the minimization algorithm `nlm`, we implement the negative log EL:
 ```{r, echo=TRUE, eval=TRUE}
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
-  return(-flexEL::logEL(G = G, support = FALSE)) # support correction not on
+  return(-flexEL::logEL(G = G, supp_adj = FALSE)) # support correction not on
 }
 ```
 
@@ -150,9 +150,9 @@ mr_dGdb_R <- function(y, X, beta) {
 
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
-  res_lst <- flexEL::logEL(G, support = FALSE, return_dldG = TRUE) 
+  res_lst <- flexEL::logEL(G, supp_adj = FALSE, grad = TRUE) 
   neglogel <- -res_lst$logel
-  dldG <- -res_lst$dldG
+  dldG <- -res_lst$grad
   dGdb <- mr_dGdb_R(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:ncol(dldG)) {
@@ -290,9 +290,15 @@ Or, if one wish to use the C++ api directly, the steps are as below:
 cat("```c", readLines("example.cpp"), "```", sep = "\n")
 ```
 
-```{r, include = TRUE, eval=TRUE}
+```{r, warn=FALSE, include=TRUE, eval=TRUE}
 Rcpp::sourceCpp("example.cpp")
-example_logEL(20)
+bb <- c(1,2)
+n_obs <- 200
+n_eqs <- 2
+X <- cbind(1, rnorm(n_obs))
+eps <- rnorm(n_obs)
+y <- X %*% bb + eps
+example_logel(c(0.75, 1.25), X, y)
 ```
 
 There are more options that you can set for the InnerEL object via `set_opts` which you can look up in the doxygen documentation in the `src/html` folder.

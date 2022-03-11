@@ -254,7 +254,7 @@ namespace flexEL {
   /// @return Whether the desired error tolerance `rel_tol` has been reached in less than `max_iter` Newton-Raphson steps.
   /// @warning Assumes that lambda_nr has been run at least once. 
   inline bool GenEL::has_converged_nr() {
-    return (nr_err_ > rel_tol_) && (nr_iter_ == max_iter_);
+    return !((nr_err_ > rel_tol_) && (nr_iter_ == max_iter_));
   }
 
   /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + 1)`. If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected.

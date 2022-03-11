@@ -9,7 +9,7 @@ mr_evalG_R <- function(y, X, beta) {
 ## ---- echo=TRUE, eval=TRUE----------------------------------------------------
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta) # G matrix based on your regression problem
-  return(-flexEL::logEL(G = G, support = FALSE)) # support correction not on
+  return(-flexEL::logEL(G = G, supp_adj = FALSE)) # support correction not on
 }
 
 ## ---- echo=TRUE, eval=TRUE----------------------------------------------------
@@ -38,9 +38,9 @@ mr_dGdb_R <- function(y, X, beta) {
 
 mr_neglogEL_R <- function(y, X, beta) {
   G <- mr_evalG_R(y, X, beta)
-  res_lst <- flexEL::logEL(G, support = FALSE, return_dldG = TRUE) 
+  res_lst <- flexEL::logEL(G, supp_adj = FALSE, grad = TRUE) 
   neglogel <- -res_lst$logel
-  dldG <- -res_lst$dldG
+  dldG <- -res_lst$grad
   dGdb <- mr_dGdb_R(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:ncol(dldG)) {
@@ -58,7 +58,13 @@ nlmout$estimate
 ## ---- echo = FALSE, results = "asis"------------------------------------------
 cat("```c", readLines("example.cpp"), "```", sep = "\n")
 
-## ---- include = TRUE, eval=TRUE-----------------------------------------------
+## ---- warn=FALSE, include=TRUE, eval=TRUE-------------------------------------
 Rcpp::sourceCpp("example.cpp")
-example_logEL(20)
+bb <- c(1,2)
+n_obs <- 200
+n_eqs <- 2
+X <- cbind(1, rnorm(n_obs))
+eps <- rnorm(n_obs)
+y <- X %*% bb + eps
+example_logel(c(0.75, 1.25), X, y)
 
