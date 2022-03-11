@@ -4,7 +4,7 @@
 \alias{logEL}
 \title{Calculate the log empirical likelihood for a given \code{G} matrix.}
 \usage{
-logEL(G, max_iter = 10, rel_tol = 0.001, supp_adj = FALSE, grad = FALSE)
+logEL(G, max_iter = 100, rel_tol = 1e-07, supp_adj = FALSE, grad = FALSE)
 }
 \arguments{
 \item{G}{A numeric matrix of size \verb{n_obs x n_eqs}.}

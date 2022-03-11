@@ -229,8 +229,9 @@ GenEL <- R6::R6Class(
         ##   stop("`weights` should contain only non-negative values.")
         ## }
         private$check_weights(weights)
-        GenEL_weighted_logel(private$.GEL, t(G), weights, check_conv)
+        ans <- GenEL_weighted_logel(private$.GEL, t(G), weights, check_conv)
       }
+      ans
     },
 
     #' @description Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.

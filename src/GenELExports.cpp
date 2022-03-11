@@ -159,16 +159,10 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL,
   // Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
   // Eigen::VectorXd norm_weights = weights/weights.sum();
   GEL->lambda_nr(lambda, G, weights);
-  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
-  // bool not_conv = false;
-  // if(check_conv) {
-  //   int n_iter;
-  //   double max_err;
-  //   GEL->get_diag(n_iter, max_err);
-  //   not_conv = (n_iter == GEL->get_max_iter()) &&
-  //     (max_err > GEL->get_rel_tol());
-  // }
-  if (not_conv) {
+  // bool not_conv = check_conv ? !GEL->has_converged_nr() : false;
+  // if (not_conv) {
+  bool has_conv = check_conv ? GEL->has_converged_nr() : true;
+  if(!has_conv) {
     lambda.setConstant(std::numeric_limits<double>::quiet_NaN());
     // for (int ii=0; ii < lambda.size(); ii++) {
     //   lambda(ii) = std::numeric_limits<double>::quiet_NaN();
@@ -214,8 +208,8 @@ double GenEL_logel(SEXP pGEL,
                    bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G);
-  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
-  if(not_conv) {
+  bool has_conv = check_conv ? GEL->has_converged_nr() : true;
+  if(!has_conv) {
     log_el = -std::numeric_limits<double>::infinity();
   }
   return log_el;
@@ -237,8 +231,8 @@ double GenEL_weighted_logel(SEXP pGEL,
                             bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G, weights);
-  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
-  if(not_conv) {
+  bool has_conv = check_conv ? GEL->has_converged_nr() : true;
+  if(!has_conv) {
     log_el = -std::numeric_limits<double>::infinity();
   }
   return log_el;
@@ -250,7 +244,7 @@ double GenEL_weighted_logel(SEXP pGEL,
 /// @param[in] G         Moment matrix of size `n_eqs x n_obs`.
 /// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of `NaN`s.
 ///
-/// @return A list with elements `log_el` and `dldG` corresponding to the log EL and its gradient (a matrix of size `n_eqs x n_obs`).
+/// @return A list with elements `logel` and `grad` corresponding to the log EL and its gradient (a matrix of size `n_eqs x n_obs`).
 ///
 // [[Rcpp::export]]
 Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool check_conv) {
@@ -259,8 +253,8 @@ Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool check_conv) {
   int n_obs = GEL->get_n_obs();
   Eigen::MatrixXd dldG(n_eqs, n_obs);
   double log_el = GEL->logel_grad(dldG, G);
-  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
-  if(not_conv) {
+  bool has_conv = check_conv ? GEL->has_converged_nr() : true;
+  if(!has_conv) {
     log_el = -std::numeric_limits<double>::infinity();
     dldG.setConstant(std::numeric_limits<double>::quiet_NaN());
   }
@@ -275,7 +269,7 @@ Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool check_conv) {
 /// @param[in] weights  Weight vector of length `n_obs`.
 /// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of `NaN`s.
 ///
-/// @return A list with elements `log_el` and `dldG` corresponding to the log EL and its gradient (a matrix of size `n_eqs x n_obs`).
+/// @return A list with elements `logel` and `grad` corresponding to the log EL and its gradient (a matrix of size `n_eqs x n_obs`).
 ///
 // [[Rcpp::export]]
 Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL, 
@@ -287,13 +281,13 @@ Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL,
   int n_obs = GEL->get_n_obs();
   Eigen::MatrixXd dldG(n_eqs, n_obs);
   double log_el = GEL->logel_grad(dldG, G, weights);
-  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
-  if(not_conv) {
+  bool has_conv = check_conv ? GEL->has_converged_nr() : true;
+  if(!has_conv) {
     log_el = -std::numeric_limits<double>::infinity();
     dldG.setConstant(std::numeric_limits<double>::quiet_NaN());
   }
   return Rcpp::List::create(Rcpp::Named("logel") = log_el,
-                            Rcpp::Named("dldG") = dldG);
+                            Rcpp::Named("grad") = dldG);
 }
 
 // /// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
