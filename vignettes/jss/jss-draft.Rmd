@@ -498,7 +498,7 @@ Notice that here the gradient is a 3-dimensional matrix. This can then be combin
 mr2_neglogel_grad <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   logel_lst <- gel$logel_grad(G)
-  dldG <- -logel_lst$dldG
+  dldG <- -logel_lst$grad
   dGdb <- mr2_dGdb(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:nrow(dldG)) {
