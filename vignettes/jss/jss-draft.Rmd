@@ -305,12 +305,25 @@ Let $S$ be a transformed sigmoid function, i.e.,
   S(x; s) = \frac{1}{1+\exp(s\cdot x)},
 \end{equation}
 where $s > 0$ is a smoothing parameter. A plot of the function is given in Figure \ref{fig:smoothfun}. This function is radially symmetric around the point $(0,0.5)$.
-\begin{figure}[hbt!]
-\centering
-\includegraphics[width=0.5\textwidth]{smoothfun.png}
-\caption{Smooth function for indicator function $\mathfrak 1(x\leq 0)$.}
-\label{fig:smoothfun}
-\end{figure}
+
+```{r smoothfun, echo = FALSE, fig.height = 3.5, fig.cap = "Smoothed indicator function with different levels of smoothing parameter $s$."}
+smooth_ind <- function(x, s) 1/(1 + exp(s * x))
+par(mar = c(4.5, 4.5, .5, .5))
+curve(smooth_ind(x, s = 1e6), from = -5, to=5, n = 1001,
+      ylab = expression(S(x*";"*s)))
+curve(smooth_ind(x, s = 100), col = "blue", add = TRUE, n = 1001)
+curve(smooth_ind(x, s = 10), col = "red", add = TRUE, n = 1001)
+legend("topright",
+       legend = expression("Indicator", S(x*";"*10), S(x*";"*100)),
+       fill = c("black", "red", "blue"))
+```
+
+<!-- \begin{figure}[hbt!] -->
+<!-- \centering -->
+<!-- \includegraphics[width=0.5\textwidth]{smoothfun.png} -->
+<!-- \caption{Smooth function for indicator function $\mathfrak 1(x\leq 0)$.} -->
+<!-- \label{fig:smoothfun} -->
+<!-- \end{figure} -->
 
 Specifically, we use
 \begin{equation}\label{eq:indsmooth}
@@ -498,7 +511,7 @@ Notice that here the gradient is a 3-dimensional matrix. This can then be combin
 mr2_neglogel_grad <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   logel_lst <- gel$logel_grad(G)
-  dldG <- -logel_lst$dldG
+  dldG <- -logel_lst$grad
   dGdb <- mr2_dGdb(y, X, beta)
   grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
   for (ii in 1:nrow(dldG)) {
