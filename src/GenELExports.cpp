@@ -121,17 +121,36 @@ bool GenEL_get_supp_adj(SEXP pGEL) {
   return supp_adj;
 }
 
+/// Get diagnostics for the last Newton-Raphson run.
+///
+/// @param[in] pGEL   `externalptr` pointer to GenEL object.
+///
+/// @return A list with elements `n_iter` and `max_err` giving the number of Newton-Raphson iterations and the maximum componentwise (relative) error between the last to iterations of `lambda`.
+///
+// [[Rcpp::export]]
+Rcpp::List GenEL_get_diag(SEXP pGEL) {
+  Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
+  int n_iter = 0;
+  double max_err = 0;
+  GEL->get_diag(n_iter, max_err);
+  return Rcpp::List::create(Rcpp::Named("n_iter") = n_iter,
+                            Rcpp::Named("max_err") = max_err);
+}
+
 /// Solve the dual problem via Newton-Raphson algorithm.
 ///
 /// @param[in] pGEL     `externalptr` pointer to GenEL object. 
 /// @param[in] G         Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
 /// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
-/// 
+/// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of `NaN`s.
+///
+/// @return A vector of length `n_eqs` corresponding to the last step of the Newton-Raphson algorithm.
+///
 // [[Rcpp::export]]
 Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL, 
                                 Eigen::MatrixXd G, 
                                 Eigen::VectorXd weights, 
-                                bool verbose) {
+                                bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   // bool supp_adj = GEL->get_supp_adj();
   // int n_obs = G.cols();
@@ -140,27 +159,31 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP pGEL,
   // Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
   // Eigen::VectorXd norm_weights = weights/weights.sum();
   GEL->lambda_nr(lambda, G, weights);
-  int n_iter;
-  double max_err;
-  bool not_conv;
-  GEL->get_diag(n_iter, max_err);
-  not_conv = (n_iter == GEL->get_max_iter()) && (max_err > GEL->get_rel_tol());
-  if(verbose) {
-    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
-  }
+  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
+  // bool not_conv = false;
+  // if(check_conv) {
+  //   int n_iter;
+  //   double max_err;
+  //   GEL->get_diag(n_iter, max_err);
+  //   not_conv = (n_iter == GEL->get_max_iter()) &&
+  //     (max_err > GEL->get_rel_tol());
+  // }
   if (not_conv) {
-    for (int ii=0; ii < lambda.size(); ii++) {
-      lambda(ii) = std::numeric_limits<double>::quiet_NaN();
-    }
+    lambda.setConstant(std::numeric_limits<double>::quiet_NaN());
+    // for (int ii=0; ii < lambda.size(); ii++) {
+    //   lambda(ii) = std::numeric_limits<double>::quiet_NaN();
+    // }
   }
   return lambda;
 }
 
-/// Calculate the probability vector base on the given G matrix.
+/// Calculate the probability vector based on the given `G` matrix.
 /// 
 /// @param[in] pGEL     `externalptr` pointer to GenEL object. 
 /// @param[in] lambda   Dual problem vector of size `n_eqs`.  
 /// @param[in] G        Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
+///
+/// @return A vector of length `n_obs` or `n_obs+1` (depending on the value of `supp_adj`) giving the probability vector `omega_hat`.
 ///
 // [[Rcpp::export]]
 Eigen::VectorXd GenEL_omega_hat(SEXP pGEL, 
@@ -177,22 +200,23 @@ Eigen::VectorXd GenEL_omega_hat(SEXP pGEL,
   return omega;
 }
 
-/// Calculate the log empirical likelihood base on the given G matrix.
+/// Calculate the log empirical likelihood base on the given `G` matrix.
 /// 
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
-/// @param[in] omega   Probability vector of length `n_obs + supp_adj`.
-/// 
+/// @param[in] G         Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected.
+/// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns negative infinity.
+///
+/// @return Scalar value of the log empirical likelihood function.
+///
 // [[Rcpp::export]]
 double GenEL_logel(SEXP pGEL, 
                    Eigen::MatrixXd G,
-                   bool verbose) {
+                   bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G);
-  if(verbose) {
-    int n_iter;
-    double max_err;
-    GEL->get_diag(n_iter, max_err);
-    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
+  if(not_conv) {
+    log_el = -std::numeric_limits<double>::infinity();
   }
   return log_el;
 }
@@ -202,71 +226,74 @@ double GenEL_logel(SEXP pGEL,
 /// @param[in] pGEL    `externalptr` pointer to GenEL object. 
 /// @param[in] G        Moment matrix of size `n_eqs x (n_obs + supp_adj)`.
 /// @param[in] weights  Weight vector of length `n_obs`.
+/// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns negative infinity.
+///
+/// @return Scalar value of the log empirical likelihood function.
 ///
 // [[Rcpp::export]]
 double GenEL_weighted_logel(SEXP pGEL, 
                             Eigen::MatrixXd G, 
                             Eigen::VectorXd weights, 
-                            bool verbose) {
+                            bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   double log_el = GEL->logel(G, weights);
-  if(verbose) {
-    int n_iter;
-    double max_err;
-    GEL->get_diag(n_iter, max_err);
-    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
+  if(not_conv) {
+    log_el = -std::numeric_limits<double>::infinity();
   }
   return log_el;
 }
 
-/// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+/// Calculate log EL and its gradient with respect to `G`.
 ///
 /// @param[in] pGEL      `externalptr` pointer to GenEL object.
 /// @param[in] G         Moment matrix of size `n_eqs x n_obs`.
-/// @param[in] verbose   A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+/// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of `NaN`s.
+///
+/// @return A list with elements `log_el` and `dldG` corresponding to the log EL and its gradient (a matrix of size `n_eqs x n_obs`).
 ///
 // [[Rcpp::export]]
-Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool verbose) {
+Rcpp::List GenEL_logel_grad(SEXP pGEL, Eigen::MatrixXd G, bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   int n_eqs = GEL->get_n_eqs();
   int n_obs = GEL->get_n_obs();
   Eigen::MatrixXd dldG(n_eqs, n_obs);
   double log_el = GEL->logel_grad(dldG, G);
-  if (verbose) {
-    int n_iter;
-    double max_err;
-    GEL->get_diag(n_iter, max_err);
-    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
+  if(not_conv) {
+    log_el = -std::numeric_limits<double>::infinity();
+    dldG.setConstant(std::numeric_limits<double>::quiet_NaN());
   }
   return Rcpp::List::create(Rcpp::Named("logel") = log_el,
-                            Rcpp::Named("dldG") = dldG.transpose());
+                            Rcpp::Named("dldG") = dldG);
 }
 
-/// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
+/// Calculate the weighted log EL and its gradient with respect to `G`.
 ///
 /// @param[in] pGEL     `externalptr` pointer to GenEL object.
 /// @param[in] G        Moment matrix of size `n_eqs x n_obs`.
 /// @param[in] weights  Weight vector of length `n_obs`.
-/// @param[in] verbose  A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.
+/// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of `NaN`s.
+///
+/// @return A list with elements `log_el` and `dldG` corresponding to the log EL and its gradient (a matrix of size `n_eqs x n_obs`).
 ///
 // [[Rcpp::export]]
 Rcpp::List GenEL_weighted_logel_grad(SEXP pGEL, 
                                      Eigen::MatrixXd G, 
                                      Eigen::VectorXd weights,
-                                     bool verbose) {
+                                     bool check_conv) {
   Rcpp::XPtr<flexEL::GenEL> GEL(pGEL);
   int n_eqs = GEL->get_n_eqs();
   int n_obs = GEL->get_n_obs();
   Eigen::MatrixXd dldG(n_eqs, n_obs);
   double log_el = GEL->logel_grad(dldG, G, weights);
-  if (verbose) {
-    int n_iter;
-    double max_err;
-    GEL->get_diag(n_iter, max_err);
-    Rprintf("n_iter = %i, max_err = %f\n", n_iter, max_err);
+  bool not_conv = check_conv ? GEL->has_converged_nr() : false;
+  if(not_conv) {
+    log_el = -std::numeric_limits<double>::infinity();
+    dldG.setConstant(std::numeric_limits<double>::quiet_NaN());
   }
   return Rcpp::List::create(Rcpp::Named("logel") = log_el,
-                            Rcpp::Named("dldG") = dldG.transpose());
+                            Rcpp::Named("dldG") = dldG);
 }
 
 // /// Calculate the probability vector, log EL, and the derivative of log EL w.r.t. G evaluated at G.
