@@ -7,6 +7,10 @@ author:
     affiliation: University of Waterloo
   - name: Martin Lysy
     affiliation: University of Waterloo
+  - name: Ye Meng
+    affiliation: University of Waterloo
+  - name: Yunfeng Yang
+    affiliation: University of Waterloo
     address:
       - 200 University Avenue West
       - Ontario, Canada
@@ -530,9 +534,132 @@ Alternatively, a user can implement the `G` matrix and gradient calculations in 
 
 ## Bayesian EL
 
-- Good to illustrate with \proglang{Stan} NUTS algorithm, because we've implemented it already and \proglang{Stan} is a really good autodiff engine + best NUTS implementation.
+<!-- - Good to illustrate with \proglang{Stan} NUTS algorithm, because we've implemented it already and \proglang{Stan} is a really good autodiff engine + best NUTS implementation.
 
-- Can illustrate with the example from the JRSSB EL-HMC paper.
+- Can illustrate with the example from the JRSSB EL-HMC paper.-->
+
+The following sections will present the Bayesian EL(BayesEL) estimation, as well as an example incorporating \pkg{flexEL} and \proglang{Stan}.
+
+The BayesEL method combines the prior information on parameters and the data-driven likelihood to draw inference on the estimand that is defined by estimating equations. With the prior density $\pi(\tth)$ over the support $\Theta$, the posterior is defined as:
+
+$$
+\pi(\tth\mid\xx) = \frac{L(\tth\mid\xx)\pi(\tth)}{\int L(\tth\mid\xx)\pi(\tth) \text{d}\tth}
+\propto \left[ \prod_{i=1}^{n}w_i \right] \cdot \pi(\tth)
+$$
+As the analytic form of $\pi(\tth\mid\xx)$ is generally absent, the Markov Chain Monte Carlo (MCMC) sampling can be applied to make inference from the posterior distribution. However, the posterior distribution is usually in a non-parametric manner and its support can be irregular, which confronts the adoption of the Gibbs sampling and the Random Walk Metropolis sampling. @chaudhuri-et-al2017 utilized the results from convex analysis and adapted the Hamiltonian Monte Carlo(HMC) sampling, a gradient-based method, to overcoming these restraints and solving problems with minimal assumptions. 
+<!--
+To ensure the HMC sampling work for the BayesEL procedures, the following assumptions must hold:
+
+\begin{assump}
+$\Theta$ is an open set.
+\end{assump}
+
+\begin{assump}
+$g$ is a smooth function of $\tth$ in $\Theta$, $q \leq d$ and $\Theta_1 = \{\tth \in \Theta: L(\tth) > 0\}$ is non-empty. 
+\end{assump}
+
+\begin{assump} 
+The sample size $n > q$ and the matrix $\GG$ has full row rank for any $\tth\in\Theta$
+\end{assump}
+
+\begin{assump}
+For any fixed $\xx$, suppose at least $q$ elements of $\w$ that are non-zero, then for any fixed $\tth\in\Theta$, the matrix $\sum_{i=1}^n w_i \nabla{\GG(\xx_i)}$ has full row rank, where $\nabla \GG(\xx_i)$ is the $q\times d$ Jacobian matrix.
+\end{assump}
+
+\begin{assump}
+Consider a sequence of points in $\Theta_1$, $\{\tth^{(k)}\}$, such that $\tth^{(k)}$ converges to a boundary point $\tth^{(0)}$ of $\TTh_1$. Assume that $\tth^{(0)}$ lies within $\Theta$ and $L(\tth^{(k)})$ strictly decreases to $L(\tth^{(0)})$. then, for some constant $b(n, \theta^{(0)}) > -1$, we have 
+$$
+\lim_{k\to \inf} \inf \frac{\log\left[\pi(\tth^{(k-1)})\right]-\log\left[\pi(\tth^{(k)})\right]}{\log\left[L(\tth^{(k-1)})\right]-\log\left[L(\tth^{(k)})\right]} \geq b(n, \theta^{(0)}) 
+$$
+\end{assump}
+-->
+
+The HMC sampling employs the Hamiltonian dynamics in the Metropolis algorithm and explores the target distribution rapidly. @Neal2012 visualized the Hamiltonian dynamics as a frictionless puck sliding over a smooth height-varying surface. The potential energy ($\Ua(\theta)$) the puck possesses is proportional to its height ($\theta$), at which the kinetic energy is explicitly defined in physics by $\Ka(p) = \frac{p^2}{2m}$, where $p$ is the momentum at height ($\theta$) and $m$ is the mass of the puck. The major characteristic of the Hamiltonian dynamics is energy conservation: $\Ha(\theta, p)$ will remain constant over time, while the allocation of the energy into $\Ua(\theta)$ and $\Ka(p)$ may vary with the movement of the puck over time. 
+
+The $d$-dimensional Hamiltonian system consists of $d$ particles deferring to Hamiltonian dynamics. The state of the system at time $t$ can be described by the trajectory $\GGa_t = (\tth_t, \pp_t)$ with position variables $\tth = (\rv \theta d)$ and auxiliary momentum variables $\pp = (\rv p d )$. Then, the Hamiltonian system is characterized by the conservative total energy:
+$$
+\Ha (\tth, \pp) = \Ua(\tth) + \Ka (\pp)
+$$
+
+To use HMC sampling to sample from the posterior with empirical likelihood $\pi(\tth\mid \xx)$, the potential energy are therefore defined by:
+
+$$
+\Ua(\tth) = - \log\{\pi(\tth\mid \xx)\} = - \log\{L(\tth)\} - \log\{\pi(\tth)\} - \log{\Ca(\xx)}
+$$
+where $\Ca(\xx)$ is a normalizing constant. The kinetic energy is given by
+$$
+    \Ka (\pp) = \frac{\pp^T \MM ^{-1}\pp}{2}
+$$
+where the mass matrix $\MM$ is a symmetric positive definite matrix and is usually set to be a scalar multiple of the identity matrix; as a result, it's apparent that $\Ka(\pp)$ corresponds to the log probability density of a Gaussian distribution. 
+
+The Hamiltonian function $\Ha(\tth, \pp, t)$ can be described by the set of differential equations, also known as the Hamilton's equations:
+\begin{equation}
+\der t\tth(t) = + \del{\pp} \Ha(\tth, \pp)=\MM^{-1}\pp, \qquad \der t \pp(t) = - \del{\tth} \Ha(\tth,\pp) = \frac{\nabla \pi(\tth\mid\xx)}{ \pi(\tth\mid\xx)}
+(\#eq:HEQ)
+\end{equation}
+The three fundamental properties of the Hamiltonian dynamics that grants the feasible and efficient HMC proposal are: reversible, conservative and volume preserving. The simple intuition behind the reversibility is that the initial state can be traced back from some time $t$, and it guarantees the convergence of HMC. The conservation property makes $\Ha(\tth, \pp)$ constant over the phase space trajectory $\GGa_t = (\tth_t, \pp_t)$, which makes the theoretical acceptance rate of HMC algorithm to be 1. Mathematically, the volume preservation deciphers that the change of variables $\GGa_0 \to \GGa_t$ has a Jacobian of 1
+
+$$
+\left| \frac{\partial \GGa_t}{\partial \GGa_0} \right|= 1
+$$
+
+Therefore, it signifies that the joint distribution of $\GGa_t = (\tth_t, \pp_t)$ is invariant to the Hamiltonian change-of-variables from $\GGa_0$ to $\GGa_t$. 
+
+Given the current state $\GGa_\curr = (\tth_\curr, \pp_\curr)$, the HMC sampling will start with a random draw for the artificial momentum vector $\pp_0 \sim\N(\bz, \MM)$. Then, from the initial state $\GGa_0 = (\tth_\curr, \pp_0)$, the HMC proposal are made based on the solution to the Hamilton's equations (\ref{eq:HEQ}). However, the ordinary differential equations (\ref{eq:HEQ}) can't be solved analytically on the phase space except several simple cases. The leapfrog integration is able to approximate the differential equations by discretizing time with small step size $\eps = t/L$, where ($L, \eps$) are parameters of the algorithm to be tuned. Then, for each one of the $L$ steps, the evolution kernel $\hat \IH_\eps$ is given by
+\begin{equation}
+\begin{split}
+\tilde \pp_\eps & = \pp + (\eps/2) \cdot \frac{\nabla \pi(\tth\mid\xx)}{ \pi(\tth\mid\xx)} \\
+\tilde \tth & = \tth + \eps \cdot \tilde \MM^{-1}\pp_\eps \\
+\tilde \pp & = \tilde \pp_\eps + (\eps/2) \cdot \frac{\nabla \pi(\tilde\tth\mid\xx)}{ \pi(\tilde\tth\mid\xx)}
+\end{split}
+(\#eq:leapfrog)
+\end{equation} 
+The leap-frog integrator is a second-order symplectic integrator that will guarantee the generated trajectories to comply with the three fundamental properties discussed earlier. The HMC proposal $\GGa_\prop$ is accepted with the probability 
+
+$$
+\alpha=\min\left\{1, \frac{p(\GGa_\prop)}{p(\GGa_0)}\right\}= \min\left\{1, \frac{\exp(\Ha(\GGa_0))}{\exp(\Ha(\GGa_\prop))}\right\}
+$$
+
+The energy conservation suggests that if the Hamilton's equations (\ref{eq:HEQ}) can be solved analytically, the proposal will always be accepted. Though the leapfrog integrator is highly accurate, the numerical approximation will bias the proposed trajectory such that the Hamiltonian will not be exactly conservative. Besides, the approximation will not be perfectly reversible in practice due to rounding calculation. In this sense, the $\Ha(\GGa_t)$ will depart away from $\Ha(\GGa_0)$ and the acceptance rate would not achieve 1. By treating the proposal as a stochastic one, the Metropolis acceptance step is embraced to compensate for this deviation. However, this deviation is fairly small and the resulting acceptance probability is relatively high, which makes HMC efficient. 
+
+@Betancourt2017 explains the geometry of the phase space, i.e the collection of all possible values of the $\GGa_t$ and how the HMC sampling manage to explore regions with large curvature and draw samples from the posterior efficiently. @chaudhuri-et-al2017 derives the sufficient assumptions to make the HMC algorithm works in principle and to keep the successive positions proposed by the leapfrog integrator inside the support of the posterior $\pi(\tth\mid\xx)$. For a posterior with complex and non-convex support, the HMC sampling will keep the proposed trajectories inside the support due to high absolute gradient values of the log-posterior at the boundaries. This makes HMC sampling a powerful alternative to explore a BayesEL posterior.
+
+The HMC has three parameters to be tuned: the mass matrix $\MM$, the discretization step size $\eps$ and the number of steps taken $L$. @Neal2012 gives detailed geometry underlying and discloses the message that the inverse mass matrix corresponds to the variance matrix of the target distribution. In the light of this fact, the mass can be roughly estimated from the inverse variance of the posterior distribution. In practice, it is good to simply set $\MM$ as an identity matrix. On the other hand, if the mass matrix is poorly estimated, a smaller step size has to be adopted to assure the accuracy of the proposal and, as a result, more leapfrog steps will be taken to ensure the efficiency. 
+
+@Matthew2011 points out that the performance of HMC is highly sensitive to the the step size $\eps$ and the number of steps $L$. If $L$ is too small, the algorithm exhibits undesirable random walk behavior; yet, a large $L$ will lead to a waste of computation. The No-U-Turn Sampler(NUTS), a variant of HMC, will automatically make an appropriate choice of $L$ in each iteration. Generally speaking, NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. As shown in @Matthew2011, NUTS empirically has an efficient performance as a HMC algorithm that is well tuned.
+
+\pkg{stanEL} deciphered the fast gradient calculation provided by \pkg{flexEL} and gain computational
+efficiency as compared to use \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan} with the following user defined script.
+
+```{r logElopt, echo = FALSE, results = "asis"}
+cat("```hpp", readLines("logEL_opt_stan.hpp"), "```", sep = "\n")
+```
+
+Consider the logistic model with $Y_{i} \sim BIN(1, \rho_i)$, where $n$ is the number of observation: 
+
+$$
+\logit \rho_i = \xx_{i}'\bbe.
+$$
+
+The Bartlett moment conditions are given by
+$$
+E[y_{i} - \rho_{i} ] = 0, \qquad E\left[\frac{(y_{i} - \rho_{i})^2}{\rho_{i}(1-\rho_{i})} - 1  \right] = 0.
+$$
+
+The $\bm{G}_{n\times 2}$ matrix is therefore given by:
+
+$$
+\bm{G}(\bbe) = \begin{bmatrix}
+y_1 - \rho_1              &    \frac{(y_1 - \rho_1)^2}{\rho_1(1 - \rho_1)} -1      \\
+\vdots & \vdots\\
+y_n - \rho_n              &    \frac{(y_n - \rho_n)^2}{\rho_n(1 - \rho_n)} - 1      \\
+\end{bmatrix},
+$$
+Assume the prior distribution is $\bbe \sim \N(0, \sigma_{\beta}^2)$, the following \proglang{Stan} script concludes the corresponding logistic model, where the log posterior calculation will be managed by 'logEL' in \pkg{flexEL}.
+
+```{r logisticStan, echo = FALSE, results = "asis"}
+cat("```stan", readLines("logistic_el.stan"), "```", sep = "\n")
+```
 
 # Conclusion
 

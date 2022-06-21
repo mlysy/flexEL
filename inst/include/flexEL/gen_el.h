@@ -126,6 +126,8 @@ namespace flexEL {
                    const Ref<const MatrixXd>& G,
                    const Ref<const VectorXd>& weights);
                    // const Ref<const VectorXd>& norm_weights);
+    /// Check whether Newton-Raphson algorithm has converged.
+    bool has_converged_nr();
     /// Calculate the profile probability weights.
     void omega_hat(Ref<VectorXd> omega,
                    const Ref<const VectorXd>& lambda,
@@ -247,6 +249,12 @@ namespace flexEL {
     nr_iter = nr_iter_;
     nr_err = nr_err_;
     return;
+  }
+
+  /// @return Whether the desired error tolerance `rel_tol` has been reached in less than `max_iter` Newton-Raphson steps.
+  /// @warning Assumes that lambda_nr has been run at least once. 
+  inline bool GenEL::has_converged_nr() {
+    return (nr_err_ > rel_tol_) && (nr_iter_ == max_iter_);
   }
 
   /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + 1)`. If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected.

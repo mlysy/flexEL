@@ -4,11 +4,15 @@
 \usepackage{amsmath}
 \newcommand{\s}{\sigma}
 \newcommand{\XX}{\bm X}
+\newcommand{\GG}{\bm G}
+\newcommand{\MM}{{\bm M}}
+\newcommand{\mm}{{\bm m}}
 \newcommand{\xx}{\bm x}
 \newcommand{\yy}{\bm y}
 \newcommand{\zz}{\bm z}
 \newcommand{\uu}{\bm u}
 \newcommand{\qq}{\bm q}
+\newcommand{\pp}{{\bm p}}
 \newcommand{\ee}{\bm e}
 \newcommand{\tth}{\bm \theta}
 \newcommand{\lla}{\bm \lambda}
@@ -16,6 +20,8 @@
 \newcommand{\gga}{\bm \gamma}
 \newcommand{\eep}{\bm \epsilon}
 \newcommand{\oom}{\bm \omega}
+\newcommand{\GGa}{{\bm \Gamma}}
+\newcommand{\TTh}{{\bm \Theta}}
 \newcommand{\R}{\mathbb R}
 \renewcommand{\gg}{\bm g}
 \newcommand{\w}{\omega}
@@ -29,6 +35,7 @@
 \newcommand{\str}[1]{{#1}^{\star}}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\diag}{diag} % diagonal matrix
 % \newcommand{\cx}{\bm{{\scriptstyle \mathcal X}}}
 \newcommand{\e}{\varepsilon}
 \newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
@@ -36,3 +43,27 @@
 \newcommand{\sha}[1]{{#1}^{\sharp}}
 \newcommand{\ud}{\mathop{}\!\mathrm{d}}
 \newcommand{\dth}{\frac{\ud}{\ud\tth}}
+\newcommand{\Ua}{{\mathcal{U}}}
+\newcommand{\Ha}{{\mathcal{H}}}
+\newcommand{\Ka}{{\mathcal{K}}}
+\newcommand{\IH}{{\mathfrak P}}
+\newcommand{\Ca}{{\mathcal C}}
+\newcommand{\pv}{p_{\text{v}}} % p-value
+\newcommand{\eps}{\varepsilon} % epsilon
+\newcommand{\curr}{{\text{curr}}}
+\newcommand{\prop}{{\text{prop}}}
+\newcommand{\rv}[3][1]{#2_{#1},\ldots,#2_{#3}}
+% derivatives and partials
+\newcommand{\del}[2][]{\frac{\partial^{#1}}{\partial {#2}^{#1}}}
+\newcommand{\der}[2][]{\frac{\textnormal{d}^{#1}}{\textnormal{d} {#2}^{#1}}}
+% bold zero
+\newcommand{\bz}{{\bm 0}}
+% normal distribution
+\newcommand{\N}{\mathcal{N}}
+
+\newtheorem{assump}{Assumption}
+\DeclareMathOperator{\logit}{logit}
+
+
+
+

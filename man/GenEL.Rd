@@ -52,6 +52,9 @@ be a scalar (default to NULL).}
 Check the dimension of G is what is expected.
 
 
+Check the dimension of weights is as expected.
+
+
 Create a new \code{GenEL} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
@@ -65,6 +68,8 @@ Create a new \code{GenEL} object.
 \item{\code{n_eqs}}{Number of (moment constraint) equations.}
 
 \item{\code{G}}{A numeric matrix.}
+
+\item{\code{weights}}{A numeric vector.}
 }
 \if{html}{\out{</div>}}
 }
@@ -105,7 +110,7 @@ Set more than one options together.
   supp_adj = FALSE,
   supp_adj_a = NULL,
   weight_adj = NULL,
-  lambda0 = rep(0, GenEL_get_n_eqs(private$.GEL))
+  lambda0 = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -122,7 +127,7 @@ Set more than one options together.
 
 \item{\code{weight_adj}}{Weight under weighted log EL (default to 1.0).}
 
-\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.}
+\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.  Defaults to a vector of zeros.}
 }
 \if{html}{\out{</div>}}
 }
@@ -133,7 +138,7 @@ Set more than one options together.
 \subsection{Method \code{lambda_nr()}}{
 Calculate the solution of the dual problem of maximum log EL problem.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -143,7 +148,7 @@ Calculate the solution of the dual problem of maximum log EL problem.
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
-\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
 }
 \if{html}{\out{</div>}}
 }
@@ -157,7 +162,7 @@ A numeric vector of length \code{n_eqs}.
 \subsection{Method \code{omega_hat()}}{
 Calculate the probability vector base on the given G matrix.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -167,7 +172,7 @@ Calculate the probability vector base on the given G matrix.
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
-\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
 }
 \if{html}{\out{</div>}}
 }
@@ -181,7 +186,7 @@ A probability vector of length \code{n_obs + supp_adj}.
 \subsection{Method \code{logel()}}{
 Calculate the log empirical likelihood base on the given G matrix.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -191,7 +196,7 @@ Calculate the log empirical likelihood base on the given G matrix.
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
-\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, returns \code{-Inf}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -205,7 +210,7 @@ A scalar.
 \subsection{Method \code{logel_grad()}}{
 Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, weights, verbose = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -215,7 +220,7 @@ Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
 
 \item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
 
-\item{\code{verbose}}{A boolean indicating whether to print out number of iterations and maximum error at the end of the Newton-Raphson algorithm.}
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of \code{NaN}s.}
 }
 \if{html}{\out{</div>}}
 }
