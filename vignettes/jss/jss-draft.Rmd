@@ -175,27 +175,25 @@ Consider a general regression model
 \[
   y_i = \mu(\xx_i; \tth) + \eta(\xx_i; \tth)\cdot\e_i, \quad i=1,\cdots,n
 \]
-where $\e_i$ follows an unknown distribution with mean $0$ and variance $1$, and independent of $\xx_i$, and $m$-dimensional conditional moment restrictions
-\begin{equation}\label{eq:cmom}
-  \E\bigl[\gg(\xx, \e; \tth) \| \xx\bigr] = 0.
-\end{equation}
+where $\e_i$ follows an unknown distribution with mean $0$ and variance $1$, and independent of $\xx_i$.
 
 Let us denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s) and the complete residuals as $\e_i'$s (corresponding to $y_i'$s). The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function $F(\xx,\e) = G(\xx) \cdot H(\e)$, where $G$ and $H$ are the CDFs of $\xx$ and $\e$:
 \begin{equation}\label{eq:celF}
   \CEL(\tth) = \max_{F \in \mathcal F(\tth)}\prod_{i=1}^n dG(\xx_i) \cdot dH(\e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
 \end{equation}
-where
-\[
-  e_i = e_i(\tth) = \frac{u_i - \mu(\xx_i;\tth)}{\eta(\xx_i;\tth)},
-\]
-and $\mathcal F(\tth)$ is the set of all valid distribution functions satisfying \eqref{eq:cmom}.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\xx)$ is attained as the empirical distribution $\hat G(\xx)$ which puts a point mass of $1/n$ on each covariate observation $\xx_1, \ldots, \xx_n$.  Restricting our attention to $G(\xx)$ uniform on the observed covariates, and considering only the weaker moment condition
+<!-- where -->
+<!-- \[ -->
+<!--   e_i = e_i(\tth) = \frac{u_i - \mu(\xx_i;\tth)}{\eta(\xx_i;\tth)}, -->
+<!-- \] -->
+where $e_i = e_i(\tth) = \{u_i - \mu(\xx_i;\tth)\}/\eta(\xx_i;\tth)$,
+and $\mathcal F(\tth)$ is the set of all valid distribution functions.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\xx)$ is attained as the empirical distribution $\hat G(\xx)$ which puts a point mass of $1/n$ on each covariate observation $\xx_1, \ldots, \xx_n$.  Restricting our attention to $G(\xx)$ uniform on the observed covariates, and considering the moment condition
 \begin{equation}\label{eq:umom}
   \E\bigl[\gg(\xx, \e; \tth)\bigr] = 0
 \end{equation}
 (which is true for any $G(\xx)$ if \eqref{eq:cmom} holds), the CEL function reduces to
-\[
+\begin{equation}
   \CEL(\tth) = \max_{F \in \mathcal F^\star(\tth)}\prod_{i=1}^n dH(e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
-\]
+\end{equation}
 where $\mathcal F^\star(\tth)$ is the set of all valid distributions $F(\xx, \e)$ satisfying \eqref{eq:umom}.
 
 <!-- The right-censored empirical likelihood (CEL) is then defined as as the profile likelihood over the distribution function of $\ee$: -->
@@ -235,13 +233,19 @@ It turns out that the log of equation (\ref{eq:elcens}) (log CEL) is not a conti
 
 
 The log CEL can be expanded as follows
+<!-- \begin{equation} -->
+<!-- \begin{split} -->
+<!-- \ell_{\CEL}(\tth) &= \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) + -->
+<!--   (1-\delta_i)\log(\sum_{j:e_j \geq e_i} \w_j(\tth))\Bigr] \\ -->
+<!--   &= \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) + -->
+<!--     (1-\delta_i)\log(\sum_{j=1}^n \mathfrak 1(e_j(\tth) \geq e_i(\tth)) \cdot \w_j(\tth))\Bigr]. -->
+<!-- \end{split} -->
+<!-- \label{eq:logel_orig} -->
+<!-- \end{equation} -->
 \begin{equation}
-\begin{split}
-\ell_{\CEL}(\tth) &= \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) +
-  (1-\delta_i)\log(\sum_{j:e_j \geq e_i} \w_j(\tth))\Bigr] \\
-  &= \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) +
+\ell_{\CEL}(\tth) 
+  = \sum_{i=1}^n \Bigl[\delta_i\log(\w_i(\tth)) +
     (1-\delta_i)\log(\sum_{j=1}^n \mathfrak 1(e_j(\tth) \geq e_i(\tth)) \cdot \w_j(\tth))\Bigr].
-\end{split}
 \label{eq:logel_orig}
 \end{equation}
 
@@ -252,6 +256,7 @@ Let $S$ be a transformed sigmoid function, i.e.,
   S(x; s) = \frac{1}{1+\exp(s\cdot x)},
 \end{equation}
 where $s > 0$ is a smoothing parameter. A plot of the function is given in Figure \ref{fig:smoothfun}. This function is radially symmetric around the point $(0,0.5)$. The smoothing parameter $s$ is default to 10 in **flexEL**.
+
 ```{r smoothfun, echo = FALSE, fig.height = 3.5, fig.cap = "Smoothed indicator function with different levels of smoothing parameter $s$."}
 smooth_ind <- function(x, s) 1/(1 + exp(s * x))
 par(mar = c(4.5, 4.5, .5, .5))
@@ -263,6 +268,15 @@ legend("topright",
        legend = expression("Indicator", S(x*";"*10), S(x*";"*100)),
        fill = c("black", "red", "blue"))
 ```
+
+
+<!-- \begin{figure}[hbt!] -->
+<!-- \centering -->
+<!-- \includegraphics[width=0.5\textwidth]{smoothfun.png} -->
+<!-- \caption{Smooth function for indicator function $\mathfrak 1(x\leq 0)$.} -->
+<!-- \label{fig:smoothfun} -->
+<!-- \end{figure} -->
+
 
 Specifically, we use
 \begin{equation}\label{eq:indsmooth}
@@ -280,43 +294,45 @@ The log smoothed censored EL (log SCEL) is then defined as
 
 ### EM algorithm for smoothing
 
-Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{unobserved (latent) variables} are the $\e_i'$s such that $\delta_i = 0$, the \textbf{complete data likelihood} is
-\begin{equation}\label{eq:complike}
-  \ell(\w,\e|\uu) = \sum_{i=1}^n\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)})
-\end{equation}
+Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{unobserved (latent) variables} are the $\e_i'$s such that $\delta_i = 0$.
 
-The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to $\yy$ (vector of all latent variables), conditioned on the observed values, the censoring indicator and the current state of the parameters. Since $\delta_i = 1$ (meaning $u_i=y_i$), we have
+<!-- , the \textbf{complete data likelihood} is -->
+<!-- \begin{equation}\label{eq:complike} -->
+<!--   \ell(\w,\e|\uu) = \sum_{i=1}^n\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)}) -->
+<!-- \end{equation} -->
 
-\begin{equation}\label{eq:estep}
-\begin{split}
-  \E_{\e|e,\delta,\w_0}\bigl[\ell(\w,\e|e)\bigr]
-  &= \E_{\e|e,\delta,\w_0}\Bigl[\sum_{i=1}^n\delta_i\log(\w_i) +
-  (1-\delta_i)\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)})\Bigr] \\
-  &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) +
-  (1-\delta_i)\sum_{j=1}^n \E_{\e_i|e,\delta,\w_0}[\mathfrak1(\e_i=e_j)]\log(\w_j)\Bigr] \\
-  &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) +
-  (1-\delta_i)\sum_{j=1}^n P_{\e_i|e,\delta,\w_0}(\e_i=e_j)\log(\w_j)\Bigr].
-\end{split}
-\end{equation}
+<!-- The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to $\yy$ (vector of all latent variables), conditioned on the observed values, the censoring indicator and the current state of the parameters. Since $\delta_i = 1$ (meaning $u_i=y_i$), we have -->
 
-Notice that we can write
-\[
-  \log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)}) =
-  \sum_{i=1}^n \mathfrak 1(\e_i=e_j)\log(\w_j),
-\]
-because for any $i \in \{1,\cdots,n\}$, $\mathfrak 1(\e_i=e_j)=1$ for one and only one $j\in\{1,\cdots,n\}$. Also, the latent $\e_i's$ are independent but not identically distributed, since each of them follows a different categorical distribution (multinomial distribution with one trial).
+<!-- \begin{equation}\label{eq:estep} -->
+<!-- \begin{split} -->
+<!--   \E_{\e|e,\delta,\w_0}\bigl[\ell(\w,\e|e)\bigr] -->
+<!--   &= \E_{\e|e,\delta,\w_0}\Bigl[\sum_{i=1}^n\delta_i\log(\w_i) + -->
+<!--   (1-\delta_i)\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)})\Bigr] \\ -->
+<!--   &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) + -->
+<!--   (1-\delta_i)\sum_{j=1}^n \E_{\e_i|e,\delta,\w_0}[\mathfrak1(\e_i=e_j)]\log(\w_j)\Bigr] \\ -->
+<!--   &= \sum_{i=1}^n\Bigl[\delta_i\log(\w_i) + -->
+<!--   (1-\delta_i)\sum_{j=1}^n P_{\e_i|e,\delta,\w_0}(\e_i=e_j)\log(\w_j)\Bigr]. -->
+<!-- \end{split} -->
+<!-- \end{equation} -->
 
-The conditional distribution in (\ref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass is allocated in a subset of $\{e_1,\cdots,e_n\}$ such that $\mathfrak 1(e_j\geq e_i) = 1$ for $j=1,\cdots,n$, which is still a multinomial distribution,
-\begin{equation}\label{eq:condprob_orig}
-  P_{\e_i|e,\delta,\w_0}(\e_i=e_j) =
-  \frac{\mathfrak 1(e_j\geq e_i)\cdot \w_{0j}}{\sum_{k=1}^n\mathfrak 1(e_k\geq e_i)\cdot\w_{0k}}.
-\end{equation}
+<!-- Notice that we can write -->
+<!-- \[ -->
+<!--   \log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)}) = -->
+<!--   \sum_{i=1}^n \mathfrak 1(\e_i=e_j)\log(\w_j), -->
+<!-- \] -->
+<!-- because for any $i \in \{1,\cdots,n\}$, $\mathfrak 1(\e_i=e_j)=1$ for one and only one $j\in\{1,\cdots,n\}$. Also, the latent $\e_i's$ are independent but not identically distributed, since each of them follows a different categorical distribution (multinomial distribution with one trial). -->
 
-With smoothing function (\ref{eq:indsmooth}), the probability (\ref{eq:condprob_orig}) can be converted to  
-\begin{equation}\label{eq:condprob_smooth}
-  P_{\e_i|e,\delta,\w_0,s}(\e_i=e_j) =
-  \frac{ S_{ij}(\tth;s)\cdot \w_{0j}}{\sum_{k=1}^n S_{ik}(\tth;s)\cdot\w_{0k}}.
-\end{equation}
+<!-- The conditional distribution in (\ref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass is allocated in a subset of $\{e_1,\cdots,e_n\}$ such that $\mathfrak 1(e_j\geq e_i) = 1$ for $j=1,\cdots,n$, which is still a multinomial distribution, -->
+<!-- \begin{equation}\label{eq:condprob_orig} -->
+<!--   P_{\e_i|e,\delta,\w_0}(\e_i=e_j) = -->
+<!--   \frac{\mathfrak 1(e_j\geq e_i)\cdot \w_{0j}}{\sum_{k=1}^n\mathfrak 1(e_k\geq e_i)\cdot\w_{0k}}. -->
+<!-- \end{equation} -->
+
+<!-- With smoothing function (\ref{eq:indsmooth}), the probability (\ref{eq:condprob_orig}) can be converted to   -->
+<!-- \begin{equation}\label{eq:condprob_smooth} -->
+<!--   P_{\e_i|e,\delta,\w_0,s}(\e_i=e_j) = -->
+<!--   \frac{ S_{ij}(\tth;s)\cdot \w_{0j}}{\sum_{k=1}^n S_{ik}(\tth;s)\cdot\w_{0k}}. -->
+<!-- \end{equation} -->
 
 
 
@@ -327,8 +343,6 @@ Therefore, the EM algorithm for smoothing iterates between the following two ste
 \begin{equation}\label{eq:emestep}
 \begin{split}
   \E_{\e|e,\delta,\w_0,s}[\ell(\w,\e|e)]
-  &= \sum_{i=1}^n \Big[\delta_i \log \w_i +
-    (1-\delta_i) \sum_{j = 1}^n \tilde \w_{ij} \log \w_j\Big] \\
   &= \sum_{i=1}^n \Big[\delta_i + \sum_{j = 1}^n (1-\delta_j)
       \cdot\tilde\w_{ji}\Big]\cdot\log \w_i,
 \end{split}
@@ -353,6 +367,37 @@ which has the form of the weighted empirical likelihood inner optimization probl
 
 \end{itemize}
 
+<!-- \begin{itemize} -->
+<!-- \item \textbf{E-step:} Given the observed values and the weights $\w_0$ from the previous iteration, the expectation of the log likelihood is -->
+<!-- \begin{equation}\label{eq:emestep} -->
+<!-- \begin{split} -->
+<!--   \E_{\e|e,\delta,\w_0,s}[\ell(\w,\e|e)] -->
+<!--   &= \sum_{i=1}^n \Big[\delta_i \log \w_i + -->
+<!--     (1-\delta_i) \sum_{j = 1}^n \tilde \w_{ij} \log \w_j\Big] \\ -->
+<!--   &= \sum_{i=1}^n \Big[\delta_i + \sum_{j = 1}^n (1-\delta_j) -->
+<!--       \cdot\tilde\w_{ji}\Big]\cdot\log \w_i, -->
+<!-- \end{split} -->
+<!-- \end{equation} -->
+<!-- where -->
+<!-- \[ -->
+<!--   \tilde \w_{ji} = \frac{S_{ij}(\tth;s) \cdot \w_{0i}}{\sum_{k = 1}^n S_{ik}(\tth;s) \cdot \w_{0k}}, \quad j,i: 1,\cdots,n. -->
+<!-- \] -->
+
+<!-- \item \textbf{M-step:} -->
+<!-- Let $q_i = \delta_i + \sum_{j=1}^n (1-\delta_j)\cdot \tilde \w_{ji}$ for $i=1,\cdots,n$, then the problem becomes -->
+<!-- \begin{equation}\label{eq:emmstep} -->
+<!-- \begin{split} -->
+<!--   \max_{\w}\quad & \sum_{i=1}^n q_i \log \w_i \\ -->
+<!--   \mbox{s.t.}\quad & \sum_{i=1}^n \w_i\cdot \gg(\xx_i,u_i;\tth) = 0 \\ -->
+<!--   & \sum_{i=1}^n \w_i = 1 \\ -->
+<!--   & \w_i \geq 0, \quad i=1\cdots,n, -->
+<!-- \end{split} -->
+<!-- \end{equation} -->
+
+<!-- which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegahat}) to (\ref{eq:optim}). -->
+
+<!-- \end{itemize} -->
+
 With support correction, we can calculate the weight $r_{n+1}$ (before normalization) for the additional $\log w_{n+1}$ by assigning the censoring indicator as $0$ and the residual as $-\inf$. This minimizes the impact of the fake observation on the other observations.
 
 
@@ -369,15 +414,23 @@ The BayesEL method combines the prior information on parameters and the data-dri
 \pi(\tth\mid\xx) = \frac{L(\tth\mid\xx)\pi(\tth)}{\int L(\tth\mid\xx)\pi(\tth) \text{d}\tth}
 \propto \left[ \prod_{i=1}^{n}w_i \right] \cdot \pi(\tth)
 \end{equation}
-As the analytic form of $\pi(\tth\mid\xx)$ is generally absent, the Markov Chain Monte Carlo (MCMC) sampling can be applied to make inference from the posterior distribution. However, the posterior distribution is usually in a non-parametric manner and its support can be irregular, which confronts the adoption of the Gibbs sampling and the Random Walk Metropolis sampling. @chaudhuri-elhmc utilized the results from convex analysis and adapted the Hamiltonian Monte Carlo(HMC) sampling, a gradient-based method, to overcome these restraints and solve problems with minimal assumptions.
+
+Many researchers apply the empirical likelihood in a Bayesian framework to obtain favorable results and properties. @rao2010bayesian propose a Bayesian pseudo-empirical-likelihood approach, by using the Bayesian empirical likelihood to survey research. The approach provides asymptotically valid intervals under the design-based set-up and is shown to be flexible in complex survey areas. @yang2012bayesian evaluates the Bayesian empirical likelihood for quantile regression. They demonstrate that the posterior with any fixed prior is asymptotically normal. Also the authors illustrate several common features across quantiles with informative priors. @chaudhuri.ghosh11 takes empirical likelihood into small area estimation. Their proposed method needs not the requirement of parametric likelihood nor the linearity of the estimators. 
+
+
+
+There are also many researchers interested in the computation of Bayesian empirical likelihood. @mengersen2013bayesian develop the Bayesian computation with empirical likelihood. The proposed model provides significant time savings compared to the approximate Bayesian computation. @schennach2005bayesian proposes a method called 'Bayesian exponentially tilted empirical likelihood', which enjoys the property of empirical likelihood and exponentially tilting methods.  @chaudhuri-elhmc found that the posterior distribution is usually in a non-parametric manner and its support can be irregular, which confronts the adoption of the Gibbs sampling and the Random Walk Metropolis sampling. Hence they utilized the results from convex analysis and adapted the Hamiltonian Monte Carlo(HMC) sampling, a gradient-based method, to overcome these restraints and solve problems with minimal assumptions.
+
+<!-- As the analytic form of $\pi(\tth\mid\xx)$ is generally absent, the Markov Chain Monte Carlo (MCMC) sampling can be applied to make inference from the posterior distribution. However, the posterior distribution is usually in a non-parametric manner and its support can be irregular, which confronts the adoption of the Gibbs sampling and the Random Walk Metropolis sampling. @chaudhuri-elhmc utilized the results from convex analysis and adapted the Hamiltonian Monte Carlo(HMC) sampling, a gradient-based method, to overcome these restraints and solve problems with minimal assumptions. -->
 
 
 The HMC has three parameters to be tuned: the mass matrix $M$, the discretization step size $\epsilon$ and the number of steps taken $L$. @Neal2012 gives detailed geometry underlying and discloses the message that the inverse mass matrix corresponds to the variance matrix of the target distribution. In the light of this fact, the mass can be roughly estimated from the inverse variance of the posterior distribution. In practice, it is good to simply set $M$ as an identity matrix. On the other hand, if the mass matrix is poorly estimated, a smaller step size has to be adopted to assure the accuracy of the proposal and, as a result, more leapfrog steps will be taken to ensure the efficiency.
 
 @Matthew2011 points out that the performance of HMC is highly sensitive to the the step size $\epsilon$ and the number of steps $L$. If $L$ is too small, the algorithm exhibits undesirable random walk behavior; yet, a large $L$ will lead to a waste of computation. The No-U-Turn Sampler(NUTS), a variant of HMC, will automatically make an appropriate choice of $L$ in each iteration. Generally speaking, NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. As shown in @Matthew2011, NUTS empirically has an efficient performance as a HMC algorithm that is well tuned.
 
-\pkg{stanEL} deciphered the fast gradient calculation provided by \pkg{flexEL} and gain computational efficiency as compared to use \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan} with the following user defined script.
+<!-- \pkg{stanEL} deciphered the fast gradient calculation provided by \pkg{flexEL} and gain computational efficiency as compared to use \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan}. -->
 
+\pkg{stanEL} utilizes the custom gradient provided by \pkg{flexEL}, which is more computational efficient and faster than \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan}.
 
 # Software Design and Illustrations
 
