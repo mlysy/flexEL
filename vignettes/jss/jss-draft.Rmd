@@ -36,13 +36,6 @@ output:
     # keep_tex: true
     highlight: tango
 ---
-\newcommand{\logit}{\operatorname{logit}}
-\newcommand{\ilogit}{\operatorname{ilogit}}
-\newcommand{\rrh}{\boldsymbol{\rho}}
-\newcommand{\mmu}{\boldsymbol{\mu}}
-\newcommand{\nnu}{\boldsymbol{\nu}}
-\newcommand{\N}{\mathcal{N}}
-\newcommand{\logel}{\operatorname{logEL}}
 
 
 
@@ -50,6 +43,7 @@ output:
 library(knitr)
 knitr::opts_chunk$set(comment="",
                       prompt = TRUE,
+                      eval = FALSE, # set to TRUE to get actual output
                       R.options = list(prompt = "R> ",
                                        continue = "+  ",
                                        width = 70,
@@ -468,12 +462,12 @@ Several optimization routines are available in \proglang{R}. If analytic gradien
 In this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
 
 The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp:
-```{r, echo = FALSE, results = "asis"}
+```{r mrcpp, echo = FALSE, results = "asis"}
 cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
 ```
 
 After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
-```{r, warn=FALSE, include=TRUE, eval=TRUE}
+```{r mrcppsource, warning=FALSE}
 Rcpp::sourceCpp("mr_neglogel.cpp")
 beta0 <- c(1,2)
 n <- 200
@@ -486,7 +480,7 @@ nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
 
 If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
 
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 library(flexEL)
 mr_neglogel <- function(beta, y, X, gel) {
   G <- flexEL::mr_evalG(y, X, beta)
@@ -499,7 +493,7 @@ gel$supp_adj <- TRUE # turn on support correction
 nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
 ```
 The usage is similar with right-censored outcomes, e.g. using \proglang{R}:
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 mr_neglogcel <- function(beta, y_obs, X, cel) {
   G <- flexEL::mr_evalG(y, X, beta)
   -gel$logel(G)
@@ -583,7 +577,7 @@ In other words, the $g$ function is specified as
 \]
 
 This can be implemented in R (called `mr2_evalG`) as follows: 
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 mr2_evalG <- function(y, X, beta) {
   tX <- t(X)
   yXb <- y - c(X %*% beta)
@@ -593,7 +587,7 @@ mr2_evalG <- function(y, X, beta) {
 ```
 
 With \pkg{flexEL}, the negative log EL can be implemented as:
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 mr2_neglogel <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   return(-gel$logel(G))
@@ -601,7 +595,7 @@ mr2_neglogel <- function(beta, y, X, gel) {
 ```
 
 One may also provide the gradient of `mr2_evalG` with respect to the parameters, in this case, it is
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 mr2_dGdb <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) -tcrossprod(x,x))
@@ -610,7 +604,7 @@ mr2_dGdb <- function(y, X, beta) {
 ```
 
 Notice that here the gradient is a 3-dimensional matrix. This can then be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. the parameters, $\beta$:
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 mr2_neglogel_grad <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   logel_lst <- gel$logel_grad(G)
@@ -625,7 +619,7 @@ mr2_neglogel_grad <- function(beta, y, X, gel) {
 ```
 
 Then one can use e.g. `optim` to obtain the estimate of $\beta$:
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 library(flexEL)
 
 # simulate some data
@@ -663,7 +657,7 @@ require(tidyr)
 require(dplyr)
 require(numDeriv)
 require(optimCheck)
-options(mc.cores = parallel::detectCores())
+## options(mc.cores = parallel::detectCores())
 
 
 head(jobsatis)
@@ -738,24 +732,24 @@ dinvgamma <- function(x, shape, scale, log = FALSE) {
 # prepare the jobsatis dataset for Stan
 
 # convert to tibble and separate satis into satis_Yes and satis_No
-jobsatis <- jobsatis %>%
+js_data <- jobsatis %>%
   as_tibble() %>%
   pivot_wider(names_from = "satis", names_prefix = "satis_",
               values_from = "count")
 
 # tabulate satis_Yes counts in each region
-tab_yes <- jobsatis %>%
+tab_yes <- js_data %>%
   select(-satis_No) %>%
   pivot_wider(names_from = "region", values_from = "satis_Yes")
 
 # tabulate satis_Tot = (satis_Yes + satis_No) counts in each region
-tab_total <- jobsatis %>%
+tab_total <- js_data %>%
   mutate(satis_Total = satis_Yes + satis_No) %>%
   select(-satis_Yes, -satis_No) %>%
   pivot_wider(names_from = "region", values_from = "satis_Total")
 
 # number of regions
-n_area <- nlevels(jobsatis$region)
+n_area <- nlevels(js_data$region)
 # number of observations per region
 n_obs <- nrow(tab_yes)
 
@@ -776,10 +770,9 @@ X <- model.matrix(~ age + gender + race + gender:race, data = tab_yes)
 n_cov <- ncol(X)
 ```
 
+\subsection[MAP Using flexEL]{MAP Using \pkg{flexEL}}
 
-### MAP Using flexEL
-
-Let us start by finding the maximum *a posteriori* (MAP) estimates of $\bbe$ and  $\zz$ using the [**flexEL**](https://github.com/mlysy/flexEL) package [@R-flexEL].  Note that, instead of writing the log-posterior in terms of $\bbe$ and $\zz$, we instead parametrize it in terms of $\bbe_{\text{raw}} = \bbe/\sigma$ and $\zz_{\text{raw}} = \zz/\tau$, as this typically improves convergence of Stan's MCMC sampler.
+Let us start by finding the maximum *a posteriori* (MAP) estimates of $\bbe$ and  $\zz$ using the \pkg{flexEL} package.  Note that, instead of writing the log-posterior in terms of $\bbe$ and $\zz$, we instead parametrize it in terms of $\bbe_{\text{raw}} = \bbe/\sigma$ and $\zz_{\text{raw}} = \zz/\tau$, as this typically improves convergence of Stan's MCMC sampler.
 
 ```{r flex function}
 #' Calculate the `G` matrices for the logistic regression / small area model with common covariate matrix.
@@ -900,7 +893,7 @@ flexELest <- t(ilogit(Xb_est  + z_est[n_area]))
 flexELest
 ```
 
-### MCMC using stanEL
+\subsubsection[MCMC using stanEL]{MCMC using \pkg{stanEL}}
 
 To vectorize the calculation, we set the G as `2 X n_obs`, and assign value by row. Thus, in calling the `logEL_opt`, we do not need to get transpose of G matrix.  The implementation of the Bayesian EL model is provided below.
 
@@ -928,7 +921,7 @@ init_fun <- function() {
        tau = tau_est)
 }
 
-options(mc.cores = parallel::detectCores())
+## options(mc.cores = parallel::detectCores())
 job_satis_fit <- rstan::sampling(stanEL:::stanmodels$logisa_el,data = data,
                                  chain = 4, init = init_fun)
 
