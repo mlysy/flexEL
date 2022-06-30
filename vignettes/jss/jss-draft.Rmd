@@ -3,13 +3,19 @@ title:
   formatted: "\\pkg{flexEL}: A Fast and Flexible Framework for Empirical Likelihood Modeling"
   plain: "flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling"
 author: 
-  - name: Shimeng Huang (with Yunfeng's edition)
+  - name: Shimeng Huang
+    affiliation: University of Waterloo
+  - name: Yunfeng Yang
+    affiliation: University of Waterloo
+  - name: Silvia Meng
     affiliation: University of Waterloo
   - name: Martin Lysy
     affiliation: University of Waterloo
     address:
+      - Department of Statistics and Actuarial Science
+      - University of Waterloo
       - 200 University Avenue West
-      - Ontario, Canada
+      - Waterloo, Canada
     email: \email{mlysy@uwaterloo.ca}
 abstract: >
   This paper introduces \pkg{flexEL}, a fast and flexible framework for implementing and calibrating empirical likelihood models. In particular, it provides the loglikelihood and gradient functions for arbitrary moment constraint matrices. The inner optimization problem is efficiently computed in C++ using the "Eigen" linear algebra library. The package also provides functions for implementing right-censored regression models, where the inner optimization is conducted via an expectation-maximation algirithm. Users may interface with the library through \proglang{R} or directly through C++, as the underlying C++ code is exposes as a standalone header-only library.
