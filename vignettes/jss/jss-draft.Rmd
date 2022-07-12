@@ -108,7 +108,7 @@ where $q_i > 0, \forall i=1,\cdots,n$, and the $n$-dimensional vector of probabi
 \end{split}
 \end{equation}
 
-When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\ref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian function can be set up as 
+When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\eqref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian function can be set up as 
 \begin{equation} \label{eq:lagrange}
   \L = \sum_{i=1}^n q_i\log(\w_i) + (\sum_{i=1}^n q_i)\lla'(\sum_{i=1}^n \w_i \cdot g(\xx_i;\tth)) + \mu(1-\sum_{i=1}^n \w_i).
 \end{equation}
@@ -138,7 +138,7 @@ r_i &= q_i/\sum_{i=1}^n q_i, \\
 
 In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 show that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the parameters accordingly.
 
-With the Lagrangian function in (\ref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, which allows one to employ a gradient-based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to $\tth$ can be derived as
+With the Lagrangian function in (\eqref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, which allows one to employ a gradient-based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to $\tth$ can be derived as
 
 \begin{equation}
 \dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth),
@@ -148,7 +148,7 @@ where $Q = \sum_{i=1}^n q_i$.
 
 ## Support Correction
 
-Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 propose a method to handle this situation by adding one more constraint in the EL inner optimization problem (\ref{eq:noncensopt}), that is
+Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 propose a method to handle this situation by adding one more constraint in the EL inner optimization problem (\eqref{eq:noncensopt}), that is
 
 \begin{equation} \label{eq:noncensoptadj}
 \begin{split}
@@ -172,9 +172,9 @@ It is also shown by @chen-et-al2008 that this approach retains the optimally pro
 The package \pkg{flexEL} handles the situation of regression models with right-censored outcomes, that is, instead of observing outcomes $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. The censoring variable $c_i$ is assumed to be conditionally independent of $y_i$ given $\xx_i$.
 
 Consider a general regression model
-\[
+\begin{equation}
   y_i = \mu(\xx_i; \tth) + \eta(\xx_i; \tth)\cdot\e_i, \quad i=1,\cdots,n
-\]
+\end{equation}
 where $\e_i$ follows an unknown distribution with mean $0$ and variance $1$, and independent of $\xx_i$.
 
 Let us denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s) and the complete residuals as $\e_i'$s (corresponding to $y_i'$s). The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function $F(\xx,\e) = G(\xx) \cdot H(\e)$, where $G$ and $H$ are the CDFs of $\xx$ and $\e$:
@@ -188,9 +188,9 @@ Let us denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to
 where $e_i = e_i(\tth) = \{u_i - \mu(\xx_i;\tth)\}/\eta(\xx_i;\tth)$,
 and $\mathcal F(\tth)$ is the set of all valid distribution functions.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\xx)$ is attained as the empirical distribution $\hat G(\xx)$ which puts a point mass of $1/n$ on each covariate observation $\xx_1, \ldots, \xx_n$.  Restricting our attention to $G(\xx)$ uniform on the observed covariates, and considering the moment condition
 \begin{equation}\label{eq:umom}
-  \E\bigl[\gg(\xx, \e; \tth)\bigr] = 0
-\end{equation}
-(which is true for any $G(\xx)$ if \eqref{eq:cmom} holds), the CEL function reduces to
+  \E\bigl[\gg(\xx, \e; \tth)\bigr] = 0,
+\end{equation} 
+the CEL function reduces to
 \begin{equation}
   \CEL(\tth) = \max_{F \in \mathcal F^\star(\tth)}\prod_{i=1}^n dH(e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
 \end{equation}
@@ -226,7 +226,7 @@ Right-censoring is essentially a missing data problem. In \pkg{flexEL}, the righ
 
 ### Continuity Correction of Empirical Likelihood with Right-Censored Outcomes
 
-It turns out that the log of equation (\ref{eq:elcens}) (log CEL) is not a continuous function in $\tth$, so that direct optimization of log CEL is difficult to achieve. Therefore, we develop a continuity correction method, which is a revision of the log CEL function, so that one can employ gradient-based optimization algorithms.
+It turns out that the log of equation (\eqref{eq:elcens}) (log CEL) is not a continuous function in $\tth$, so that direct optimization of log CEL is difficult to achieve. Therefore, we develop a continuity correction method, which is a revision of the log CEL function, so that one can employ gradient-based optimization algorithms.
 
 
 <!-- In order to obtain an estimate in this case, one could use Markov Chain Monte Carlo or global optimization algorithm such as simulated annealing, which are both time-consuming.  -->
@@ -249,13 +249,13 @@ The log CEL can be expanded as follows
 \label{eq:logel_orig}
 \end{equation}
 
-We can see that the discontinuity of $\ell_{\CEL}(\tth)$ in (\ref{eq:logel_orig}) is due to an indicator function. To correct this discontinuity, we replace the indicator function by a continuous approximation.
+We can see that the discontinuity of $\ell_{\CEL}(\tth)$ in (\eqref{eq:logel_orig}) is due to an indicator function. To correct this discontinuity, we replace the indicator function by a continuous approximation.
 
 Let $S$ be a transformed sigmoid function, i.e.,
 \begin{equation}\label{eq:sigmoid}
   S(x; s) = \frac{1}{1+\exp(s\cdot x)},
 \end{equation}
-where $s > 0$ is a smoothing parameter. A plot of the function is given in Figure \ref{fig:smoothfun}. This function is radially symmetric around the point $(0,0.5)$. The smoothing parameter $s$ is default to 10 in **flexEL**.
+where $s > 0$ is a smoothing parameter. A plot of the function is given in Figure \eqref{fig:smoothfun}. This function is radially symmetric around the point $(0,0.5)$. The smoothing parameter $s$ is default to 10 in \pkg{flexEL}.
 
 ```{r smoothfun, echo = FALSE, fig.height = 3.5, fig.cap = "Smoothed indicator function with different levels of smoothing parameter $s$."}
 smooth_ind <- function(x, s) 1/(1 + exp(s * x))
@@ -283,7 +283,7 @@ Specifically, we use
   S_{ij}(\tth;s) := S(e_i(\tth)-e_j(\tth);s)
   = \frac{1}{1+\exp(s\cdot(e_i(\tth)-e_j(\tth)))}.
 \end{equation}
-Notice that as long as $e_i(\tth)$ is a continuous function of $\tth$ for all $i=1,\cdots,n$, the function (\ref{eq:indsmooth}) is indeed a continuous function of $\tth$.
+Notice that as long as $e_i(\tth)$ is a continuous function of $\tth$ for all $i=1,\cdots,n$, the function (\eqref{eq:indsmooth}) is indeed a continuous function of $\tth$.
 
 The log smoothed censored EL (log SCEL) is then defined as
 \begin{equation}\label{eq:logel_smoo}
@@ -301,7 +301,7 @@ Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{uno
 <!--   \ell(\w,\e|\uu) = \sum_{i=1}^n\log(\prod_{j=1}^n \w_j^{\mathfrak 1(\e_i=e_j)}) -->
 <!-- \end{equation} -->
 
-<!-- The E-step of the EM algorithm takes the expectation of (\ref{eq:complike}) with respect to $\yy$ (vector of all latent variables), conditioned on the observed values, the censoring indicator and the current state of the parameters. Since $\delta_i = 1$ (meaning $u_i=y_i$), we have -->
+<!-- The E-step of the EM algorithm takes the expectation of (\eqref{eq:complike}) with respect to $\yy$ (vector of all latent variables), conditioned on the observed values, the censoring indicator and the current state of the parameters. Since $\delta_i = 1$ (meaning $u_i=y_i$), we have -->
 
 <!-- \begin{equation}\label{eq:estep} -->
 <!-- \begin{split} -->
@@ -322,13 +322,13 @@ Recall that if $\delta_i=1$, we have $e_i=\e_i$. This means that the \textbf{uno
 <!-- \] -->
 <!-- because for any $i \in \{1,\cdots,n\}$, $\mathfrak 1(\e_i=e_j)=1$ for one and only one $j\in\{1,\cdots,n\}$. Also, the latent $\e_i's$ are independent but not identically distributed, since each of them follows a different categorical distribution (multinomial distribution with one trial). -->
 
-<!-- The conditional distribution in (\ref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass is allocated in a subset of $\{e_1,\cdots,e_n\}$ such that $\mathfrak 1(e_j\geq e_i) = 1$ for $j=1,\cdots,n$, which is still a multinomial distribution, -->
+<!-- The conditional distribution in (\eqref{eq:condprob_orig}) is a categorical distribution conditioned on that the probability mass is allocated in a subset of $\{e_1,\cdots,e_n\}$ such that $\mathfrak 1(e_j\geq e_i) = 1$ for $j=1,\cdots,n$, which is still a multinomial distribution, -->
 <!-- \begin{equation}\label{eq:condprob_orig} -->
 <!--   P_{\e_i|e,\delta,\w_0}(\e_i=e_j) = -->
 <!--   \frac{\mathfrak 1(e_j\geq e_i)\cdot \w_{0j}}{\sum_{k=1}^n\mathfrak 1(e_k\geq e_i)\cdot\w_{0k}}. -->
 <!-- \end{equation} -->
 
-<!-- With smoothing function (\ref{eq:indsmooth}), the probability (\ref{eq:condprob_orig}) can be converted to   -->
+<!-- With smoothing function (\eqref{eq:indsmooth}), the probability (\eqref{eq:condprob_orig}) can be converted to   -->
 <!-- \begin{equation}\label{eq:condprob_smooth} -->
 <!--   P_{\e_i|e,\delta,\w_0,s}(\e_i=e_j) = -->
 <!--   \frac{ S_{ij}(\tth;s)\cdot \w_{0j}}{\sum_{k=1}^n S_{ik}(\tth;s)\cdot\w_{0k}}. -->
@@ -363,7 +363,7 @@ Let $q_i = \delta_i + \sum_{j=1}^n (1-\delta_j)\cdot \tilde \w_{ji}$ for $i=1,\c
 \end{split}
 \end{equation}
 
-which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegahat}) to (\ref{eq:optim}).
+which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\eqref{eq:omegahat}) to (\eqref{eq:optim}).
 
 \end{itemize}
 
@@ -394,7 +394,7 @@ which has the form of the weighted empirical likelihood inner optimization probl
 <!-- \end{split} -->
 <!-- \end{equation} -->
 
-<!-- which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\ref{eq:omegahat}) to (\ref{eq:optim}). -->
+<!-- which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\eqref{eq:omegahat}) to (\eqref{eq:optim}). -->
 
 <!-- \end{itemize} -->
 
@@ -411,7 +411,7 @@ The following sections will present the Bayesian EL(BayesEL) estimation, as well
 The BayesEL method combines the prior information on parameters and the data-driven likelihood to draw inference on the estimand that is defined by estimating equations. With the prior density $\pi(\tth)$ over the support $\Theta$, the posterior is defined as:
 
 \begin{equation}
-\pi(\tth\mid\xx) = \frac{L(\tth\mid\xx)\pi(\tth)}{\int L(\tth\mid\xx)\pi(\tth) \text{d}\tth}
+\pi(\tth\mid\xx) = \frac{L(\tth\mid\xx)\pi(\tth)}{\int L(\tth\mid\xx)\pi(\tth) \ud \tth}
 \propto \left[ \prod_{i=1}^{n}w_i \right] \cdot \pi(\tth)
 \end{equation}
 
@@ -430,7 +430,7 @@ The HMC has three parameters to be tuned: the mass matrix $M$, the discretizatio
 
 <!-- \pkg{stanEL} deciphered the fast gradient calculation provided by \pkg{flexEL} and gain computational efficiency as compared to use \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan}. -->
 
-\pkg{stanEL} utilizes the custom gradient provided by \pkg{flexEL}, which is more computational efficient and faster than \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the 'logEL' calculation in \proglang{Stan}.
+\pkg{stanEL} utilizes the custom gradient provided by \pkg{flexEL}, which is more computational efficient and faster than \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the `logel()` calculation in \proglang{Stan}.
 
 # Software Design and Illustrations
 
@@ -467,20 +467,24 @@ cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
 ```
 
 After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
+
+ - [] The following coding reports error 
 ```{r mrcppsource, warning=FALSE}
-Rcpp::sourceCpp("mr_neglogel.cpp")
+# report error
+# Rcpp::sourceCpp("mr_neglogel.cpp")
 beta0 <- c(1,2)
 n <- 200
 X <- cbind(1, rnorm(n))
 eps <- rnorm(n)
 y <- c(X %*% beta0 + eps)
 # mr_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)
-nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
+# uncommment the following sentence
+# nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
 ```
 
 If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
 
-```{r}
+```{r flexEL R}
 library(flexEL)
 mr_neglogel <- function(beta, y, X, gel) {
   G <- flexEL::mr_evalG(y, X, beta)
@@ -493,7 +497,7 @@ gel$supp_adj <- TRUE # turn on support correction
 nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
 ```
 The usage is similar with right-censored outcomes, e.g. using \proglang{R}:
-```{r}
+```{r flexEL R RC}
 mr_neglogcel <- function(beta, y_obs, X, cel) {
   G <- flexEL::mr_evalG(y, X, beta)
   -gel$logel(G)
@@ -534,7 +538,7 @@ If the $\tau$-th quantile value of $\e_i\iid(0,1)$ is $\nu_{\tau}$, then $\e_i-\
   \hat\nu_{\tau} = \argmin_{\tilde\nu_{\tau}} \E\Biggl[\rho_{\tau}\Bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\g)}-\tilde\nu_{\tau}\Bigr)\Biggr].
 \end{equation}
 
-As before, we use the first order optimality condition of (\ref{eq:nueq}) to obtain the estimating equation for $\nu_{\tau}$. Therefore, we obtain all the moment conditions for quantile regression as follows
+As before, we use the first order optimality condition of (\eqref{eq:nueq}) to obtain the estimating equation for $\nu_{\tau}$. Therefore, we obtain all the moment conditions for quantile regression as follows
 \begin{equation} \label{eq:qrls}
 \begin{split}
   \E\Bigl[\frac{y-\xx'\bbe}{\exp(2\zz'\gga)}\cdot\xx\Bigr] &= 0 \\
@@ -556,28 +560,28 @@ Usage of quantile regression in \pkg{flexEL} is very similar to mean regression 
 ## User-defined Model
 
 The following toy example illustrates how to use \pkg{flexEL} with a customized model. Consider a simple two-parameter linear regression model
-\[
+\begin{equation}
   y_i = \beta_0 + \beta_1x_i + \e_i, \quad i=1,\cdots,n, 
-\]
+\end{equation}
 where $\epsilon_i \iid \text{F}(\epsilon)$ such that $\E(\epsilon_i) = 0$ and $\text{Var}(\epsilon_i) = 1$.
 
 As the first step, one should design the estimating equations of the parameters and implement a function (`evalG`) that returns the corresponding $G$ matrix of dimension $n\times m$, where $n$ is the number of observations, and $m$ is the dimension of the range of the estimating equation. 
 
 In this example, the following estimating equation can be used, which has a range of dimension $m=p$, same as the dimension of the parameter vector $\beta$:
-\[
+\begin{equation}
   \E[(y-x'\beta)\cdot x] = 0,
-\]
+\end{equation}
 which is
-\[
+\begin{equation}
   \sum_{i=1}^n w_i\cdot (y_i-x_i'\beta)\cdot x_i = 0.
-\]
+\end{equation}
 In other words, the $g$ function is specified as
-\[
+\begin{equation}
   g(x,y;\beta) = (y-x'\beta)\cdot x.
-\]
+\end{equation}
 
 This can be implemented in R (called `mr2_evalG`) as follows: 
-```{r}
+```{r G function}
 mr2_evalG <- function(y, X, beta) {
   tX <- t(X)
   yXb <- y - c(X %*% beta)
@@ -587,7 +591,7 @@ mr2_evalG <- function(y, X, beta) {
 ```
 
 With \pkg{flexEL}, the negative log EL can be implemented as:
-```{r}
+```{r neg logel}
 mr2_neglogel <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   return(-gel$logel(G))
@@ -595,7 +599,7 @@ mr2_neglogel <- function(beta, y, X, gel) {
 ```
 
 One may also provide the gradient of `mr2_evalG` with respect to the parameters, in this case, it is
-```{r}
+```{r gradient of G}
 mr2_dGdb <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) -tcrossprod(x,x))
@@ -604,7 +608,7 @@ mr2_dGdb <- function(y, X, beta) {
 ```
 
 Notice that here the gradient is a 3-dimensional matrix. This can then be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. the parameters, $\beta$:
-```{r}
+```{r gradient logel}
 mr2_neglogel_grad <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   logel_lst <- gel$logel_grad(G)
@@ -619,7 +623,7 @@ mr2_neglogel_grad <- function(beta, y, X, gel) {
 ```
 
 Then one can use e.g. `optim` to obtain the estimate of $\beta$:
-```{r}
+```{r optim flexEL}
 library(flexEL)
 
 # simulate some data
@@ -664,54 +668,54 @@ head(jobsatis)
 ```
 
 Let $y_{ij}$ denote the number of employees who were satisfied with their jobs in cell $j$ and area $i$ out of a total $n_{ij}$; then, $\rho_{ij} = E[y_{ij}/n_{ij}]$ measures the job satisfaction. With the above demonstration, the job satisfaction model can be established as follows:
-$$
-\begin{aligned}
+\begin{equation}
+\begin{split}
 \logit \rho_{ij} & = \xx_{ij}'\bbe + z_i, \\
 \xx_{ij}'\bbe & = \mu + \alpha_a + \gamma_s+\eta_r+(\gamma\eta)_{sr}
-\end{aligned}
-$$
+\end{split}
+\end{equation}
 where $\alpha_a, \gamma_s, \eta_r, (\gamma\eta)_{sr}$ denotes the main effects of $a$th age, $s$th sex and $r$th race and first-order interaction effects of sex and race. As a result, there are $1+(3-1) + (2-1) +(2-1)+(2-1)\times(2-1)=6$ parameters to estimate, apart from the seven area-level random effects with $\tau$ being their unknown variance.
 
 ### Model and Mshioment Conditions
 
 
 The following model for small area estimation is presented by @chaudhuri.ghosh11.  Let $y_{ij}$ denote the number of successes for observation $j$ in area $i$ out of $n_{ij}$ trials, and let $\rho_{ij} = E[y_{ij}/n_{ij}]$.  Let $\xx_{ij}$ denote the corresponding covariate vector, and $z_i$ be an area-level random effect, such that
-$$
+\begin{equation}
 \logit \rho_{ij} = \xx_{ij}'\bbe + z_i, \qquad z_i \iid \N(0, \tau).
-$$
+\end{equation}
 Rather than assume the $y_{ij}$ are iid Bernoulli trials with success probability $\rho_{ij}$, Chaudhuri and Gosh simply assume the Bartlett moment conditions
-$$
+\begin{equation}
 E[y_{ij} - n_{ij} \rho_{ij} \mid z_i] = 0, \qquad E\left[\frac{(y_{ij} - n_{ij} \rho_{ij})^2}{n_{ij}\rho_{ij}(1-\rho_{ij})} - 1 \mid z_i \right] = 0.
-$$
+\end{equation}
 
 ### Empirical Likelihood
 
 Let $N_i$ denote the number of observations in area $i$ and $N_A$, the number of areas, such that the total number of observations is $N = \sum_{i=1}^{N_A} N_i$.  Let $\yy_i = (y_{i1},...,y_{iN_{i}})$, and similarly for $\rrh_i$, $\XX_i$, etc.  The empirical likelihood in terms of $\bbe$ and $\zz = (z_1,..., z_{N_A})$ satisfies the sample moments
-$$
+\begin{equation}
 \sum_{j=1}^{N_i} \omega_{ij} (y_{ij} - n_{ij} \rho_{ij}) = 0, \qquad \sum_{j=1}^{N_i} \omega_{ij} \left(\frac{(y_{ij} - n_{ij} \rho_{ij})^2}{n_{ij}\rho_{ij}(1-\rho_{ij})} - 1\right) = 0, \qquad i = 1,\ldots,N_A,
-$$
+\end{equation}
 where $\omega_{ij} > 0$ are the EL weights. If we consider the $y_{ij}$ as coming from a conditional distribution given $z_i$, then we set $\sum_{j=1}^{N_i} \omega_{ij} = 1$ for each $i = 1,\ldots,N_A$.  Thus, we obtain $N_A$ matrices
 
-$$\bm{G}(\bbe, z_i) = [\mmu_i, \mmu_i^2/\nnu_i-1]$$
+\begin{equation}
+\bm{G}(\bbe, z_i) = [\mmu_i, \mmu_i^2/\nnu_i-1]
+\end{equation}
 
 of size $N_i \times 2$, where $\mmu_i = \yy_i - \bm{n}_i \rrh_i$, $\nnu_i = \bm{n}_i\rrh_i(1-\rrh_i)$, and $\rrh_i = \ilogit(\XX_i \bbe + z_i)$.
 
 
 If $\logel(\bbe, z_i)$ denotes the log-EL function for each area $i$, then the combined log-EL function for all $N_A$ areas is
-$$
+\begin{equation}
 \logel(\bbe, \zz) = \sum_{i=1}^{N_A} \logel(\bbe, z_i).
-$$
+\end{equation}
 
 
 ### Parameter Prior
 
-The primary purpose of **stanEL** is to perform Bayesian inference on empirical likelihood by using Stan. For this purpose we must specify a prior on $\beta$ and $\tau$, which we take from @chaudhuri-elhmc :
+The primary purpose of \pkg{stanEL} is to perform Bayesian inference on empirical likelihood by using Stan. For this purpose we must specify a prior on $\beta$ and $\tau$, which we take from @chaudhuri-elhmc :
 
-$$
-\begin{aligned}
+\begin{equation}
 \bbe  \sim \N(0, \sigma^2),\qquad \tau  \sim \text{IG}(\alpha, \eta),
-\end{aligned}
-$$
+\end{equation}
 
 where $\sigma = 10$ and $\alpha = \eta = .1$.
 
@@ -756,12 +760,12 @@ n_obs <- nrow(tab_yes)
 # n_area x n_obs matrix of counts of satisfied employees
 y <- tab_yes %>%
   select(-race, -age, -gender) %>%
-  as.matrix() %>% t()
+  as.matrix() 
 
 # n_area x n_obs matrix of total number of employees
 N <- tab_total %>%
   select(-race, -age, -gender) %>%
-  as.matrix() %>% t()
+  as.matrix()
 
 # common covariate matrix
 X <- model.matrix(~ age + gender + race + gender:race, data = tab_yes)
@@ -775,24 +779,34 @@ n_cov <- ncol(X)
 Let us start by finding the maximum *a posteriori* (MAP) estimates of $\bbe$ and  $\zz$ using the \pkg{flexEL} package.  Note that, instead of writing the log-posterior in terms of $\bbe$ and $\zz$, we instead parametrize it in terms of $\bbe_{\text{raw}} = \bbe/\sigma$ and $\zz_{\text{raw}} = \zz/\tau$, as this typically improves convergence of Stan's MCMC sampler.
 
 ```{r flex function}
-#' Calculate the `G` matrices for the logistic regression / small area model with common covariate matrix.
+#' Density of the inverse gamma distribution.
+dinvgamma <- function(x, shape, scale, log = FALSE) {
+  if(all(shape > 0 & scale > 0)) {
+    cst <- shape * log(scale) - lgamma(shape)
+  } else cst <- 0
+  ld <- cst - (shape + 1) * log(x) - scale/x
+  if(!log) ld <- exp(ld)
+  ld
+}
+
+#' Calculate the `G` matrices for the LOGISA model.
 #'
 #' @param beta Vector of `n_cov` regression parameters.
 #' @param z Vector of `n_area` regional parameters.
-#' @param y Matrix of `n_area x n_obs` successes.
-#' @param N Matrix of `n_area x n_obs` total counts.
+#' @param y Matrix of `n_obs x n_area` successes.
+#' @param N Matrix of `n_obs x n_area` total counts.
 #' @param X Common covariate matrix of size `n_obs x n_cov`.
 #' @return A list of `n_area` matrices of size `n_obs x 2`.
 logisa_G <- function(beta, z, y, N, X) {
   n_cov <- ncol(X)
   n_obs <- nrow(X)
-  n_area <- nrow(y)
+  n_area <- ncol(y)
   G_all <- list()
   for (ii in 1:n_area){
     G <- matrix(NA, nrow = nrow(X), ncol = 2)
     rho <- ilogit(X %*% beta + z[ii])
-    nu <- N[ii,] * rho
-    mu <- y[ii,] - nu
+    nu <- N[,ii] * rho
+    mu <- y[,ii] - nu
     nu <- nu*(1 - rho)
     G[,1] <- mu
     G[,2] <- (mu)^2 / nu - 1
@@ -801,62 +815,31 @@ logisa_G <- function(beta, z, y, N, X) {
   return(G_all)
 }
 
-#' Calculate the log-EL likelihood for an arbitrary `G` matrix.
-#'
-#' @param G Matrix of size `n_obs x n_eq`.
-# logel <- function(G, max_iter = 10, rel_tol = 1e-3, supp_adj = FALSE,
-#                   return_dldG = FALSE) {
-#   el <- flexEL::GenEL$new(nrow(G), ncol(G))
-#   el$set_opts(max_iter = max_iter, rel_tol = rel_tol, supp_adj = supp_adj)
-#   if(return_dldG == T){
-#     return(el$logel_grad(G))
-#   } else {
-#     return(el$logel(G))
-#   }
-# }
-logel <- function(G, max_iter = 10, rel_tol = 1e-3, supp_adj = FALSE,
-                  grad = FALSE) {
-  ans <- flexEL::logEL(G = G, max_iter = max_iter, rel_tol = rel_tol,
-                       supp_adj = supp_adj, grad = grad)
-  if(grad && all(is.na(ans$grad))) {
-    ans$grad[] <- 0
-  }
-  ans
-}
-
-#' log-EL posterior for logistic regression small area estimation.
-#'
-#' @param theta Vector of `n_area + n_obs + 1`
-#' @param y Matrix of `n_area x n_obs` successes.
-#' @param N Matrix of `n_area x n_obs` total counts.
+#' EL log-posterior for LOGISA model.
+#' 
+#' @param beta_raw Vector of `n_cov` standardized regression parameters `beta_raw = beta/beta_sd`.
+#' @param z_raw Vector of `n_area` standardized regional parameters `z_raw = z/sqrt(tau)`.
+#' @param tau Variance of regional parameters.
+#' @param y Matrix of `n_obs x n_area` successes.
+#' @param N Matrix of `n_obs x n_area` total counts.
 #' @param X Common covariate matrix of size `n_obs x n_cov`.
-#' @param beta_sd A positive scalar, standard deviation of beta
-#' @param tau_prior Vector of 2, inverse gamma distribution parameter of tau
-#' @return Scalar, the log-EL posterior
-logisa_G_logel_test <- function(beta_raw, z_raw, tau, y, N, X, beta_sd, tau_prior,
-                                supp_adj, max_iter, rel_tol) {
+#' @param beta_sd Standard deviation of beta.
+#' @param tau_prior Length-two vector of shape and scale parameters of the inverse-gamma prior distribution on `tau`.
+#' @param supp_adj,max_iter,rel_tol Tuning parameters for [flexEL::logEL()].
+#' @return The EL logposterior for the LOGISA model.
+logisa_el_logpost <- function(beta_raw, z_raw, tau,
+                              y, N, X,
+                              beta_sd, tau_prior,
+                              supp_adj, max_iter, rel_tol) {
   beta <- beta_raw * beta_sd
   z <- z_raw * sqrt(tau)
   G_all <- logisa_G(beta, z, y, N, X)
-  ll <- sapply(G_all, logel, supp_adj = supp_adj, max_iter = max_iter, rel_tol = rel_tol)
+  ll <- sapply(G_all, flexEL::logEL,
+               supp_adj = supp_adj, max_iter = max_iter, rel_tol = rel_tol)
   lpi_z <- dnorm(z_raw, log = TRUE)
   lpi_beta <- dnorm(beta_raw, log = TRUE)
   lpi_tau <- dinvgamma(tau, shape = tau_prior[1], scale = tau_prior[2], log = TRUE)
   return(sum(ll) + sum(lpi_z) + sum(lpi_beta) + lpi_tau)
-}
-
-#' log-EL posterior for logistic regression small area estimation
-#'    with all parameters are embedded into theta
-logisa_G_logel_test_theta <- function(theta, y, N, X, beta_sd, tau_prior,
-                                supp_adj, max_iter, rel_tol) {
-  n_cov <- ncol(X)
-  n_obs <- nrow(X)
-  n_area <- nrow(y)
-  beta_raw <- theta[1:n_cov]
-  z_raw <- theta[n_cov + 1:n_area]
-  tau <- theta[n_cov + n_area + 1]
-  return(logisa_G_logel_test(beta_raw, z_raw, tau, y, N, X, beta_sd, tau_prior,
-                             supp_adj, max_iter, rel_tol))
 }
 ```
 
@@ -866,22 +849,38 @@ For this we use the gradient-free Nelder-Mead method provided by `stats::optim()
 
 
 ```{r flexELresult}
-# initial value
 set.seed(8888)
-p_init <- c(rnorm(n_cov + n_area, sd = 0.1), runif(1))
+
+# prior specification
 beta_sd <- 10
 tau_prior <- c(.1, .1)
+
+# negative EL log-posterior
 nlogpost <- function(theta) {
-  -logisa_G_logel_test_theta(theta, y = y, N = N, X = X,
-                       beta_sd = beta_sd, tau_prior = tau_prior,
-                       supp_adj = FALSE, max_iter = 100, rel_tol = 1e-7)
+  n_cov <- ncol(X)
+  n_obs <- nrow(X)
+  n_area <- ncol(y)
+  beta_raw <- theta[1:n_cov]
+  z_raw <- theta[n_cov + 1:n_area]
+  tau <- theta[n_cov + n_area + 1]
+  -logisa_el_logpost(beta_raw = beta_raw, z_raw = z_raw, tau = tau,
+                     y = y, N = N, X = X,
+                     beta_sd = beta_sd, tau_prior = tau_prior,
+                     supp_adj = FALSE, max_iter = 100, rel_tol = 1e-7)
 }
-optimout <- optim(p_init, fn = nlogpost,
+
+# initial value for optimization
+theta_init <- c(rnorm(n_cov + n_area, sd = 0.1), runif(1))
+
+optimout <- optim(par = theta_init, fn = nlogpost,
                   control = list(maxit = 1e5, reltol = 1e-10))
+#' Convergence of 0 indicates successful completion; 
 optimout$convergence
 
-# Convergence of 0 indicates successful completion;
-# Then, estimation is able to be obtained by:
+```
+
+```{r map est}
+#' Then, estimation is able to be obtained by: 
 theta_est<- optimout$par
 beta_raw_est <- theta_est[1:n_cov]
 z_raw_est <- theta_est[n_cov + 1:n_area]
@@ -889,13 +888,14 @@ tau_est <- exp(theta_est[n_cov + n_area + 1])
 beta_est <- beta_sd * beta_raw_est
 z_est <-  sqrt(tau_est) * z_raw_est
 Xb_est <- X %*% beta_est
-flexELest <- t(ilogit(Xb_est  + z_est[n_area]))
-flexELest
+map_est <- t(ilogit(Xb_est  + z_est[n_area]))
+map_est
 ```
+
 
 \subsubsection[MCMC using stanEL]{MCMC using \pkg{stanEL}}
 
-To vectorize the calculation, we set the G as `2 X n_obs`, and assign value by row. Thus, in calling the `logEL_opt`, we do not need to get transpose of G matrix.  The implementation of the Bayesian EL model is provided below.
+To vectorize the calculation, we set the G as `2 X n_obs`, and assign value by row. Thus, in calling the `logEL_opt()`, we do not need to get transpose of G matrix.  The implementation of the Bayesian EL model is provided below.
 
 ```{r, echo = FALSE, results = "asis"}
 cat("```stan",
@@ -904,13 +904,13 @@ cat("```stan",
     "```", sep = "\n")
 ```
 
-We now turn to MCMC sampling with **rstan**:
+We now turn to MCMC sampling with \pkg{rstan}:
 
-```{r stanEL, fig.width=7, fig.height= 4, message=FALSE, warning=F}
+```{r stanEL, fig.width=7, fig.height= 4, message=FALSE, warning=FALSE}
 beta_sd <- 10
 tau_prior <- c(.1,.1)
 data <- list(n_area = n_area, n_obs = n_obs, n_cov = n_cov,
-             y = y, X = X, N = N,
+             y = t(y), X = X, N = t(N),
              beta_sd = beta_sd, tau_prior = tau_prior,
              max_iter = 100, rel_tol = 1e-7, supp_adj= 0)
 
@@ -921,6 +921,7 @@ init_fun <- function() {
        tau = tau_est)
 }
 
+# uncomment the line below to do sampling in parallel
 ## options(mc.cores = parallel::detectCores())
 job_satis_fit <- rstan::sampling(stanEL:::stanmodels$logisa_el,data = data,
                                  chain = 4, init = init_fun)
@@ -938,20 +939,25 @@ Here we compare point estimates of the proportion of satisfied employees in the 
 
 - `glm`: The generalized linear model estimate using logistic regression.
 
-- `MAP`: The Bayesian MAP estimate using **flexEL**.
+- `MAP`: The Bayesian MAP estimate using \pkg{flexEL}.
 
-- `NUTS`: The posterior mean of the full Bayesian estimate using **stanEL**.
+- `NUTS`: The posterior mean of the full Bayesian estimate using \pkg{stanEL}.
 
 - `CMY17`: The posterior HMC estimates reported by @chaudhuri-elhmc.
 
 ```{r comp}
 # glm estimation with logistic regression
-glm_est <- glm(cbind(y[n_area,], N[n_area,]-y[n_area,]) ~ X - 1,
+glm_est <- glm(cbind(y[,n_area], N[,n_area]-y[,n_area]) ~ X - 1,
                family = "binomial")
 glm_est <- predict(glm_est, type = "response")
-bayesEL_Chaudhuri <- c(0.636,0.628,.677,.669,.733,.726,.674,.583,.713,.626,.764,.686)
+# nuts estimate using stanEL
+nuts_est <- summary(job_satis_fit,pars = 'rho_Pacific')[[1]][,1]
+# hmc estimate reported by Chaudhuri et al 2017
+cmy_est <- c(0.636,0.628,.677,.669,.733,.726,.674,.583,.713,.626,.764,.686)
 
-rbind(glm = glm_est, MAP = flexELest, HMC = stanELest,CMY17 = bayesEL_Chaudhuri)
+disp <- rbind(glm_est, map_est, nuts_est, cmy_est)
+rownames(disp) <- c("GLM", "MAP", "NUTS", "CMY17")
+round(disp, 3)
 ```
 CMY17 is the estimator for the Pacific region in the @chaudhuri-elhmc.
 
