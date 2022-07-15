@@ -8,6 +8,8 @@ author:
   - name: Yunfeng Yang
     affiliation: University of Waterloo
   - name: Silvia Meng
+    affiliation: 'University of Waterloo \AND'
+  - name: Samuel W.K. Wong
     affiliation: University of Waterloo
   - name: Martin Lysy
     affiliation: University of Waterloo
@@ -33,7 +35,7 @@ output:
     includes:
       in_header: jss-includes.tex
     citation_package: natbib
-    # keep_tex: true
+    keep_tex: true
     highlight: tango
 ---
 
@@ -138,13 +140,15 @@ r_i &= q_i/\sum_{i=1}^n q_i, \\
 
 In the case that we are only interested in one parameter $\theta$ of an unknown distribution $F$, @owen1990 has shown that the limiting distribution of the EL ratio statistic is chi-square. For a vector of parameters, @qin-lawless1994 show that the EL ratio statistic is asymptotic normal. This means that we can derive confidence intervals of the parameters accordingly.
 
-With the Lagrangian function in (\eqref{eq:lagrange}), we can also derive the gradient of $\L$ with respect to $\tth$, which allows one to employ a gradient-based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to $\tth$ can be derived as
+With the Lagrangian function in \eqref{eq:lagrange}, we can also derive the gradient of $\L$ with respect to $\tth$, which allows one to employ a gradient-based optimization algorithm to find the optimal solution of the estimator. Specifically, the gradient of the the weighted empirical log likelihood with respect to $\tth$ can be derived as
 
 \begin{equation}
 \dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \lla(\tth)' \dth g_i(\tth),
 \end{equation}
 
-where $Q = \sum_{i=1}^n q_i$.  
+where $Q = \sum_{i=1}^n q_i$.
+
+**TODO:** Write this using $\frac{\ud}{\ud \bm{G}} \frac{\ud \bm{G}}{\ud \tth}$ for later.
 
 ## Support Correction
 
@@ -458,6 +462,20 @@ Users can also leverage the EL calculation for customized models specified by es
 Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to `G` via chain rule, a user can then utilize `optim` or `nlm` in \proglang{R} for parameter estimation with gradient-based methods.
 
 ## Mean Regression
+
+**TODO:**
+
+- [ ] Define the model.  This is basically given by (24).  Please see \pkg{flexEL} vignette for details on the model.
+
+- [ ] Write down the moment conditions.  We need to know what $\gg(\xx, y; \bbe)$ is in order to implement the EL model.  In this case it is
+
+	$$
+	\gg(\xx, y; \bbe) = (y - \xx'\bbe) \xx.
+	$$
+
+- [ ] Also need to write down the gradient, i.e., $\frac{\ud}{\ud \bbe} \gg(\xx, y; \bbe)$.
+
+- [ ] Clean up the code.  This we can do after the math is written down correctly.
 
 In this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
 
@@ -897,12 +915,15 @@ map_est
 
 To vectorize the calculation, we set the G as `2 X n_obs`, and assign value by row. Thus, in calling the `logEL_opt()`, we do not need to get transpose of G matrix.  The implementation of the Bayesian EL model is provided below.
 
-```{r, echo = FALSE, results = "asis"}
-cat("```stan",
+```{r, echo = FALSE, eval = TRUE, results = "asis"}
+cat("```cpp",
     readLines(system.file("stan", "logisa_el.stan",
                           package = "stanEL")),
     "```", sep = "\n")
 ```
+
+<!-- ```{stan, output.var = "logisastan", eval = FALSE, code = readLines(system.file("stan", "logisa_el.stan", package = "stanEL"))} -->
+<!-- ``` -->
 
 We now turn to MCMC sampling with \pkg{rstan}:
 
