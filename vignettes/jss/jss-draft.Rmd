@@ -85,6 +85,7 @@ Let $\XX = (\xx_1,\cdots,\xx_n)$ be the data where $\xx_i\in\R^d$'s, $i = 1,...,
 \end{equation}
 where $\gg(\xx, \tth) = \bigl( g_1(\xx, \tth), \ldots, g_m(\xx, \tth) \bigr)$.
 
+
 The empirical likelihood $\EL(\tth)$ is defined as the profile likelihood over the distribution function of $\xx$:
 \begin{equation} \label{eq:elF}
   \EL(\tth) = \max_{F \in \mathcal F(\tth)} \prod_{i=1}^n \mathrm{d} F(\xx_i),
@@ -110,7 +111,7 @@ where $q_i > 0, \forall i=1,\cdots,n$, and the $n$-dimensional vector of probabi
 \end{split}
 \end{equation}
 
-When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in (\eqref{eq:noncensopt}) is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian function can be set up as 
+When $q_i = 1, \forall i=1,\cdots,n$, we have the regular empirical likelihood function. The problem in \eqref{eq:noncensopt} is a constrained convex optimization problem, and its optimal solution can be found via Lagrangian function, similar to the steps in @owen1990. Specifically, the Lagrangian function can be set up as 
 \begin{equation} \label{eq:lagrange}
   \L = \sum_{i=1}^n q_i\log(\w_i) + (\sum_{i=1}^n q_i)\lla'(\sum_{i=1}^n \w_i \cdot g(\xx_i;\tth)) + \mu(1-\sum_{i=1}^n \w_i).
 \end{equation}
@@ -152,7 +153,7 @@ where $Q = \sum_{i=1}^n q_i$.
 
 ## Support Correction
 
-Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 propose a method to handle this situation by adding one more constraint in the EL inner optimization problem (\eqref{eq:noncensopt}), that is
+Let $g_i = g(\xx_i;\tth)$ for $i = 1,\cdots, n$. As mentioned above, a necessary condition of obtaining a unique optimal solution is that $\bm 0$ is in the convex full of the points $g_1,\cdots,g_n$ which may not be satisfied with the data. @chen-et-al2008 propose a method to handle this situation by adding one more constraint in the EL inner optimization problem \eqref{eq:noncensopt}, that is
 
 \begin{equation} \label{eq:noncensoptadj}
 \begin{split}
@@ -173,15 +174,16 @@ It is also shown by @chen-et-al2008 that this approach retains the optimally pro
 
 ### Setup
 
-The package \pkg{flexEL} handles the situation of regression models with right-censored outcomes, that is, instead of observing outcomes $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. The censoring variable $c_i$ is assumed to be conditionally independent of $y_i$ given $\xx_i$.
-
 Consider a general regression model
 \begin{equation}
   y_i = \mu(\xx_i; \tth) + \eta(\xx_i; \tth)\cdot\e_i, \quad i=1,\cdots,n
 \end{equation}
 where $\e_i$ follows an unknown distribution with mean $0$ and variance $1$, and independent of $\xx_i$.
 
-Let us denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to $u_i'$s) and the complete residuals as $\e_i'$s (corresponding to $y_i'$s). The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function $F(\xx,\e) = G(\xx) \cdot H(\e)$, where $G$ and $H$ are the CDFs of $\xx$ and $\e$:
+The package \pkg{flexEL} handles the situation of regression models with right-censored outcomes, that is, instead of observing outcomes $y_i$, we observe $u_i = \min(y_i, c_i)$ and $\delta_i = \mathfrak 1\{y_i \le c_i\}$, where $c_i$ is the censoring time. The censoring variable $c_i$ is assumed to be conditionally independent of $y_i$ given $\xx_i$.
+
+
+Let us denote the residuals given a specific $\tth$ as $e_i = e_i(\tth) = \{u_i - \mu(\xx_i;\tth)\}/\eta(\xx_i;\tth)$ and the complete residuals as $\e_i = \{y_i - \mu(\xx_i;\tth)\}/\eta(\xx_i;\tth)$. The empirical likelihood with censored observations once again is defined by profiling over the unknown joint distribution function $F(\xx,\e) = G(\xx) \cdot H(\e)$, where $G$ and $H$ are the CDFs of $\xx$ and $\e$:
 \begin{equation}\label{eq:celF}
   \CEL(\tth) = \max_{F \in \mathcal F(\tth)}\prod_{i=1}^n dG(\xx_i) \cdot dH(\e_i)^{\delta_i} \cdot [1- H(e_i)]^{1-\delta_i},
 \end{equation}
@@ -189,8 +191,7 @@ Let us denote the residuals given a specific $\tth$ as $e_i'$s (corresponding to
 <!-- \[ -->
 <!--   e_i = e_i(\tth) = \frac{u_i - \mu(\xx_i;\tth)}{\eta(\xx_i;\tth)}, -->
 <!-- \] -->
-where $e_i = e_i(\tth) = \{u_i - \mu(\xx_i;\tth)\}/\eta(\xx_i;\tth)$,
-and $\mathcal F(\tth)$ is the set of all valid distribution functions.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\xx)$ is attained as the empirical distribution $\hat G(\xx)$ which puts a point mass of $1/n$ on each covariate observation $\xx_1, \ldots, \xx_n$.  Restricting our attention to $G(\xx)$ uniform on the observed covariates, and considering the moment condition
+where $\mathcal F(\tth)$ is the set of all valid distribution functions.  It is not hard to show that for any choice of $H(\e)$, the maximum of \eqref{eq:celF} over $G(\xx)$ is attained as the empirical distribution $\hat G(\xx)$ which puts a point mass of $1/n$ on each covariate observation $\xx_1, \ldots, \xx_n$.  Restricting our attention to $G(\xx)$ uniform on the observed covariates, and considering the moment condition
 \begin{equation}\label{eq:umom}
   \E\bigl[\gg(\xx, \e; \tth)\bigr] = 0,
 \end{equation} 
@@ -230,7 +231,7 @@ Right-censoring is essentially a missing data problem. In \pkg{flexEL}, the righ
 
 ### Continuity Correction of Empirical Likelihood with Right-Censored Outcomes
 
-It turns out that the log of equation (\eqref{eq:elcens}) (log CEL) is not a continuous function in $\tth$, so that direct optimization of log CEL is difficult to achieve. Therefore, we develop a continuity correction method, which is a revision of the log CEL function, so that one can employ gradient-based optimization algorithms.
+It turns out that the log of equation \eqref{eq:elcens} (log CEL) is not a continuous function in $\tth$, so that direct optimization of log CEL is difficult to achieve. Therefore, we develop a continuity correction method, which is a revision of the log CEL function, so that one can employ gradient-based optimization algorithms.
 
 
 <!-- In order to obtain an estimate in this case, one could use Markov Chain Monte Carlo or global optimization algorithm such as simulated annealing, which are both time-consuming.  -->
@@ -253,7 +254,7 @@ The log CEL can be expanded as follows
 \label{eq:logel_orig}
 \end{equation}
 
-We can see that the discontinuity of $\ell_{\CEL}(\tth)$ in (\eqref{eq:logel_orig}) is due to an indicator function. To correct this discontinuity, we replace the indicator function by a continuous approximation.
+We can see that the discontinuity of $\ell_{\CEL}(\tth)$ in \eqref{eq:logel_orig} is due to an indicator function. To correct this discontinuity, we replace the indicator function by a continuous approximation.
 
 Let $S$ be a transformed sigmoid function, i.e.,
 \begin{equation}\label{eq:sigmoid}
@@ -287,7 +288,7 @@ Specifically, we use
   S_{ij}(\tth;s) := S(e_i(\tth)-e_j(\tth);s)
   = \frac{1}{1+\exp(s\cdot(e_i(\tth)-e_j(\tth)))}.
 \end{equation}
-Notice that as long as $e_i(\tth)$ is a continuous function of $\tth$ for all $i=1,\cdots,n$, the function (\eqref{eq:indsmooth}) is indeed a continuous function of $\tth$.
+Notice that as long as $e_i(\tth)$ is a continuous function of $\tth$ for all $i=1,\cdots,n$, the function \eqref{eq:indsmooth} is indeed a continuous function of $\tth$.
 
 The log smoothed censored EL (log SCEL) is then defined as
 \begin{equation}\label{eq:logel_smoo}
@@ -367,7 +368,7 @@ Let $q_i = \delta_i + \sum_{j=1}^n (1-\delta_j)\cdot \tilde \w_{ji}$ for $i=1,\c
 \end{split}
 \end{equation}
 
-which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations (\eqref{eq:omegahat}) to (\eqref{eq:optim}).
+which has the form of the weighted empirical likelihood inner optimization problem, and $\oom = (\w_1,\cdots,\w_n)$ can be updated as given by equations \eqref{eq:omegahat} to \eqref{eq:optim}.
 
 \end{itemize}
 
@@ -465,19 +466,38 @@ Several optimization routines are available in \proglang{R}. If analytic gradien
 
 **TODO:**
 
-- [ ] Define the model.  This is basically given by (24).  Please see \pkg{flexEL} vignette for details on the model.
+- [x] Define the model.  This is basically given by (24).  Please see \pkg{flexEL} vignette for details on the model.
 
-- [ ] Write down the moment conditions.  We need to know what $\gg(\xx, y; \bbe)$ is in order to implement the EL model.  In this case it is
+- [x] Write down the moment conditions.  We need to know what $\gg(\xx, y; \bbe)$ is in order to implement the EL model.  In this case it is
 
 	$$
 	\gg(\xx, y; \bbe) = (y - \xx'\bbe) \xx.
 	$$
 
-- [ ] Also need to write down the gradient, i.e., $\frac{\ud}{\ud \bbe} \gg(\xx, y; \bbe)$.
+- [x] Also need to write down the gradient, i.e., $\frac{\ud}{\ud \bbe} \gg(\xx, y; \bbe)$.
 
 - [ ] Clean up the code.  This we can do after the math is written down correctly.
 
-In this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
+
+Let us consider a simple linear regression as an example. Suppose we have $n$ independent and identically distributed observations $(x_i,y_i)$, $i = 1,...,n$, which follow the model 
+\begin{equation}
+y_i = \beta_0 + \beta_1x_i + \epsilon_i,
+\end{equation}
+where $\epsilon_i$ follows an unknown distribution with $\E(\epsilon_i) = 0$.
+
+To implememnt the empirical likelihood, the moment condition in this example is 
+\begin{equation}
+\gg(\xx, y; \bbe) = (y - \xx'\bbe) \xx.
+\end{equation}
+
+And the gradient of $\gg(\xx, y; \bbe)$ with respect to $\bbe$ is 
+\begin{equation}
+\frac{\ud}{\ud \bbe} \gg(\xx, y; \bbe) = -\xx\xx'.
+\end{equation}
+
+
+
+Further, in this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
 
 The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp:
 ```{r mrcpp, echo = FALSE, results = "asis"}
@@ -556,7 +576,7 @@ If the $\tau$-th quantile value of $\e_i\iid(0,1)$ is $\nu_{\tau}$, then $\e_i-\
   \hat\nu_{\tau} = \argmin_{\tilde\nu_{\tau}} \E\Biggl[\rho_{\tau}\Bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\g)}-\tilde\nu_{\tau}\Bigr)\Biggr].
 \end{equation}
 
-As before, we use the first order optimality condition of (\eqref{eq:nueq}) to obtain the estimating equation for $\nu_{\tau}$. Therefore, we obtain all the moment conditions for quantile regression as follows
+As before, we use the first order optimality condition of \eqref{eq:nueq} to obtain the estimating equation for $\nu_{\tau}$. Therefore, we obtain all the moment conditions for quantile regression as follows
 \begin{equation} \label{eq:qrls}
 \begin{split}
   \E\Bigl[\frac{y-\xx'\bbe}{\exp(2\zz'\gga)}\cdot\xx\Bigr] &= 0 \\
@@ -775,12 +795,12 @@ n_area <- nlevels(js_data$region)
 # number of observations per region
 n_obs <- nrow(tab_yes)
 
-# n_area x n_obs matrix of counts of satisfied employees
+# n_obs x n_area matrix of counts of satisfied employees
 y <- tab_yes %>%
   select(-race, -age, -gender) %>%
   as.matrix() 
 
-# n_area x n_obs matrix of total number of employees
+# n_obs x n_area matrix of total number of employees
 N <- tab_total %>%
   select(-race, -age, -gender) %>%
   as.matrix()
@@ -915,7 +935,7 @@ map_est
 
 To vectorize the calculation, we set the G as `2 X n_obs`, and assign value by row. Thus, in calling the `logEL_opt()`, we do not need to get transpose of G matrix.  The implementation of the Bayesian EL model is provided below.
 
-```{r, echo = FALSE, eval = TRUE, results = "asis"}
+```{r showstanEL, echo = FALSE, eval = TRUE, results = "asis"}
 cat("```cpp",
     readLines(system.file("stan", "logisa_el.stan",
                           package = "stanEL")),
@@ -986,6 +1006,7 @@ The table shows that all three methods present similar results as compared to wh
 
 
 # Conclusion
+
 
 
 \bibliography{references}
