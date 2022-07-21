@@ -437,7 +437,7 @@ The HMC has three parameters to be tuned: the mass matrix $M$, the discretizatio
 
 \pkg{stanEL} utilizes the custom gradient provided by \pkg{flexEL}, which is more computational efficient and faster than \proglang{Stan}'s auto differentiation engine. \pkg{stanEL} sources \pkg{flexEL} and wraps the `logel()` calculation in \proglang{Stan}.
 
-# Software Design and Illustrations
+# Software Design
 
 The main purpose of \pkg{flexEL} is to support fast and flexible computation of empirical likelihood given estimating equations. The package also supports regression with right-censored responses based on an EM algorithm described in the previous section. In addition, support correction and continuity correction are also included in the package, which are easily turned on and off by the users. 
 
@@ -461,6 +461,8 @@ where $\e_i$ follows an unknown distribution but only with mean $0$.
 Users can also leverage the EL calculation for customized models specified by estimating equations, in which case, a user can either create a function in \proglang{R} that returns the `G` matrix given the value of the parameters (call it e.g. `evalG`), or implement the calculation in C++ before wrapping into an \proglang{R} interface. 
 
 Several optimization routines are available in \proglang{R}. If analytic gradient of `G` with respect to the parameters can be derived, a user can also provide a corresponding gradient function. Combined with the gradient of log EL with respect to `G` via chain rule, a user can then utilize `optim` or `nlm` in \proglang{R} for parameter estimation with gradient-based methods.
+
+# Examples
 
 ## Mean Regression
 
@@ -495,6 +497,50 @@ And the gradient of $\gg(\xx, y; \bbe)$ with respect to $\bbe$ is
 \frac{\ud}{\ud \bbe} \gg(\xx, y; \bbe) = -\xx\xx'.
 \end{equation}
 
+```{r meanreg}
+require(flexEL)
+require(R6)
+
+meanreg_logel <- function(y, X, beta) {
+  yXb <- y - X %*% beta
+  G <- as.numeric(yXb) * X
+  flexEL::logEL(G = G, supp_adj = TRUE)
+}
+
+MeanReg <- R6Class(
+  classname = "MeanReg",
+  inherit = GenEL,
+
+  private = list(
+    .X = NULL,
+    .y = NULL
+  ),
+  
+  public = list(
+
+    #' Class constructor.
+    initialize = function(y, X) {
+      n_obs <- nrow(X)
+      n_eqs <- ncol(X)
+      super$initialize(n_obs, n_eqs)
+      private$.X <- X
+      private$.y <- y
+    },
+
+    #' Calculate G matrix.
+    evalG = function(beta) {
+      yXb <- private$.y - private$.X %*% beta
+      as.numeric(yXb) * private$.X
+    },
+
+    #' Calculate the log-EL.
+    logel = function(beta) {
+      G <- self$evalG(beta)
+      super$logel(G)
+    }
+  )
+)
+```
 
 
 Further, in this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
@@ -533,6 +579,10 @@ gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initalize an GenEL object
 gel$supp_adj <- TRUE # turn on support correction
 
 nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
+
+mrel <- MeanReg$new(y, X)
+mrel$supp_adj <- TRUE
+mrel$logel(c(0.75, 1.25))
 ```
 The usage is similar with right-censored outcomes, e.g. using \proglang{R}:
 ```{r flexEL R RC}
