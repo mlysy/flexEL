@@ -45,7 +45,7 @@ output:
 library(knitr)
 knitr::opts_chunk$set(comment="",
                       prompt = TRUE,
-                      eval = TRUE, # set to TRUE to get actual output
+                      eval = FALSE, # set to TRUE to get actual output
                       R.options = list(prompt = "R> ",
                                        continue = "+  ",
                                        width = 70,
@@ -603,7 +603,7 @@ MeanReg <- R6Class(
 
 
 
-```{r result check }
+```{r resultcheck }
 
 #' check the logEL is the same 
 # functional result
@@ -735,9 +735,11 @@ As before, we use the first order optimality condition of \eqref{eq:nueq} to obt
   \E\Bigl[\frac{y-\xx'\bbe}{\exp(2\zz'\gga)}\cdot\xx\Bigr] &= 0 \\
   \E\Bigl[\bigl(1-\frac{(y-\xx'\bbe)^2}{\s^2\cdot\exp(2\zz'\gga)}\bigr)\cdot\zz\Bigr] &= 0 \\
   \E\Bigl[\frac{(y-\xx'\bbe)^2}{\s^2\cdot\exp(2\zz'\gga)}-1\Bigr] &= 0 \\
-  \E\Bigl[\rho'_{\tau}\bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\gga)}-\nu_{\tau}\bigr)\Bigr] &= 0.
+  \E\Bigl[\rho^{(1)}_{\tau}\bigl(\frac{y-\xx'\bbe}{\s\cdot\exp(\zz'\gga)}-\nu_{\tau}\bigr)\Bigr] &= 0,
 \end{split}
 \end{equation}
+
+where $\rho^{(1)}_{\tau}(u) = \frac{\ud}{\ud u} \rho_{\tau}(u)$.
 
 Notice that the indicator function used by the "check function" is also a source of discontinuity in log EL even in the absence of censoring. Although there are other approaches to smooth out the discontinuity in quantile regression, such as @chen2007, splines or kernel methods, the same trick used for correcting the discontinuity caused by right-censoring is particularly straightforward to be applied here as well. That is, we modify \eqref{eq:check} as follows:
 
@@ -747,6 +749,83 @@ Notice that the indicator function used by the "check function" is also a source
 where $S$ is defined as in \eqref{eq:sigmoid}.
 
 Usage of quantile regression in \pkg{flexEL} is very similar to mean regression in the last section. Moreover, one can simultaneously estimte parameters at multiple quantile levels both with the location and location-scale models. With the location model, both the intercept and the slope parameters can be different at different quantile levels. Essentially, the `G` matrix is obtained by stacking together multiple `G` matrices each at one quantile level. This is one advantage of quantile regression when heteroscedasticity presents. With the location-scale model, only the quantile parameter $\nu_{\tau}$ is different at different quantile levels, since heteroscedasticity can be handled by the scale function.
+
+**TODO:**
+
+- [ ] Write down the derivative of the smoothed check function $\frac{\ud}{\ud u} \rho_{S,\tau}(u; s)$, and complete the coding in `check_smooth_dx()`.
+
+```{r quantreg}
+#--- Helper functions ----------------------------------------------------------
+
+#' Smoothed indicator function.
+indicator_smooth <- function(x, s) 1/(1 + exp(s * x))
+
+#' Smoothed check function.
+check_smooth <- function(x, tau, s) x * (tau - indicator_smooth(x, s))
+
+#' Derivative of smooth checked function wrt `x`.
+check_smooth_dx <- function(x, tau, s) {}
+
+#' Quantile regression G function.
+quantreg_evalG <- function(y, X, Z, beta, gamma, sigma, nu, tau, s) {
+  yXb <- as.numeric(y - X %*% beta)
+  eZg <- exp(as.numeric(Z %*% gamma))
+  G <- cbind((yXb/eZg^2) * X,                 # beta
+             (1 - (yXb/(sigma*eZg))^2) * Z,   # gamma
+             (yXb/(sigma*eZg))^2 - 1,         # sigma
+             check_smooth_dx(yXb/(sigma*eZg) - nu, tau, s))
+  G
+}
+
+QuantReg <- R6Class(
+  classname = "QuantReg",
+  inherit = CensEL,
+
+  private = list(
+    .X = NULL,
+    .Z = NULL,
+    .u = NULL,
+    .delta = NULL
+  ),
+
+  public = list(
+
+    initialize = function(u, delta, X, Z) {
+      n_obs <- nrow(X)
+      n_eqs <- ncol(X) + ncol(Z) + 2
+      super$initialize(n_obs, n_eqs)
+      private$.X <- X
+      private$.Z <- Z
+      private$.u <- u
+      private$.delta <- delta
+    },
+
+    evalG = function(beta, gamma, sigma, nu, tau, s) {
+      quantreg_evalG(y = private$.u,
+                     X = private$.X,
+                     Z = private$.Z,
+                     beta = beta,
+                     gamma = gamma,
+                     sigma = sigma,
+                     nu = nu,
+                     tau = tau,
+                     s = s)
+    },
+
+    resid = function(beta, gamma, sigma) {
+      uXb <- private$.u - as.numeric(private$.X %*% beta)
+      eZg <- sigma * exp(as.numeric(private$.Z %*% gamma))
+      uXb/eZg
+    },
+
+    logel = function(beta, gamma, sigma, nu, tau, s) {
+      eps <- self$resid(beta, gamma, sigma)
+      G <- evalG(beta, gamma, sigma, nu, tau, s)
+      super$logel(G, private$.delta, eps)
+    }
+  )
+)
+```
 
 ## User-defined Model
 
