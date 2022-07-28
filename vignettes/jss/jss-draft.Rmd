@@ -45,7 +45,7 @@ output:
 library(knitr)
 knitr::opts_chunk$set(comment="",
                       prompt = TRUE,
-                      eval = FALSE, # set to TRUE to get actual output
+                      eval = TRUE, # set to TRUE to get actual output
                       R.options = list(prompt = "R> ",
                                        continue = "+  ",
                                        width = 70,
@@ -413,10 +413,10 @@ With support correction, we can calculate the weight $r_{n+1}$ (before normaliza
 
 The following sections will present the Bayesian EL(BayesEL) estimation, as well as an example incorporating \pkg{flexEL} and \proglang{Stan}.
 
-The BayesEL method combines the prior information on parameters and the data-driven likelihood to draw inference on the estimand that is defined by estimating equations. With the prior density $\pi(\tth)$ over the support $\Theta$, the posterior is defined as:
+The BayesEL method combines the prior information on parameters and the data-driven likelihood to draw inference on the estimand that is defined by estimating equations. With the prior density $\pi(\tth)$ over the support $\Theta$ and the likelihood $L(\xx\mid\tth)$, the posterior is defined as:
 
 \begin{equation}
-\pi(\tth\mid\xx) = \frac{L(\tth\mid\xx)\pi(\tth)}{\int L(\tth\mid\xx)\pi(\tth) \ud \tth}
+\pi(\tth\mid\xx) = \frac{L(\xx\mid\tth)\pi(\tth)}{\int L(\xx\mid\tth)\pi(\tth) \ud \tth}
 \propto \left[ \prod_{i=1}^{n}w_i \right] \cdot \pi(\tth)
 \end{equation}
 
@@ -481,13 +481,13 @@ Several optimization routines are available in \proglang{R}. If analytic gradien
 - [ ] Clean up the code.  This we can do after the math is written down correctly.
 
 
-Let us consider a simple linear regression as an example. Suppose we have $n$ independent and identically distributed observations $(x_i,y_i)$, $i = 1,...,n$, which follow the model 
+Let us consider a general multivariate linear regression as an example. Suppose we have $n$ independent and identically distributed observations $(\xx_i,y_i)$, $i = 1,...,n$, which follow the model 
 \begin{equation}
-y_i = \beta_0 + \beta_1x_i + \epsilon_i,
+  y_i = \xx_i'\bbe + \e_i, \quad i=1,\cdots,n.,
 \end{equation}
 where $\epsilon_i$ follows an unknown distribution with $\E(\epsilon_i) = 0$.
 
-To implememnt the empirical likelihood, the moment condition in this example is 
+To implement the empirical likelihood, the moment condition in this example is 
 \begin{equation}
 \gg(\xx, y; \bbe) = (y - \xx'\bbe) \xx.
 \end{equation}
@@ -497,8 +497,43 @@ And the gradient of $\gg(\xx, y; \bbe)$ with respect to $\bbe$ is
 \frac{\ud}{\ud \bbe} \gg(\xx, y; \bbe) = -\xx\xx'.
 \end{equation}
 
-```{r meanreg}
+
+We first show the simple functional implementation of \pkg{flexEL}. By creating the function `mr_evalG_R()` returning `G` matrix and `mr_neglogel()` returning negative logEL value, one can use `nlm()` to minimize the negative logEL value and get $\bbe$ estimate. 
+
+```{r data generation}
+beta0 <- c(1,2)
+n <- 200
+X <- cbind(1, rnorm(n))
+eps <- rnorm(n)
+y <- c(X %*% beta0 + eps)
+```
+
+```{r simple implementation}
 require(flexEL)
+#' create G matrix 
+mr_evalG_R <- function(y, X, beta) {
+  tX <- t(X)
+  yXb <- y - c(X %*% beta)
+  G <- sweep(tX, MARGIN = 2, yXb, `*`)
+  return(t(G))
+}
+
+#' return negative logEL value with the gel class
+mr_neglogel <- function(beta, y, X, gel) {
+  G <- flexEL::mr_evalG(y, X, beta)
+  return(-gel$logel(G))
+}
+
+gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initialize an GenEL object
+gel$supp_adj <- TRUE # turn on support correction
+
+nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
+```
+
+Further, we can adopt a more object-oriented implementation. Here, we show that the functional implementation and the object-oriented implementation provide the same logEL value and gradient.
+
+
+```{r meanreg}
 require(R6)
 
 meanreg_logel <- function(y, X, beta) {
@@ -510,14 +545,14 @@ meanreg_logel <- function(y, X, beta) {
 MeanReg <- R6Class(
   classname = "MeanReg",
   inherit = GenEL,
-
+  
   private = list(
     .X = NULL,
     .y = NULL
   ),
   
   public = list(
-
+    
     #' Class constructor.
     initialize = function(y, X) {
       n_obs <- nrow(X)
@@ -526,20 +561,88 @@ MeanReg <- R6Class(
       private$.X <- X
       private$.y <- y
     },
-
+    
     #' Calculate G matrix.
     evalG = function(beta) {
       yXb <- private$.y - private$.X %*% beta
       as.numeric(yXb) * private$.X
     },
-
+    
     #' Calculate the log-EL.
     logel = function(beta) {
       G <- self$evalG(beta)
       super$logel(G)
+    },
+    
+    #' Calculate the gradient of logel w.r.t. G 
+    dldG = function(beta) {
+      G <- self$evalG(beta)
+     super$logel_grad(G)$grad
+    },
+    
+    
+    #' Calculate the gradient of logel w.r.t. beta
+    dldb = function(beta){
+      # construct dGdb
+      lx <- split(private$.X, row(private$.X))
+      # calculate dGdb
+      dGdb <- lapply(lx, function(x) tcrossprod(x,x))
+      dldG_mat <- self$dldG(beta)
+      grad_mat <- matrix(NA, nrow = nrow(dldG_mat), ncol = ncol(dldG_mat))
+      for (ii in 1:ncol(dldG_mat)) {
+        grad_mat[,ii] <- dGdb[[ii]] %*% dldG_mat[ii,]
+      }
+      grad <- colSums(grad_mat)
+      grad
+      
     }
+    
   )
 )
+```
+
+
+
+```{r result check }
+
+#' check the logEL is the same 
+# functional result
+meanreg_logel(y, X, c(0.75, 1.25))
+
+# object-oriented result
+mrel <- MeanReg$new(y, X)
+mrel$supp_adj <- TRUE
+mrel$logel(c(0.75, 1.25))
+
+
+#' check the gradient is the same 
+#' functional result 
+#' the function returning dGdb
+mr_dGdb_R <- function(y, X, beta) {
+  lx <- split(X, row(X))
+  dg <- lapply(lx, function(x) tcrossprod(x,x))
+  return(dg)
+}
+
+#' the function returning negative logEL value and dldb
+mr_neglogEL_R <- function(y, X, beta) {
+  G <- mr_evalG_R(y, X, beta)
+  res_lst <- flexEL::logEL(G, supp_adj = TRUE, grad = TRUE) 
+  neglogel <- -res_lst$logel
+  dldG <- -res_lst$grad
+  dGdb <- mr_dGdb_R(y, X, beta)
+  grad_mat <- matrix(NA, nrow = nrow(dldG), ncol = ncol(dldG))
+  for (ii in 1:ncol(dldG)) {
+    grad_mat[,ii] <- dGdb[[ii]] %*% dldG[ii,]
+  }
+  grad <- colSums(grad_mat)
+  attr(neglogel, "gradient") <- grad
+  return(neglogel)
+}
+attr(mr_neglogEL_R(y,X,c(1, 2)),"gradient")
+
+#' object-oriented result 
+-mrel$dldb(c(1, 2))
 ```
 
 
@@ -552,7 +655,7 @@ cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
 
 After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
 
- - [] The following coding reports error 
+ - [ ] The following coding reports error 
 ```{r mrcppsource, warning=FALSE}
 # report error
 # Rcpp::sourceCpp("mr_neglogel.cpp")
@@ -575,7 +678,7 @@ mr_neglogel <- function(beta, y, X, gel) {
   return(-gel$logel(G))
 }
 
-gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initalize an GenEL object
+gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initialize an GenEL object
 gel$supp_adj <- TRUE # turn on support correction
 
 nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
