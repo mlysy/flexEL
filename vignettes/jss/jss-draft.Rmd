@@ -498,49 +498,27 @@ And the gradient of $\gg(\xx, y; \bbe)$ with respect to $\bbe$ is
 \end{equation}
 
 
-We first show the simple functional implementation of \pkg{flexEL}. By creating the function `mr_evalG_R()` returning `G` matrix and `mr_neglogel()` returning negative logEL value, one can use `nlm()` to minimize the negative logEL value and get $\bbe$ estimate. 
+We first show the simple functional implementation of \pkg{flexEL}. The function `meanreg_log()` provides the logEL value based on the `G` matrix and `flexEL::logEL()`. The fastest way to implement \pkg{flexEL} is to use `nlm()` to minimize the negative logEL value and get $\bbe$ estimate. 
 
-```{r data generation}
-beta0 <- c(1,2)
-n <- 200
-X <- cbind(1, rnorm(n))
-eps <- rnorm(n)
-y <- c(X %*% beta0 + eps)
-```
 
-```{r simple implementation}
+<!-- By creating the function `mr_evalG_R()` returning `G` matrix and `mr_neglogel()` returning negative logEL value, one can use `nlm()` to minimize the negative logEL value and get $\bbe$ estimate.  -->
+
+
+```{r functional_implementation}
 require(flexEL)
-#' create G matrix 
-mr_evalG_R <- function(y, X, beta) {
-  tX <- t(X)
-  yXb <- y - c(X %*% beta)
-  G <- sweep(tX, MARGIN = 2, yXb, `*`)
-  return(t(G))
-}
-
-#' return negative logEL value with the gel class
-mr_neglogel <- function(beta, y, X, gel) {
-  G <- flexEL::mr_evalG(y, X, beta)
-  return(-gel$logel(G))
-}
-
-gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initialize an GenEL object
-gel$supp_adj <- TRUE # turn on support correction
-
-nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
-```
-
-Further, we can adopt a more object-oriented implementation. Here, we show that the functional implementation and the object-oriented implementation provide the same logEL value and gradient.
-
-
-```{r meanreg}
-require(R6)
-
+#' Calculate the log EL
 meanreg_logel <- function(y, X, beta) {
   yXb <- y - X %*% beta
   G <- as.numeric(yXb) * X
   flexEL::logEL(G = G, supp_adj = TRUE)
 }
+```
+
+Further, one can use a more flexible and memory efficient coding, which is the object-oriented programming (OOP). We also include the gradient of logEL with respect to $\bbe$, $\frac{\ud}{\ud \bbe} \log \EL(\bbe)$, in the object-oriented programming.
+
+
+```{r meanreg_oop}
+require(R6)
 
 MeanReg <- R6Class(
   classname = "MeanReg",
@@ -602,22 +580,40 @@ MeanReg <- R6Class(
 ```
 
 
+Next, we adopt the two-parameter model as an example for illustration. In the data simulation, we set $\bbe = \left[\beta_0, \beta_1\right]' = \left[1,2\right]'$, $\xx = \left[1, x\right]'$, where $x \iid \N(0,1)$, and the sample size $n= 200$. 
 
-```{r resultcheck }
+
+```{r data_simulation}
+# the true value of beta
+beta_true <- c(1,2)
+# the sample size n = 200
+n <- 200
+# simulate the covariate X = c(1,x)
+X <- cbind(1, rnorm(n))
+# simulate the noise term epsilon
+eps <- rnorm(n)
+#simulate the response data 
+y <- c(X %*% beta_true + eps)
+```
+
+Then, we show that the functional implementation and the object oriented programming give the same logEL value and the gradient with the simulated data. 
+
+```{r result_check }
 
 #' check the logEL is the same 
-# functional result
+# the logEL value in the functional implementation
 meanreg_logel(y, X, c(0.75, 1.25))
 
 # object-oriented result
 mrel <- MeanReg$new(y, X)
 mrel$supp_adj <- TRUE
+# the logEL value in the OOP implementation
 mrel$logel(c(0.75, 1.25))
 
 
 #' check the gradient is the same 
 #' functional result 
-#' the function returning dGdb
+#' the functional way returning the gradient
 mr_dGdb_R <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) tcrossprod(x,x))
@@ -626,7 +622,8 @@ mr_dGdb_R <- function(y, X, beta) {
 
 #' the function returning negative logEL value and dldb
 mr_neglogEL_R <- function(y, X, beta) {
-  G <- mr_evalG_R(y, X, beta)
+  yXb <- y - X %*% beta
+  G <- as.numeric(yXb) * X
   res_lst <- flexEL::logEL(G, supp_adj = TRUE, grad = TRUE) 
   neglogel <- -res_lst$logel
   dldG <- -res_lst$grad
@@ -639,73 +636,159 @@ mr_neglogEL_R <- function(y, X, beta) {
   attr(neglogel, "gradient") <- grad
   return(neglogel)
 }
-attr(mr_neglogEL_R(y,X,c(1, 2)),"gradient")
+attr(mr_neglogEL_R(y,X,c(0.75, 1.25)),"gradient")
 
-#' object-oriented result 
--mrel$dldb(c(1, 2))
+#' object-oriented result of the gradient 
+-mrel$dldb(c(0.75, 1.25))
 ```
 
+Finally, we perform the optimization to obtain the parameter estimate of $\bbe$.
 
-Further, in this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}. 
 
-The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp:
-```{r mrcpp, echo = FALSE, results = "asis"}
-cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n")
-```
-
-After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this:
-
- - [ ] The following coding reports error 
-```{r mrcppsource, warning=FALSE}
-# report error
-# Rcpp::sourceCpp("mr_neglogel.cpp")
-beta0 <- c(1,2)
-n <- 200
-X <- cbind(1, rnorm(n))
-eps <- rnorm(n)
-y <- c(X %*% beta0 + eps)
-# mr_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE)
-# uncommment the following sentence
-# nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE)
-```
-
-If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows:
-
-```{r flexEL R}
-library(flexEL)
-mr_neglogel <- function(beta, y, X, gel) {
-  G <- flexEL::mr_evalG(y, X, beta)
-  return(-gel$logel(G))
+```{r optimization_implementation}
+#' Calculate the negative logEL in the mean regression model 
+neg_meanreg_logel <- function(beta) {
+  -meanreg_logel(y,X,beta)
 }
+nlm(neg_meanreg_logel, c(0.75, 1.25))
 
-gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initialize an GenEL object
-gel$supp_adj <- TRUE # turn on support correction
-
-nlm(mr_neglogel, c(0.75, 1.25), y, X, gel)
-
-mrel <- MeanReg$new(y, X)
-mrel$supp_adj <- TRUE
-mrel$logel(c(0.75, 1.25))
+# nlm(meanreg_logel, c(0.75, 1.25), y, X)
 ```
-The usage is similar with right-censored outcomes, e.g. using \proglang{R}:
-```{r flexEL R RC}
-mr_neglogcel <- function(beta, y_obs, X, cel) {
-  G <- flexEL::mr_evalG(y, X, beta)
-  -gel$logel(G)
-}
 
-cel <- flexEL::CensEL$new(n_obs = n, n_eqs = 2)
-cel$supp_adj <- TRUE
-cel$smooth <- TRUE # turn on continuity correction
-cel$smooth_s <- 1 # set tuning parameter for continuity correction
+<!-- Further, we can adopt a more object-oriented implementation. Here, we show that the functional implementation and the object-oriented implementation provide the same logEL value and gradient. -->
 
-z <- rnorm(2*mean(y), n = n) # censoring variable
-delta <- y <= z # censoring indicators
-y_obs <- y
-y_obs[!delta] <- z[!delta]
 
-nlm(mr_neglogcel, c(0.75, 1.25), y_obs, X, cel)
-```
+<!-- ```{r meanreg_oop} -->
+<!-- require(R6) -->
+
+<!-- meanreg_logel <- function(y, X, beta) { -->
+<!--   yXb <- y - X %*% beta -->
+<!--   G <- as.numeric(yXb) * X -->
+<!--   flexEL::logEL(G = G, supp_adj = TRUE) -->
+<!-- } -->
+
+<!-- MeanReg <- R6Class( -->
+<!--   classname = "MeanReg", -->
+<!--   inherit = GenEL, -->
+
+<!--   private = list( -->
+<!--     .X = NULL, -->
+<!--     .y = NULL -->
+<!--   ), -->
+
+<!--   public = list( -->
+
+<!--     #' Class constructor. -->
+<!--     initialize = function(y, X) { -->
+<!--       n_obs <- nrow(X) -->
+<!--       n_eqs <- ncol(X) -->
+<!--       super$initialize(n_obs, n_eqs) -->
+<!--       private$.X <- X -->
+<!--       private$.y <- y -->
+<!--     }, -->
+
+<!--     #' Calculate G matrix. -->
+<!--     evalG = function(beta) { -->
+<!--       yXb <- private$.y - private$.X %*% beta -->
+<!--       as.numeric(yXb) * private$.X -->
+<!--     }, -->
+
+<!--     #' Calculate the log-EL. -->
+<!--     logel = function(beta) { -->
+<!--       G <- self$evalG(beta) -->
+<!--       super$logel(G) -->
+<!--     }, -->
+
+<!--     #' Calculate the gradient of logel w.r.t. G  -->
+<!--     dldG = function(beta) { -->
+<!--       G <- self$evalG(beta) -->
+<!--      super$logel_grad(G)$grad -->
+<!--     }, -->
+
+
+<!--     #' Calculate the gradient of logel w.r.t. beta -->
+<!--     dldb = function(beta){ -->
+<!--       # construct dGdb -->
+<!--       lx <- split(private$.X, row(private$.X)) -->
+<!--       # calculate dGdb -->
+<!--       dGdb <- lapply(lx, function(x) tcrossprod(x,x)) -->
+<!--       dldG_mat <- self$dldG(beta) -->
+<!--       grad_mat <- matrix(NA, nrow = nrow(dldG_mat), ncol = ncol(dldG_mat)) -->
+<!--       for (ii in 1:ncol(dldG_mat)) { -->
+<!--         grad_mat[,ii] <- dGdb[[ii]] %*% dldG_mat[ii,] -->
+<!--       } -->
+<!--       grad <- colSums(grad_mat) -->
+<!--       grad -->
+
+<!--     } -->
+
+<!--   ) -->
+<!-- ) -->
+<!-- ``` -->
+
+
+
+
+<!-- Further, in this section, we illustrate how one can interact with the C++ API or \proglang{R} API with the built-in location mean regression model and achieve parameter estimation in \proglang{R}.  -->
+
+<!-- The following script creates a function in C++ that can be exported to \proglang{R} using Rcpp: -->
+<!-- ```{r mrcpp, echo = FALSE, results = "asis"} -->
+<!-- cat("```c", readLines("mr_neglogel.cpp"), "```", sep = "\n") -->
+<!-- ``` -->
+
+<!-- After sourcing the function into \proglang{R} with Rcpp, one can then use e.g. `nlm` for negative log EL minimization. The following uses simulated data to illustrate this: -->
+
+<!--  - [ ] The following coding reports error  -->
+<!-- ```{r mrcppsource, warning=FALSE} -->
+<!-- # report error -->
+<!-- # Rcpp::sourceCpp("mr_neglogel.cpp") -->
+<!-- beta_true <- c(1,2) -->
+<!-- n <- 200 -->
+<!-- X <- cbind(1, rnorm(n)) -->
+<!-- eps <- rnorm(n) -->
+<!-- y <- c(X %*% beta_true + eps) -->
+<!-- # mr_neglogel(c(0.75, 1.25), t(X), y, verbose = TRUE) -->
+<!-- # uncommment the following sentence -->
+<!-- # nlm(mr_neglogel, c(0.75, 1.25), y, t(X), FALSE) -->
+<!-- ``` -->
+
+<!-- If a user wishes not to use the C++ API directly, they can write a similar function in \proglang{R} as follows: -->
+
+<!-- ```{r flexEL R} -->
+<!-- library(flexEL) -->
+<!-- mr_neglogel <- function(beta, y, X, gel) { -->
+<!--   G <- flexEL::mr_evalG(y, X, beta) -->
+<!--   return(-gel$logel(G)) -->
+<!-- } -->
+
+<!-- gel <- flexEL::GenEL$new(n_obs = n, n_eqs = 2) # initialize an GenEL object -->
+<!-- gel$supp_adj <- TRUE # turn on support correction -->
+
+<!-- nlm(mr_neglogel, c(0.75, 1.25), y, X, gel) -->
+
+<!-- mrel <- MeanReg$new(y, X) -->
+<!-- mrel$supp_adj <- TRUE -->
+<!-- mrel$logel(c(0.75, 1.25)) -->
+<!-- ``` -->
+<!-- The usage is similar with right-censored outcomes, e.g. using \proglang{R}: -->
+<!-- ```{r flexEL R RC} -->
+<!-- mr_neglogcel <- function(beta, y_obs, X, cel) { -->
+<!--   G <- flexEL::mr_evalG(y, X, beta) -->
+<!--   -gel$logel(G) -->
+<!-- } -->
+
+<!-- cel <- flexEL::CensEL$new(n_obs = n, n_eqs = 2) -->
+<!-- cel$supp_adj <- TRUE -->
+<!-- cel$smooth <- TRUE # turn on continuity correction -->
+<!-- cel$smooth_s <- 1 # set tuning parameter for continuity correction -->
+
+<!-- z <- rnorm(2*mean(y), n = n) # censoring variable -->
+<!-- delta <- y <= z # censoring indicators -->
+<!-- y_obs <- y -->
+<!-- y_obs[!delta] <- z[!delta] -->
+
+<!-- nlm(mr_neglogcel, c(0.75, 1.25), y_obs, X, cel) -->
+<!-- ``` -->
 
 <!-- - Show users how to create their own `Gfun` and use this from \proglang{R}.   -->
 
@@ -746,13 +829,18 @@ Notice that the indicator function used by the "check function" is also a source
 \begin{equation}
 \rho_{S,\tau}(u;s) = u\cdot(\tau - S(u;s)),
 \end{equation}
-where $S$ is defined as in \eqref{eq:sigmoid}.
+where $S$ is defined as in \eqref{eq:sigmoid}. Also, the gradient is derived as 
+
+\begin{equation}
+\frac{\ud}{\ud u} \rho_{S,\tau}(u; s) = (\tau - \frac{1}{1 + \exp(s\cdot u)}) + u\cdot \frac{s\cdot \exp(s\cdot u)}{\left[1 + \exp(s\cdot u)\right]^2},
+\end{equation}
 
 Usage of quantile regression in \pkg{flexEL} is very similar to mean regression in the last section. Moreover, one can simultaneously estimte parameters at multiple quantile levels both with the location and location-scale models. With the location model, both the intercept and the slope parameters can be different at different quantile levels. Essentially, the `G` matrix is obtained by stacking together multiple `G` matrices each at one quantile level. This is one advantage of quantile regression when heteroscedasticity presents. With the location-scale model, only the quantile parameter $\nu_{\tau}$ is different at different quantile levels, since heteroscedasticity can be handled by the scale function.
 
+
 **TODO:**
 
-- [ ] Write down the derivative of the smoothed check function $\frac{\ud}{\ud u} \rho_{S,\tau}(u; s)$, and complete the coding in `check_smooth_dx()`.
+- [x] Write down the derivative of the smoothed check function $\frac{\ud}{\ud u} \rho_{S,\tau}(u; s)$, and complete the coding in `check_smooth_dx()`.
 
 ```{r quantreg}
 #--- Helper functions ----------------------------------------------------------
@@ -764,7 +852,8 @@ indicator_smooth <- function(x, s) 1/(1 + exp(s * x))
 check_smooth <- function(x, tau, s) x * (tau - indicator_smooth(x, s))
 
 #' Derivative of smooth checked function wrt `x`.
-check_smooth_dx <- function(x, tau, s) {}
+check_smooth_dx <- function(x, tau, s) (tau - 1/(1+exp(s*x))) + x*(s*exp(s*x)/((1+exp(s*x))^2))
+
 
 #' Quantile regression G function.
 quantreg_evalG <- function(y, X, Z, beta, gamma, sigma, nu, tau, s) {
@@ -785,7 +874,9 @@ QuantReg <- R6Class(
     .X = NULL,
     .Z = NULL,
     .u = NULL,
-    .delta = NULL
+    .delta = NULL,
+    .s = NULL,
+    .tau = NULL
   ),
 
   public = list(
@@ -800,7 +891,7 @@ QuantReg <- R6Class(
       private$.delta <- delta
     },
 
-    evalG = function(beta, gamma, sigma, nu, tau, s) {
+    evalG = function(beta, gamma, sigma, nu) {
       quantreg_evalG(y = private$.u,
                      X = private$.X,
                      Z = private$.Z,
@@ -808,8 +899,8 @@ QuantReg <- R6Class(
                      gamma = gamma,
                      sigma = sigma,
                      nu = nu,
-                     tau = tau,
-                     s = s)
+                     tau = private$.tau,
+                     s = private$.s)
     },
 
     resid = function(beta, gamma, sigma) {
@@ -818,14 +909,20 @@ QuantReg <- R6Class(
       uXb/eZg
     },
 
-    logel = function(beta, gamma, sigma, nu, tau, s) {
+    logel = function(beta, gamma, sigma, nu) {
       eps <- self$resid(beta, gamma, sigma)
-      G <- evalG(beta, gamma, sigma, nu, tau, s)
+      G <- evalG(beta, gamma, sigma, nu, private$.tau, private$.s)
       super$logel(G, private$.delta, eps)
     }
   )
 )
 ```
+
+
+Next, we follow an example introduced in @huang18. In the data simulation, we set $\xx_i = \left[1,x_i\right]'$, $\bbe = \left[\beta_0, \beta_1\right]' = \left[0.5,1\right]'$, $\sigma^2 = 1$. Also, we let $x_i,z_i \iid \N(0,1)$,
+the censoring variable $c_i \iid \N(1.35,1)$, and $\e_i$
+
+
 
 ## User-defined Model
 
@@ -851,7 +948,7 @@ In other words, the $g$ function is specified as
 \end{equation}
 
 This can be implemented in R (called `mr2_evalG`) as follows: 
-```{r G function}
+```{r G_function}
 mr2_evalG <- function(y, X, beta) {
   tX <- t(X)
   yXb <- y - c(X %*% beta)
@@ -861,7 +958,7 @@ mr2_evalG <- function(y, X, beta) {
 ```
 
 With \pkg{flexEL}, the negative log EL can be implemented as:
-```{r neg logel}
+```{r neg_logel}
 mr2_neglogel <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   return(-gel$logel(G))
@@ -869,7 +966,7 @@ mr2_neglogel <- function(beta, y, X, gel) {
 ```
 
 One may also provide the gradient of `mr2_evalG` with respect to the parameters, in this case, it is
-```{r gradient of G}
+```{r gradient_of_G}
 mr2_dGdb <- function(y, X, beta) {
   lx <- split(X, row(X))
   dg <- lapply(lx, function(x) -tcrossprod(x,x))
@@ -878,7 +975,7 @@ mr2_dGdb <- function(y, X, beta) {
 ```
 
 Notice that here the gradient is a 3-dimensional matrix. This can then be combined with the gradient of log EL w.r.t `G` to obtain the gradient of log EL w.r.t. the parameters, $\beta$:
-```{r gradient logel}
+```{r gradient_logel}
 mr2_neglogel_grad <- function(beta, y, X, gel) {
   G <- mr2_evalG(y, X, beta)
   logel_lst <- gel$logel_grad(G)
@@ -893,15 +990,15 @@ mr2_neglogel_grad <- function(beta, y, X, gel) {
 ```
 
 Then one can use e.g. `optim` to obtain the estimate of $\beta$:
-```{r optim flexEL}
+```{r optim_flexEL}
 library(flexEL)
 
 # simulate some data
 n <- 200
 X <- cbind(1, rnorm(n))
-beta0 <- c(1, 2)
+beta_true <- c(1, 2)
 eps <- (rchisq(n, df=5)-5)/sqrt(2*5)
-y <- c(X %*% beta0) + eps
+y <- c(X %*% beta_true) + eps
 
 gel <- GenEL$new(n_obs = n, n_eqs = 2)
 gel$supp_adj <- TRUE
@@ -1048,7 +1145,7 @@ n_cov <- ncol(X)
 
 Let us start by finding the maximum *a posteriori* (MAP) estimates of $\bbe$ and  $\zz$ using the \pkg{flexEL} package.  Note that, instead of writing the log-posterior in terms of $\bbe$ and $\zz$, we instead parametrize it in terms of $\bbe_{\text{raw}} = \bbe/\sigma$ and $\zz_{\text{raw}} = \zz/\tau$, as this typically improves convergence of Stan's MCMC sampler.
 
-```{r flex function}
+```{r flex_function}
 #' Density of the inverse gamma distribution.
 dinvgamma <- function(x, shape, scale, log = FALSE) {
   if(all(shape > 0 & scale > 0)) {
@@ -1118,7 +1215,7 @@ For this we use the gradient-free Nelder-Mead method provided by `stats::optim()
 
 
 
-```{r flexELresult}
+```{r flexEL_result}
 set.seed(8888)
 
 # prior specification
@@ -1149,7 +1246,7 @@ optimout$convergence
 
 ```
 
-```{r map est}
+```{r map_est}
 #' Then, estimation is able to be obtained by: 
 theta_est<- optimout$par
 beta_raw_est <- theta_est[1:n_cov]
