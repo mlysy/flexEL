@@ -642,18 +642,31 @@ attr(mr_neglogEL_R(y,X,c(0.75, 1.25)),"gradient")
 -mrel$dldb(c(0.75, 1.25))
 ```
 
-Finally, we perform the optimization to obtain the parameter estimate of $\bbe$.
+Finally, we perform the optimization to obtain the parameter estimate of $\bbe$, $\hat{\bbe}$.
 
 
 ```{r optimization_implementation}
-#' Calculate the negative logEL in the mean regression model 
+#' Calculate the negative logEL in the mean regression model
 neg_meanreg_logel <- function(beta) {
   -meanreg_logel(y,X,beta)
 }
-nlm(neg_meanreg_logel, c(0.75, 1.25))
-
+nlmresult <- nlm(neg_meanreg_logel, c(0.75, 1.25), hessian = TRUE)
+nlmresult
 # nlm(meanreg_logel, c(0.75, 1.25), y, X)
 ```
+
+And we also demonstrate the standard error of $\hat{\bbe}$, $\text{se}(\hat{\bbe})$.
+
+```{r sd_bbe}
+# save the beta_hat estimate
+beta_hat <- nlmresult$estimate
+# calculate the fisher information matrix
+FI <- nlmresult$hessian
+# calculat the standard error of the beta_hat
+beta_se <- sqrt(diag(chol2inv(chol(FI))))
+beta_se
+```
+
 
 <!-- Further, we can adopt a more object-oriented implementation. Here, we show that the functional implementation and the object-oriented implementation provide the same logEL value and gradient. -->
 
@@ -869,7 +882,7 @@ quantreg_evalG <- function(y, X, Z, beta, gamma, sigma, nu, tau, s) {
 QuantReg <- R6Class(
   classname = "QuantReg",
   inherit = CensEL,
-
+  
   private = list(
     .X = NULL,
     .Z = NULL,
@@ -878,10 +891,10 @@ QuantReg <- R6Class(
     .s = NULL,
     .tau = NULL
   ),
-
+  
   public = list(
-
-    initialize = function(u, delta, X, Z) {
+    
+    initialize = function(u, delta, X, Z, s, tau) {
       n_obs <- nrow(X)
       n_eqs <- ncol(X) + ncol(Z) + 2
       super$initialize(n_obs, n_eqs)
@@ -889,8 +902,10 @@ QuantReg <- R6Class(
       private$.Z <- Z
       private$.u <- u
       private$.delta <- delta
+      private$.s <- s
+      private$.tau <- tau
     },
-
+    
     evalG = function(beta, gamma, sigma, nu) {
       quantreg_evalG(y = private$.u,
                      X = private$.X,
@@ -902,16 +917,16 @@ QuantReg <- R6Class(
                      tau = private$.tau,
                      s = private$.s)
     },
-
+    
     resid = function(beta, gamma, sigma) {
       uXb <- private$.u - as.numeric(private$.X %*% beta)
       eZg <- sigma * exp(as.numeric(private$.Z %*% gamma))
       uXb/eZg
     },
-
+    
     logel = function(beta, gamma, sigma, nu) {
       eps <- self$resid(beta, gamma, sigma)
-      G <- evalG(beta, gamma, sigma, nu, private$.tau, private$.s)
+      G <- self$evalG(beta, gamma, sigma, nu)
       super$logel(G, private$.delta, eps)
     }
   )
@@ -919,10 +934,126 @@ QuantReg <- R6Class(
 ```
 
 
-Next, we follow an example introduced in @huang18. In the data simulation, we set $\xx_i = \left[1,x_i\right]'$, $\bbe = \left[\beta_0, \beta_1\right]' = \left[0.5,1\right]'$, $\sigma^2 = 1$. Also, we let $x_i,z_i \iid \N(0,1)$,
-the censoring variable $c_i \iid \N(1.35,1)$, and $\e_i$
+(Check the gradient by using `numDeriv::grad()`. After many experiments, I found that the `numDeriv::grad()` does not allow the function to have a argument named `s`. That is why I change `s` to `sm` in the gradient check. 
+
+```{r gradient_check}
+# generate the random `x`
+x <- rnorm(10)
+# our `check_smooth_dx` resultwith `tau = .5`, `s = 1`
+check_smooth_dx(x = x, tau = .5, s = 1)
+
+# next we use `numDeriv::grad()`
+check_smooth <- function(x, tau, sm) {
+  x * (tau - 1/(1 + exp(sm * x)))
+}
+numDeriv::grad(check_smooth,  x, tau = .5, sm = 1)
 
 
+```
+
+)
+
+
+Next, we follow an example introduced in @huang18. We consider the location-scale right-censored quantile regression model:
+
+\begin{equation} 
+  y_i = \xx_i'\bbe + \s\cdot\exp(\zz_i'\gga)\cdot\epsilon_i, \quad i=1,\cdots,n,
+\end{equation}
+
+In the data simulation, we set $\xx_i = \left[1,x_i\right]'$, $\bbe = \left[\beta_0, \beta_1\right]' = \left[0.5,1\right]'$, $\sigma^2 = 1$. Also, we let $x_i,z_i \iid \N(0,1)$, the censoring variable $c_i \iid \N(1.35,1)$, and $\epsilon_i =\min(\e_i,c_i)$, where $\e_i \iid \N(0,1)$. We fit $75$-th quantile regression in this example, that is $\tau = 0.75$.
+
+We compare the estimators obtained by using \pkg{flexEL} and the heteroscedastic accelerated failure time model by @wang15 with Kaplan-Meier (HLM+KM).
+
+
+```{r quantreg_cel_datagen}
+set.seed(20220811)
+# n is the sample size
+n <- 500
+# p is the length of beta
+p <- 2
+# q is the length of gamma 
+q <- 1
+# X is the location covariate variable
+X <- replicate(p-1, rnorm(n))
+X <- cbind(1, X) # X may have an intercept term, if so, it should be explicit
+# Z is the scale covariate variable 
+Z <- replicate(q, rnorm(n)) # Z shall not have an intercept term
+# true value for beta
+beta0 <- c(.5, 1)
+# true value for gamma
+gamma0 <- -.5
+# true value for sigma
+sig20 <- 1
+# the error term eps ~ N(0,1)
+eps <- rnorm(n)
+# simulate the y data with error term eps ~ N(0,1)
+y <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*eps) # with N(0,1) error term
+
+## calculate G matrix given data and certain parameter values ##
+# a single quantile level (with continuity correction) with 0.75 quantile
+tau <- 0.75 
+# Let the initial value be the true value 
+beta <- c(.5, 1) 
+gamma <- -.5 
+sig2 <- 1 
+sigma <- sqrt(sig2)
+nu <- qnorm(.75)
+theta_init <- c(beta, gamma, sigma, nu)
+
+
+# censored data
+c <- rnorm(n = n, mean = 1.35, sd = 1) # censoring variable
+delta <- eps <= c # censoring indicators
+y_allcen <- c(X %*% beta0 + sqrt(sig20)*exp(Z %*% gamma0)*c)
+y_obs <- y
+y_obs[!delta] <- y_allcen[!delta]
+```
+
+```{r quantreg_fit}
+# set s = 1 in the smoothing method
+s <- 1
+# generate the quantreg class
+qrel <- QuantReg$new(y_obs, delta, X, Z, s, tau)
+# turn supp_adj on
+qrel$supp_adj <- TRUE
+# use the smooth method
+qrel$smooth <- TRUE
+# set s = 1 in the smoothing method
+qrel$smooth_s <- 1
+
+
+# negative logel of quantile regression 
+neg_quantreg_logel <- function(theta) {
+  beta <- theta[1:2]
+  gamma <- theta[3]
+  sigma <- theta[4]
+  nu <- theta[5]
+  -qrel$logel(beta,gamma,sigma,nu)
+}
+
+# optim result
+optimout <- optim( theta_init,neg_quantreg_logel)
+optimout$par
+optimout$converge
+
+# Note that we let the true value be the initial value
+rbind(theta_init, optimout$par)
+```
+
+
+```{r hlm_fitting}
+require(hlm)
+# fit the hlm model
+M <- hlm(cbind(y_obs,delta)~ X + 0|Z+0)
+# Note that M$coefficients$gamma/2 is the estimator of gamma
+M
+# calculate the eps
+uXb <- y_obs - as.numeric(X %*% M$coefficients$beta)
+eZg <- sigma * exp(as.numeric(Z %*% M$coefficients$gamma/2))
+eps_est <- uXb/eZg
+# display the nu estimator
+quantile(eps_est,probs = .75)
+```
 
 ## User-defined Model
 
@@ -1183,7 +1314,7 @@ logisa_G <- function(beta, z, y, N, X) {
 }
 
 #' EL log-posterior for LOGISA model.
-#' 
+#'
 #' @param beta_raw Vector of `n_cov` standardized regression parameters `beta_raw = beta/beta_sd`.
 #' @param z_raw Vector of `n_area` standardized regional parameters `z_raw = z/sqrt(tau)`.
 #' @param tau Variance of regional parameters.
@@ -1241,13 +1372,13 @@ theta_init <- c(rnorm(n_cov + n_area, sd = 0.1), runif(1))
 
 optimout <- optim(par = theta_init, fn = nlogpost,
                   control = list(maxit = 1e5, reltol = 1e-10))
-#' Convergence of 0 indicates successful completion; 
+#' Convergence of 0 indicates successful completion;
 optimout$convergence
 
 ```
 
 ```{r map_est}
-#' Then, estimation is able to be obtained by: 
+#' Then, estimation is able to be obtained by:
 theta_est<- optimout$par
 beta_raw_est <- theta_est[1:n_cov]
 z_raw_est <- theta_est[n_cov + 1:n_area]
