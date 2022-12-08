@@ -2,12 +2,11 @@ library(testthat)
 library(flexEL)
 context("CensEL")
 
-## source("el_rfuns.R")
 source("flexEL-testfunctions.R")
 
 #--- smooth_indicator ----------------------------------------------------------
 
-test_that("R and C++ versions of smooth_indicator are the same.", {
+test_that("R and C++ versions of `flexEL:::smooth_indicator()` are the same.", {
   job_descr <- expand.grid(has_inf = c("eps1", "eps2", "none"))
   n_jobs <- nrow(job_descr)
   for(ii in 1:n_jobs) {
