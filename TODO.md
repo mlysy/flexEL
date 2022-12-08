@@ -81,13 +81,13 @@ flexEL::GenEL el(n_obs, n_eqs);
 // set options.  all optional since constructor provides defaults.
 el.set_max_iter(100);
 el.set_rel_tol(1e-7);
-// FIXME: remove supp_corr from class?  
+// FIXME: remove supp_adj from class?  
 // Would make the class code much easier/clearer, and straightforward
 // to perform support adjustment during creation of G.
 // so, doesn't seem like that much added convenience...
-// ANS: NO.  Otherwise the `supp_corr` flag effectively gets passed to the user.  
+// ANS: NO.  Otherwise the `supp_adj` flag effectively gets passed to the user.  
 // This is annoying if the user is a developer wishing to incorporate flexEL into something else.
-el.set_supp_corr(true, a); // and version without a
+el.set_supp_adj(true, a); // and version without a
 el.set_lambda0(lambda0);
 
 // high-level interface
@@ -102,8 +102,8 @@ loglik = el.loglik_grad(dldG, G, weights);
 
 // all intermediate steps
 // solve dual problem.
-// Both G and norm_weights can be of size `n_obs` or `n_obs + supp_corr`.
-// If `supp_corr = true` and size is `n_obs + 1`, takes inputs as-is.
+// Both G and norm_weights can be of size `n_obs` or `n_obs + supp_adj`.
+// If `supp_adj = true` and size is `n_obs + 1`, takes inputs as-is.
 // Otherwise performs support correction for you.
 el.lambda_nr(lambda, G, norm_weights); 
 el.omega_hat(omega, G, lambda, norm_weights);
@@ -117,43 +117,57 @@ el.get_diag(nr_iter, nr_err); // actual number of steps and
 
 ### Censored Regression EL
 
+Instead of embedding a `GenEL` object into a `CensEL`, the relevant methods of the latter will expect a reference to the former.  This allows for the options of `GenEL` to be set in the corresponding object, rather than needing to each be wrapped to pass down to it from the `CensEL` object.  Also, only smoothed version available.
+
 ```cpp
 // instantiate
-flexEL::CensEL cel(n_obs, n_eqs);
+flexEL::GenEL gel(n_obs, n_eqs);
+flexEL::CensEL cel(gel);
 
-// mostly same options except:
-cel.set_max_iter_nr(100); // NR iterations (same as el.set_max_iter)
-cel.set_max_iter_em(10); // EM iterations
+// can also initialize directly from problem dimensions, 
+// though we need gel for later
+flexEL::CensEL cel(n_obs, n_eqs); 
+
+// options
+cel.set_max_iter(10); // maximum number of EM iterations
 cel.set_abs_tol(1e-5); // EM absolute tolerance
-cel.set_smooth_weights(true, a); // smooth weights to get a continuous logel
+cel.set_smooth(s); // Indicator smoothing parameter.
 
 // just logel
-loglik = cel.logel(G, epsilon, delta);
+loglik = cel.logel(G, epsilon, delta, gel);
 
 // intermediate steps
-cel.lambda_nr(lambda, G, weights); // M-step (overloaded from GenEL)
-cel.expected_weights(weights, omega, delta); // E-step
-cel.expected_weights(weights, omega, delta, epsilon); // recalculate ranking
-cel.omega_hat(omega, G, epsilon, delta) // EM algorithm
-loglik = cel.logel_omega(omega, epsilon, delta);
+gel.lambda_nr(lambda, G, weights); // M-step with gel
+cel.expected_weights(weights, omega, delta, epsilon); // E-step
+cel.omega_hat(omega, G, delta, epsilon, gel) // EM algorithm
+loglik = cel.logel_omega(omega, delta, epsilon);
 
 // diagnostics
-cel.get_diag(em_iter, em_err, nr_iter, nr_err);
+cel.get_diag(em_iter, em_err);
 ```
 
 ## R API
 
 Perhaps best if this follows the C++ API fairly closely using R6 classes.  We can also include a few convenience functions for users who don't want to bother doing things efficiently.
 
+### General EL
+
 ```r
-el <- GenEL$new(n_obs, n_eqs)
-el$set_opts(max_iter = 100, rel_tol = 1e-7, supp_corr = TRUE, lambda0 = 0)
-
-# can also do both in one line via method chaining
-el <- GenEL$new(n_obs, n_eqs)$set_opts(...)
-
-# can also set options individually via active bindings
+# constructor.  
+# options set here so default values below are obvious.
+el <- GenEL$new(n_obs, n_eqs,
+	            max_iter = 100,
+				rel_tol = 1e-7,
+				supp_adj = FALSE,
+				supp_adj_a = max(1, .5 * log(n_obs)),
+				weight_adj = 1,
+				lambda0 = 0)
+				
+# can update options individually via active bindings
 el$max_iter <- 50 # can also used for getter: el$max_iter
+
+# can also change multiple options at once.  those not listed aren't changed 
+el$set_opts(max_iter = 100, rel_tol = 1e-7, supp_adj = TRUE, lambda0 = 0)
 
 # rest is more or less as expected, 
 # except explicit return value rather than pass-by-reference
@@ -193,3 +207,7 @@ MeanRegEL <- R6Class(
   )
 )
 ```
+
+### Censored EL
+
+The API here is slightly different than on the C++ side

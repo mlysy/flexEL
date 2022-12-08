@@ -2,249 +2,144 @@
 % Please edit documentation in R/class_CensEL.R
 \name{CensEL}
 \alias{CensEL}
-\title{Right-censored regression EL class}
+\title{R6 Class for censored EL models.}
 \description{
-R6 class for EL regression with right-censored responses.
+R6 Class for censored EL models.
+
+R6 Class for censored EL models.
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{lambda0}}{Access or reset the initial value of lambda. The value
-must be a vector of length \code{n_eqs} (default to a vector of 0).}
+\item{\code{n_obs}}{Number of observations.}
 
-\item{\code{max_iter_nr}}{Access or reset the value of the maximum number of
-iterations for the Newton-Raphson algorithm. The value must be a
-positive integer (default to 100).}
+\item{\code{n_eqs}}{Number of equations.}
 
-\item{\code{rel_tol}}{Access or reset the value of relative tolerance controlling
-the accuracy at convergence of the Newton-Raphson algorithm. The value
-must be a small positive number (default to 1e-7).}
+\item{\code{max_iter}}{Maximum number of EM iterations (positive integer).}
 
-\item{\code{max_iter_em}}{Access or reset the value of the maximum number of
-iterations for the EM algorithm. The value must be a positive integer
-(default to 100).}
+\item{\code{abs_tol}}{Absolute tolerance for terminating the EM algorithm (positive number).}
 
-\item{\code{abs_tol}}{Access or reset the value of absolute tolerance controlling
-the accuracy at convergence of the EM algorithm. The value must be
-a small positive number (default to 1e-3).}
-
-\item{\code{supp_adj}}{Access or reset the support correction flag. The value
-must be a boolean indicating whether to conduct support correction or
-not (default to FALSE).}
-
-\item{\code{supp_adj_a}}{Access or reset the value of support corection factor.
-The value must be a positive scalar (default to \code{max(1.0, log(n_obs)/2)}).}
-
-\item{\code{smooth}}{Access or reset the continuity correction flag. The value
-must be a boolean indicating whether to conduct continuity
-correction or not (default to FALSE). If set to \code{TRUE}, the tuning
-parameter for continuity correction is default to 10.}
-
-\item{\code{smooth_s}}{Access or reset the continuity correction flag. The value
-must be a positive scalar for tuning the extent of
-continuity correction (default to 10). The smaller the value, the more
-smooth it makes.}
+\item{\code{smooth_s}}{Indicator smoothing parameter.  A positive number, where \code{smooth_s = Inf} gives the regular indicator function.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{CensEL$new()}}
-\item \href{#method-set_supp_adj}{\code{CensEL$set_supp_adj()}}
-\item \href{#method-set_smooth}{\code{CensEL$set_smooth()}}
-\item \href{#method-set_opts}{\code{CensEL$set_opts()}}
-\item \href{#method-eval_weights}{\code{CensEL$eval_weights()}}
-\item \href{#method-omega_hat}{\code{CensEL$omega_hat()}}
-\item \href{#method-logel}{\code{CensEL$logel()}}
-\item \href{#method-clone}{\code{CensEL$clone()}}
+\item \href{#method-CensEL-new}{\code{CensEL$new()}}
+\item \href{#method-CensEL-set_opts}{\code{CensEL$set_opts()}}
+\item \href{#method-CensEL-expected_weights}{\code{CensEL$expected_weights()}}
+\item \href{#method-CensEL-clone}{\code{CensEL$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-CensEL-new"></a>}}
+\if{latex}{\out{\hypertarget{method-CensEL-new}{}}}
 \subsection{Method \code{new()}}{
-Check the dimension of G is what is expected.
+Check that \code{delta} is well specified.
+
+
+Check that \code{epsilon} is well specified.
+
+
+Check that \code{omega} is well specified.
 
 
 Create a new \code{CensEL} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$new(gel, smooth_s = 10, max_iter = 10, abs_tol = 1e-07)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{n_obs}}{Number of observations.}
+\item{\code{gel}}{A \code{GenEL} object.}
 
-\item{\code{n_eqs}}{Number of (moment constraint) equations.}
+\item{\code{gel}}{A \code{GenEL} object.}
 
-\item{\code{G}}{A numeric matrix.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \code{CensEL} object.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_supp_adj"></a>}}
-\if{latex}{\out{\hypertarget{method-set_supp_adj}{}}}
-\subsection{Method \code{set_supp_adj()}}{
-Set the support correction flag and support correction factor.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL)}\if{html}{\out{</div>}}
-}
+\item{\code{smooth_s}}{Indicator smoothing parameter (positive scalar).}
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+\item{\code{smooth_s}}{Indicator smoothing parameter (positive scalar).}
 
-\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+\item{\code{max_iter}}{Maximum number of EM iterations (positive integer).}
+
+\item{\code{max_iter}}{Maximum number of EM iterations (positive integer).}
+
+\item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
+
+\item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
+
+\item{\code{delta}}{Vector of censoring indicators.}
+
+\item{\code{epsilon}}{Vector of residuals.}
+
+\item{\code{omega}}{Vector of residuals.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_smooth"></a>}}
-\if{latex}{\out{\hypertarget{method-set_smooth}{}}}
-\subsection{Method \code{set_smooth()}}{
-Set the support correction flag and support correction factor.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_smooth(smooth = FALSE, smooth_s = NULL)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{smooth}}{A boolean indicating whether to conduct support correction or not.}
-
-\item{\code{smooth_s}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_opts"></a>}}
-\if{latex}{\out{\hypertarget{method-set_opts}{}}}
+\if{html}{\out{<a id="method-CensEL-set_opts"></a>}}
+\if{latex}{\out{\hypertarget{method-CensEL-set_opts}{}}}
 \subsection{Method \code{set_opts()}}{
-Set more than one options together.
+Set multiple options together.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_opts(
-  max_iter_nr = 100,
-  rel_tol = 1e-07,
-  max_iter_em = 100,
-  abs_tol = 0.001,
-  supp_adj = FALSE,
-  supp_adj_a = NULL,
-  smooth = FALSE,
-  smooth_s = NULL,
-  lambda0 = rep(0, CensEL_get_n_eqs(private$.CEL))
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$set_opts(smooth_s, max_iter, abs_tol)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{max_iter_nr}}{A positive integer controlling the maximum number of iterations for the Newton-Raphson algorithm.}
+\item{\code{smooth_s}}{Indicator smoothing parameter (positive scalar).}
 
-\item{\code{rel_tol}}{A small positive number controlling accuracy at convergence for the Newton-Raphson algorithm.}
+\item{\code{smooth_s}}{Indicator smoothing parameter (positive scalar).}
 
-\item{\code{max_iter_em}}{A positive integer controlling the maximum number of iterations for the EM algorithm.}
+\item{\code{max_iter}}{Maximum number of EM iterations (positive integer).}
 
-\item{\code{abs_tol}}{A small positive number controlling accuracy at convergence for the EM algorithm.}
+\item{\code{max_iter}}{Maximum number of EM iterations (positive integer).}
 
-\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+\item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
 
-\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
-
-\item{\code{smooth}}{A boolean indicating whether to conduct support correction or not.}
-
-\item{\code{smooth_s}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
-
-\item{\code{lambda0}}{Initial value of lambda of length \code{n_eqs}.}
+\item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+Any number of these arguments can be supplied.  Those that are missing are not modified.
+}
+
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-eval_weights"></a>}}
-\if{latex}{\out{\hypertarget{method-eval_weights}{}}}
-\subsection{Method \code{eval_weights()}}{
-Calculate the weights corresponding to the censored loglikelihood with EM algorithm.
+\if{html}{\out{<a id="method-CensEL-expected_weights"></a>}}
+\if{latex}{\out{\hypertarget{method-CensEL-expected_weights}{}}}
+\subsection{Method \code{expected_weights()}}{
+Calculate the expected weights in the EM algorithm.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$eval_weights(delta, epsilon, omega)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$expected_weights(delta, epsilon, omega)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{delta}}{A vector of censoring indicators of length \code{n_obs}, where
-0 means censored and 1 means observed. With support correction, the last
-entry of delta will be assumed to be 0.}
+\item{\code{delta}}{Censoring vector of length \code{n_obs}.  The method will attempt to coerce it to logicals.}
 
-\item{\code{epsilon}}{A vector of residuals of length \code{n_obs}. With support
-correction, the last entry of epsilon will be assumed to be -Inf.}
+\item{\code{epsilon}}{Residual vector of length \code{n_obs}.}
 
-\item{\code{omega}}{A probability vector of length \code{n_obs + supp_adj}. with
-support correction, last entry of omega is assumed to correspond to
-the additional estimating equation.}
+\item{\code{omega}}{Probability vector of length \code{n_obs + supp_adj}.  Should contain positive scalars, and method will attempt to normalize it to sum to one.}
 }
 \if{html}{\out{</div>}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-omega_hat"></a>}}
-\if{latex}{\out{\hypertarget{method-omega_hat}{}}}
-\subsection{Method \code{omega_hat()}}{
-Calculate the probability vector base on the given G matrix,
-censoring indicator, and residuals.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$omega_hat(G, delta, epsilon)}\if{html}{\out{</div>}}
+\subsection{Details}{
+When \code{supp_adj = TRUE} it is assumed that \code{delta[n_obs+1] = FALSE} and \code{epsilon[n_obs+1] = -Inf}.
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{G}}{A matrix of dimension \verb{n_obs x n_eqs}.}
-
-\item{\code{delta}}{A vector of censoring indicators where 0 means censored and 1 means observed.}
-
-\item{\code{epsilon}}{A vector of residuals.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-logel"></a>}}
-\if{latex}{\out{\hypertarget{method-logel}{}}}
-\subsection{Method \code{logel()}}{
-Calculate the log empirical likelihood base on the given G matrix.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$logel(G, delta, epsilon)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{G}}{A matrix of dimension \verb{n_obs x n_eqs}.}
-
-\item{\code{delta}}{A vector of censoring indicators of length \code{n_obs}, where
-0 means censored and 1 means observed. With support correction, the last
-entry of delta will be assumed to be 0.}
-
-\item{\code{epsilon}}{A vector of residuals.}
-}
-\if{html}{\out{</div>}}
-}
 \subsection{Returns}{
-A scalar.
+Weight vector of length \code{n_obs + supp_adj}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-CensEL-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-CensEL-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

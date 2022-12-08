@@ -30,26 +30,36 @@ A numeric matrix of dimension \code{n_obs} x (\code{n_bet} x \code{n_qts}).
 Evaluate the G matrix for a quantile regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
-}
+Assuming data were generated from
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
+}\if{html}{\out{</div>}}
 
 where \code{eps_i}'s are ~iid \code{eps}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
-Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i) = x_i'beta, for i = 1, ..., n.
-}
+Quantile regression estimates the alpha-level quantile of the response variable, i.e.,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Q_alpha(y | x_i) = x_i'beta, for i = 1, ..., n.
+}\if{html}{\out{</div>}}
 
 where the 1st element of \code{x_i} should be 1 and  the 1st element of \code{beta} corresponds
 to the \code{alpha}-level quantile of \code{eps}.
 The estimating equation can be derived based on the minimizing "check function" introduced by
-Koenker and Bassett (1978),\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
-}
+Koenker and Bassett (1978),
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
+}\if{html}{\out{</div>}}
 
 where \code{alpha} is the quantile level, \verb{1\{\}} is the indicator function which returns 1 if the
-condition is true and 0 otherwise, and \verb{u_i = y_i - x_i'beta}. That is,\preformatted{min_beta rho(y - X*beta)
-}
+condition is true and 0 otherwise, and \verb{u_i = y_i - x_i'beta}. That is,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{min_beta rho(y - X*beta)
+}\if{html}{\out{</div>}}
 
 The above minimization problem is equivalent to setting it's first derivative
-w.r.t \code{beta} to 0, i.e.,\preformatted{phi(y - X*beta) = 0
-}
+w.r.t \code{beta} to 0, i.e.,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{phi(y - X*beta) = 0
+}\if{html}{\out{</div>}}
 
 where \code{phi} is the first derivative of \code{rho}.
 The left-hand-side of the above equation is the \code{G} matrix returned by this function.

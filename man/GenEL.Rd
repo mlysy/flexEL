@@ -2,52 +2,51 @@
 % Please edit documentation in R/class_GenEL.R
 \name{GenEL}
 \alias{GenEL}
-\title{General EL class}
+\title{R6 Class for general EL models.}
 \description{
-R6 class for EL with general moment specification.
+R6 Class for general EL models.
+
+R6 Class for general EL models.
+}
+\note{
+The returned \code{externalptr} is pointing to the same C++ object as is `private$.gelptr$.  So, modifying one modifies the other.
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{max_iter}}{Access or reset the value of the maximum number of
-iterations. The value must be a positive integer (default to 100).}
+\item{\code{n_obs}}{Number of observations.}
 
-\item{\code{rel_tol}}{Access or reset the value of relative tolerance
-controlling the accuracy at convergence. The value must be a small
-positive number (default to 1e-7).}
+\item{\code{n_eqs}}{Number of observations.}
 
-\item{\code{lambda0}}{Access or reset the initial value of lambda. The value
-must be a vector of length \code{n_eqs} (default to a vector of 0).}
+\item{\code{max_iter}}{Maximum number of Newton-Raphson iterations.}
 
-\item{\code{supp_adj}}{Access or reset the support correction flag. The value
-must be a boolean indicating whether to conduct support correction or
-not (default to FALSE).}
+\item{\code{rel_tol}}{Relative tolerance for Newton-Raphson algorithm.}
 
-\item{\code{supp_adj_a}}{Access or reset the value of support corection factor.
-The value must be a scalar (defaults to \code{max(1.0, log(n_obs)/2)}).}
+\item{\code{lambda0}}{Initialization vector for the Newton-Raphson algorithm.}
 
-\item{\code{weight_adj}}{Access or reset the value of the weight for the
-additional fake observation under support correction. The value must
-be a scalar (default to NULL).}
+\item{\code{supp_adj}}{Whether or not to perform support adjustment.}
+
+\item{\code{supp_adj_a}}{Support adjustment factor.}
+
+\item{\code{weight_adj}}{Weights of pseudo-observation for support adjustment.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{GenEL$new()}}
-\item \href{#method-set_supp_adj}{\code{GenEL$set_supp_adj()}}
-\item \href{#method-set_opts}{\code{GenEL$set_opts()}}
-\item \href{#method-lambda_nr}{\code{GenEL$lambda_nr()}}
-\item \href{#method-omega_hat}{\code{GenEL$omega_hat()}}
-\item \href{#method-logel}{\code{GenEL$logel()}}
-\item \href{#method-logel_grad}{\code{GenEL$logel_grad()}}
-\item \href{#method-clone}{\code{GenEL$clone()}}
+\item \href{#method-GenEL-new}{\code{GenEL$new()}}
+\item \href{#method-GenEL-set_opts}{\code{GenEL$set_opts()}}
+\item \href{#method-GenEL-lambda_nr}{\code{GenEL$lambda_nr()}}
+\item \href{#method-GenEL-omega_hat}{\code{GenEL$omega_hat()}}
+\item \href{#method-GenEL-logel}{\code{GenEL$logel()}}
+\item \href{#method-GenEL-logel_grad}{\code{GenEL$logel_grad()}}
+\item \href{#method-GenEL-clone}{\code{GenEL$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-GenEL-new"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-new}{}}}
 \subsection{Method \code{new()}}{
 Check the dimension of G is what is expected.
 
@@ -55,9 +54,21 @@ Check the dimension of G is what is expected.
 Check the dimension of weights is as expected.
 
 
+Get \code{private$.gelptr}.
+
+
 Create a new \code{GenEL} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$new(n_obs, n_eqs)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$new(
+  n_obs,
+  n_eqs,
+  max_iter = 100,
+  rel_tol = 1e-07,
+  supp_adj = FALSE,
+  supp_adj_a = max(1, 0.5 * log(n_obs)),
+  weight_adj = 1,
+  lambda0
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -67,74 +78,90 @@ Create a new \code{GenEL} object.
 
 \item{\code{n_eqs}}{Number of (moment constraint) equations.}
 
+\item{\code{max_iter}}{Maximum number of Newton-Raphson iterations (positive integer).}
+
+\item{\code{max_iter}}{Maximum number of Newton-Raphson iterations (positive integer).}
+
+\item{\code{rel_tol}}{Relative tolerance for Newton-Raphson termination (positive scalar).}
+
+\item{\code{rel_tol}}{Relative tolerance for Newton-Raphson termination (positive scalar).}
+
+\item{\code{supp_adj}}{Whether or not to perform support adjustment (boolean).}
+
+\item{\code{supp_adj}}{Whether or not to perform support adjustment (boolean).}
+
+\item{\code{supp_adj_a}}{Support adjustment factor (positive scalar).}
+
+\item{\code{supp_adj_a}}{Support adjustment factor (positive scalar).}
+
+\item{\code{weight_adj}}{Weight of pseudo-observation when there is support adjustment (positive scalar).}
+
+\item{\code{weight_adj}}{Weight of pseudo-observation when there is support adjustment (positive scalar).}
+
+\item{\code{lambda0}}{Vector of length \code{n_eqs} with which to initialize the Newton-Raphson algorithm.}
+
+\item{\code{lambda0}}{Vector of length \code{n_eqs} with which to initialize the Newton-Raphson algorithm.}
+
 \item{\code{weights}}{A numeric vector.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+This is used to treat \code{.gelptr} as a protected member, i.e., for classes inheriting from \code{GenEL} to pass \code{.gelptr} on to C++ code.  Accessor is private as the intent is for this to not be called directly by the user.
+}
+
 \subsection{Returns}{
 A \code{GenEL} object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_supp_adj"></a>}}
-\if{latex}{\out{\hypertarget{method-set_supp_adj}{}}}
-\subsection{Method \code{set_supp_adj()}}{
-Set the support correction flag and support correction factor.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_supp_adj(supp_adj = FALSE, supp_adj_a = NULL, weight_adj = NULL)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
-
-\item{\code{supp_adj_a}}{Support adjustment factor (default to \code{max(1.0, log(n_obs)/2)}).}
-
-\item{\code{weight_adj}}{Weight under weighted log EL (default to 1.0).}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_opts"></a>}}
-\if{latex}{\out{\hypertarget{method-set_opts}{}}}
+\if{html}{\out{<a id="method-GenEL-set_opts"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-set_opts}{}}}
 \subsection{Method \code{set_opts()}}{
-Set more than one options together.
+Set multiple options together.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_opts(
-  max_iter = 100,
-  rel_tol = 1e-07,
-  supp_adj = FALSE,
-  supp_adj_a = NULL,
-  weight_adj = NULL,
-  lambda0 = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$set_opts(max_iter, rel_tol, supp_adj, supp_adj_a, weight_adj, lambda0)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{max_iter}}{A positive integer controlling the maximum number of iterations.}
+\item{\code{max_iter}}{Maximum number of Newton-Raphson iterations (positive integer).}
 
-\item{\code{rel_tol}}{A small positive number controlling accuracy at convergence.}
+\item{\code{max_iter}}{Maximum number of Newton-Raphson iterations (positive integer).}
 
-\item{\code{supp_adj}}{A boolean indicating whether to conduct support correction or not.}
+\item{\code{rel_tol}}{Relative tolerance for Newton-Raphson termination (positive scalar).}
 
-\item{\code{supp_adj_a}}{Support adjustment factor. Defaults to \code{max(1.0, log(n_obs)/2)}.}
+\item{\code{rel_tol}}{Relative tolerance for Newton-Raphson termination (positive scalar).}
 
-\item{\code{weight_adj}}{Weight under weighted log EL (default to 1.0).}
+\item{\code{supp_adj}}{Whether or not to perform support adjustment (boolean).}
 
-\item{\code{lambda0}}{Initialization vector of size \code{n_eqs}.  Defaults to a vector of zeros.}
+\item{\code{supp_adj}}{Whether or not to perform support adjustment (boolean).}
+
+\item{\code{supp_adj_a}}{Support adjustment factor (positive scalar).}
+
+\item{\code{supp_adj_a}}{Support adjustment factor (positive scalar).}
+
+\item{\code{weight_adj}}{Weight of pseudo-observation when there is support adjustment (positive scalar).}
+
+\item{\code{weight_adj}}{Weight of pseudo-observation when there is support adjustment (positive scalar).}
+
+\item{\code{lambda0}}{Vector of length \code{n_eqs} with which to initialize the Newton-Raphson algorithm.}
+
+\item{\code{lambda0}}{Vector of length \code{n_eqs} with which to initialize the Newton-Raphson algorithm.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+Any number of these arguments can be supplied.  Those that are missing are not modified.
+}
+
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-lambda_nr"></a>}}
-\if{latex}{\out{\hypertarget{method-lambda_nr}{}}}
+\if{html}{\out{<a id="method-GenEL-lambda_nr"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-lambda_nr}{}}}
 \subsection{Method \code{lambda_nr()}}{
-Calculate the solution of the dual problem of maximum log EL problem.
+Calculate the solution of the empirical likelihood dual problem using the Newton-Raphson algorithm.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$lambda_nr(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
@@ -142,11 +169,27 @@ Calculate the solution of the dual problem of maximum log EL problem.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
 }
 \if{html}{\out{</div>}}
 }
@@ -155,8 +198,8 @@ A numeric vector of length \code{n_eqs}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-omega_hat"></a>}}
-\if{latex}{\out{\hypertarget{method-omega_hat}{}}}
+\if{html}{\out{<a id="method-GenEL-omega_hat"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-omega_hat}{}}}
 \subsection{Method \code{omega_hat()}}{
 Calculate the probability vector base on the given G matrix.
 \subsection{Usage}{
@@ -166,11 +209,27 @@ Calculate the probability vector base on the given G matrix.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
 }
 \if{html}{\out{</div>}}
 }
@@ -179,10 +238,10 @@ A probability vector of length \code{n_obs + supp_adj}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-logel"></a>}}
-\if{latex}{\out{\hypertarget{method-logel}{}}}
+\if{html}{\out{<a id="method-GenEL-logel"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-logel}{}}}
 \subsection{Method \code{logel()}}{
-Calculate the log empirical likelihood for a given \code{G} matrix.
+Evaluate the empirical loglikelihood function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
@@ -190,23 +249,37 @@ Calculate the log empirical likelihood for a given \code{G} matrix.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, returns \code{-Inf}.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns `-Inf.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A scalar.
+The empirical loglikelihood evaluated at \code{G} (a scalar).
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-logel_grad"></a>}}
-\if{latex}{\out{\hypertarget{method-logel_grad}{}}}
+\if{html}{\out{<a id="method-GenEL-logel_grad"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-logel_grad}{}}}
 \subsection{Method \code{logel_grad()}}{
-Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
+Calculate empirical loglikelihood and its derivative with respect to \code{G}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$logel_grad(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
@@ -214,21 +287,35 @@ Calculate log EL and the derivative of log EL w.r.t. G evaluated at G.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{G}}{A numeric matrix of dimension \verb{n_obs x n_eqs}.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{weights}}{A numeric vector of length \code{n_obs} containing non-negative values.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
 
-\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within the given maximum number of Newton-Raphson iterations.  If not, sets the log EL to negative infinity and the gradient to a matrix of \code{NaN}s.}
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, sets the empirical loglikelihood to \code{-Inf} and its gradient to a matrix of \code{NaN}s.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A list with elements \code{logel} and \code{grad}, the latter being a matrix of size \verb{n_obs x n_eqs}.
+A list with elements \code{logel} and \code{grad}, the former being a scalaer and the latter a matrix of size \verb{n_obs x n_eqs}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-GenEL-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-GenEL-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

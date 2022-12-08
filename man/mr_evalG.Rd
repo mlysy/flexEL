@@ -23,17 +23,23 @@ A numeric matrix of dimension \code{n_obs} x \code{n_bet}.
 Evaluate the G matrix for a mean regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
-}
+Assuming data were generated from
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{y_i = x_i'beta + eps_i, for i = 1, ..., n,
+}\if{html}{\out{</div>}}
 
 where \code{eps_i}'s are ~iid \code{F(eps)}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
 The estimating equations for \code{beta} can be derived based on the least squares method,
-that is,\preformatted{min_beta (y - X*beta)'(y - X*beta)
-}
+that is,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{min_beta (y - X*beta)'(y - X*beta)
+}\if{html}{\out{</div>}}
 
 The above minimization problem is equivalent to setting it's first derivative
-w.r.t \code{beta} to 0, i.e.,\preformatted{X'*(y - X*beta) = 0
-}
+w.r.t \code{beta} to 0, i.e.,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{X'*(y - X*beta) = 0
+}\if{html}{\out{</div>}}
 
 The left-hand-side of the above equation is the \code{G} matrix returned by this function.
 }

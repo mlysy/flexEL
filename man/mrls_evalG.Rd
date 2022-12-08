@@ -31,8 +31,10 @@ A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 1}.
 Evaluate the G matrix for a location-scale mean regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + sqrt(sig2) * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
-}
+Assuming data were generated from
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{y_i = x_i'beta + sqrt(sig2) * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
+}\if{html}{\out{</div>}}
 
 where \code{eps_i}'s are ~iid \code{F(eps)}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
 In this location-scale model, \verb{x_i'beta} is the location function and \verb{sqrt(sig2) * exp(z_i'gamma)}

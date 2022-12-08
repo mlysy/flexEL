@@ -26,6 +26,7 @@ y <- X %*% b + eps # length n response vector
 
 ## ---- echo=TRUE, eval=TRUE----------------------------------------------------
 beta_init <- coef(lm(y ~ X-1)) # obtain initial value
+beta_init
 nlmout <- nlm(f = mr_neglogEL_R, p = beta_init, y = y, X = X)
 nlmout$estimate
 

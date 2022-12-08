@@ -12,111 +12,94 @@
 
 <meta name="author" content="Shimeng Huang, Martin Lysy" />
 
-<meta name="date" content="2022-03-10" />
+<meta name="date" content="2022-10-07" />
 
 <title>flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling</title>
 
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
-  }
-});
-</script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-  { counter-reset: source-line 0; }
+{ counter-reset: source-line 0; }
 pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
+{ position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -142,6 +125,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
 
 <style type="text/css">body {
 background-color: #fff;
@@ -337,28 +342,30 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore"><strong>flexEL</strong>: A Fast and Flexible Framework for Empirical Likelihood Modeling</h1>
 <h4 class="author">Shimeng Huang, Martin Lysy</h4>
-<h4 class="date">2022-03-10</h4>
+<h4 class="date">2022-10-07</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#the-empirical-likelihood-framework">The Empirical Likelihood Framework</a><ul>
-<li><a href="#basic-el-framework">Basic EL framework</a></li>
-<li><a href="#usage-by-example">Usage by Example</a></li>
+<li><a href="#the-empirical-likelihood-framework" id="toc-the-empirical-likelihood-framework">The Empirical Likelihood Framework</a>
+<ul>
+<li><a href="#basic-el-framework" id="toc-basic-el-framework">Basic EL framework</a></li>
+<li><a href="#usage-by-example" id="toc-usage-by-example">Usage by Example</a></li>
 </ul></li>
-<li><a href="#models-included-in-the-package">Models Included in the Package</a><ul>
-<li><a href="#mean-and-quantile-regression-models">Mean and quantile regression models</a></li>
-<li><a href="#location-scale-mean-and-quantile-regression-model">Location-Scale Mean and Quantile Regression Model</a></li>
+<li><a href="#models-included-in-the-package" id="toc-models-included-in-the-package">Models Included in the Package</a>
+<ul>
+<li><a href="#mean-and-quantile-regression-models" id="toc-mean-and-quantile-regression-models">Mean and quantile regression models</a></li>
+<li><a href="#location-scale-mean-and-quantile-regression-model" id="toc-location-scale-mean-and-quantile-regression-model">Location-Scale Mean and Quantile Regression Model</a></li>
 </ul></li>
-<li><a href="#el-for-right-censored-responses">EL for Right-censored Responses</a><ul>
-<li><a href="#continuity-correction-of-el-under-right-censoring">Continuity-Correction of EL under right-censoring</a></li>
+<li><a href="#el-for-right-censored-responses" id="toc-el-for-right-censored-responses">EL for Right-censored Responses</a>
+<ul>
+<li><a href="#continuity-correction-of-el-under-right-censoring" id="toc-continuity-correction-of-el-under-right-censoring">Continuity-Correction of EL under right-censoring</a></li>
 </ul></li>
-<li><a href="#usage-in-c">Usage in C++</a></li>
-<li><a href="#future-works">Future Works</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#usage-in-c" id="toc-usage-in-c">Usage in C++</a></li>
+<li><a href="#future-works" id="toc-future-works">Future Works</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
-
 
 <div id="the-empirical-likelihood-framework" class="section level2">
 <h2>The Empirical Likelihood Framework</h2>
@@ -395,7 +402,7 @@ where for any given <span class="math inline">\({\boldsymbol{\theta}}\)</span>, 
 <p>One thing to notice is that the log EL function may not be continuous and differentiable if the estimating equation is not so. In the quantile regression problem, for example, since the estimating equation for quantile is not continuous, a continuity correction is needed in order to directly optimize the log EL function. Alternatively, you may rely on global optimization algorithms such as simulated annealing, or Markov Chain Monte Carlo sampling to obtain a meaningful estimate.</p>
 <p>Let’s use a simple two-parameter linear regression model as an example. Suppose we assume the following model
 <span class="math display">\[
-  y_i = \beta_0 + \beta_1x_i + {\epsilon}_i, \quad i=1,\cdots,n, 
+  y_i = \beta_0 + \beta_1x_i + {\epsilon}_i, \quad i=1,\cdots,n,
 \]</span>
 where <span class="math inline">\(\epsilon_i \stackrel {\textrm{iid}}{\sim}\textrm{F}(\epsilon)\)</span> such that <span class="math inline">\(\textrm{E}(\epsilon_i) = 0\)</span> and <span class="math inline">\(\textrm{var}(\epsilon_i) = 1\)</span>. Notice that the distribution of <span class="math inline">\(\epsilon_i\)</span> is unkown, and no distribution assumption is made except for its mean and variance here.</p>
 <p>As the first step, for any particular regression model, one should design an estimating function of the parameters, and implement a function (<code>evalG</code>) to calculate the corresponding <span class="math inline">\(G\)</span> matrix of dimension <span class="math inline">\(n\times m\)</span>, where <span class="math inline">\(n\)</span> is the number of observations, and <span class="math inline">\(m\)</span> is the dimension of the range of the estimating equation. This function can be directly implemented in R.</p>
@@ -412,59 +419,62 @@ In other words, the <span class="math inline">\(g\)</span> function is specified
   g(x,y;\beta) = (y-x^T\beta)\cdot x.
 \]</span></p>
 <p>This can be implemented in R (<code>mr_evalG_R</code>) which returns the <span class="math inline">\(G\)</span> matrix:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>mr_evalG_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {</span>
-<span id="cb1-2"><a href="#cb1-2"></a>  tX &lt;-<span class="st"> </span><span class="kw">t</span>(X)</span>
-<span id="cb1-3"><a href="#cb1-3"></a>  yXb &lt;-<span class="st"> </span>y <span class="op">-</span><span class="st"> </span><span class="kw">c</span>(X <span class="op">%*%</span><span class="st"> </span>beta)</span>
-<span id="cb1-4"><a href="#cb1-4"></a>  G &lt;-<span class="st"> </span><span class="kw">sweep</span>(tX, <span class="dt">MARGIN =</span> <span class="dv">2</span>, yXb, <span class="st">`</span><span class="dt">*</span><span class="st">`</span>)</span>
-<span id="cb1-5"><a href="#cb1-5"></a>  <span class="kw">return</span>(<span class="kw">t</span>(G))</span>
-<span id="cb1-6"><a href="#cb1-6"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mr_evalG_R <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, beta) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  tX <span class="ot">&lt;-</span> <span class="fu">t</span>(X)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  yXb <span class="ot">&lt;-</span> y <span class="sc">-</span> <span class="fu">c</span>(X <span class="sc">%*%</span> beta)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  G <span class="ot">&lt;-</span> <span class="fu">sweep</span>(tX, <span class="at">MARGIN =</span> <span class="dv">2</span>, yXb, <span class="st">`</span><span class="at">*</span><span class="st">`</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">t</span>(G))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>With <code>er_evalG_R</code> we can obtain a <span class="math inline">\(G\)</span> matrix for any given <span class="math inline">\(\beta\)</span>. This function can then be used to construct the log EL function, which is a function of the parameter <span class="math inline">\(\beta\)</span>.</p>
 <p>To find the estimate of <span class="math inline">\(\beta\)</span>, we can use optimization algorithms in R such as <code>nlm</code> or <code>optim</code>. These functions require a starting value of the parameters to be optimized. In the above linear regression case, we can use <code>lm</code> in R, which assumes <span class="math inline">\(\epsilon_i\stackrel {\textrm{iid}}{\sim}\mathcal N(0,1)\)</span> but nonetheless should be able to provide a good starting point.</p>
 <p>Here, for the convenience of using the minimization algorithm <code>nlm</code>, we implement the negative log EL:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {</span>
-<span id="cb2-2"><a href="#cb2-2"></a>  G &lt;-<span class="st"> </span><span class="kw">mr_evalG_R</span>(y, X, beta) <span class="co"># G matrix based on your regression problem</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a>  <span class="kw">return</span>(<span class="op">-</span>flexEL<span class="op">::</span><span class="kw">logEL</span>(<span class="dt">G =</span> G, <span class="dt">supp_adj =</span> <span class="ot">FALSE</span>)) <span class="co"># support correction not on</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mr_neglogEL_R <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, beta) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  G <span class="ot">&lt;-</span> <span class="fu">mr_evalG_R</span>(y, X, beta) <span class="co"># G matrix based on your regression problem</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="sc">-</span>flexEL<span class="sc">::</span><span class="fu">logEL</span>(<span class="at">G =</span> G, <span class="at">supp_adj =</span> <span class="cn">FALSE</span>)) <span class="co"># support correction not on</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Let’s simulate some data:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>gen_nct_eps &lt;-<span class="st"> </span><span class="cf">function</span>(n, df, ncp) {</span>
-<span id="cb3-2"><a href="#cb3-2"></a>  m &lt;-<span class="st"> </span>ncp<span class="op">*</span><span class="kw">sqrt</span>(df<span class="op">/</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">gamma</span>((df<span class="dv">-1</span>)<span class="op">/</span><span class="dv">2</span>)<span class="op">/</span><span class="kw">gamma</span>(df<span class="op">/</span><span class="dv">2</span>)</span>
-<span id="cb3-3"><a href="#cb3-3"></a>  v &lt;-<span class="st"> </span>df<span class="op">*</span>(<span class="dv">1</span><span class="op">+</span>ncp<span class="op">^</span><span class="dv">2</span>)<span class="op">/</span>(df<span class="dv">-2</span>)<span class="op">-</span>ncp<span class="op">^</span><span class="dv">2</span><span class="op">*</span>df<span class="op">/</span><span class="dv">2</span><span class="op">*</span>(<span class="kw">gamma</span>((df<span class="dv">-1</span>)<span class="op">/</span><span class="dv">2</span>)<span class="op">/</span><span class="kw">gamma</span>(df<span class="op">/</span><span class="dv">2</span>))<span class="op">^</span><span class="dv">2</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a>  eps &lt;-<span class="st"> </span>(<span class="kw">rt</span>(n, <span class="dt">df =</span> df, <span class="dt">ncp =</span> ncp)<span class="op">-</span>m)<span class="op">/</span><span class="kw">sqrt</span>(v)</span>
-<span id="cb3-5"><a href="#cb3-5"></a>}</span>
-<span id="cb3-6"><a href="#cb3-6"></a>n &lt;-<span class="st"> </span><span class="dv">500</span> <span class="co"># number of observations</span></span>
-<span id="cb3-7"><a href="#cb3-7"></a>b &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.5</span>,<span class="dv">1</span>) <span class="co"># beta_0 = 0.5, beta_1 = 1</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>eps &lt;-<span class="st"> </span><span class="kw">gen_nct_eps</span>(n, <span class="dt">df =</span> <span class="dv">20</span>, <span class="dt">ncp =</span> <span class="dv">1</span>) <span class="co"># a re-centered right-skewed non-central t distribution</span></span>
-<span id="cb3-9"><a href="#cb3-9"></a>X &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="dv">1</span>, <span class="kw">rnorm</span>(n)) <span class="co"># n x 2 covariate matrix (intercept included)</span></span>
-<span id="cb3-10"><a href="#cb3-10"></a>y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>b <span class="op">+</span><span class="st"> </span>eps <span class="co"># length n response vector</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>gen_nct_eps <span class="ot">&lt;-</span> <span class="cf">function</span>(n, df, ncp) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> ncp<span class="sc">*</span><span class="fu">sqrt</span>(df<span class="sc">/</span><span class="dv">2</span>)<span class="sc">*</span><span class="fu">gamma</span>((df<span class="dv">-1</span>)<span class="sc">/</span><span class="dv">2</span>)<span class="sc">/</span><span class="fu">gamma</span>(df<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  v <span class="ot">&lt;-</span> df<span class="sc">*</span>(<span class="dv">1</span><span class="sc">+</span>ncp<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(df<span class="dv">-2</span>)<span class="sc">-</span>ncp<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>df<span class="sc">/</span><span class="dv">2</span><span class="sc">*</span>(<span class="fu">gamma</span>((df<span class="dv">-1</span>)<span class="sc">/</span><span class="dv">2</span>)<span class="sc">/</span><span class="fu">gamma</span>(df<span class="sc">/</span><span class="dv">2</span>))<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  eps <span class="ot">&lt;-</span> (<span class="fu">rt</span>(n, <span class="at">df =</span> df, <span class="at">ncp =</span> ncp)<span class="sc">-</span>m)<span class="sc">/</span><span class="fu">sqrt</span>(v)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span> <span class="co"># number of observations</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5</span>,<span class="dv">1</span>) <span class="co"># beta_0 = 0.5, beta_1 = 1</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">gen_nct_eps</span>(n, <span class="at">df =</span> <span class="dv">20</span>, <span class="at">ncp =</span> <span class="dv">1</span>) <span class="co"># a re-centered right-skewed non-central t distribution</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">rnorm</span>(n)) <span class="co"># n x 2 covariate matrix (intercept included)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> X <span class="sc">%*%</span> b <span class="sc">+</span> eps <span class="co"># length n response vector</span></span></code></pre></div>
 <p>With the <code>neglogEL</code> function, we can then obtain the estimate using <code>nlm</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>beta_init &lt;-<span class="st"> </span><span class="kw">coef</span>(<span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>X<span class="dv">-1</span>)) <span class="co"># obtain initial value</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a>nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)</span>
-<span id="cb4-3"><a href="#cb4-3"></a>nlmout<span class="op">$</span>estimate</span></code></pre></div>
-<pre><code>## [1] 0.5183124 1.0050678</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>beta_init <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">lm</span>(y <span class="sc">~</span> X<span class="dv">-1</span>)) <span class="co"># obtain initial value</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>beta_init</span></code></pre></div>
+<pre><code>##        X1        X2 
+## 0.4693294 0.9781646</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>nlmout <span class="ot">&lt;-</span> <span class="fu">nlm</span>(<span class="at">f =</span> mr_neglogEL_R, <span class="at">p =</span> beta_init, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>nlmout<span class="sc">$</span>estimate</span></code></pre></div>
+<pre><code>## [1] 0.4693294 0.9781646</code></pre>
 <p>You may also provide the gradient of the estimating equations to the optimization algorithm, which can speed up the optimization.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>mr_dGdb_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {</span>
-<span id="cb6-2"><a href="#cb6-2"></a>  lx &lt;-<span class="st"> </span><span class="kw">split</span>(X, <span class="kw">row</span>(X))</span>
-<span id="cb6-3"><a href="#cb6-3"></a>  dg &lt;-<span class="st"> </span><span class="kw">lapply</span>(lx, <span class="cf">function</span>(x) <span class="kw">tcrossprod</span>(x,x))</span>
-<span id="cb6-4"><a href="#cb6-4"></a>  <span class="kw">return</span>(dg)</span>
-<span id="cb6-5"><a href="#cb6-5"></a>}</span>
-<span id="cb6-6"><a href="#cb6-6"></a></span>
-<span id="cb6-7"><a href="#cb6-7"></a>mr_neglogEL_R &lt;-<span class="st"> </span><span class="cf">function</span>(y, X, beta) {</span>
-<span id="cb6-8"><a href="#cb6-8"></a>  G &lt;-<span class="st"> </span><span class="kw">mr_evalG_R</span>(y, X, beta)</span>
-<span id="cb6-9"><a href="#cb6-9"></a>  res_lst &lt;-<span class="st"> </span>flexEL<span class="op">::</span><span class="kw">logEL</span>(G, <span class="dt">supp_adj =</span> <span class="ot">FALSE</span>, <span class="dt">grad =</span> <span class="ot">TRUE</span>) </span>
-<span id="cb6-10"><a href="#cb6-10"></a>  neglogel &lt;-<span class="st"> </span><span class="op">-</span>res_lst<span class="op">$</span>logel</span>
-<span id="cb6-11"><a href="#cb6-11"></a>  dldG &lt;-<span class="st"> </span><span class="op">-</span>res_lst<span class="op">$</span>grad</span>
-<span id="cb6-12"><a href="#cb6-12"></a>  dGdb &lt;-<span class="st"> </span><span class="kw">mr_dGdb_R</span>(y, X, beta)</span>
-<span id="cb6-13"><a href="#cb6-13"></a>  grad_mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">nrow =</span> <span class="kw">nrow</span>(dldG), <span class="dt">ncol =</span> <span class="kw">ncol</span>(dldG))</span>
-<span id="cb6-14"><a href="#cb6-14"></a>  <span class="cf">for</span> (ii <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(dldG)) {</span>
-<span id="cb6-15"><a href="#cb6-15"></a>    grad_mat[,ii] &lt;-<span class="st"> </span>dGdb[[ii]] <span class="op">%*%</span><span class="st"> </span>dldG[ii,]</span>
-<span id="cb6-16"><a href="#cb6-16"></a>  }</span>
-<span id="cb6-17"><a href="#cb6-17"></a>  grad &lt;-<span class="st"> </span><span class="kw">colSums</span>(grad_mat)</span>
-<span id="cb6-18"><a href="#cb6-18"></a>  <span class="kw">attr</span>(neglogel, <span class="st">&quot;gradient&quot;</span>) &lt;-<span class="st"> </span>grad</span>
-<span id="cb6-19"><a href="#cb6-19"></a>  <span class="kw">return</span>(neglogel)</span>
-<span id="cb6-20"><a href="#cb6-20"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>nlmout &lt;-<span class="st"> </span><span class="kw">nlm</span>(<span class="dt">f =</span> mr_neglogEL_R, <span class="dt">p =</span> beta_init, <span class="dt">y =</span> y, <span class="dt">X =</span> X)</span>
-<span id="cb7-2"><a href="#cb7-2"></a>nlmout<span class="op">$</span>estimate</span></code></pre></div>
-<pre><code>## [1] 0.5183124 1.0050678</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mr_dGdb_R <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, beta) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  lx <span class="ot">&lt;-</span> <span class="fu">split</span>(X, <span class="fu">row</span>(X))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  dg <span class="ot">&lt;-</span> <span class="fu">lapply</span>(lx, <span class="cf">function</span>(x) <span class="fu">tcrossprod</span>(x,x))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(dg)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>mr_neglogEL_R <span class="ot">&lt;-</span> <span class="cf">function</span>(y, X, beta) {</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  G <span class="ot">&lt;-</span> <span class="fu">mr_evalG_R</span>(y, X, beta)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  res_lst <span class="ot">&lt;-</span> flexEL<span class="sc">::</span><span class="fu">logEL</span>(G, <span class="at">supp_adj =</span> <span class="cn">FALSE</span>, <span class="at">grad =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  neglogel <span class="ot">&lt;-</span> <span class="sc">-</span>res_lst<span class="sc">$</span>logel</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  dldG <span class="ot">&lt;-</span> <span class="sc">-</span>res_lst<span class="sc">$</span>grad</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  dGdb <span class="ot">&lt;-</span> <span class="fu">mr_dGdb_R</span>(y, X, beta)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  grad_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(dldG), <span class="at">ncol =</span> <span class="fu">ncol</span>(dldG))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (ii <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(dldG)) {</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    grad_mat[,ii] <span class="ot">&lt;-</span> dGdb[[ii]] <span class="sc">%*%</span> dldG[ii,]</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  grad <span class="ot">&lt;-</span> <span class="fu">colSums</span>(grad_mat)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">attr</span>(neglogel, <span class="st">&quot;gradient&quot;</span>) <span class="ot">&lt;-</span> grad</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(neglogel)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>nlmout <span class="ot">&lt;-</span> <span class="fu">nlm</span>(<span class="at">f =</span> mr_neglogEL_R, <span class="at">p =</span> beta_init, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>nlmout<span class="sc">$</span>estimate</span></code></pre></div>
+<pre><code>## [1] 0.4693294 0.9781646</code></pre>
 </div>
 </div>
 <div id="models-included-in-the-package" class="section level2">
@@ -559,50 +569,50 @@ where <span class="math inline">\(s &gt; 0\)</span> is a smoothing parameter and
 <h2>Usage in C++</h2>
 <p>One can also implement a regression model in C++ following the header file <code>mean_reg_model.h</code>. The key element of this is once again the <code>EvalG</code> method which defines the regression model. Then one can export this method as in <code>mean_reg_model_exports.cpp</code>.</p>
 <p>Or, if one wish to use the C++ api directly, the steps are as below:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">/// </span><span class="an">@file</span><span class="co"> </span><span class="cv">example.cpp</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a></span>
-<span id="cb9-3"><a href="#cb9-3"></a><span class="co">// [[Rcpp::depends(&quot;flexEL&quot;)]]</span></span>
-<span id="cb9-4"><a href="#cb9-4"></a><span class="co">// [[Rcpp::depends(&quot;RcppEigen&quot;)]]</span></span>
-<span id="cb9-5"><a href="#cb9-5"></a></span>
-<span id="cb9-6"><a href="#cb9-6"></a><span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="pp">#include </span><span class="im">&lt;RcppEigen.h&gt;</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a><span class="pp">#include </span><span class="im">&lt;flexEL/gen_el.h&gt;</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a><span class="pp">#include </span><span class="im">&lt;flexEL/mean_reg_model.h&gt;</span></span>
-<span id="cb9-10"><a href="#cb9-10"></a></span>
-<span id="cb9-11"><a href="#cb9-11"></a><span class="co">/// Empirical likelihood function for the mean regression model.</span></span>
-<span id="cb9-12"><a href="#cb9-12"></a><span class="co">///</span></span>
-<span id="cb9-13"><a href="#cb9-13"></a><span class="co">/// </span><span class="an">@param[in]</span><span class="co"> </span><span class="cv">beta</span><span class="co"> Vector of `n_cov` regression coefficients.</span></span>
-<span id="cb9-14"><a href="#cb9-14"></a><span class="co">/// </span><span class="an">@param[in]</span><span class="co"> </span><span class="cv">X</span><span class="co"> Covariate matrix of size `n_obs x n_cov`.</span></span>
-<span id="cb9-15"><a href="#cb9-15"></a><span class="co">/// </span><span class="an">@param[in]</span><span class="co"> </span><span class="cv">y</span><span class="co"> Response vector of length `n_obs`.</span></span>
-<span id="cb9-16"><a href="#cb9-16"></a><span class="co">///</span></span>
-<span id="cb9-17"><a href="#cb9-17"></a><span class="co">/// </span><span class="an">@return</span><span class="co"> Scalar value of the log empirical likelihood function.</span></span>
-<span id="cb9-18"><a href="#cb9-18"></a><span class="co">// [[Rcpp::export]]</span></span>
-<span id="cb9-19"><a href="#cb9-19"></a><span class="dt">double</span> example_logel(Eigen::VectorXd beta,</span>
-<span id="cb9-20"><a href="#cb9-20"></a>                     Eigen::MatrixXd X,</span>
-<span id="cb9-21"><a href="#cb9-21"></a>                     Eigen::VectorXd y) {</span>
-<span id="cb9-22"><a href="#cb9-22"></a>  flexEL::MeanRegModel MR(y, X.transpose());</span>
-<span id="cb9-23"><a href="#cb9-23"></a>  <span class="dt">int</span> n_obs = MR.get_n_obs();</span>
-<span id="cb9-24"><a href="#cb9-24"></a>  <span class="dt">int</span> n_eqs = MR.get_n_eqs();</span>
-<span id="cb9-25"><a href="#cb9-25"></a>  MatrixXd G = MatrixXd::Zero(MR.get_n_eqs(), MR.get_n_obs());</span>
-<span id="cb9-26"><a href="#cb9-26"></a>  MR.eval_G(G, beta);</span>
-<span id="cb9-27"><a href="#cb9-27"></a>  flexEL::GenEL GEL(n_obs, n_eqs);</span>
-<span id="cb9-28"><a href="#cb9-28"></a>  GEL.set_supp_adj(true); <span class="co">// turn on support correction</span></span>
-<span id="cb9-29"><a href="#cb9-29"></a>  <span class="dt">double</span> logel = GEL.logel(G);</span>
-<span id="cb9-30"><a href="#cb9-30"></a>  <span class="cf">if</span>(!GEL.has_converged_nr()) {</span>
-<span id="cb9-31"><a href="#cb9-31"></a>    <span class="co">// convergence check</span></span>
-<span id="cb9-32"><a href="#cb9-32"></a>    logel = -std::numeric_limits&lt;<span class="dt">double</span>&gt;::infinity();</span>
-<span id="cb9-33"><a href="#cb9-33"></a>  }</span>
-<span id="cb9-34"><a href="#cb9-34"></a>  <span class="cf">return</span>(logel);</span>
-<span id="cb9-35"><a href="#cb9-35"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>Rcpp<span class="op">::</span><span class="kw">sourceCpp</span>(<span class="st">&quot;example.cpp&quot;</span>)</span>
-<span id="cb10-2"><a href="#cb10-2"></a>bb &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)</span>
-<span id="cb10-3"><a href="#cb10-3"></a>n_obs &lt;-<span class="st"> </span><span class="dv">200</span></span>
-<span id="cb10-4"><a href="#cb10-4"></a>n_eqs &lt;-<span class="st"> </span><span class="dv">2</span></span>
-<span id="cb10-5"><a href="#cb10-5"></a>X &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="dv">1</span>, <span class="kw">rnorm</span>(n_obs))</span>
-<span id="cb10-6"><a href="#cb10-6"></a>eps &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n_obs)</span>
-<span id="cb10-7"><a href="#cb10-7"></a>y &lt;-<span class="st"> </span>X <span class="op">%*%</span><span class="st"> </span>bb <span class="op">+</span><span class="st"> </span>eps</span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="kw">example_logel</span>(<span class="kw">c</span>(<span class="fl">0.75</span>, <span class="fl">1.25</span>), X, y)</span></code></pre></div>
-<pre><code>## [1] -1107.018</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="an">@file</span><span class="co"> </span><span class="cv">example.cpp</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">// [[Rcpp::depends(&quot;flexEL&quot;)]]</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">// [[Rcpp::depends(&quot;RcppEigen&quot;)]]</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;RcppEigen.h&gt;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;flexEL/gen_el.h&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;flexEL/mean_reg_model.h&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">/// Empirical likelihood function for the mean regression model.</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co">///</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="an">@param[in]</span><span class="co"> </span><span class="cv">beta</span><span class="co"> Vector of `n_cov` regression coefficients.</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="an">@param[in]</span><span class="co"> </span><span class="cv">X</span><span class="co"> Covariate matrix of size `n_obs x n_cov`.</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="an">@param[in]</span><span class="co"> </span><span class="cv">y</span><span class="co"> Response vector of length `n_obs`.</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co">///</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co">/// </span><span class="an">@return</span><span class="co"> Scalar value of the log empirical likelihood function.</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co">// [[Rcpp::export]]</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> example_logel<span class="op">(</span>Eigen<span class="op">::</span>VectorXd beta<span class="op">,</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>                     Eigen<span class="op">::</span>MatrixXd X<span class="op">,</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>                     Eigen<span class="op">::</span>VectorXd y<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  flexEL<span class="op">::</span>MeanRegModel MR<span class="op">(</span>y<span class="op">,</span> X<span class="op">.</span>transpose<span class="op">());</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n_obs <span class="op">=</span> MR<span class="op">.</span>get_n_obs<span class="op">();</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n_eqs <span class="op">=</span> MR<span class="op">.</span>get_n_eqs<span class="op">();</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  MatrixXd G <span class="op">=</span> MatrixXd<span class="op">::</span>Zero<span class="op">(</span>MR<span class="op">.</span>get_n_eqs<span class="op">(),</span> MR<span class="op">.</span>get_n_obs<span class="op">());</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  MR<span class="op">.</span>eval_G<span class="op">(</span>G<span class="op">,</span> beta<span class="op">);</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>  flexEL<span class="op">::</span>GenEL GEL<span class="op">(</span>n_obs<span class="op">,</span> n_eqs<span class="op">);</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>  GEL<span class="op">.</span>set_supp_adj<span class="op">(</span>true<span class="op">);</span> <span class="co">// turn on support correction</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span> logel <span class="op">=</span> GEL<span class="op">.</span>logel<span class="op">(</span>G<span class="op">);</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span><span class="op">(!</span>GEL<span class="op">.</span>has_converged_nr<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// convergence check</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    logel <span class="op">=</span> <span class="op">-</span>std<span class="op">::</span>numeric_limits<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;::</span>infinity<span class="op">();</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span><span class="op">(</span>logel<span class="op">);</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">sourceCpp</span>(<span class="st">&quot;example.cpp&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>bb <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>n_eqs <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">rnorm</span>(n_obs))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_obs)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> X <span class="sc">%*%</span> bb <span class="sc">+</span> eps</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">example_logel</span>(<span class="fu">c</span>(<span class="fl">0.75</span>, <span class="fl">1.25</span>), X, y)</span></code></pre></div>
+<pre><code>## [1] -1107.824</code></pre>
 <p>There are more options that you can set for the InnerEL object via <code>set_opts</code> which you can look up in the doxygen documentation in the <code>src/html</code> folder.</p>
 </div>
 <div id="future-works" class="section level2">
@@ -614,15 +624,15 @@ where <span class="math inline">\(s &gt; 0\)</span> is a smoothing parameter and
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
-<div id="refs" class="references">
-<div id="ref-chen-et-al08">
-<p>Chen, Jiahua, Asokan Mulayath Variyath, and Bovas Abraham. 2008. “Adjusted Empirical Likelihood and Its Properties.” <em>Journal of Computational and Graphical Statistics</em> 17 (2): 426–43.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-chen-et-al08" class="csl-entry">
+Chen, Jiahua, Asokan Mulayath Variyath, and Bovas Abraham. 2008. <span>“Adjusted Empirical Likelihood and Its Properties.”</span> <em>Journal of Computational and Graphical Statistics</em> 17 (2): 426–43.
 </div>
-<div id="ref-huang18">
-<p>Huang, Shimeng. 2018. “Empirical Likelihood Quantile Regression for Right-Censored Data.” Master’s thesis, University of Waterloo.</p>
+<div id="ref-huang18" class="csl-entry">
+Huang, Shimeng. 2018. <span>“Empirical Likelihood Quantile Regression for Right-Censored Data.”</span> Master’s thesis, University of Waterloo.
 </div>
-<div id="ref-koenker-bassett78">
-<p>Koenker, Roger, and Gilbert Bassett Jr. 1978. “Regression Quantiles.” <em>Econometrica: Journal of the Econometric Society</em>, 33–50.</p>
+<div id="ref-koenker-bassett78" class="csl-entry">
+Koenker, Roger, and Gilbert Bassett Jr. 1978. <span>“Regression Quantiles.”</span> <em>Econometrica: Journal of the Econometric Society</em>, 33–50.
 </div>
 </div>
 </div>

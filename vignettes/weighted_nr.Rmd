@@ -65,10 +65,11 @@ Let $r_i = q_i / \sum_{i=1}^n q_i$.  Then the solution to the weighted EL proble
 \hat \omega_i = \frac{r_i}{1 - \hat \bla'\bg_i}, 
 \label{eq:omegahat}
 \end{equation}
-where
+where 
 \begin{equation}
 \begin{aligned}
-\hat \bla & = \argmax_{\bla} \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right), \\
+\hat \bla & = \argmax_{\bla} Q(\bla), \\
+Q(\bla) & = \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right), \\
 \log^\star(x; r) & = 
 \begin{cases} 
 \log(x) & x \ge r \\
@@ -77,7 +78,18 @@ where
 \end{aligned}
 \label{eq:optim}
 \end{equation}
-The convex optimization problem in $\bla$ can be solved by the Newton-Raphson algorithm.
+The convex optimization problem in $\bla$ can be solved by the Newton-Raphson algorithm.  That is, the Newton-Raphson updates are given by
+$$
+\bla_{t+1} = \bla_{t} - [Q_{(2)}(\bla_t)]^{-1} Q_{(1)}(\bla_t),
+$$
+where
+\begin{equation}
+\begin{aligned}
+Q_{(1)}(\bla) = \frac{\ud}{\ud \bla} Q(\bla) & = -\sum_{i=1}^n r_i \log^\star_{(1)}(1 - \bla'\bg_i; r_i) \bg_i, \\
+Q_{(2)}(\bla) = \frac{\ud^2}{\ud \bla \ud \bla'} Q(\bla) & = \sum_{i=1}^n r_i \log^\star_{(2)}(1 - \bla' \bg_i; r_i) \bg_i \bg_i',
+\end{aligned}
+\label{eq:nr}
+\end{equation}
 
 # Gradient
 

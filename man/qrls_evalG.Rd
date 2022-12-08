@@ -37,20 +37,26 @@ A numeric matrix of dimension \code{n_obs} x \code{n_bet + n_gam + 2}.
 Evaluate the G matrix for a location-scale quantile regression model.
 }
 \details{
-Assuming data were generated from\preformatted{y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
-}
+Assuming data were generated from
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{y_i = x_i'beta + sigma * exp(z_i'gamma) * eps_i, for i = 1, ..., n,
+}\if{html}{\out{</div>}}
 
 where \code{eps_i}'s are ~iid \code{F(eps)}, with \code{E[eps] = 0} and \code{Var[eps] = 1}.
-Quantile regression estimates the alpha-level quantile of the response variable, i.e.,\preformatted{Q_alpha(y | x_i, z_i) = x_i'beta + sigma * exp(z_i'gamma) * nu_alpha,
+Quantile regression estimates the alpha-level quantile of the response variable, i.e.,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Q_alpha(y | x_i, z_i) = x_i'beta + sigma * exp(z_i'gamma) * nu_alpha,
 for i = 1, ..., n
-}
+}\if{html}{\out{</div>}}
 
 where \code{nu_alpha} is the alpha-level quantile value of \code{eps}.
 In this location-scale model, \verb{x_i'beta} is the location function and \verb{sqrt(sig2) * exp(z_i'gamma)}
 is the scale function. The \code{G} matrix is calculated by stacking together the first derivative of the
 quasi-likelihood function w.r.t \code{beta}, \code{gamma}, \code{sig2}, and the first derivative w.r.t \code{nu_alpha}
-of the check function introduced by Koenker and Bassett (1978),\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
-}
+of the check function introduced by Koenker and Bassett (1978),
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{rho_alpha(u) = u * (alpha - 1\{u <= 0\})
+}\if{html}{\out{</div>}}
 
 where \code{alpha} is the quantile level and \verb{1\{\}} is the indicator function which returns 1 if the
 condition is true and 0 otherwise.

@@ -5,56 +5,28 @@ CensEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_CensEL_ctor`, n_obs, n_eqs)
 }
 
-CensEL_set_max_iter_nr <- function(pCEL, max_iter) {
-    invisible(.Call(`_flexEL_CensEL_set_max_iter_nr`, pCEL, max_iter))
+CensEL_get_n_obs <- function(pCEL) {
+    .Call(`_flexEL_CensEL_get_n_obs`, pCEL)
 }
 
-CensEL_set_max_iter_em <- function(pCEL, max_iter) {
-    invisible(.Call(`_flexEL_CensEL_set_max_iter_em`, pCEL, max_iter))
+CensEL_get_n_eqs <- function(pCEL) {
+    .Call(`_flexEL_CensEL_get_n_eqs`, pCEL)
 }
 
-CensEL_set_rel_tol <- function(pCEL, rel_tol) {
-    invisible(.Call(`_flexEL_CensEL_set_rel_tol`, pCEL, rel_tol))
+CensEL_expected_weights <- function(pCEL, delta, epsilon, omega) {
+    .Call(`_flexEL_CensEL_expected_weights`, pCEL, delta, epsilon, omega)
+}
+
+CensEL_set_smooth <- function(pCEL, smooth_s) {
+    invisible(.Call(`_flexEL_CensEL_set_smooth`, pCEL, smooth_s))
+}
+
+CensEL_set_max_iter <- function(pCEL, max_iter) {
+    invisible(.Call(`_flexEL_CensEL_set_max_iter`, pCEL, max_iter))
 }
 
 CensEL_set_abs_tol <- function(pCEL, abs_tol) {
     invisible(.Call(`_flexEL_CensEL_set_abs_tol`, pCEL, abs_tol))
-}
-
-CensEL_set_lambda0 <- function(pCEL, lambda0) {
-    invisible(.Call(`_flexEL_CensEL_set_lambda0`, pCEL, lambda0))
-}
-
-CensEL_get_n_obs <- function(pGEL) {
-    .Call(`_flexEL_CensEL_get_n_obs`, pGEL)
-}
-
-CensEL_get_n_eqs <- function(pGEL) {
-    .Call(`_flexEL_CensEL_get_n_eqs`, pGEL)
-}
-
-CensEL_get_supp_adj <- function(pGEL) {
-    .Call(`_flexEL_CensEL_get_supp_adj`, pGEL)
-}
-
-CensEL_set_supp_adj <- function(pCEL, supp_adj, a_ = NULL) {
-    invisible(.Call(`_flexEL_CensEL_set_supp_adj`, pCEL, supp_adj, a_))
-}
-
-CensEL_set_smooth <- function(pCEL, smooth, s_ = NULL) {
-    invisible(.Call(`_flexEL_CensEL_set_smooth`, pCEL, smooth, s_))
-}
-
-CensEL_eval_weights <- function(pCEL, delta, epsilon, omega) {
-    .Call(`_flexEL_CensEL_eval_weights`, pCEL, delta, epsilon, omega)
-}
-
-CensEL_omega_hat <- function(pCEL, G, delta, epsilon) {
-    .Call(`_flexEL_CensEL_omega_hat`, pCEL, G, delta, epsilon)
-}
-
-CensEL_logel <- function(pCEL, G, delta, epsilon) {
-    .Call(`_flexEL_CensEL_logel`, pCEL, G, delta, epsilon)
 }
 
 GenEL_ctor <- function(n_obs, n_eqs) {
@@ -117,43 +89,11 @@ GenEL_weighted_logel_grad <- function(pGEL, G, weights, check_conv) {
     .Call(`_flexEL_GenEL_weighted_logel_grad`, pGEL, G, weights, check_conv)
 }
 
-MeanReg_evalG <- function(y, X, beta) {
-    .Call(`_flexEL_MeanReg_evalG`, y, X, beta)
-}
-
-MeanRegLS_evalG <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_flexEL_MeanRegLS_evalG`, y, X, Z, beta, gamma, sig2)
-}
-
-MeanReg_dGdt <- function(y, X, beta) {
-    .Call(`_flexEL_MeanReg_dGdt`, y, X, beta)
-}
-
-MeanRegLS_dGdt <- function(y, X, Z, beta, gamma, sig2) {
-    .Call(`_flexEL_MeanRegLS_dGdt`, y, X, Z, beta, gamma, sig2)
-}
-
-QuantReg_evalG <- function(y, X, tauArr, Beta) {
-    .Call(`_flexEL_QuantReg_evalG`, y, X, tauArr, Beta)
-}
-
-QuantRegLS_evalG <- function(y, X, Z, tauArr, beta, gamma, sig2, nu) {
-    .Call(`_flexEL_QuantRegLS_evalG`, y, X, Z, tauArr, beta, gamma, sig2, nu)
-}
-
-QuantReg_evalG_smooth <- function(y, X, tauArr, Beta, s) {
-    .Call(`_flexEL_QuantReg_evalG_smooth`, y, X, tauArr, Beta, s)
-}
-
-QuantReg_dGdt_smooth <- function(y, X, tauArr, Beta, s) {
-    .Call(`_flexEL_QuantReg_dGdt_smooth`, y, X, tauArr, Beta, s)
-}
-
-QuantRegLS_evalG_smooth <- function(y, X, Z, tauArr, beta, gamma, sig2, nu, s) {
-    .Call(`_flexEL_QuantRegLS_evalG_smooth`, y, X, Z, tauArr, beta, gamma, sig2, nu, s)
-}
-
 .adjG <- function(G, a) {
     .Call(`_flexEL_adjG`, G, a)
+}
+
+smooth_indicator <- function(eps1, eps2, s) {
+    .Call(`_flexEL_smooth_indicator`, eps1, eps2, s)
 }
 

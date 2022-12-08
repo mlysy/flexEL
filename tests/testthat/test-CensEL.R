@@ -1,10 +1,53 @@
-# library(testthat)
-# library(flexEL)
+library(testthat)
+library(flexEL)
 context("CensEL")
 
-source("el_rfuns.R")
+## source("el_rfuns.R")
+source("flexEL-testfunctions.R")
 
-ntest <- 3
+#--- smooth_indicator ----------------------------------------------------------
+
+test_that("R and C++ versions of smooth_indicator are the same.", {
+  job_descr <- expand.grid(has_inf = c("eps1", "eps2", "none"))
+  n_jobs <- nrow(job_descr)
+  for(ii in 1:n_jobs) {
+    has_inf <- job_descr$has_inf[ii]
+    n <- sample(10:20, 1)
+    eps1 <- runif(1, -1, 1)
+    eps2 <- runif(n, -1, 1)
+    s <- runif(1, 0, 20)
+    if(has_inf == "eps1") {
+      eps1 <- -Inf
+    } else if(has_inf == "eps2") {
+      eps2[sample(n, 5)] <- -Inf
+    }
+    smooth_r <- smooth_indicator(eps1, eps2, s)
+    smooth_cpp <- flexEL:::smooth_indicator(eps1, eps2, s)
+    expect_equal(smooth_r, smooth_cpp)
+  }
+})
+
+#--- expected_weights ----------------------------------------------------------
+
+test_that("R and C++ versions of `CensEL$expected_weights()` are the same.", {
+  n_test <- 50
+  for (ii in 1:n_test) {
+    n_obs <- sample(10:20,1)
+    n_eqs <- sample(1:(n_obs-2), 1)
+    supp_adj <- as.logical(rbinom(1, 1, .5))
+    delta <- sample(0:1, size = n_obs, replace = TRUE)
+    epsilon <- rnorm(n_obs)
+    omega <- runif(n_obs+supp_adj, 0, 1)
+    omega <- omega/sum(omega)
+    smooth_s <- runif(1, 0, 1)
+    gel <- GenEL$new(n_obs, n_eqs)
+    cel <- CensEL$new(gel, smooth_s = smooth_s)
+    weights_cpp <- cel$expected_weights(delta, epsilon, omega)
+    weights_r <- expected_weights(delta, epsilon, omega, smooth_s)
+    expect_equal(weights_cpp, weights_r)
+  }
+})
+
 
 # ---- eval_weights ----
 
@@ -147,7 +190,7 @@ test_that("omega_hat with given convergence settings", {
     cel$abs_tol <- abs_tol
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     # omega_cpp
-    omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon, 
+    omega_R_lst <- omega_hat_EM_R(G, deltas = delta, epsilons = epsilon,
                                   max_iter = max_iter, rel_tol = rel_tol, abs_tol = abs_tol)
     # omega_R_lst$omegas
     # range(omega_cpp-omega_R_lst$omegas)
@@ -238,7 +281,7 @@ test_that("omega_hat with support and continuity correction", {
     cel$smooth_s <- s
     omega_cpp <- cel$omega_hat(G, delta = delta, epsilon = epsilon)
     omega_cpp
-    omega_R_lst <- omega_hat_EM_smooth_R(adjG_R(G, adj_a), deltas = delta, 
+    omega_R_lst <- omega_hat_EM_smooth_R(adjG_R(G, adj_a), deltas = delta,
                                          epsilons = epsilon, s = s, adjust = TRUE)
     omega_R_lst$omegas
     # range(omega_cpp-omega_R_lst$omegas)
@@ -629,9 +672,9 @@ test_that("logel with given convergence settings, support and continuity correct
     # omega_cpp
     logel_cpp <- cel$logel(G, delta, epsilon)
     # logel_cpp
-    omega_R_lst <- omega_hat_EM_smooth_R(adjG_R(G, adj_a), 
-                                         deltas = delta, epsilons = epsilon, s = s, 
-                                         adjust = TRUE, max_iter = max_iter, 
+    omega_R_lst <- omega_hat_EM_smooth_R(adjG_R(G, adj_a),
+                                         deltas = delta, epsilons = epsilon, s = s,
+                                         adjust = TRUE, max_iter = max_iter,
                                          rel_tol = rel_tol, abs_tol = abs_tol)
     # omega_R_lst$omegas
     logel_R <- logEL_smooth_R(omega_R_lst$omegas, epsilon, delta, s = s, adjust = TRUE)

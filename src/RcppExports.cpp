@@ -23,121 +23,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// CensEL_set_max_iter_nr
-void CensEL_set_max_iter_nr(SEXP pCEL, int max_iter);
-RcppExport SEXP _flexEL_CensEL_set_max_iter_nr(SEXP pCELSEXP, SEXP max_iterSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    CensEL_set_max_iter_nr(pCEL, max_iter);
-    return R_NilValue;
-END_RCPP
-}
-// CensEL_set_max_iter_em
-void CensEL_set_max_iter_em(SEXP pCEL, int max_iter);
-RcppExport SEXP _flexEL_CensEL_set_max_iter_em(SEXP pCELSEXP, SEXP max_iterSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    CensEL_set_max_iter_em(pCEL, max_iter);
-    return R_NilValue;
-END_RCPP
-}
-// CensEL_set_rel_tol
-void CensEL_set_rel_tol(SEXP pCEL, int rel_tol);
-RcppExport SEXP _flexEL_CensEL_set_rel_tol(SEXP pCELSEXP, SEXP rel_tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< int >::type rel_tol(rel_tolSEXP);
-    CensEL_set_rel_tol(pCEL, rel_tol);
-    return R_NilValue;
-END_RCPP
-}
-// CensEL_set_abs_tol
-void CensEL_set_abs_tol(SEXP pCEL, int abs_tol);
-RcppExport SEXP _flexEL_CensEL_set_abs_tol(SEXP pCELSEXP, SEXP abs_tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< int >::type abs_tol(abs_tolSEXP);
-    CensEL_set_abs_tol(pCEL, abs_tol);
-    return R_NilValue;
-END_RCPP
-}
-// CensEL_set_lambda0
-void CensEL_set_lambda0(SEXP pCEL, Eigen::VectorXd lambda0);
-RcppExport SEXP _flexEL_CensEL_set_lambda0(SEXP pCELSEXP, SEXP lambda0SEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda0(lambda0SEXP);
-    CensEL_set_lambda0(pCEL, lambda0);
-    return R_NilValue;
-END_RCPP
-}
 // CensEL_get_n_obs
-int CensEL_get_n_obs(SEXP pGEL);
-RcppExport SEXP _flexEL_CensEL_get_n_obs(SEXP pGELSEXP) {
+int CensEL_get_n_obs(SEXP pCEL);
+RcppExport SEXP _flexEL_CensEL_get_n_obs(SEXP pCELSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
-    rcpp_result_gen = Rcpp::wrap(CensEL_get_n_obs(pGEL));
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    rcpp_result_gen = Rcpp::wrap(CensEL_get_n_obs(pCEL));
     return rcpp_result_gen;
 END_RCPP
 }
 // CensEL_get_n_eqs
-int CensEL_get_n_eqs(SEXP pGEL);
-RcppExport SEXP _flexEL_CensEL_get_n_eqs(SEXP pGELSEXP) {
+int CensEL_get_n_eqs(SEXP pCEL);
+RcppExport SEXP _flexEL_CensEL_get_n_eqs(SEXP pCELSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
-    rcpp_result_gen = Rcpp::wrap(CensEL_get_n_eqs(pGEL));
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    rcpp_result_gen = Rcpp::wrap(CensEL_get_n_eqs(pCEL));
     return rcpp_result_gen;
 END_RCPP
 }
-// CensEL_get_supp_adj
-bool CensEL_get_supp_adj(SEXP pGEL);
-RcppExport SEXP _flexEL_CensEL_get_supp_adj(SEXP pGELSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pGEL(pGELSEXP);
-    rcpp_result_gen = Rcpp::wrap(CensEL_get_supp_adj(pGEL));
-    return rcpp_result_gen;
-END_RCPP
-}
-// CensEL_set_supp_adj
-void CensEL_set_supp_adj(SEXP pCEL, bool supp_adj, Rcpp::Nullable<Rcpp::NumericVector> a_);
-RcppExport SEXP _flexEL_CensEL_set_supp_adj(SEXP pCELSEXP, SEXP supp_adjSEXP, SEXP a_SEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< bool >::type supp_adj(supp_adjSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type a_(a_SEXP);
-    CensEL_set_supp_adj(pCEL, supp_adj, a_);
-    return R_NilValue;
-END_RCPP
-}
-// CensEL_set_smooth
-void CensEL_set_smooth(SEXP pCEL, bool smooth, Rcpp::Nullable<Rcpp::NumericVector> s_);
-RcppExport SEXP _flexEL_CensEL_set_smooth(SEXP pCELSEXP, SEXP smoothSEXP, SEXP s_SEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< bool >::type smooth(smoothSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type s_(s_SEXP);
-    CensEL_set_smooth(pCEL, smooth, s_);
-    return R_NilValue;
-END_RCPP
-}
-// CensEL_eval_weights
-Eigen::VectorXd CensEL_eval_weights(SEXP pCEL, Eigen::VectorXd delta, Eigen::VectorXd epsilon, Eigen::VectorXd omega);
-RcppExport SEXP _flexEL_CensEL_eval_weights(SEXP pCELSEXP, SEXP deltaSEXP, SEXP epsilonSEXP, SEXP omegaSEXP) {
+// CensEL_expected_weights
+Eigen::VectorXd CensEL_expected_weights(SEXP pCEL, Eigen::VectorXd delta, Eigen::VectorXd epsilon, Eigen::VectorXd omega);
+RcppExport SEXP _flexEL_CensEL_expected_weights(SEXP pCELSEXP, SEXP deltaSEXP, SEXP epsilonSEXP, SEXP omegaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -145,36 +55,41 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilon(epsilonSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type omega(omegaSEXP);
-    rcpp_result_gen = Rcpp::wrap(CensEL_eval_weights(pCEL, delta, epsilon, omega));
+    rcpp_result_gen = Rcpp::wrap(CensEL_expected_weights(pCEL, delta, epsilon, omega));
     return rcpp_result_gen;
 END_RCPP
 }
-// CensEL_omega_hat
-Eigen::VectorXd CensEL_omega_hat(SEXP pCEL, Eigen::MatrixXd G, Eigen::VectorXd delta, Eigen::VectorXd epsilon);
-RcppExport SEXP _flexEL_CensEL_omega_hat(SEXP pCELSEXP, SEXP GSEXP, SEXP deltaSEXP, SEXP epsilonSEXP) {
+// CensEL_set_smooth
+void CensEL_set_smooth(SEXP pCEL, double smooth_s);
+RcppExport SEXP _flexEL_CensEL_set_smooth(SEXP pCELSEXP, SEXP smooth_sSEXP) {
 BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilon(epsilonSEXP);
-    rcpp_result_gen = Rcpp::wrap(CensEL_omega_hat(pCEL, G, delta, epsilon));
-    return rcpp_result_gen;
+    Rcpp::traits::input_parameter< double >::type smooth_s(smooth_sSEXP);
+    CensEL_set_smooth(pCEL, smooth_s);
+    return R_NilValue;
 END_RCPP
 }
-// CensEL_logel
-double CensEL_logel(SEXP pCEL, Eigen::MatrixXd G, Eigen::VectorXd delta, Eigen::VectorXd epsilon);
-RcppExport SEXP _flexEL_CensEL_logel(SEXP pCELSEXP, SEXP GSEXP, SEXP deltaSEXP, SEXP epsilonSEXP) {
+// CensEL_set_max_iter
+void CensEL_set_max_iter(SEXP pCEL, int max_iter);
+RcppExport SEXP _flexEL_CensEL_set_max_iter(SEXP pCELSEXP, SEXP max_iterSEXP) {
 BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type epsilon(epsilonSEXP);
-    rcpp_result_gen = Rcpp::wrap(CensEL_logel(pCEL, G, delta, epsilon));
-    return rcpp_result_gen;
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    CensEL_set_max_iter(pCEL, max_iter);
+    return R_NilValue;
+END_RCPP
+}
+// CensEL_set_abs_tol
+void CensEL_set_abs_tol(SEXP pCEL, double abs_tol);
+RcppExport SEXP _flexEL_CensEL_set_abs_tol(SEXP pCELSEXP, SEXP abs_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pCEL(pCELSEXP);
+    Rcpp::traits::input_parameter< double >::type abs_tol(abs_tolSEXP);
+    CensEL_set_abs_tol(pCEL, abs_tol);
+    return R_NilValue;
 END_RCPP
 }
 // GenEL_ctor
@@ -361,145 +276,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// MeanReg_evalG
-Eigen::MatrixXd MeanReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta);
-RcppExport SEXP _flexEL_MeanReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanReg_evalG(y, X, beta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// MeanRegLS_evalG
-Eigen::MatrixXd MeanRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
-RcppExport SEXP _flexEL_MeanRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanRegLS_evalG(y, X, Z, beta, gamma, sig2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// MeanReg_dGdt
-Eigen::MatrixXd MeanReg_dGdt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd beta);
-RcppExport SEXP _flexEL_MeanReg_dGdt(SEXP ySEXP, SEXP XSEXP, SEXP betaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanReg_dGdt(y, X, beta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// MeanRegLS_dGdt
-Eigen::MatrixXd MeanRegLS_dGdt(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2);
-RcppExport SEXP _flexEL_MeanRegLS_dGdt(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanRegLS_dGdt(y, X, Z, beta, gamma, sig2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// QuantReg_evalG
-Eigen::MatrixXd QuantReg_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::MatrixXd Beta);
-RcppExport SEXP _flexEL_QuantReg_evalG(SEXP ySEXP, SEXP XSEXP, SEXP tauArrSEXP, SEXP BetaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type tauArr(tauArrSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Beta(BetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_evalG(y, X, tauArr, Beta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// QuantRegLS_evalG
-Eigen::MatrixXd QuantRegLS_evalG(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu);
-RcppExport SEXP _flexEL_QuantRegLS_evalG(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP nuSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type tauArr(tauArrSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type nu(nuSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG(y, X, Z, tauArr, beta, gamma, sig2, nu));
-    return rcpp_result_gen;
-END_RCPP
-}
-// QuantReg_evalG_smooth
-Eigen::MatrixXd QuantReg_evalG_smooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::MatrixXd Beta, double s);
-RcppExport SEXP _flexEL_QuantReg_evalG_smooth(SEXP ySEXP, SEXP XSEXP, SEXP tauArrSEXP, SEXP BetaSEXP, SEXP sSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type tauArr(tauArrSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Beta(BetaSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_evalG_smooth(y, X, tauArr, Beta, s));
-    return rcpp_result_gen;
-END_RCPP
-}
-// QuantReg_dGdt_smooth
-Eigen::MatrixXd QuantReg_dGdt_smooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::VectorXd tauArr, Eigen::MatrixXd Beta, double s);
-RcppExport SEXP _flexEL_QuantReg_dGdt_smooth(SEXP ySEXP, SEXP XSEXP, SEXP tauArrSEXP, SEXP BetaSEXP, SEXP sSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type tauArr(tauArrSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Beta(BetaSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantReg_dGdt_smooth(y, X, tauArr, Beta, s));
-    return rcpp_result_gen;
-END_RCPP
-}
-// QuantRegLS_evalG_smooth
-Eigen::MatrixXd QuantRegLS_evalG_smooth(Eigen::VectorXd y, Eigen::MatrixXd X, Eigen::MatrixXd Z, Eigen::VectorXd tauArr, Eigen::VectorXd beta, Eigen::VectorXd gamma, double sig2, Eigen::VectorXd nu, double s);
-RcppExport SEXP _flexEL_QuantRegLS_evalG_smooth(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP tauArrSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP sig2SEXP, SEXP nuSEXP, SEXP sSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type tauArr(tauArrSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< double >::type sig2(sig2SEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type nu(nuSEXP);
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(QuantRegLS_evalG_smooth(y, X, Z, tauArr, beta, gamma, sig2, nu, s));
-    return rcpp_result_gen;
-END_RCPP
-}
 // adjG
 Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a);
 RcppExport SEXP _flexEL_adjG(SEXP GSEXP, SEXP aSEXP) {
@@ -512,22 +288,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// smooth_indicator
+Eigen::VectorXd smooth_indicator(double eps1, Eigen::VectorXd eps2, double s);
+RcppExport SEXP _flexEL_smooth_indicator(SEXP eps1SEXP, SEXP eps2SEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type eps1(eps1SEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type eps2(eps2SEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(smooth_indicator(eps1, eps2, s));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_CensEL_ctor", (DL_FUNC) &_flexEL_CensEL_ctor, 2},
-    {"_flexEL_CensEL_set_max_iter_nr", (DL_FUNC) &_flexEL_CensEL_set_max_iter_nr, 2},
-    {"_flexEL_CensEL_set_max_iter_em", (DL_FUNC) &_flexEL_CensEL_set_max_iter_em, 2},
-    {"_flexEL_CensEL_set_rel_tol", (DL_FUNC) &_flexEL_CensEL_set_rel_tol, 2},
-    {"_flexEL_CensEL_set_abs_tol", (DL_FUNC) &_flexEL_CensEL_set_abs_tol, 2},
-    {"_flexEL_CensEL_set_lambda0", (DL_FUNC) &_flexEL_CensEL_set_lambda0, 2},
     {"_flexEL_CensEL_get_n_obs", (DL_FUNC) &_flexEL_CensEL_get_n_obs, 1},
     {"_flexEL_CensEL_get_n_eqs", (DL_FUNC) &_flexEL_CensEL_get_n_eqs, 1},
-    {"_flexEL_CensEL_get_supp_adj", (DL_FUNC) &_flexEL_CensEL_get_supp_adj, 1},
-    {"_flexEL_CensEL_set_supp_adj", (DL_FUNC) &_flexEL_CensEL_set_supp_adj, 3},
-    {"_flexEL_CensEL_set_smooth", (DL_FUNC) &_flexEL_CensEL_set_smooth, 3},
-    {"_flexEL_CensEL_eval_weights", (DL_FUNC) &_flexEL_CensEL_eval_weights, 4},
-    {"_flexEL_CensEL_omega_hat", (DL_FUNC) &_flexEL_CensEL_omega_hat, 4},
-    {"_flexEL_CensEL_logel", (DL_FUNC) &_flexEL_CensEL_logel, 4},
+    {"_flexEL_CensEL_expected_weights", (DL_FUNC) &_flexEL_CensEL_expected_weights, 4},
+    {"_flexEL_CensEL_set_smooth", (DL_FUNC) &_flexEL_CensEL_set_smooth, 2},
+    {"_flexEL_CensEL_set_max_iter", (DL_FUNC) &_flexEL_CensEL_set_max_iter, 2},
+    {"_flexEL_CensEL_set_abs_tol", (DL_FUNC) &_flexEL_CensEL_set_abs_tol, 2},
     {"_flexEL_GenEL_ctor", (DL_FUNC) &_flexEL_GenEL_ctor, 2},
     {"_flexEL_GenEL_set_max_iter", (DL_FUNC) &_flexEL_GenEL_set_max_iter, 2},
     {"_flexEL_GenEL_set_rel_tol", (DL_FUNC) &_flexEL_GenEL_set_rel_tol, 2},
@@ -543,16 +325,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 4},
     {"_flexEL_GenEL_logel_grad", (DL_FUNC) &_flexEL_GenEL_logel_grad, 3},
     {"_flexEL_GenEL_weighted_logel_grad", (DL_FUNC) &_flexEL_GenEL_weighted_logel_grad, 4},
-    {"_flexEL_MeanReg_evalG", (DL_FUNC) &_flexEL_MeanReg_evalG, 3},
-    {"_flexEL_MeanRegLS_evalG", (DL_FUNC) &_flexEL_MeanRegLS_evalG, 6},
-    {"_flexEL_MeanReg_dGdt", (DL_FUNC) &_flexEL_MeanReg_dGdt, 3},
-    {"_flexEL_MeanRegLS_dGdt", (DL_FUNC) &_flexEL_MeanRegLS_dGdt, 6},
-    {"_flexEL_QuantReg_evalG", (DL_FUNC) &_flexEL_QuantReg_evalG, 4},
-    {"_flexEL_QuantRegLS_evalG", (DL_FUNC) &_flexEL_QuantRegLS_evalG, 8},
-    {"_flexEL_QuantReg_evalG_smooth", (DL_FUNC) &_flexEL_QuantReg_evalG_smooth, 5},
-    {"_flexEL_QuantReg_dGdt_smooth", (DL_FUNC) &_flexEL_QuantReg_dGdt_smooth, 5},
-    {"_flexEL_QuantRegLS_evalG_smooth", (DL_FUNC) &_flexEL_QuantRegLS_evalG_smooth, 9},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},
+    {"_flexEL_smooth_indicator", (DL_FUNC) &_flexEL_smooth_indicator, 3},
     {NULL, NULL, 0}
 };
 

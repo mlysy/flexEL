@@ -2,8 +2,6 @@
 
 export(CensEL)
 export(GenEL)
-export(MeanRegEL)
-export(QuantRegEL)
 export(logEL)
 export(mr_dGdt)
 export(mr_evalG)
