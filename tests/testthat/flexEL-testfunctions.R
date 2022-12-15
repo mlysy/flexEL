@@ -13,7 +13,7 @@ GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv) {
   supp_adj_a <- runif(1, 1, 5)
   weight_adj <- runif(1, 0, 2)
   lambda0 <- rnorm(n_eqs)
-  # list of arguments to other methods
+  # list of arguments to GenEL methods
   el_args <- list(G = G, check_conv = check_conv)
   # el_opts will contain all options to give lambda_nr.
   # if set_opts == TRUE, it will be passed to gel$set_opts
@@ -34,6 +34,43 @@ GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv) {
     do.call(gel$set_opts, el_opts)
   }
   list(gel = gel, el_opts = el_opts, el_args = el_args)
+}
+
+# setup for CensEL tests
+CensEL_setup <- function(set_opts, supp_adj, check_conv) {
+  gel_setup <- GenEL_setup(set_opts = TRUE, supp_adj = supp_adj,
+                           weighted = FALSE, check_conv = check_conv)
+  n_obs <- gel_setup$gel$n_obs
+  n_eqs <- gel_setup$gel$n_eqs
+  supp_adj <- gel_setup$gel$supp_adj
+  delta <- sample(0:1, size = n_obs, replace = TRUE)
+  epsilon <- rnorm(n_obs)
+  omega <- runif(n_obs+supp_adj, 0, 1)
+  omega <- omega/sum(omega)
+  smooth_s <- runif(1, 0, 1)
+  max_iter <- sample(c(100, 200, 500), 1)
+  abs_tol <- runif(1, 1e-4, 1e-3)
+  # list of arguments to CensEL methods
+  cel_args <- list(G = gel_setup$el_args$G,
+                   delta = delta, epsilon = epsilon,
+                   omega = omega,
+                   check_conv = check_conv)
+  cel <- CensEL$new(n_obs, n_eqs)
+  gel_opts <- gel_setup$el_opts
+  cel_opts <- list(max_iter = max_iter, abs_tol = abs_tol, smooth_s = smooth_s)
+  # set options via active bindings
+  cel$max_iter <- max_iter
+  cel$abs_tol <- abs_tol
+  cel$smooth_s <- smooth_s
+  if(set_opts) {
+    # set options via set_opts
+    do.call(cel$set_opts, cel_opts)
+  }
+  # only way to set gel options
+  do.call(cel$gel$set_opts, gel_opts)
+  list(cel = cel,
+       cel_opts = cel_opts, gel_opts = gel_opts,
+       cel_args = cel_args)
 }
 
 # maximum relative error
@@ -107,7 +144,7 @@ adjust_support <- function(G, weights, delta, epsilon,
 }
 
 # weighted newton-raphson
-# returns: lambda, has_converged, and support-adjusted G and weights
+# returns: lambda and has_converged flag
 lambda_nr <- function(G, weights, max_iter, rel_tol, lambda0,
                       supp_adj, supp_adj_a, weight_adj,
                       check_conv) {
@@ -147,17 +184,17 @@ lambda_nr <- function(G, weights, max_iter, rel_tol, lambda0,
     }
     lambda_old <- lambda # complete cycle
   }
-  not_conv <- (ii == max_iter && err > rel_tol)
-  if(check_conv && not_conv) {
+  has_converged <- !(ii == max_iter && err > rel_tol)
+  if(check_conv && !has_converged) {
     lambda <- rep(NaN, n_eqs)
   }
-  list(lambda = c(lambda), has_converged = !not_conv)
+  list(lambda = c(lambda), has_converged = has_converged)
 }
 
-# weighted omega_hat
-omega_hat <- function(G, weights, max_iter, rel_tol, lambda0,
-                      supp_adj, supp_adj_a, weight_adj,
-                      check_conv) {
+# weighted omega_hat for newton-raphson algorithm
+omega_hat_nr <- function(G, weights, max_iter, rel_tol, lambda0,
+                         supp_adj, supp_adj_a, weight_adj,
+                         check_conv) {
   lambda_out <- lambda_nr(G = G, weights = weights,
                           max_iter = max_iter, rel_tol = rel_tol,
                           lambda0 = lambda0,
@@ -192,11 +229,11 @@ logel_grad <- function(G, weights, max_iter, rel_tol, lambda0,
   if(check_conv && !lambda_out$has_converged) {
     out <- list(logel = -Inf, grad = matrix(NaN, nrow(G), ncol(G)))
   } else {
-    omega <- omega_hat(G = G, weights = weights,
-                       max_iter = max_iter, rel_tol = rel_tol,
-                       lambda0 = lambda0,
-                       supp_adj = supp_adj, supp_adj_a = supp_adj_a,
-                       weight_adj = weight_adj, check_conv = check_conv)
+    omega <- omega_hat_nr(G = G, weights = weights,
+                          max_iter = max_iter, rel_tol = rel_tol,
+                          lambda0 = lambda0,
+                          supp_adj = supp_adj, supp_adj_a = supp_adj_a,
+                          weight_adj = weight_adj, check_conv = check_conv)
     el_args <- adjust_support(G = G, weights = weights,
                               supp_adj = supp_adj, supp_adj_a = supp_adj_a,
                               weight_adj = weight_adj)
@@ -238,3 +275,56 @@ expected_weights <- function(delta, epsilon, omega, smooth_s) {
   }
   weights
 }
+
+# omega_hat from EM algorithm
+# em_opts: list with elements smooth_s, max_iter, abs_tol
+# nr_opts: list with elements max_iter, rel_tol, lambda0, supp_adj, supp_adj_a, weight_adj
+# returns: omega_hat and has_converged
+omega_hat_em <- function(G, delta, epsilon,
+                         em_opts, nr_opts,
+                         check_conv) {
+  # setup
+  cel <- CensEL$new(nrow(G), ncol(G))
+  do.call(cel$set_opts, em_opts)
+  do.call(cel$gel$set_opts, nr_opts)
+  # initialize quantities
+  n_obs <- cel$n_obs
+  supp_adj <- cel$gel$supp_adj
+  n_obs2 <- n_obs + supp_adj
+  has_converged_em <- TRUE
+  omega <- rep(1/n_obs2, n_obs2)
+  weights <- cel$expected_weights(omega = omega,
+                                  delta = delta, epsilon = epsilon)
+  logel_old <- cel$gel$logel(G, check_conv = FALSE)
+  for(ii in 1:cel$max_iter) {
+    # M-step
+    if(supp_adj) cel$gel$set_opts(weight_adj = weights[n_obs2])
+    # lots of redundant calculations here
+    lambda <- cel$gel$lambda_nr(G, weights = weights[1:n_obs],
+                                check_conv = FALSE)
+    omega <- cel$gel$omega_hat(G, weights = weights[1:n_obs],
+                               check_conv = FALSE)
+    logel <- cel$gel$logel(G,
+                           weights = weights[1:n_obs],
+                           check_conv = FALSE)
+    # now establish convergence
+    has_converged_nr <- cel$gel$lambda_nr(G, weights = weights[1:n_obs],
+                                          check_conv = TRUE)
+    has_converged_nr <- all(is.nan(has_converged_nr))
+    em_err <- abs(logel - logel_old) # might be NaN if lambda_nr DNC
+    if(has_converged_em && has_converged_nr) has_converged_em <- FALSE
+    if(is.nan(em_err) || em_err < cel$abs_tol) break
+    logel_old <- logel
+    cel$gel$set_opts(lambda0 = lambda) # update starting point
+    # E-step
+    weights <- cel$expected_weights(omega = omega,
+                                    delta = delta, epsilon = epsilon)
+  }
+  has_converged_em <- has_converged_em &&
+    !(ii == cel$max_iter && em_err > cel$abs_tol)
+  if(check_conv && !has_converged_em) {
+    omega <- rep(NaN, n_obs2)
+  }
+  list(omega = omega, has_converged = has_converged_em)
+}
+

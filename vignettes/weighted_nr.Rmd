@@ -1,26 +1,28 @@
 ---
-title: "Weighted Empirical Likelihood"
+title: "Empirical Likelihood Algorithms"
 author: "Shimeng Huang, Martin Lysy"
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
+  bookdown::html_vignette2:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Weighted Empirical Likelihood}
+  %\VignetteIndexEntry{Empirical Likelihood Algorithms}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: flexEL.bib
 ---
 
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-</script>
+<!-- <script type="text/x-mathjax-config"> -->
+<!-- MathJax.Hub.Config({ -->
+<!--   TeX: { equationNumbers: { autoNumber: "AMS" } } -->
+<!-- }); -->
+<!-- </script> -->
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator{\EL}{EL}
+\DeclareMathOperator{\CEL}{CEL}
+\newcommand{\SCEL}{\textrm{SCEL}}
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\bz}{{\bm{0}}}
 \newcommand{\bg}{{\bm{g}}}
@@ -32,20 +34,20 @@ MathJax.Hub.Config({
 \newcommand{\bla}{{\bm{\lambda}}}
 \newcommand{\w}{{\omega}}
 \newcommand{\bom}{{\bm{\omega}}}
-\newcommand{\e}{{\epsilon}}
+\newcommand{\eps}{{\epsilon}}
 \newcommand{\tth}{{\bm{\theta}}}
 \newcommand{\E}{\textrm{E}}
 \newcommand{\F}{\textrm{F}}
-\newcommand{\CEL}{\textrm{CEL}}
-\newcommand{\SCEL}{\textrm{SCEL}}
 \newcommand{\R}{\mathbb R}
 \newcommand{\var}{\textrm{var}}
 \newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
 \newcommand{\N}{\mathcal N}
 \newcommand{\ud}{\mathop{}\!\mathrm{d}}
 \newcommand{\dth}{\frac{\ud}{\ud\tth}}
+\newcommand{\indicator}{\operatorname{\mathbb{1}}}
+\newcommand{\indsmooth}{\operatorname{\mathcal{S}}}
 
-# Setup
+# Weighted Empirical Likelihood
 
 The weighted empirical likelihood (EL) is defined as
 $$
@@ -54,16 +56,16 @@ $$
 where $\hat \bom = \hat \bom(\tth)$ solves the optimization problem
 \begin{equation}
 \max_{\bom} \sum_{i=1}^n q_i \log(\omega_i) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \bom \in \Delta^{n-1},
-\label{eq:wel}
+(\#eq:wel)
 \end{equation}
 where $\bg_i  = \bg_i(\tth) \in \mathbb R^m$, $q_i > 0$ are the weights, and $\Delta^{n-1} = \{\bom \in \mathbb R^n: \sum_{i=1}^n \omega_i = 1, \omega_i > 0\}$ is the $(n-1)$-dimensional probability simplex.
 
-# Solution
+## Solution
 
 Let $r_i = q_i / \sum_{i=1}^n q_i$.  Then the solution to the weighted EL problem is given by
 \begin{equation}
 \hat \omega_i = \frac{r_i}{1 - \hat \bla'\bg_i}, 
-\label{eq:omegahat}
+(\#eq:omegahat)
 \end{equation}
 where 
 \begin{equation}
@@ -76,7 +78,7 @@ Q(\bla) & = \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right), \\
 - \tfrac 1 2 (x/r)^2 + 2 (x/r) - \tfrac 3 2 + \log r & x < r.
 \end{cases}
 \end{aligned}
-\label{eq:optim}
+(\#eq:optim)
 \end{equation}
 The convex optimization problem in $\bla$ can be solved by the Newton-Raphson algorithm.  That is, the Newton-Raphson updates are given by
 $$
@@ -88,10 +90,10 @@ where
 Q_{(1)}(\bla) = \frac{\ud}{\ud \bla} Q(\bla) & = -\sum_{i=1}^n r_i \log^\star_{(1)}(1 - \bla'\bg_i; r_i) \bg_i, \\
 Q_{(2)}(\bla) = \frac{\ud^2}{\ud \bla \ud \bla'} Q(\bla) & = \sum_{i=1}^n r_i \log^\star_{(2)}(1 - \bla' \bg_i; r_i) \bg_i \bg_i',
 \end{aligned}
-\label{eq:nr}
+(\#eq:nr)
 \end{equation}
 
-# Gradient
+## Gradient
 
 The gradient of the the weighted empirical loglikelihood with respect to $\tt$ is
 $$
@@ -101,12 +103,46 @@ $$
 & = \dth \bla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot \bg_i(\tth)}{1 - \bla'\bg_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth),
 \end{aligned}
 $$
-where $Q = \sum_{i=1}^n q_i$.  Since substituting \\eqref{eq:omegahat} into \\eqref{eq:wel} gives
+where $Q = \sum_{i=1}^n q_i$.  Since substituting \@ref(eq:omegahat) into \@ref(eq:wel) gives
 $$
 \sum_{i=1}^n \hat \omega_i \cdot \bg_i = \sum_{i=1}^n \frac{r_i \cdot \bg_i}{1 - \hat \bla'\bg_i} = \bz,
 $$
 the first term in the gradient disappears, such that we have
 \begin{equation}
 \dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth).
-\label{eq:gradel}
+(\#eq:gradel)
 \end{equation}
+
+# Censored Empirical Likelihood
+
+Consider the location-scale model
+
+$$
+y_i = \mu(\xx_i, \tth) + \sigma(\xx_i, \tth) + \eps_i,
+$$
+
+where $\xx_i \iid F(\xx)$ and $\eps_i \iid G(\eps)$ is a general residual distribution with $E[\eps] = 0$ and $\var(\eps) = 1$.  Suppose we observe $u_i = \min(y_i, c_i)$ where $c_i$ is the censoring time, and we also observe $\delta_i = \indicator\{y_i \le c_i\}$.  Let $e_i = e_i(\tth) = (u_i - \mu(\xx_i, \tth))/\sigma(\xx_i, \tth)$.  For the moment conditions
+
+$$
+E[\bg(\xx, \eps, \tth)] = \bz,
+$$
+
+The EL with smoothed right censoring is defined as
+\begin{equation}
+\log \CEL(\tth) = \log \CEL(\tth, \hat{\bom}) = \sum_{i=1}^n \left[\delta_i \log(\hat\w_i) + (1-\delta_i) \log\left(\sum_{j=1}^n \indsmooth(e_i - e_j; s) \cdot \hat\w_j \right)\right],
+\end{equation}
+
+where $\indsmooth(\cdot; s)$ is the smoothed indicator function,
+
+$$
+\indsmooth(x; s) = \frac{1}{1 + \exp(s \cdot x)},
+$$
+
+and $\hat{\bom} = \hat{\bom}(\tth)$ solves the optimization problem
+
+\begin{equation}
+\max_{\bom} \log \CEL(\tth, \bom) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \bom \in \Delta^{n-1}.
+\end{equation}
+
+## EM Algorithm
+

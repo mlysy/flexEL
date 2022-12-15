@@ -1,8 +1,9 @@
 ## library(testthat)
 ## library(flexEL)
-context("GenEL")
 
 source("flexEL-testfunctions.R")
+
+# TODO: add test for support adjustment
 
 test_that("R and C++ implementation of `GenEL$lambda_nr()` are the same.", {
   test_cases <- expand.grid(
@@ -39,7 +40,7 @@ test_that("R and C++ implementation of `GenEL$omega_hat()` are the same.", {
                          weighted = test_cases$weighted[ii],
                          check_conv = check_conv)
     out_cpp <- do.call(setup$gel$omega_hat, setup$el_args)
-    out_r <- do.call(omega_hat, c(setup$el_args, setup$el_opts))
+    out_r <- do.call(omega_hat_nr, c(setup$el_args, setup$el_opts))
     expect_equal(out_cpp, out_r)
   }
 })

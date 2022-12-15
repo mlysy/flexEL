@@ -5,88 +5,92 @@ CensEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_CensEL_ctor`, n_obs, n_eqs)
 }
 
-CensEL_get_n_obs <- function(pCEL) {
-    .Call(`_flexEL_CensEL_get_n_obs`, pCEL)
+CensEL_get_n_obs <- function(p_cel) {
+    .Call(`_flexEL_CensEL_get_n_obs`, p_cel)
 }
 
-CensEL_get_n_eqs <- function(pCEL) {
-    .Call(`_flexEL_CensEL_get_n_eqs`, pCEL)
+CensEL_get_n_eqs <- function(p_cel) {
+    .Call(`_flexEL_CensEL_get_n_eqs`, p_cel)
 }
 
-CensEL_expected_weights <- function(pCEL, delta, epsilon, omega) {
-    .Call(`_flexEL_CensEL_expected_weights`, pCEL, delta, epsilon, omega)
+CensEL_expected_weights <- function(p_cel, delta, epsilon, omega) {
+    .Call(`_flexEL_CensEL_expected_weights`, p_cel, delta, epsilon, omega)
 }
 
-CensEL_set_smooth <- function(pCEL, smooth_s) {
-    invisible(.Call(`_flexEL_CensEL_set_smooth`, pCEL, smooth_s))
+CensEL_omega_hat <- function(p_cel, G, delta, epsilon, check_conv, p_gel) {
+    .Call(`_flexEL_CensEL_omega_hat`, p_cel, G, delta, epsilon, check_conv, p_gel)
 }
 
-CensEL_set_max_iter <- function(pCEL, max_iter) {
-    invisible(.Call(`_flexEL_CensEL_set_max_iter`, pCEL, max_iter))
+CensEL_set_smooth <- function(p_cel, smooth_s) {
+    invisible(.Call(`_flexEL_CensEL_set_smooth`, p_cel, smooth_s))
 }
 
-CensEL_set_abs_tol <- function(pCEL, abs_tol) {
-    invisible(.Call(`_flexEL_CensEL_set_abs_tol`, pCEL, abs_tol))
+CensEL_set_max_iter <- function(p_cel, max_iter) {
+    invisible(.Call(`_flexEL_CensEL_set_max_iter`, p_cel, max_iter))
+}
+
+CensEL_set_abs_tol <- function(p_cel, abs_tol) {
+    invisible(.Call(`_flexEL_CensEL_set_abs_tol`, p_cel, abs_tol))
 }
 
 GenEL_ctor <- function(n_obs, n_eqs) {
     .Call(`_flexEL_GenEL_ctor`, n_obs, n_eqs)
 }
 
-GenEL_set_max_iter <- function(pGEL, max_iter) {
-    invisible(.Call(`_flexEL_GenEL_set_max_iter`, pGEL, max_iter))
+GenEL_set_max_iter <- function(p_gel, max_iter) {
+    invisible(.Call(`_flexEL_GenEL_set_max_iter`, p_gel, max_iter))
 }
 
-GenEL_set_rel_tol <- function(pGEL, rel_tol) {
-    invisible(.Call(`_flexEL_GenEL_set_rel_tol`, pGEL, rel_tol))
+GenEL_set_rel_tol <- function(p_gel, rel_tol) {
+    invisible(.Call(`_flexEL_GenEL_set_rel_tol`, p_gel, rel_tol))
 }
 
-GenEL_set_supp_adj <- function(pGEL, supp_adj, a_ = NULL, weight_adj_ = NULL) {
-    invisible(.Call(`_flexEL_GenEL_set_supp_adj`, pGEL, supp_adj, a_, weight_adj_))
+GenEL_set_supp_adj <- function(p_gel, supp_adj, a_ = NULL, weight_adj_ = NULL) {
+    invisible(.Call(`_flexEL_GenEL_set_supp_adj`, p_gel, supp_adj, a_, weight_adj_))
 }
 
-GenEL_set_lambda0 <- function(pGEL, lambda0) {
-    invisible(.Call(`_flexEL_GenEL_set_lambda0`, pGEL, lambda0))
+GenEL_set_lambda0 <- function(p_gel, lambda0) {
+    invisible(.Call(`_flexEL_GenEL_set_lambda0`, p_gel, lambda0))
 }
 
-GenEL_get_n_obs <- function(pGEL) {
-    .Call(`_flexEL_GenEL_get_n_obs`, pGEL)
+GenEL_get_n_obs <- function(p_gel) {
+    .Call(`_flexEL_GenEL_get_n_obs`, p_gel)
 }
 
-GenEL_get_n_eqs <- function(pGEL) {
-    .Call(`_flexEL_GenEL_get_n_eqs`, pGEL)
+GenEL_get_n_eqs <- function(p_gel) {
+    .Call(`_flexEL_GenEL_get_n_eqs`, p_gel)
 }
 
-GenEL_get_supp_adj <- function(pGEL) {
-    .Call(`_flexEL_GenEL_get_supp_adj`, pGEL)
+GenEL_get_supp_adj <- function(p_gel) {
+    .Call(`_flexEL_GenEL_get_supp_adj`, p_gel)
 }
 
-GenEL_get_diag <- function(pGEL) {
-    .Call(`_flexEL_GenEL_get_diag`, pGEL)
+GenEL_get_diag <- function(p_gel) {
+    .Call(`_flexEL_GenEL_get_diag`, p_gel)
 }
 
-GenEL_lambda_nr <- function(pGEL, G, weights, check_conv) {
-    .Call(`_flexEL_GenEL_lambda_nr`, pGEL, G, weights, check_conv)
+GenEL_lambda_nr <- function(p_gel, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_lambda_nr`, p_gel, G, weights, check_conv)
 }
 
-GenEL_omega_hat <- function(pGEL, lambda, G, weights) {
-    .Call(`_flexEL_GenEL_omega_hat`, pGEL, lambda, G, weights)
+GenEL_omega_hat <- function(p_gel, lambda, G, weights) {
+    .Call(`_flexEL_GenEL_omega_hat`, p_gel, lambda, G, weights)
 }
 
-GenEL_logel <- function(pGEL, G, check_conv) {
-    .Call(`_flexEL_GenEL_logel`, pGEL, G, check_conv)
+GenEL_logel <- function(p_gel, G, check_conv) {
+    .Call(`_flexEL_GenEL_logel`, p_gel, G, check_conv)
 }
 
-GenEL_weighted_logel <- function(pGEL, G, weights, check_conv) {
-    .Call(`_flexEL_GenEL_weighted_logel`, pGEL, G, weights, check_conv)
+GenEL_weighted_logel <- function(p_gel, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_weighted_logel`, p_gel, G, weights, check_conv)
 }
 
-GenEL_logel_grad <- function(pGEL, G, check_conv) {
-    .Call(`_flexEL_GenEL_logel_grad`, pGEL, G, check_conv)
+GenEL_logel_grad <- function(p_gel, G, check_conv) {
+    .Call(`_flexEL_GenEL_logel_grad`, p_gel, G, check_conv)
 }
 
-GenEL_weighted_logel_grad <- function(pGEL, G, weights, check_conv) {
-    .Call(`_flexEL_GenEL_weighted_logel_grad`, pGEL, G, weights, check_conv)
+GenEL_weighted_logel_grad <- function(p_gel, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_weighted_logel_grad`, p_gel, G, weights, check_conv)
 }
 
 .adjG <- function(G, a) {

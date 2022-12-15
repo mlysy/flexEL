@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "gen_el.h"
 #include <limits> // for std::numeric_limits
+#include <iostream>
 // #include "sort_order.h"
 // #include "ind_smooth.h" 
 
@@ -36,7 +37,7 @@ namespace flexEL {
     int em_iter_; // actual number of iterations
     double abs_tol_; // absolute tolerance
     double em_err_; // actual absolute error
-    bool dnc_nr_; // flag for NR convergence failure
+    bool has_converged_nr_; // flag for NR convergence failure
 
     // implementation functions
     void omega_hat_impl(Ref<VectorXd> omega,
@@ -112,7 +113,7 @@ namespace flexEL {
     n_eqs_ = n_eqs;
     n_obs1_ = n_obs_+1; // space for augmented delta and epsilon
     supp_adj_ = false;
-    dnc_nr_ = false;
+    has_converged_nr_ = false;
     // memory allocation
     lambda_ = VectorXd::Zero(n_eqs_);
     weights_ = VectorXd::Zero(n_obs1_);
@@ -178,9 +179,10 @@ namespace flexEL {
     return abs_tol_;
   }
   
-  /// @return `true` if all the Newton-Raphson M-steps converged and if the desired error tolerance `abs_tol` has been reached in less than `max_iter` EM steps.
+  /// @return `true` if (i) all the Newton-Raphson M-steps converged and (ii) the desired error tolerance `abs_tol` has been reached in less than `max_iter` EM steps.
   inline bool CensEL::has_converged_em() {
-    return (!dnc_nr_) && (!((em_err_ > abs_tol_) && (em_iter_ == max_iter_)));
+    return has_converged_nr_ &&
+      (!((em_err_ > abs_tol_) && (em_iter_ == max_iter_)));
   }
 
 
@@ -230,7 +232,16 @@ namespace flexEL {
     }
     return;
   }
-  
+
+  /// Convergence of the algorithm is determined as follows:
+  ///
+  /// - After each M-step, convergence of the NR algorithm is checked.  If it failed, the EM algorithm is deemed not to have converged.  However, it does not stop running.
+  ///
+  /// - The EM algorithm stops when the termination criterion is reached, i.e., either `max_iter` has been reached or the difference between `logel` values is less than `abs_tol`.
+  ///
+  /// - The algorithm can also stop when `gel.logel()` returns a `nan`.
+  /// Once the EM algorithm stops, we check whether every NR algorithm has converged and also whether the absolute tolerance has been reached.  If these are both true, the EM algorithm is deemed to have converged.
+  ///
   /// @param[out] omega  Probability vector of length `n_obs` or `n_obs+1`.
   /// @param[in] G       Moment matrix with `n_eqs` rows and `omega.size()` columns. 
   /// @param[in] delta   Vector of censoring indicators of length `omega.size()`.
@@ -247,17 +258,31 @@ namespace flexEL {
     double logel_old = gel.logel(G);
     double logel;
     int ii;
+    has_converged_nr_ = true;
+    // printf("max_iter_nr = %i, rel_tol_nr = %f\n",
+    // 	   gel.get_max_iter(), gel.get_rel_tol());
+    // std::cout << "weights:" << std::endl << weights_.head(n_obs2).transpose() << std::endl;
     for(ii=0; ii<max_iter_; ii++) {
+      // std::cout << "step " << ii << std::endl;
       // M-step
       gel.lambda_nr(lambda_, G, weights_.head(n_obs2));
       gel.omega_hat(omega, lambda_, G, weights_.head(n_obs2));
       logel = gel.logel_omega(omega, weights_.head(n_obs2));
+      // std::cout << "lambda:" << std::endl << lambda_.transpose() << std::endl;
+      // std::cout << "omega:" << std::endl << omega.transpose() << std::endl;
+      // printf("logel = %f, logel_old = %f\n", logel, logel_old);
       em_err_ = abs(logel - logel_old);
+      // printf("em_err = %f, abs_tol = %f\n", em_err_, abs_tol_);
+      // printf("gel.has_converged_nr() = %i\n", gel.has_converged_nr());
+      if(has_converged_nr_ && !gel.has_converged_nr()) {
+	has_converged_nr_ = false;
+      }
       if(em_err_ < abs_tol_) break;
       logel_old = logel;
       gel.set_lambda0(lambda_); // update starting point
       // E-step
       expected_weights(weights_.head(n_obs2), delta, epsilon, omega);
+      // std::cout << "weights:" << std::endl << weights_.head(n_obs2).transpose() << std::endl;
     }
     em_iter_ = ii;
     return;

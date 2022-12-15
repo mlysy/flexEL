@@ -9,9 +9,9 @@ GenEL <- R6::R6Class(
 
     .gelptr = NULL,
     .lambda0 = NULL,
-    .max_iter = 100,
-    .rel_tol = 1e-7,
-    .supp_adj = FALSE,
+    .max_iter = NULL,
+    .rel_tol = NULL,
+    .supp_adj = NULL,
     .supp_adj_a = NULL,
     .weight_adj = NULL,
 
@@ -141,8 +141,9 @@ GenEL <- R6::R6Class(
   public = list(
 
     #' @description Create a new `GenEL` object.
-    #' @param n_obs Number of observations.
-    #' @param n_eqs Number of (moment constraint) equations.
+    #'
+    #' @template param_n_obs
+    #' @template param_n_eqs
     #' @template param_max_iter_nr
     #' @template param_rel_tol
     #' @template param_supp_adj
@@ -157,11 +158,11 @@ GenEL <- R6::R6Class(
                           supp_adj = FALSE,
                           supp_adj_a = max(1.0, .5 * log(n_obs)),
                           weight_adj = 1.0,
-                          lambda0) {
+                          lambda0 = rep(0, n_eqs)) {
       private$.gelptr <- GenEL_ctor(n_obs, n_eqs)
-      private$.lambda0 <- rep(0, n_eqs)
-      private$.supp_adj_a <- max(1.0,0.5*log(n_obs))
-      private$.weight_adj <- 1.0
+      self$set_opts(max_iter = max_iter, rel_tol = rel_tol,
+                    supp_adj = supp_adj, supp_adj_a = supp_adj_a,
+                    weight_adj = weight_adj, lambda0 = lambda0)
     },
 
     ## #' @description Set the support correction flag and support correction factor.

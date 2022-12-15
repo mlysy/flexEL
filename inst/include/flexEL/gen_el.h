@@ -310,6 +310,10 @@ namespace flexEL {
   inline void GenEL::lambda_nr_impl(Ref<VectorXd> lambda,
                                     const Ref<const MatrixXd>& G,
                                     const Ref<const VectorXd>& norm_weights) {
+    // printf("Entering lambda_nr_impl()\n");
+    // std::cout << "lambda:" << std::endl << lambda.transpose() << std::endl;
+    // std::cout << "G:" << std::endl << G << std::endl;
+    // std::cout << "norm_weights:" << std::endl << norm_weights.transpose() << std::endl;
     int n_obs2 = G.cols();
     // lambda = lambda0_; // set to initial value
     // logstar constants
@@ -339,6 +343,8 @@ namespace flexEL {
       lambda_new_ = lambda - Q1_;
       nr_err_ = max_rel_err(lambda, lambda_new_);
       lambda = lambda_new_; // complete cycle
+      // printf("lambda[%i]:\n", ii);
+      // std::cout << lambda.transpose() << std::endl;
       if (nr_err_ < rel_tol_) {
         break;
       }
@@ -405,7 +411,10 @@ namespace flexEL {
     Ref<const MatrixXd> G_eff = supp_G(G);
     Ref<const VectorXd> norm_weights_eff = supp_norm_weights(weights);
     // std::cout << "norm_weights_eff = " << norm_weights_eff.transpose() << std::endl;
+    // std::cout << "lambda_in = " << lambda.transpose() << std::endl;
+    // std::cout << "G_eff = " << G_eff << std::endl;
     lambda_nr_impl(lambda, G_eff, norm_weights_eff);
+    // std::cout << "lambda_out = " << lambda.transpose() << std::endl;    
     return;
   }
   

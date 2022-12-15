@@ -8,6 +8,9 @@ R6 Class for censored EL models.
 
 R6 Class for censored EL models.
 }
+\note{
+\code{CensEL} objects contain an internal \code{GenEL_wrapper} object.  This is exactly the same as a \code{GenEL} object, except it exposes the \code{externalptr} of the underlying C++ object.  This functionality is not provided in the original \code{GenEL} class as a safety precaution, as modifying the \code{externalptr} in an unintended way can terminate the R session.
+}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
@@ -20,6 +23,8 @@ R6 Class for censored EL models.
 \item{\code{abs_tol}}{Absolute tolerance for terminating the EM algorithm (positive number).}
 
 \item{\code{smooth_s}}{Indicator smoothing parameter.  A positive number, where \code{smooth_s = Inf} gives the regular indicator function.}
+
+\item{\code{gel}}{Internal \code{GenEL} object which handles the Newton-Raphson M-step of the EM algorithm.}
 }
 \if{html}{\out{</div>}}
 }
@@ -29,6 +34,7 @@ R6 Class for censored EL models.
 \item \href{#method-CensEL-new}{\code{CensEL$new()}}
 \item \href{#method-CensEL-set_opts}{\code{CensEL$set_opts()}}
 \item \href{#method-CensEL-expected_weights}{\code{CensEL$expected_weights()}}
+\item \href{#method-CensEL-omega_hat}{\code{CensEL$omega_hat()}}
 \item \href{#method-CensEL-clone}{\code{CensEL$clone()}}
 }
 }
@@ -47,15 +53,22 @@ Check that \code{omega} is well specified.
 
 Create a new \code{CensEL} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CensEL$new(gel, smooth_s = 10, max_iter = 10, abs_tol = 1e-07)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$new(
+  n_obs,
+  n_eqs,
+  smooth_s = 10,
+  max_iter = 10,
+  abs_tol = 1e-07,
+  gel_opts
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{gel}}{A \code{GenEL} object.}
+\item{\code{n_obs}}{Number of observations.}
 
-\item{\code{gel}}{A \code{GenEL} object.}
+\item{\code{n_eqs}}{Number of moment equations.}
 
 \item{\code{smooth_s}}{Indicator smoothing parameter (positive scalar).}
 
@@ -68,6 +81,8 @@ Create a new \code{CensEL} object.
 \item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
 
 \item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
+
+\item{\code{gel_opts}}{Named list of options for internal \code{GenEL} object.  If missing uses default values described in \code{\link[=GenEL$new]{GenEL$new()}}.}
 
 \item{\code{delta}}{Vector of censoring indicators.}
 
@@ -77,6 +92,10 @@ Create a new \code{CensEL} object.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+In order to set the \code{GenEL} options, use \code{CensEL$gel$set_opts()}.  Using e.g., \verb{CensEL$gel$supp_adj<-} does not appear to work as expected.
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CensEL-set_opts"></a>}}
@@ -105,7 +124,7 @@ Set multiple options together.
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-Any number of these arguments can be supplied.  Those that are missing are not modified.
+Any number of these arguments can be supplied.  Those that are missing are not modified.  In order to modify the \code{GenEL} options, use \code{CensEL$gel$set_opts()}.
 }
 
 }
@@ -123,6 +142,10 @@ Calculate the expected weights in the EM algorithm.
 \describe{
 \item{\code{delta}}{Censoring vector of length \code{n_obs}.  The method will attempt to coerce it to logicals.}
 
+\item{\code{delta}}{Censoring vector of length \code{n_obs}.  The method will attempt to coerce it to logicals.}
+
+\item{\code{epsilon}}{Residual vector of length \code{n_obs}.}
+
 \item{\code{epsilon}}{Residual vector of length \code{n_obs}.}
 
 \item{\code{omega}}{Probability vector of length \code{n_obs + supp_adj}.  Should contain positive scalars, and method will attempt to normalize it to sum to one.}
@@ -135,6 +158,36 @@ When \code{supp_adj = TRUE} it is assumed that \code{delta[n_obs+1] = FALSE} and
 
 \subsection{Returns}{
 Weight vector of length \code{n_obs + supp_adj}.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CensEL-omega_hat"></a>}}
+\if{latex}{\out{\hypertarget{method-CensEL-omega_hat}{}}}
+\subsection{Method \code{omega_hat()}}{
+Calculate the profile probability weights via EM algorithm.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CensEL$omega_hat(G, delta, epsilon, check_conv)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{G}}{Constraint matrix of size \verb{n_obs x n_eqs}.}
+
+\item{\code{delta}}{Censoring vector of length \code{n_obs}.  The method will attempt to coerce it to logicals.}
+
+\item{\code{delta}}{Censoring vector of length \code{n_obs}.  The method will attempt to coerce it to logicals.}
+
+\item{\code{epsilon}}{Residual vector of length \code{n_obs}.}
+
+\item{\code{epsilon}}{Residual vector of length \code{n_obs}.}
+
+\item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns a vector of \code{NaN}s.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Vector of probability weights of length \code{n_obs + supp_adj}.
 }
 }
 \if{html}{\out{<hr>}}

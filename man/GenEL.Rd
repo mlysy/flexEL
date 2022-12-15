@@ -67,7 +67,7 @@ Create a new \code{GenEL} object.
   supp_adj = FALSE,
   supp_adj_a = max(1, 0.5 * log(n_obs)),
   weight_adj = 1,
-  lambda0
+  lambda0 = rep(0, n_eqs)
 )}\if{html}{\out{</div>}}
 }
 
@@ -76,7 +76,7 @@ Create a new \code{GenEL} object.
 \describe{
 \item{\code{n_obs}}{Number of observations.}
 
-\item{\code{n_eqs}}{Number of (moment constraint) equations.}
+\item{\code{n_eqs}}{Number of moment equations.}
 
 \item{\code{max_iter}}{Maximum number of Newton-Raphson iterations (positive integer).}
 
