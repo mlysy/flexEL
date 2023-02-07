@@ -82,7 +82,7 @@ Create a new \code{CensEL} object.
 
 \item{\code{abs_tol}}{Absolute tolerance for EM algorithm termination (positive scalar).}
 
-\item{\code{gel_opts}}{Named list of options for internal \code{GenEL} object.  If missing uses default values described in \code{\link[=GenEL$new]{GenEL$new()}}.}
+\item{\code{gel_opts}}{Named list of options for internal \code{GenEL} object.  If missing uses default values described in \code{\link[=GenEL]{GenEL$new()}}.}
 
 \item{\code{delta}}{Vector of censoring indicators.}
 

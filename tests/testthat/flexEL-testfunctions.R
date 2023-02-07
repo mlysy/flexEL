@@ -261,18 +261,29 @@ expected_weights <- function(delta, epsilon, omega, smooth_s) {
   n_obs <- length(delta)
   n_obs2 <- length(omega)
   supp_adj <- n_obs2 == n_obs + 1
-  weights <- rep(NA, n_obs2)
   if(supp_adj) {
     epsilon <- c(epsilon, -Inf)
     delta <- c(as.logical(delta), FALSE)
   }
+  weights <- rep(0, n_obs2)
   for(ii in 1:n_obs2) {
-    omega_tilde <- smooth_indicator(epsilon[ii], epsilon, smooth_s)
-    omega_tilde[ii] <- .5
-    omega_tilde <- omega_tilde * omega
-    omega_tilde <- omega_tilde / sum(omega_tilde)
-    weights[ii] <- delta[ii] + sum((1-delta) * omega_tilde)
+    if(delta[ii]) {
+      weights[ii] <- weights[ii] + 1
+    } else {
+      omega_tilde <- smooth_indicator(epsilon[ii], epsilon, smooth_s)
+      omega_tilde[ii] <- .5
+      omega_tilde <- omega_tilde * omega
+      weights <-  weights + omega_tilde / sum(omega_tilde)
+    }
   }
+  ## weights <- rep(NA, n_obs2)
+  ## for(ii in 1:n_obs2) {
+  ##   omega_tilde <- smooth_indicator(epsilon[ii], epsilon, smooth_s)
+  ##   omega_tilde[ii] <- .5
+  ##   omega_tilde <- omega_tilde * omega
+  ##   omega_tilde <- omega_tilde / sum(omega_tilde)
+  ##   weights[ii] <- delta[ii] + sum((1-delta) * omega_tilde)
+  ## }
   weights
 }
 

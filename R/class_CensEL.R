@@ -123,7 +123,7 @@ CensEL <- R6::R6Class(
                   #' @template param_smooth_s
                   #' @template param_max_iter_em
                   #' @template param_abs_tol
-                  #' @param gel_opts Named list of options for internal `GenEL` object.  If missing uses default values described in [GenEL$new()].
+                  #' @param gel_opts Named list of options for internal `GenEL` object.  If missing uses default values described in [`GenEL$new()`][GenEL].
                   #'
                   #' @note `CensEL` objects contain an internal `GenEL_wrapper` object.  This is exactly the same as a `GenEL` object, except it exposes the `externalptr` of the underlying C++ object.  This functionality is not provided in the original `GenEL` class as a safety precaution, as modifying the `externalptr` in an unintended way can terminate the R session.
                   initialize = function(n_obs, n_eqs,

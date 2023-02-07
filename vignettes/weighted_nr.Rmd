@@ -26,61 +26,101 @@ bibliography: flexEL.bib
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\bz}{{\bm{0}}}
 \newcommand{\bg}{{\bm{g}}}
+\newcommand{\bG}{{\bm{G}}}
 \newcommand{\XX}{{\bm{X}}}
 \newcommand{\xx}{{\bm{x}}}
 \newcommand{\zz}{{\bm{z}}}
 \newcommand{\bbe}{{\bm{\beta}}}
+\newcommand{\tta}{{\bm{\tau}}}
 \newcommand{\bga}{{\bm{\gamma}}}
 \newcommand{\bla}{{\bm{\lambda}}}
 \newcommand{\w}{{\omega}}
-\newcommand{\bom}{{\bm{\omega}}}
+\newcommand{\oom}{{\bm{\omega}}}
 \newcommand{\eps}{{\epsilon}}
+\newcommand{\eep}{{\bm{\epsilon}}}
+\newcommand{\ee}{{\bm{e}}}
 \newcommand{\tth}{{\bm{\theta}}}
 \newcommand{\E}{\textrm{E}}
 \newcommand{\F}{\textrm{F}}
 \newcommand{\R}{\mathbb R}
 \newcommand{\var}{\textrm{var}}
 \newcommand{\iid}{\stackrel {\textrm{iid}}{\sim}}
+\newcommand{\ind}{\stackrel {\textrm{ind}}{\sim}}
 \newcommand{\N}{\mathcal N}
 \newcommand{\ud}{\mathop{}\!\mathrm{d}}
 \newcommand{\dth}{\frac{\ud}{\ud\tth}}
-\newcommand{\indicator}{\operatorname{\mathbb{1}}}
-\newcommand{\indsmooth}{\operatorname{\mathcal{S}}}
+\DeclareMathOperator{\indicator}{\mathbb{1}}
+\DeclareMathOperator{\indsmooth}{\mathcal{S}}
+\newcommand{\indexset}{\mathcal{I}}
+\newcommand{\simplex}{\Delta}
+\DeclareMathOperator{\categorical}{Categorical}
+\DeclareMathOperator{\bernoulli}{Bernoulli}
 
-# Weighted Empirical Likelihood
+# General Empirical Likelihood
 
-The weighted empirical likelihood (EL) is defined as
+Suppose we have iid observations $\xx_1, \ldots \xx_n \iid F(\xx \mid \tth)$.  The goal is to estimate the model parameters $\tth$.  However, the complete parametric specification of $F(\xx \mid \tth)$ is unknown.  Instead, we only have the moment conditions
 $$
-\log \EL(\tth) = \sum_{i=1}^n q_i \log (\hat \omega_i),
+E[\bg(\xx, \tth)] = \bz.
 $$
-where $\hat \bom = \hat \bom(\tth)$ solves the optimization problem
+The empirical likelihood (EL) function is defined as
+$$
+\log \EL(\tth) = \log \EL(\tth, \hat \oom) =  \sum_{i=1}^n \log \hat \omega_i,
+$$
+where $\hat \oom = \hat \oom(\tth)$ solves the optimization problem
 \begin{equation}
-\max_{\bom} \sum_{i=1}^n q_i \log(\omega_i) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \bom \in \Delta^{n-1},
+\max_{\oom} \log \EL(\tth, \oom) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \oom \in \simplex^{n-1},
+(\#eq:elopt)
+\end{equation}
+where $\bg_i = \bg(\xx_i, \tth) \in \mathbb R^m$ and 
+$$
+\simplex^{n-1} = \{\oom \in \mathbb R^n: \sum_{i=1}^n \omega_i = 1, \omega_i > 0\}
+$$ 
+is the $(n-1)$-dimensional probability simplex.  The estimator $\hat \tth = \argmax_{\tth} \log \EL(\tth)$ is called the EL estimator of $\tth$.
+
+## Computation
+
+For fixed $\tth$, we may solve the optimization problem \@ref(eq:elopt) as follows.  First, let us consider solving \@ref(eq:elopt) for a slighly generalized "weighted" EL function
+\begin{equation}
+\log \EL(\tth, \oom) = \sum_{i=1}^n q_i \log \omega_i,
 (\#eq:wel)
 \end{equation}
-where $\bg_i  = \bg_i(\tth) \in \mathbb R^m$, $q_i > 0$ are the weights, and $\Delta^{n-1} = \{\bom \in \mathbb R^n: \sum_{i=1}^n \omega_i = 1, \omega_i > 0\}$ is the $(n-1)$-dimensional probability simplex.
-
-## Solution
-
-Let $r_i = q_i / \sum_{i=1}^n q_i$.  Then the solution to the weighted EL problem is given by
-\begin{equation}
-\hat \omega_i = \frac{r_i}{1 - \hat \bla'\bg_i}, 
-(\#eq:omegahat)
-\end{equation}
-where 
-\begin{equation}
-\begin{aligned}
-\hat \bla & = \argmax_{\bla} Q(\bla), \\
-Q(\bla) & = \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right), \\
-\log^\star(x; r) & = 
+where $q_i > 0$ are the weights.  Let $r_i = q_i / \sum_{i=1}^n q_i$, and consider the convex function
+$$
+Q(\bla) = \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right),
+$$
+where
+$$
+\log^\star(x; r) = 
 \begin{cases} 
 \log(x) & x \ge r \\
 - \tfrac 1 2 (x/r)^2 + 2 (x/r) - \tfrac 3 2 + \log r & x < r.
 \end{cases}
-\end{aligned}
-(\#eq:optim)
+$$
+Then the solution to the weighted EL optimization problem \@ref(eq:elopt)-\@ref(eq:wel) is given by
+\begin{equation}
+\hat \omega_i = \frac{r_i}{1 - \hat \bla'\bg_i}, 
+(\#eq:omegahat)
 \end{equation}
-The convex optimization problem in $\bla$ can be solved by the Newton-Raphson algorithm.  That is, the Newton-Raphson updates are given by
+where
+\begin{equation}
+\hat \bla = \argmax_{\bla} Q(\bla).
+(\#eq:Qopt)
+\end{equation}
+
+<!-- \begin{equation} -->
+<!-- \begin{aligned} -->
+<!-- \hat \bla & = \argmax_{\bla} Q(\bla), \\ -->
+<!-- Q(\bla) & = \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right), \\ -->
+<!-- \log^\star(x; r) & =  -->
+<!-- \begin{cases}  -->
+<!-- \log(x) & x \ge r \\ -->
+<!-- - \tfrac 1 2 (x/r)^2 + 2 (x/r) - \tfrac 3 2 + \log r & x < r. -->
+<!-- \end{cases} -->
+<!-- \end{aligned} -->
+<!-- (\#eq:optim) -->
+<!-- \end{equation} -->
+
+The convex optimization problem \@ref(eq:Qopt) can be solved by the Newton-Raphson algorithm.  That is, the Newton-Raphson updates are given by
 $$
 \bla_{t+1} = \bla_{t} - [Q_{(2)}(\bla_t)]^{-1} Q_{(1)}(\bla_t),
 $$
@@ -95,54 +135,121 @@ Q_{(2)}(\bla) = \frac{\ud^2}{\ud \bla \ud \bla'} Q(\bla) & = \sum_{i=1}^n r_i \l
 
 ## Gradient
 
-The gradient of the the weighted empirical loglikelihood with respect to $\tt$ is
+The gradient of the the weighted empirical loglikelihood with respect to $\tth$ is
 $$
 \begin{aligned}
 \dth \log \EL(\tth) & = \dth \sum_{i=1}^n q_i \log \hat \omega_i(\tth) \\
 & = \sum_{i=1}^n \frac{q_i}{1 - \bla'\bg_i} \cdot \dth \bla(\tth)'\bg_i(\tth) \\
-& = \dth \bla(\tth)' \left[\sum_{i=1}^n \frac{q_i \cdot \bg_i(\tth)}{1 - \bla'\bg_i}\right] + Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth),
+& = R \times \left(\dth \bla(\tth)' \left[\sum_{i=1}^n \frac{r_i \cdot \bg_i(\tth)}{1 - \bla'\bg_i}\right] + \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth) \right),
 \end{aligned}
 $$
-where $Q = \sum_{i=1}^n q_i$.  Since substituting \@ref(eq:omegahat) into \@ref(eq:wel) gives
+where $R = \sum_{i=1}^n q_i$.  Using \@ref(eq:omegahat), we have
 $$
-\sum_{i=1}^n \hat \omega_i \cdot \bg_i = \sum_{i=1}^n \frac{r_i \cdot \bg_i}{1 - \hat \bla'\bg_i} = \bz,
+\sum_{i=1}^n \frac{r_i \cdot \bg_i}{1 - \hat \bla'\bg_i} = \sum_{i=1}^n \hat \omega_i \cdot \bg_i = \bz,
 $$
-the first term in the gradient disappears, such that we have
+where the second equality comes from the definition of the optimization constraint in \@ref(eq:elopt).  Therefore, the first term in the gradient disappears, such that we have
 \begin{equation}
-\dth \log \EL(\tth) = Q \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth).
+\dth \log \EL(\tth) = R \sum_{i=1}^n \hat \omega_i(\tth) \cdot \bla(\tth)' \dth \bg_i(\tth).
 (\#eq:gradel)
 \end{equation}
 
-# Censored Empirical Likelihood
+For automatic differentiation, it is useful to solve for $\frac{\ud}{\ud \bG} \log \EL(\bG)$, where $\bG_{n \times m} = (\bg_1, \ldots, \bg_n)$, in which case we have
+\begin{equation}
+\frac{\ud}{\ud \bG} \log \EL(\bG) = R \cdot \hat \oom_{n\times 1} \bla_{m\times 1}'.
+(\#eq:gradelG)
+\end{equation}
+
+
+# Empirical Likelihood with Censoring
 
 Consider the location-scale model
-
 $$
 y_i = \mu(\xx_i, \tth) + \sigma(\xx_i, \tth) + \eps_i,
 $$
+where $\xx_i \iid G(\xx)$, and independently $\eps_i \iid H(\eps)$ is a general noise distribution with $E[\eps] = 0$ and $\var(\eps) = 1$.  Suppose we observe $u_i = \min(y_i, c_i)$ where $c_i$ is the censoring time, and we also observe $\delta_i = \indicator\{y_i \le c_i\}$.  
 
-where $\xx_i \iid F(\xx)$ and $\eps_i \iid G(\eps)$ is a general residual distribution with $E[\eps] = 0$ and $\var(\eps) = 1$.  Suppose we observe $u_i = \min(y_i, c_i)$ where $c_i$ is the censoring time, and we also observe $\delta_i = \indicator\{y_i \le c_i\}$.  Let $e_i = e_i(\tth) = (u_i - \mu(\xx_i, \tth))/\sigma(\xx_i, \tth)$.  For the moment conditions
-
+Let 
+$$
+e_i = e_i(\tth) = \frac{u_i - \mu(\xx_i, \tth)}{\sigma(\xx_i, \tth}
+$$
+denote the censoring residuals.  Then for the moment conditions
 $$
 E[\bg(\xx, \eps, \tth)] = \bz,
 $$
-
-The EL with smoothed right censoring is defined as
+the EL with right censoring is defined as
 \begin{equation}
-\log \CEL(\tth) = \log \CEL(\tth, \hat{\bom}) = \sum_{i=1}^n \left[\delta_i \log(\hat\w_i) + (1-\delta_i) \log\left(\sum_{j=1}^n \indsmooth(e_i - e_j; s) \cdot \hat\w_j \right)\right],
+\log \CEL(\tth) = \log \CEL(\tth, \hat{\oom}) = \sum_{i=1}^n \left[\delta_i \log(\hat\w_i) + (1-\delta_i) \log\left(\sum_{j=1}^n \indsmooth(e_i - e_j; s) \cdot \hat\w_j \right)\right],
 \end{equation}
-
 where $\indsmooth(\cdot; s)$ is the smoothed indicator function,
-
 $$
 \indsmooth(x; s) = \frac{1}{1 + \exp(s \cdot x)},
 $$
-
-and $\hat{\bom} = \hat{\bom}(\tth)$ solves the optimization problem
-
+and $\hat{\oom} = \hat{\oom}(\tth)$ solves the optimization problem
 \begin{equation}
-\max_{\bom} \log \CEL(\tth, \bom) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \bom \in \Delta^{n-1}.
+\max_{\oom} \log \CEL(\tth, \oom) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \oom \in \simplex^{n-1},
+(\#eq:celopt)
 \end{equation}
+where $\bg_i = \bg(\xx_i, e_i, \tth)$.
 
 ## EM Algorithm
 
+For fixed $\tth$, the CEL optimization problem \@ref(eq:celopt) can be solved via an EM algorithm.  The main steps are outlined here; details are provided in the Appendix.
+
+- **Initial Step**
+
+    Let $\oom_0 = (1/n, \ldots, 1/n)$.
+
+
+- **E-Step** 
+
+    Given $\oom_t$, calculate $q_i = \delta_i + \sum_{j=1}^n(1 - \delta_j) \cdot \tilde \omega_{ji}$, where
+        $$
+		\tilde \omega_{ij} = \frac{\indsmooth(e_i - e_j; s) \cdot \omega_{tj}}{\sum_{k=1}^n \indsmooth(e_i - e_k; s) \cdot \omega_{tk}}.
+		$$
+	
+- **M-Step**
+
+    Compute $\oom_{t+1}$ by solving the weighted EL problem \@ref(eq:elopt)-\@ref(eq:wel) with $q_i$ calculated as above.
+
+
+# Appendix
+
+Suppose we have $\eps_i \iid \categorical(\oom)$ and suppose that we have additional variables
+$$
+\tau_i \mid \{\eps_i = j\} \ind \bernoulli(p_{ij}).
+$$
+Thus, we have 
+$$
+\begin{aligned}
+\tau_i & \ind \bernoulli(\sum_{j=1}^n p_{ij} \cdot \omega_j) \\
+\eps_i \mid \{\tau_i = 1\} & \ind \categorical(\tilde \omega_{i1}, \ldots, \tilde \omega_{in}), \qquad \tilde \omega_{ij} = \frac{p_{ij} \cdot \omega_j}{\sum_{k=1}^n p_{ik} \cdot \omega_k}.
+\end{aligned}
+$$
+
+Let $\indexset_k = \{i: \delta_i = k\}$ for $k = 0,1$, and similarly let $\eep_k = \{\eps_i: i \in \indexset_k\}$ and $\tta_k = \{\tau_i: i \in \indexset_k\}$.  Now suppose the $p_{ij}$ are known and we wish to estimate $\oom$ subject to the EL restriction
+$$
+\sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \qquad \oom \in \simplex^{n-1}.
+$$  
+In the context of EM, the observed data is $(\eep_1 = \indexset_1, \tta_0 = \bm{1})$ and the missing data is $\eep_0$.  Thus, the complete data likelihood is
+$$
+\ell(\oom \mid \eep_0, \eep_1 = \indexset_1, \tta_0 = \bm{1}) = \sum_{i=1}^n \left[\delta_i \log \omega_i + (1-\delta_i) \sum_{j=1}^n \indicator\{\eps_i = j\} \cdot \log \omega_j\right],
+$$
+and the observed data likelihood is
+$$
+\ell(\oom \mid \eep_1 = \indexset_1, \tta_0 = \bm{1}) = \sum_{i=1}^n \left[\delta_i \log \omega_i + (1-\delta_i) \log \left(\sum_{j=1}^n p_{ij}\cdot\omega_j\right)\right].
+$$
+
+If at step $t$ of the EM algorithm we have $\oom_t$, the E-step consists of calculating
+$$
+\begin{aligned}
+Q_t(\oom) & = E\left[\ell(\oom \mid \eep_0, \eep_1, \tta) \mid \eep_1 = \indexset_1, \tta = \bm{1}, \oom = \oom_t\right] \\
+& = \sum_{i=1}^n \left[\delta_i \log \omega_i + (1-\delta_i)\sum_{j=1}^n E[\indicator\{\eps_1 = j\} \cdot \log \omega_j \mid \eep_1 = \indexset_1, \tta = \bm{1}, \oom = \oom_t] \right] \\
+& = \sum_{i=1}^n \left[\delta_i \log \omega_i + (1-\delta_i)\sum_{j=1}^n \tilde \omega_{ij}^{(t)} \cdot \log \omega_j\right] \\
+& = \sum_{i=1}^n q_i \log \omega_i,
+\end{aligned}
+$$
+where $q_i = \delta_i + (1-\delta_i) \sum_{j=1}^n \tilde \omega_{ji}^{(t)}$ and
+$$
+\tilde \omega_{ij}^{(t)} = \frac{p_{ij} \cdot \omega_j^{(t)}}{\sum_{k=1}^n p_{ik} \cdot \omega_k^{(t)}}.
+$$
+The M-step of then consists of solving the weighted EL problem \@ref(eq:elopt)-\@ref(eq:wel) to obtain the new value of $\oom_{t+1}$ at step $t+1$.  Finally we recognize the specific case of the CEL optimization problem \@ref(eq:celopt) by setting $p_{ij} = \indsmooth(e_i - e_j; s)$.

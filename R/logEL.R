@@ -1,6 +1,6 @@
 #' Calculate the log empirical likelihood for a given `G` matrix.
 #'
-#' A simplified wrapper to [GenEL$logEL()] and [GenEL$logEL_grad()].  See documentation therein for more options.
+#' A simplified wrapper to `GenEL$logEL()` and `GenEL$logEL_grad()`.  See [`GenEL`] documentation for more options.
 #'
 #' @param G A numeric matrix of size `n_obs x n_eqs`.
 #' @param max_iter A positive integer controlling the maximum number of iterations.

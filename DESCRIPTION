@@ -11,10 +11,10 @@ Description: Various tools for implementing and calibrating empirical likelihood
 URL: https://github.com/mlysy/flexEL
 BugReports: https://github.com/mlysy/flexEL/issues
 License: GPL (>= 3)
-Imports: Rcpp (>= 0.12.13)
+Imports: Rcpp (>= 0.12.13), R6
 LinkingTo: Rcpp, RcppEigen
 RoxygenNote: 7.2.2
 Encoding: UTF-8
-Suggests: testthat, MASS, optimCheck, knitr, rmarkdown
+Suggests: testthat, MASS, optimCheck, knitr, rmarkdown, bookdown
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

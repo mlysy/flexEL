@@ -21,5 +21,5 @@ logEL(G, max_iter = 100, rel_tol = 1e-07, supp_adj = FALSE, grad = FALSE)
 The log empirical likelihood evaluated at \code{G}, or if \code{grad == TRUE}, a list with elements \code{logel} and \code{grad}, with the latter being a matrix of size \verb{n_obs x n_eqs}.
 }
 \description{
-A simplified wrapper to \code{\link[=GenEL$logEL]{GenEL$logEL()}} and \code{\link[=GenEL$logEL_grad]{GenEL$logEL_grad()}}.  See documentation therein for more options.
+A simplified wrapper to \code{GenEL$logEL()} and \code{GenEL$logEL_grad()}.  See \code{\link{GenEL}} documentation for more options.
 }

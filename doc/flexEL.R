@@ -59,13 +59,13 @@ nlmout$estimate
 ## ---- echo = FALSE, results = "asis"------------------------------------------
 cat("```c", readLines("example.cpp"), "```", sep = "\n")
 
-## ---- warn=FALSE, include=TRUE, eval=TRUE-------------------------------------
-Rcpp::sourceCpp("example.cpp")
-bb <- c(1,2)
-n_obs <- 200
-n_eqs <- 2
-X <- cbind(1, rnorm(n_obs))
-eps <- rnorm(n_obs)
-y <- X %*% bb + eps
-example_logel(c(0.75, 1.25), X, y)
+## ---- eval=FALSE--------------------------------------------------------------
+#  Rcpp::sourceCpp("example.cpp")
+#  bb <- c(1,2)
+#  n_obs <- 200
+#  n_eqs <- 2
+#  X <- cbind(1, rnorm(n_obs))
+#  eps <- rnorm(n_obs)
+#  y <- X %*% bb + eps
+#  example_logel(c(0.75, 1.25), X, y)
 

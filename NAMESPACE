@@ -3,5 +3,6 @@
 export(CensEL)
 export(GenEL)
 export(logEL)
+importFrom(R6,R6Class)
 importFrom(Rcpp,evalCpp)
 useDynLib(flexEL, .registration = TRUE)

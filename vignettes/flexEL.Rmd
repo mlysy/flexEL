@@ -1,5 +1,5 @@
 ---
-title: "**flexEL**: A Fast and Flexible Framework for Empirical Likelihood Modeling"
+title: "flexEL: A Fast and Flexible Framework for Empirical Likelihood Modeling"
 author: "Shimeng Huang, Martin Lysy"
 date: "`r Sys.Date()`"
 output:
@@ -291,7 +291,7 @@ Or, if one wish to use the C++ api directly, the steps are as below:
 cat("```c", readLines("example.cpp"), "```", sep = "\n")
 ```
 
-```{r, warn=FALSE, include=TRUE, eval=TRUE}
+```{r, eval=FALSE}
 Rcpp::sourceCpp("example.cpp")
 bb <- c(1,2)
 n_obs <- 200

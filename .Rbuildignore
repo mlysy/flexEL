@@ -1,7 +1,7 @@
 ^man-roxygen$
 ^examples$
 ^inst/doxygen/html$
-TODO.md
-summary.md
+^TODO\.md$
+^LICENSE$
 ^doc$
 ^Meta$

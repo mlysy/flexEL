@@ -218,17 +218,24 @@ namespace flexEL {
 				       const Ref<const VectorXd>& epsilon,
 				       const Ref<const VectorXd>& omega) {
     int n_obs2 = weights.size();
+    weights.setZero();
     double denom;
     for(int ii=0; ii<n_obs2; ii++) {
-      smooth_indicator(omega_tilde_.head(n_obs2), epsilon(ii), epsilon, smooth_s_);
-      if(ii == n_obs_) {
-	// convert 1/(1 + exp(Inf-Inf)) to 0.5
-	omega_tilde_(ii) = 0.5;
+      if(delta(ii) > 0.5) {
+        // avoid checking double > 0.0: delta should only ever be 0 or 1!
+	weights(ii) += 1.0;
+      } else {
+	smooth_indicator(omega_tilde_.head(n_obs2), epsilon(ii), epsilon, smooth_s_);
+	if(ii == n_obs_) {
+	  // convert 1/(1 + exp(Inf-Inf)) to 0.5
+	  omega_tilde_(ii) = 0.5;
+	}
+	omega_tilde_.head(n_obs2).array() *= omega.array();
+	denom = (omega_tilde_.head(n_obs2).array()).sum();
+	weights.array() += omega_tilde_.head(n_obs2).array() / denom;
+	// omega_tilde_.head(n_obs2).array() /= denom;
+	// weights(ii) = delta(ii) + ((1.0 - delta.array()) * omega_tilde_.head(n_obs2).array()).sum();
       }
-      omega_tilde_.head(n_obs2).array() *= omega.array();
-      denom = (omega_tilde_.head(n_obs2).array()).sum();
-      omega_tilde_.head(n_obs2).array() /= denom;
-      weights(ii) = delta(ii) + ((1.0 - delta.array()) * omega_tilde_.head(n_obs2).array()).sum();
     }
     return;
   }

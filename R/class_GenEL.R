@@ -1,5 +1,6 @@
 #' R6 Class for general EL models.
 #'
+#' @importFrom R6 R6Class
 #' @export
 GenEL <- R6::R6Class(
 
