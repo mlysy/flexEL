@@ -3,7 +3,7 @@
 #ifndef FLEXEL_CENS_EL_H
 #define FLEXEL_CENS_EL_H
 
-#include <RcppEigen.h>
+#include <Eigen/Dense>
 #include "utils.h"
 #include "gen_el.h"
 #include <limits> // for std::numeric_limits

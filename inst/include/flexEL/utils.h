@@ -5,7 +5,7 @@
 #ifndef FLEXEL_UTILS_H
 #define FLEXEL_UTILS_H
 
-#include <RcppEigen.h>
+#include <Eigen/Dense>
 
 namespace flexEL {
   using namespace Eigen;

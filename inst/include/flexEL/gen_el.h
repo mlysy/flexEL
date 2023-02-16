@@ -3,10 +3,8 @@
 #ifndef FLEXEL_GEN_EL_H
 #define FLEXEL_GEN_EL_H
 
-#include <RcppEigen.h>
 #include "utils.h"
-
-// [[Rcpp::depends(RcppEigen)]]
+#include <Eigen/Dense>
 
 namespace flexEL {
 
