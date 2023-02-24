@@ -1,1 +1,1 @@
-PKG_CXXFLAGS=-I"../inst/include/flexEL"
+PKG_CXXFLAGS = ${CXX11STD} -I"../inst/include/flexEL"

@@ -51,17 +51,19 @@ test_that("R and C++ versions of `CensEL$expected_weights()` are the same.", {
 test_that("R and C++ versions of `CensEL$omega_hat()` are the same.", {
   test_cases <- expand.grid(
     set_opts = c(FALSE, TRUE),
-    supp_adj = c(FALSE, TRUE)
+    supp_adj = c(FALSE, TRUE),
+    check_conv = c(FALSE, TRUE),
+    stringsAsFactors = FALSE
   )
   n_test <- nrow(test_cases)
   for (ii in 1:n_test) {
     # setup
     ## ii <- 1
     ## check_conv <- FALSE
-    check_conv <- sample(c(TRUE, FALSE), 1)
+    ## check_conv <- sample(c(TRUE, FALSE), 1)
     setup <- CensEL_setup(set_opts = test_cases$set_opts[ii],
                           supp_adj = test_cases$supp_adj[ii],
-                          check_conv = check_conv)
+                          check_conv = test_cases$check_conv[ii])
     arg_names <- c("G", "delta", "epsilon", "check_conv")
     out_cpp <- do.call(setup$cel$omega_hat,
                        args = setup$cel_args[arg_names])
@@ -72,3 +74,4 @@ test_that("R and C++ versions of `CensEL$omega_hat()` are the same.", {
     expect_equal(out_cpp, out_r$omega)
   }
 })
+

@@ -15,6 +15,7 @@ namespace flexEL {
 
   using namespace Eigen;
 
+  template <class Type>
   class CensEL {
     
   private:
@@ -24,30 +25,30 @@ namespace flexEL {
     int n_eqs_; // number of rows    
     int n_obs1_; // n_obs1_ = n_obs_+1: for memory allocation
     bool supp_adj_; // support adjustment flag
-    double smooth_s_; // continuity correction parameter
+    Type smooth_s_; // continuity correction parameter
     
     // internal variables for EM algorithm
-    VectorXd lambda_; // NR dual vector
-    VectorXd weights_; // EM weights
-    VectorXd omega_; // probability vector
-    VectorXd omega_tilde_; // for E-step
-    VectorXd delta_aug_; // censoring indicators
-    VectorXd epsilon_aug_; // residuals
+    Vector_t<Type> lambda_; // NR dual vector
+    Vector_t<Type> weights_; // EM weights
+    Vector_t<Type> omega_; // probability vector
+    Vector_t<Type> omega_tilde_; // for E-step
+    Vector_t<Type> delta_aug_; // censoring indicators
+    Vector_t<Type> epsilon_aug_; // residuals
     int max_iter_; // maximum number of iterations
     int em_iter_; // actual number of iterations
-    double abs_tol_; // absolute tolerance
-    double em_err_; // actual absolute error
+    Type abs_tol_; // absolute tolerance
+    Type em_err_; // actual absolute error
     bool has_converged_nr_; // flag for NR convergence failure
 
     // implementation functions
-    void omega_hat_impl(Ref<VectorXd> omega,
-			const Ref<const MatrixXd>& G,
-			const Ref<const VectorXd>& delta,
-			const Ref<const VectorXd>& epsilon,
-			GenEL& gel);
-    double logel_omega_impl(const Ref<const VectorXd>& omega,
-			    const Ref<const VectorXd>& delta,
-			    const Ref<const VectorXd>& epsilon);
+    void omega_hat_impl(RefVector_t<Type> omega,
+			cRefMatrix_t<Type>& G,
+			cRefVector_t<Type>& delta,
+			cRefVector_t<Type>& epsilon,
+			GenEL<Type>& gel);
+    Type logel_omega_impl(cRefVector_t<Type>& omega,
+			  cRefVector_t<Type>& delta,
+			  cRefVector_t<Type>& epsilon);
     
   public:
     
@@ -56,58 +57,59 @@ namespace flexEL {
     /// Set the maximum number of EM iterations.
     void set_max_iter(int max_iter);
     /// Set the absolute tolerance for the EM algorithm.
-    void set_abs_tol(double abs_tol);
+    void set_abs_tol(Type abs_tol);
     /// Set the smoothing parameter.
-    void set_smooth(double s);
+    void set_smooth(Type s);
     /// Get number of observations.
     int get_n_obs();
     /// Get number of estimating equations.
     int get_n_eqs();
     /// Get the diagnostics for the EM run.
-    void get_diag(int& em_iter, double& em_err);
+    void get_diag(int& em_iter, Type& em_err);
     /// Get the maximum number of EM iterations.
     int get_max_iter();
     /// Get the absolute tolerance of the EM algorithm.
-    double get_abs_tol();
+    Type get_abs_tol();
     /// Get the smoothing parameter.
-    double get_smooth();
+    Type get_smooth();
 
     /// Check whether EM algorithm has converged.
     bool has_converged_em();
 
     /// Censoring vector with support adjustment.
-    Ref<const VectorXd> supp_delta(const Ref<const VectorXd>& delta);
+    Ref<const Vector_t<Type> > supp_delta(cRefVector_t<Type>& delta);
     /// Residual vector with support adjustment.
-    Ref<const VectorXd> supp_epsilon(const Ref<const VectorXd>& epsilon);
+    Ref<const Vector_t<Type> > supp_epsilon(cRefVector_t<Type>& epsilon);
     
     /// Calculate the expected weights in the EM algorithm.
-    void expected_weights(Ref<VectorXd> weights,
-			  const Ref<const VectorXd>& delta,
-			  const Ref<const VectorXd>& epsilon,
-			  const Ref<const VectorXd>& omega);
+    void expected_weights(RefVector_t<Type> weights,
+			  cRefVector_t<Type>& delta,
+			  cRefVector_t<Type>& epsilon,
+			  cRefVector_t<Type>& omega);
         
     /// Calculate the profile probability weights.
-    void omega_hat(Ref<VectorXd> omega,
-                   const Ref<const MatrixXd>& G,
-                   const Ref<const VectorXd>& delta,
-                   const Ref<const VectorXd>& epsilon,
-		   GenEL& gel);
+    void omega_hat(RefVector_t<Type> omega,
+                   cRefMatrix_t<Type>& G,
+                   cRefVector_t<Type>& delta,
+                   cRefVector_t<Type>& epsilon,
+		   GenEL<Type>& gel);
 
     /// Calculate the censored empirical loglikelihood given the probability weights.
-    double logel_omega(const Ref<const VectorXd>& omega,
-		       const Ref<const VectorXd>& delta,
-		       const Ref<const VectorXd>& epsilon);
+    Type logel_omega(cRefVector_t<Type>& omega,
+		     cRefVector_t<Type>& delta,
+		     cRefVector_t<Type>& epsilon);
     /// Calculate the censored empirical loglikelihood.
-    double logel(const Ref<const MatrixXd>& G,
-                 const Ref<const VectorXd>& delta,
-                 const Ref<const VectorXd>& epsilon,
-		 GenEL& gel);
+    Type logel(cRefMatrix_t<Type>& G,
+	       cRefVector_t<Type>& delta,
+	       cRefVector_t<Type>& epsilon,
+	       GenEL<Type>& gel);
     
   };
   
   /// @param[in] n_obs    Number of observations.
   /// @param[in] n_eqs    Number of estimating equations.
-  inline CensEL::CensEL(int n_obs, int n_eqs) {
+  template <class Type>
+  inline CensEL<Type>::CensEL(int n_obs, int n_eqs) {
     // assign internal values
     n_obs_ = n_obs;
     n_eqs_ = n_eqs;
@@ -115,15 +117,15 @@ namespace flexEL {
     supp_adj_ = false;
     has_converged_nr_ = false;
     // memory allocation
-    lambda_ = VectorXd::Zero(n_eqs_);
-    weights_ = VectorXd::Zero(n_obs1_);
-    delta_aug_ = VectorXd::Zero(n_obs1_);
-    epsilon_aug_ = VectorXd::Zero(n_obs1_);
-    omega_ = VectorXd::Zero(n_obs1_);
-    omega_tilde_ = VectorXd::Zero(n_obs1_);
+    lambda_ = Vector_t<Type>::Zero(n_eqs_);
+    weights_ = Vector_t<Type>::Zero(n_obs1_);
+    delta_aug_ = Vector_t<Type>::Zero(n_obs1_);
+    epsilon_aug_ = Vector_t<Type>::Zero(n_obs1_);
+    omega_ = Vector_t<Type>::Zero(n_obs1_);
+    omega_tilde_ = Vector_t<Type>::Zero(n_obs1_);
     // support adjustment dummy values
     delta_aug_(n_obs_) = 0;
-    epsilon_aug_(n_obs_) = -std::numeric_limits<double>::infinity();
+    epsilon_aug_(n_obs_) = -std::numeric_limits<Type>::infinity();
     // default tuning parameters
     em_iter_ = 0;
     em_err_ = 0.0;
@@ -133,54 +135,64 @@ namespace flexEL {
   }
   
   /// @param[in] max_iter Maximum number of EM iterations.
-  inline void CensEL::set_max_iter(int max_iter) {
+  template <class Type>
+  inline void CensEL<Type>::set_max_iter(int max_iter) {
     max_iter_ = max_iter;
     return;
   }
   
   /// @param[in] abs_tol Relative tolerance for the EM algorithm.
-  inline void CensEL::set_abs_tol(double abs_tol) {
+  template <class Type>
+  inline void CensEL<Type>::set_abs_tol(Type abs_tol) {
     abs_tol_ = abs_tol;
     return;
   }
   
   /// @param[in] s      Tuning parameter for continuity correction.
-  inline void CensEL::set_smooth(double s) {
+  template <class Type>
+  inline void CensEL<Type>::set_smooth(Type s) {
     smooth_s_ = s; 
     return;
   }
 
-  inline int CensEL::get_n_obs() {
+  template <class Type>
+  inline int CensEL<Type>::get_n_obs() {
     return n_obs_;
   }
   
-  inline int CensEL::get_n_eqs() {
+  template <class Type>
+  inline int CensEL<Type>::get_n_eqs() {
     return n_eqs_;
   }
 
   
   /// @param[out] em_iter Number of EM iterations.
   /// @param[out] em_err Maximum relative difference between the value of logel in the last two EM steps.
-  inline void CensEL::get_diag(int& em_iter, double& em_err) {
+  template <class Type>
+  inline void CensEL<Type>::get_diag(int& em_iter, Type& em_err) {
     em_iter = em_iter_;
     em_err = em_err_;
     return;
   }
 
-  inline double CensEL::get_smooth() {
+  template <class Type>
+  inline Type CensEL<Type>::get_smooth() {
     return smooth_s_;
   }
   
-  inline int CensEL::get_max_iter() {
+  template <class Type>
+  inline int CensEL<Type>::get_max_iter() {
     return max_iter_;
   }
   
-  inline double CensEL::get_abs_tol() {
+  template <class Type>
+  inline Type CensEL<Type>::get_abs_tol() {
     return abs_tol_;
   }
   
   /// @return `true` if (i) all the Newton-Raphson M-steps converged and (ii) the desired error tolerance `abs_tol` has been reached in less than `max_iter` EM steps.
-  inline bool CensEL::has_converged_em() {
+  template <class Type>
+  inline bool CensEL<Type>::has_converged_em() {
     return has_converged_nr_ &&
       (!((em_err_ > abs_tol_) && (em_iter_ == max_iter_)));
   }
@@ -188,23 +200,25 @@ namespace flexEL {
 
   /// @param[in] delta Censoring vector of length `n_obs` or `n_obs+1`. If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `delta.size() == n_obs+1`, assumes that support has already been adjusted.
   /// return A reference to `delta` if no support adjustment is necessary (not needed or already performed); otherwise a reference to `delta_aug_`. 
-  Ref<const VectorXd> CensEL::supp_delta(const Ref<const VectorXd>& delta) {
+  template <class Type>
+  Ref<const Vector_t<Type> > CensEL<Type>::supp_delta(cRefVector_t<Type>& delta) {
     if(supp_adj_ && delta.size() == n_obs_) {
       delta_aug_.head(n_obs_) = delta;
-      return Ref<const VectorXd>(delta_aug_);
+      return Ref<const Vector_t<Type> >(delta_aug_);
     } else {
-      return Ref<const VectorXd>(delta);
+      return Ref<const Vector_t<Type> >(delta);
     }
   }
   
   /// @param[in] epsilon Residual vector of length `n_obs` or `n_obs+1`. If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `epsilon.size() == n_obs+1`, assumes that support has already been adjusted.
   /// return A reference to `epsilon` if no support adjustment is necessary (not needed or already performed); otherwise a reference to `epsilon_aug_`. 
-  Ref<const VectorXd> CensEL::supp_epsilon(const Ref<const VectorXd>& epsilon) {
+  template <class Type>
+  Ref<const Vector_t<Type> > CensEL<Type>::supp_epsilon(cRefVector_t<Type>& epsilon) {
     if(supp_adj_ && epsilon.size() == n_obs_) {
       epsilon_aug_.head(n_obs_) = epsilon;
-      return Ref<const VectorXd>(epsilon_aug_);
+      return Ref<const Vector_t<Type> >(epsilon_aug_);
     } else {
-      return Ref<const VectorXd>(epsilon);
+      return Ref<const Vector_t<Type> >(epsilon);
     }
   }
 
@@ -213,19 +227,20 @@ namespace flexEL {
   /// @param[in] delta Censoring vector of the same length as `weights`.
   /// @param[in] epsilon Residual vector of the same length as `weights`.
   /// @param[in] omega Probability vector of the same length as `weights`.
-  inline void CensEL::expected_weights(Ref<VectorXd> weights,
-				       const Ref<const VectorXd>& delta,
-				       const Ref<const VectorXd>& epsilon,
-				       const Ref<const VectorXd>& omega) {
+  template <class Type>
+  inline void CensEL<Type>::expected_weights(RefVector_t<Type> weights,
+					     cRefVector_t<Type>& delta,
+					     cRefVector_t<Type>& epsilon,
+					     cRefVector_t<Type>& omega) {
     int n_obs2 = weights.size();
     weights.setZero();
-    double denom;
+    Type denom;
     for(int ii=0; ii<n_obs2; ii++) {
       if(delta(ii) > 0.5) {
-        // avoid checking double > 0.0: delta should only ever be 0 or 1!
+        // avoid checking Type > 0.0: delta should only ever be 0 or 1!
 	weights(ii) += 1.0;
       } else {
-	smooth_indicator(omega_tilde_.head(n_obs2), epsilon(ii), epsilon, smooth_s_);
+	smooth_indicator<Type>(omega_tilde_.head(n_obs2), epsilon(ii), epsilon, smooth_s_);
 	if(ii == n_obs_) {
 	  // convert 1/(1 + exp(Inf-Inf)) to 0.5
 	  omega_tilde_(ii) = 0.5;
@@ -252,18 +267,19 @@ namespace flexEL {
   /// @param[out] omega  Probability vector of length `n_obs` or `n_obs+1`.
   /// @param[in] G       Moment matrix with `n_eqs` rows and `omega.size()` columns. 
   /// @param[in] delta   Vector of censoring indicators of length `omega.size()`.
-  /// @param[in] gel Reference to `GenEL` object which performs the M-step of the EM algorithm.
-  inline void CensEL::omega_hat_impl(Ref<VectorXd> omega,
-				     const Ref<const MatrixXd>& G,
-				     const Ref<const VectorXd>& delta,
-				     const Ref<const VectorXd>& epsilon,
-				     GenEL& gel) {
+  /// @param[in] gel Reference to `GenEL<Type>` object which performs the M-step of the EM algorithm.
+  template <class Type>
+  inline void CensEL<Type>::omega_hat_impl(RefVector_t<Type> omega,
+					   cRefMatrix_t<Type>& G,
+					   cRefVector_t<Type>& delta,
+					   cRefVector_t<Type>& epsilon,
+					   GenEL<Type>& gel) {
     int n_obs2 = omega.size();
     // initialize quantities
-    omega.fill(1.0/double(n_obs2));
+    omega.fill(1.0/Type(n_obs2));
     expected_weights(weights_.head(n_obs2), delta, epsilon, omega);
-    double logel_old = gel.logel(G);
-    double logel;
+    Type logel_old = gel.logel(G);
+    Type logel;
     int ii;
     has_converged_nr_ = true;
     // printf("max_iter_nr = %i, rel_tol_nr = %f\n",
@@ -284,7 +300,7 @@ namespace flexEL {
       if(has_converged_nr_ && !gel.has_converged_nr()) {
 	has_converged_nr_ = false;
       }
-      if(em_err_ < abs_tol_) break;
+      if(isnan(em_err_) || em_err_ < abs_tol_) break;
       logel_old = logel;
       gel.set_lambda0(lambda_); // update starting point
       // E-step
@@ -299,16 +315,17 @@ namespace flexEL {
   /// @param[in] delta Censoring vector of same length as `omega`.
   /// @param[in] epsilon Residual vector of same length as `omega`.
   /// @return Value of the censored empirical loglikelihood.
-  inline double CensEL::logel_omega_impl(const Ref<const VectorXd>& omega,
-					 const Ref<const VectorXd>& delta,
-					 const Ref<const VectorXd>& epsilon) {
+  template <class Type>
+  inline Type CensEL<Type>::logel_omega_impl(cRefVector_t<Type>& omega,
+					     cRefVector_t<Type>& delta,
+					     cRefVector_t<Type>& epsilon) {
     int n_obs2 = omega.size();
-    double logel = 0.0;
+    Type logel = 0.0;
     for(int ii=0; ii<n_obs2; ii++) {
       if(delta(ii)) {
 	logel += log(omega(ii));
       } else {
-	smooth_indicator(omega_tilde_.head(n_obs2), epsilon(ii), epsilon, smooth_s_);
+	smooth_indicator<Type>(omega_tilde_.head(n_obs2), epsilon(ii), epsilon, smooth_s_);
 	logel += log((omega_tilde_.head(n_obs2).array() * omega.array()).sum()); 
       }
     }
@@ -318,16 +335,17 @@ namespace flexEL {
   /// @param[out] omega  Probability vector of length `n_obs + supp_adj`.
   /// @param[in] G       Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected. 
   /// @param[in] delta   Vector of censoring indicators of length `n_obs` or `n_obs + supp_adj` following same logic as above.
-  /// @param[in] gel Reference to `GenEL` object which performs the M-step of the EM algorithm.
-  inline void CensEL::omega_hat(Ref<VectorXd> omega,
-                                const Ref<const MatrixXd>& G,
-                                const Ref<const VectorXd>& delta,
-                                const Ref<const VectorXd>& epsilon,
-				GenEL& gel) {
+  /// @param[in] gel Reference to `GenEL<Type>` object which performs the M-step of the EM algorithm.
+  template <class Type>
+  inline void CensEL<Type>::omega_hat(RefVector_t<Type> omega,
+				      cRefMatrix_t<Type>& G,
+				      cRefVector_t<Type>& delta,
+				      cRefVector_t<Type>& epsilon,
+				      GenEL<Type>& gel) {
     supp_adj_ = gel.get_supp_adj();
-    Ref<const VectorXd> delta_eff = supp_delta(delta);
-    Ref<const VectorXd> epsilon_eff = supp_epsilon(epsilon);
-    Ref<const MatrixXd> G_eff = gel.supp_G(G);
+    Ref<const Vector_t<Type> > delta_eff = supp_delta(delta);
+    Ref<const Vector_t<Type> > epsilon_eff = supp_epsilon(epsilon);
+    Ref<const Matrix_t<Type> > G_eff = gel.supp_G(G);
     omega_hat_impl(omega, G_eff, delta_eff, epsilon_eff, gel);
     return;
   }
@@ -336,29 +354,31 @@ namespace flexEL {
   /// @param[in] delta Censoring vector of length `n_obs` or `n_obs + `supp_adj`.
   /// @param[in] epsilon Residual vector of length `n_obs` or `n_obs + supp_adj`.
   /// @return Value of the censored empirical loglikelihood.
-  inline double CensEL::logel_omega(const Ref<const VectorXd>& omega,
-				    const Ref<const VectorXd>& delta,
-				    const Ref<const VectorXd>& epsilon) {
+  template <class Type>
+  inline Type CensEL<Type>::logel_omega(cRefVector_t<Type>& omega,
+					cRefVector_t<Type>& delta,
+					cRefVector_t<Type>& epsilon) {
     supp_adj_ = omega.size() == n_obs1_;
-    Ref<const VectorXd> delta_eff = supp_delta(delta);
-    Ref<const VectorXd> epsilon_eff = supp_epsilon(epsilon);
+    Ref<const Vector_t<Type> > delta_eff = supp_delta(delta);
+    Ref<const Vector_t<Type> > epsilon_eff = supp_epsilon(epsilon);
     return logel_omega_impl(omega, delta_eff, epsilon_eff);
   }
   
   /// @param[in] G       Moment matrix of size `n_eqs x n_obs`. 
   /// @param[in] delta   Censoring indicator vector of length `n_obs`.
   /// @param[in] epsilon Residual vector of length `n_obs`.
-  /// @param[in] gel     Reference to `GenEL` object which performs the M-step of the EM algorithm.
+  /// @param[in] gel     Reference to `GenEL<Type>` object which performs the M-step of the EM algorithm.
   /// @return Value of the censored empirical loglikelihood.
-  inline double CensEL::logel(const Ref<const MatrixXd>& G,
-                              const Ref<const VectorXd>& delta,
-                              const Ref<const VectorXd>& epsilon,
-			      GenEL& gel) {
+  template <class Type>
+  inline Type CensEL<Type>::logel(cRefMatrix_t<Type>& G,
+				  cRefVector_t<Type>& delta,
+				  cRefVector_t<Type>& epsilon,
+				  GenEL<Type>& gel) {
     supp_adj_ = gel.get_supp_adj();
     int n_obs2 = n_obs_ + supp_adj_;
-    Ref<const VectorXd> delta_eff = supp_delta(delta);
-    Ref<const VectorXd> epsilon_eff = supp_epsilon(epsilon);
-    Ref<const MatrixXd> G_eff = gel.supp_G(G);
+    Ref<const Vector_t<Type> > delta_eff = supp_delta(delta);
+    Ref<const Vector_t<Type> > epsilon_eff = supp_epsilon(epsilon);
+    Ref<const Matrix_t<Type> > G_eff = gel.supp_G(G);
     omega_hat_impl(omega_.head(n_obs2), G_eff, delta_eff, epsilon_eff, gel);
     return logel_omega_impl(omega_.head(n_obs2), delta_eff, epsilon_eff);
   }

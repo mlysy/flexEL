@@ -1,14 +1,15 @@
 #--- R version of C++ functions ------------------------------------------------
 
 # setup for GenEL tests
-GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv) {
+GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv,
+                        n_obs, n_eqs, max_iter) {
   # setup
-  n_obs <- sample(10:20, 1)
-  n_eqs <- sample(1:3, 1)
+  if(missing(n_obs)) n_obs <- sample(10:20, 1)
+  if(missing(n_eqs)) n_eqs <- sample(1:3, 1)
   gel <- GenEL$new(n_obs, n_eqs)
   G <- matrix(rnorm(n_obs * n_eqs), n_obs , n_eqs)
   weights <- runif(n_obs, 0, 2)
-  max_iter <- sample(c(1, 10, 50, 100), 1)
+  if(missing(max_iter)) max_iter <- sample(c(1, 10, 50, 100), 1)
   rel_tol <- runif(1, 1e-6, 1e-2)
   supp_adj_a <- runif(1, 1, 5)
   weight_adj <- runif(1, 0, 2)
@@ -37,9 +38,12 @@ GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv) {
 }
 
 # setup for CensEL tests
-CensEL_setup <- function(set_opts, supp_adj, check_conv) {
+CensEL_setup <- function(set_opts, supp_adj, check_conv,
+                         n_obs, n_eqs, max_iter_nr, max_iter_em) {
   gel_setup <- GenEL_setup(set_opts = TRUE, supp_adj = supp_adj,
-                           weighted = FALSE, check_conv = check_conv)
+                           weighted = FALSE, check_conv = check_conv,
+                           n_obs = n_obs, n_eqs = n_eqs,
+                           max_iter = max_iter_nr)
   n_obs <- gel_setup$gel$n_obs
   n_eqs <- gel_setup$gel$n_eqs
   supp_adj <- gel_setup$gel$supp_adj
@@ -48,7 +52,7 @@ CensEL_setup <- function(set_opts, supp_adj, check_conv) {
   omega <- runif(n_obs+supp_adj, 0, 1)
   omega <- omega/sum(omega)
   smooth_s <- runif(1, 0, 1)
-  max_iter <- sample(c(100, 200, 500), 1)
+  if(missing(max_iter_em)) max_iter_em <- sample(c(100, 200, 500), 1)
   abs_tol <- runif(1, 1e-4, 1e-3)
   # list of arguments to CensEL methods
   cel_args <- list(G = gel_setup$el_args$G,
@@ -57,9 +61,10 @@ CensEL_setup <- function(set_opts, supp_adj, check_conv) {
                    check_conv = check_conv)
   cel <- CensEL$new(n_obs, n_eqs)
   gel_opts <- gel_setup$el_opts
-  cel_opts <- list(max_iter = max_iter, abs_tol = abs_tol, smooth_s = smooth_s)
+  cel_opts <- list(max_iter = max_iter_em, abs_tol = abs_tol,
+                   smooth_s = smooth_s)
   # set options via active bindings
-  cel$max_iter <- max_iter
+  cel$max_iter <- max_iter_em
   cel$abs_tol <- abs_tol
   cel$smooth_s <- smooth_s
   if(set_opts) {
@@ -325,6 +330,7 @@ omega_hat_em <- function(G, delta, epsilon,
     em_err <- abs(logel - logel_old) # might be NaN if lambda_nr DNC
     if(has_converged_em && has_converged_nr) has_converged_em <- FALSE
     if(is.nan(em_err) || em_err < cel$abs_tol) break
+    ## if(isTRUE(em_err < cel$abs_tol)) break
     logel_old <- logel
     cel$gel$set_opts(lambda0 = lambda) # update starting point
     # E-step

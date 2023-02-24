@@ -20,8 +20,8 @@
 ///
 // [[Rcpp::export]]
 SEXP GenEL_ctor(int n_obs, int n_eqs) {
-  flexEL::GenEL *gel = new flexEL::GenEL(n_obs, n_eqs);
-  Rcpp::XPtr<flexEL::GenEL> p_gel(gel, true);
+  flexEL::GenEL<double> *gel = new flexEL::GenEL<double>(n_obs, n_eqs);
+  Rcpp::XPtr<flexEL::GenEL<double> > p_gel(gel, true);
   return p_gel;
 }
 
@@ -32,7 +32,7 @@ SEXP GenEL_ctor(int n_obs, int n_eqs) {
 ///
 // [[Rcpp::export]]
 void GenEL_set_max_iter(SEXP p_gel, int max_iter) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   gel->set_max_iter(max_iter);
   // std::cout << gel->get_max_iter() << std::endl;
   return;
@@ -45,7 +45,7 @@ void GenEL_set_max_iter(SEXP p_gel, int max_iter) {
 ///
 // [[Rcpp::export]]
 void GenEL_set_rel_tol(SEXP p_gel, double rel_tol) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   gel->set_rel_tol(rel_tol);
   // std::cout << gel->get_rel_tol() << std::endl;
   return;
@@ -63,7 +63,7 @@ void GenEL_set_supp_adj(SEXP p_gel,
                         Rcpp::Nullable<Rcpp::NumericVector> a_ = R_NilValue,
                         Rcpp::Nullable<Rcpp::NumericVector> weight_adj_ = R_NilValue) {
   // TODO: is there a better way to handle optional scalar argument?
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   gel->set_supp_adj(supp_adj);
   if (a_.isNotNull()) {
     Rcpp::NumericVector a(a_);
@@ -83,7 +83,7 @@ void GenEL_set_supp_adj(SEXP p_gel,
 ///
 // [[Rcpp::export]]
 void GenEL_set_lambda0(SEXP p_gel, Eigen::VectorXd lambda0) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   gel->set_lambda0(lambda0);
   return;
 }
@@ -94,7 +94,7 @@ void GenEL_set_lambda0(SEXP p_gel, Eigen::VectorXd lambda0) {
 ///
 // [[Rcpp::export]]
 int GenEL_get_n_obs(SEXP p_gel) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   int n_obs = gel->get_n_obs();
   return n_obs;
 }
@@ -105,7 +105,7 @@ int GenEL_get_n_obs(SEXP p_gel) {
 /// 
 // [[Rcpp::export]]
 int GenEL_get_n_eqs(SEXP p_gel) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   int n_eqs = gel->get_n_eqs();
   return n_eqs;
 }
@@ -116,7 +116,7 @@ int GenEL_get_n_eqs(SEXP p_gel) {
 ///
 // [[Rcpp::export]]
 bool GenEL_get_supp_adj(SEXP p_gel) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   bool supp_adj = gel->get_supp_adj();
   return supp_adj;
 }
@@ -129,7 +129,7 @@ bool GenEL_get_supp_adj(SEXP p_gel) {
 ///
 // [[Rcpp::export]]
 Rcpp::List GenEL_get_diag(SEXP p_gel) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   int n_iter = 0;
   double max_err = 0;
   gel->get_diag(n_iter, max_err);
@@ -151,7 +151,7 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP p_gel,
                                 Eigen::MatrixXd G, 
                                 Eigen::VectorXd weights, 
                                 bool check_conv) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   // bool supp_adj = gel->get_supp_adj();
   // int n_obs = G.cols();
   int n_eqs = G.rows();
@@ -184,7 +184,7 @@ Eigen::VectorXd GenEL_omega_hat(SEXP p_gel,
                                 Eigen::VectorXd lambda,
                                 Eigen::MatrixXd G,
                                 Eigen::VectorXd weights) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   int n_obs = gel->get_n_obs(); // G.cols() should be the same value, check in R side
   bool supp_adj = gel->get_supp_adj();
   Eigen::VectorXd omega(n_obs + supp_adj);
@@ -206,7 +206,7 @@ Eigen::VectorXd GenEL_omega_hat(SEXP p_gel,
 double GenEL_logel(SEXP p_gel, 
                    Eigen::MatrixXd G,
                    bool check_conv) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   double log_el = gel->logel(G);
   bool has_conv = check_conv ? gel->has_converged_nr() : true;
   if(!has_conv) {
@@ -229,7 +229,7 @@ double GenEL_weighted_logel(SEXP p_gel,
                             Eigen::MatrixXd G, 
                             Eigen::VectorXd weights, 
                             bool check_conv) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   double log_el = gel->logel(G, weights);
   bool has_conv = check_conv ? gel->has_converged_nr() : true;
   if(!has_conv) {
@@ -248,7 +248,7 @@ double GenEL_weighted_logel(SEXP p_gel,
 ///
 // [[Rcpp::export]]
 Rcpp::List GenEL_logel_grad(SEXP p_gel, Eigen::MatrixXd G, bool check_conv) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   int n_eqs = gel->get_n_eqs();
   int n_obs = gel->get_n_obs();
   Eigen::MatrixXd dldG(n_eqs, n_obs);
@@ -276,7 +276,7 @@ Rcpp::List GenEL_weighted_logel_grad(SEXP p_gel,
                                      Eigen::MatrixXd G, 
                                      Eigen::VectorXd weights,
                                      bool check_conv) {
-  Rcpp::XPtr<flexEL::GenEL> gel(p_gel);
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   int n_eqs = gel->get_n_eqs();
   int n_obs = gel->get_n_obs();
   Eigen::MatrixXd dldG(n_eqs, n_obs);

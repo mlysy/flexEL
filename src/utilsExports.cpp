@@ -21,9 +21,9 @@ using namespace Eigen;
 Eigen::MatrixXd adjG(Eigen::MatrixXd G, double a) {
   int n_obs = G.cols();
   int n_eqs = G.rows();
-  Eigen::MatrixXd aG = Eigen::MatrixXd::Zero(n_eqs,n_obs+1);
+  Eigen::MatrixXd aG = Eigen::MatrixXd::Zero(n_eqs, n_obs+1);
   aG.leftCols(n_obs) = G;
-  flexEL::adj_G(aG,a);
+  flexEL::adj_G<double>(aG, a);
   return aG;
 }
 
@@ -41,7 +41,7 @@ Eigen::VectorXd smooth_indicator(double eps1,
 				 Eigen::VectorXd eps2,
 				 double s) {
   Eigen::VectorXd smooth_ind = Eigen::VectorXd::Zero(eps2.size());
-  flexEL::smooth_indicator(smooth_ind, eps1, eps2, s);
+  flexEL::smooth_indicator<double>(smooth_ind, eps1, eps2, s);
   return smooth_ind;
 }
 

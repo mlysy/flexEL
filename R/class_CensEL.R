@@ -41,7 +41,7 @@ CensEL <- R6::R6Class(
                     if(length(omega) != (self$n_obs+supp_adj)) {
                       stop("`omega` must be of length `n_obs + supp_adj`.")
                     }
-                    if(!is.numeric(omega) || !all(omega > 0)) {
+                    if(!is.numeric(omega)) {
                       stop("`omega` must be a numeric vector.")
                     }
                   }

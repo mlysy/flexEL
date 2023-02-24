@@ -10,6 +10,45 @@
 namespace flexEL {
   using namespace Eigen;
 
+  /// Ref<Type> templates for Eigen function arguments.
+  ///
+  /// Basic idea:
+  ///
+  /// ```
+  /// template <class Type>
+  /// void foo(RefVector_t<Type> y, cRefMatrix_t<Type>& x);
+  /// ```
+  ///
+  /// Here:
+  ///
+  /// - `y` is an input/output argument (so can be modified by the code) and is a vector (i.e., one column matrix).
+  /// - `x` is an input argument (constant, so can't be modified by the code) and is a matrix.
+  ///
+  template <class Type>
+  using Matrix_t = Eigen::Matrix<Type, Dynamic, Dynamic>;
+  template <class Type>
+  using Diagonal_t = DiagonalMatrix<Type, Dynamic>;
+  template <class Type>
+  using Vector_t = Eigen::Matrix<Type, Dynamic, 1>;
+  template <class Type>
+  using RowVector_t = Eigen::Matrix<Type, 1, Dynamic>;
+  template <class Type>
+  using RefMatrix_t = Ref <Eigen::Matrix<Type, Dynamic, Dynamic> >;
+  template <class Type>
+  using cRefMatrix_t = const Ref <const Eigen::Matrix<Type, Dynamic, Dynamic> >;
+  template <class Type>
+  using RefDiagonal_t = Ref <DiagonalMatrix<Type, Dynamic> >;
+  template <class Type>
+  using cRefDiagonal_t = const Ref <DiagonalMatrix<Type, Dynamic> >;
+  template <class Type>
+  using RefVector_t = Ref <Eigen::Matrix<Type, Dynamic, 1> >;
+  template <class Type>
+  using cRefVector_t = const Ref <const Eigen::Matrix<Type, Dynamic, 1> >;
+  template <class Type>
+  using RefRowVector_t = Ref <Eigen::Matrix<Type, 1, Dynamic> >;
+  template <class Type>
+  using cRefRowVector_t = const Ref <const Eigen::Matrix<Type, 1, Dynamic> >;
+
   /// Maximum relative error between two vectors.
   ///
   /// Calculates
@@ -21,8 +60,9 @@ namespace flexEL {
   /// @param x1[in] First vector.
   /// @param x2[in] Second vector.
   /// @return The maximum relative error.
-  inline double max_rel_err(const Ref<const VectorXd>& x1,
-                            const Ref<const VectorXd>&x2) {
+  template <class Type>
+  inline Type max_rel_err(cRefVector_t<Type>& x1,
+			  cRefVector_t<Type>& x2) {
     return ((x1 - x2).array().abs() /
             ((x1 + x2).array().abs() + 0.1)).maxCoeff();
   }
@@ -35,10 +75,11 @@ namespace flexEL {
   /// @param eps1[in] First residual.
   /// @param eps2[in] Second residual.
   /// @param s[in] Smoothing parameter.
-  inline void smooth_indicator(Ref<VectorXd> smooth_ind,
-			       double eps1,
-			       const Ref<const VectorXd>& eps2,
-			       double s) {
+  template <class Type>
+  inline void smooth_indicator(RefVector_t<Type> smooth_ind,
+			       Type eps1,
+			       cRefVector_t<Type>& eps2,
+			       Type s) {
     smooth_ind = (1.0 + (s * (eps1 - eps2.array())).exp()).inverse();
     return;
   }
@@ -51,7 +92,8 @@ namespace flexEL {
   ///
   /// @param[in/out] G A numeric matrix of size `n_eqs x (n_obs + 1)`.  Only the last column is overwritten by the calculation.
   /// @param[in] a Scalar tuning parameter for the adjustment.
-  inline void adj_G(Ref<MatrixXd> G, double a) {
+  template <class Type>
+  inline void adj_G(RefMatrix_t<Type> G, Type a) {
     // std::cout << "adj_G: G = \n" << G << std::endl;
     int n_obs = G.cols()-1;
     // Eigen::VectorXd gbar = 1.0/n_obs*G.rowwise().sum();
@@ -72,8 +114,9 @@ namespace flexEL {
   /// @param[in] c Polynomial coefficient of degree zero.
   ///
   /// @return Value of the log-star function.
-  inline double log_star(double x, 
-                         double trunc, double a, double b, double c) {
+  template <class Type>
+  inline Type log_star(Type x, 
+		       Type trunc, Type a, Type b, Type c) {
     if(x >= trunc) {
       return(log(x));
     } else {
@@ -89,8 +132,9 @@ namespace flexEL {
   /// @param[in] b Polynomial coefficient of degree one.
   ///
   /// @return Value of the first derivative of the log-star function.
-  inline double log_star1(double x, 
-                          double trunc, double a, double b) {
+  template <class Type>
+  inline Type log_star1(Type x, 
+			Type trunc, Type a, Type b) {
     if(x >= trunc) {
       return(1.0/x);
     } 
@@ -106,7 +150,8 @@ namespace flexEL {
   /// @param[in] a Polynomial coefficient of degree two.
   ///
   /// @return Value of the first derivative of the log-star function.
-  inline double log_star2(double x, double trunc, double a) {
+  template <class Type>
+  inline Type log_star2(Type x, Type trunc, Type a) {
     if(x >= trunc) {
       return(-1.0/(x*x));
     } else {
