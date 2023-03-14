@@ -66,6 +66,11 @@ namespace flexEL {
     Type logel_omega_impl(cRefVector_t<Type>& omega,
 			  cRefVector_t<Type>& norm_weights,
 			  Type sum_weights);
+    Type logel_full_impl(RefVector_t<Type> omega,
+			 RefVector_t<Type> lambda,
+			 cRefMatrix_t<Type>& G,
+			 cRefVector_t<Type>& norm_weights,
+			 Type sum_weights);
     Type logel_impl(cRefMatrix_t<Type>& G,
 		    cRefVector_t<Type>& norm_weights,
 		    Type sum_weights);
@@ -126,6 +131,11 @@ namespace flexEL {
     /// Calculate the empirical loglikelihood given the probability weights.
     Type logel_omega(cRefVector_t<Type>& omega,
 		     cRefVector_t<Type>& weights);
+    /// Calculate the empirical loglikelihood returning intermediate computations.
+    Type logel_full(RefVector_t<Type> omega,
+		    RefVector_t<Type> lambda,
+		    cRefMatrix_t<Type>& G,
+		    cRefVector_t<Type>& weights);
     /// Calculate the unweighted empirical loglikelihood.
     Type logel(cRefMatrix_t<Type>& G);
     /// Calculate the weighted empirical loglikelihood.
@@ -347,11 +357,11 @@ namespace flexEL {
       Glambda_.head(n_obs2) = 1.0 - Glambda_.head(n_obs2).array();
       Q2_.fill(0.0);
       for(jj=0; jj<n_obs2; jj++) {
-        rho_(jj) = log_star1(Glambda_(jj),
-			     norm_weights(jj), astar_(jj), bstar_(jj));
+        rho_(jj) = log_star1<Type>(Glambda_(jj),
+				   norm_weights(jj), astar_(jj), bstar_(jj));
         GGt_.noalias() = G.col(jj) * G.col(jj).transpose();
         Q2_ -= norm_weights(jj) *
-          log_star2(Glambda_(jj), norm_weights(jj), astar_(jj)) * GGt_;
+          log_star2<Type>(Glambda_(jj), norm_weights(jj), astar_(jj)) * GGt_;
       }
       // update lambda
       rho_.array() *= norm_weights.array();
@@ -374,7 +384,7 @@ namespace flexEL {
   /// @param[out] omega Probability vector of size `n_obs` or `n_obs+1`.
   /// @param[in] lambda Dual problem vector of size `n_eqs`.
   /// @param[in] G Moment matrix of size `n_eqs x omega.size()`.
-  /// @param[in] norm_weights Normalized weight vector of size `omega_size()`.
+  /// @param[in] norm_weights Normalized weight vector of size `omega.size()`.
   template <class Type>
   inline void GenEL<Type>::omega_hat_impl(RefVector_t<Type> omega,
 					  cRefVector_t<Type>& lambda,
@@ -391,7 +401,7 @@ namespace flexEL {
   }
 
   /// @param[in] omega Probability vector of length `n_obs + supp_adj`.
-  /// @param[in] weights Vector of weights the same length as `omega`.
+  /// @param[in] norm_weights Normalized weight vector of size `omega.size()`.
   /// @return Value of empirical loglikelihood, which is `sum(log(omega))`.
   template <class Type>
   inline Type GenEL<Type>::logel_omega_impl(cRefVector_t<Type>& omega,
@@ -406,17 +416,39 @@ namespace flexEL {
   }
 
 
+  /// @param[out] omega Probability vector of size `n_obs` or `n_obs+1`.
+  /// @param[out] lambda Dual problem vector of size `n_eqs`.
+  /// @param[in] G Moment matrix of size `n_eqs x omega.size()`.
+  /// @param[in] norm_weights Normalized weight vector of size `omega.size()`.
+  /// @param[in] sum_weights Sum of weights prior to normalization.
+  ///
+  /// @return Value of empirical loglikelihood.
+  template <class Type>
+  inline Type GenEL<Type>::logel_full_impl(RefVector_t<Type> omega,
+					   RefVector_t<Type> lambda,
+					   cRefMatrix_t<Type>& G,
+					   cRefVector_t<Type>& norm_weights,
+					   Type sum_weights) {
+    lambda = lambda0_; // initial value
+    lambda_nr_impl(lambda, G, norm_weights);
+    omega_hat_impl(omega, lambda, G, norm_weights);
+    return logel_omega_impl(omega, norm_weights, sum_weights);
+  }
+
   /// @param[in] G Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs+1)`.
   /// @param[in] norm_weights Normalized weight vector of size `G.cols()`.
   /// @param[in] sum_weights Sum of weights prior to normalization.
+  ///
+  /// @return Value of empirical loglikelihood.
   template <class Type>
   inline Type GenEL<Type>::logel_impl(cRefMatrix_t<Type>& G,
 				      cRefVector_t<Type>& norm_weights,
 				      Type sum_weights) {
-    lambda_ = lambda0_; // initial value
-    lambda_nr_impl(lambda_, G, norm_weights);
-    omega_hat_impl(omega_.head(n_obs2_), lambda_, G, norm_weights);
-    return logel_omega_impl(omega_.head(n_obs2_), norm_weights, sum_weights);
+    return logel_full_impl(omega_.head(n_obs2_), lambda_, G, norm_weights, sum_weights);
+    // lambda_ = lambda0_; // initial value
+    // lambda_nr_impl(lambda_, G, norm_weights);
+    // omega_hat_impl(omega_.head(n_obs2_), lambda_, G, norm_weights);
+    // return logel_omega_impl(omega_.head(n_obs2_), norm_weights, sum_weights);
   }
 
 
@@ -470,6 +502,24 @@ namespace flexEL {
     // std::cout << "norm_weights_eff = " << norm_weights_eff.transpose() << std::endl;
     // return sum_weights * (omega.array().log() * norm_weights.array()).sum();
   }
+
+  /// @param[out] omega Probability vector of length `n_obs + supp_adj`.
+  /// @param[out] lambda Dual problem vector of size `n_eqs`.  
+  /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
+  /// @param[in] weights Vector of weights of length `n_obs`.  Not assumed to be normalized.
+  ///
+  /// @return Value of empirical loglikelihood.
+  template <class Type>
+  inline Type GenEL<Type>::logel_full(RefVector_t<Type> omega,
+				      RefVector_t<Type> lambda,
+				      cRefMatrix_t<Type>& G,
+				      cRefVector_t<Type>& weights) {
+    Ref<const Matrix_t<Type> > G_eff = supp_G(G);
+    Type sum_weights;
+    Ref<const Vector_t<Type> > norm_weights_eff = supp_norm_weights(weights, sum_weights);
+    return logel_full_impl(omega, lambda, G_eff, norm_weights_eff, sum_weights);
+  }
+
 
   /// @param[in] G Moment matrix of size `n_eqs x n_obs`.
   /// @param[in] weights Vector of weights of length `n_obs`.  Not assumed to be normalized.

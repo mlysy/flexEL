@@ -244,7 +244,8 @@ logel_grad <- function(G, weights, max_iter, rel_tol, lambda0,
                               weight_adj = weight_adj)
     weights <- el_args$weights
     lambda <- lambda_out$lambda
-    logel <- sum(weights * log(omega))
+    logel <- if(all(omega > 0)) sum(weights * log(omega)) else NaN
+    ## logel <- sum(weights * log(omega))
     n_obs <- nrow(G)
     grad <- t(lambda %*% t(omega[1:n_obs]))
     if(supp_adj) {
