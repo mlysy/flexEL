@@ -265,6 +265,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// GenEL_logel_full
+Rcpp::List GenEL_logel_full(SEXP p_gel, Eigen::MatrixXd G, Eigen::VectorXd weights, bool check_conv);
+RcppExport SEXP _flexEL_GenEL_logel_full(SEXP p_gelSEXP, SEXP GSEXP, SEXP weightsSEXP, SEXP check_convSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type p_gel(p_gelSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type G(GSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< bool >::type check_conv(check_convSEXP);
+    rcpp_result_gen = Rcpp::wrap(GenEL_logel_full(p_gel, G, weights, check_conv));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GenEL_logel_grad
 Rcpp::List GenEL_logel_grad(SEXP p_gel, Eigen::MatrixXd G, bool check_conv);
 RcppExport SEXP _flexEL_GenEL_logel_grad(SEXP p_gelSEXP, SEXP GSEXP, SEXP check_convSEXP) {
@@ -340,6 +354,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_flexEL_GenEL_omega_hat", (DL_FUNC) &_flexEL_GenEL_omega_hat, 4},
     {"_flexEL_GenEL_logel", (DL_FUNC) &_flexEL_GenEL_logel, 3},
     {"_flexEL_GenEL_weighted_logel", (DL_FUNC) &_flexEL_GenEL_weighted_logel, 4},
+    {"_flexEL_GenEL_logel_full", (DL_FUNC) &_flexEL_GenEL_logel_full, 4},
     {"_flexEL_GenEL_logel_grad", (DL_FUNC) &_flexEL_GenEL_logel_grad, 3},
     {"_flexEL_GenEL_weighted_logel_grad", (DL_FUNC) &_flexEL_GenEL_weighted_logel_grad, 4},
     {"_flexEL_adjG", (DL_FUNC) &_flexEL_adjG, 2},

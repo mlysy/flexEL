@@ -85,6 +85,10 @@ GenEL_weighted_logel <- function(p_gel, G, weights, check_conv) {
     .Call(`_flexEL_GenEL_weighted_logel`, p_gel, G, weights, check_conv)
 }
 
+GenEL_logel_full <- function(p_gel, G, weights, check_conv) {
+    .Call(`_flexEL_GenEL_logel_full`, p_gel, G, weights, check_conv)
+}
+
 GenEL_logel_grad <- function(p_gel, G, check_conv) {
     .Call(`_flexEL_GenEL_logel_grad`, p_gel, G, check_conv)
 }

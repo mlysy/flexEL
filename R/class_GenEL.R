@@ -226,7 +226,7 @@ GenEL <- R6::R6Class(
       GenEL_lambda_nr(private$.gelptr, t(G), weights, check_conv)
     },
 
-    #' @description Calculate the probability vector base on the given G matrix.
+    #' @description Calculate the probability vector based on the given G matrix.
     #'
     #' @template param_G
     #' @template param_weights
@@ -255,24 +255,27 @@ GenEL <- R6::R6Class(
     #'
     #' @template param_G
     #' @template param_weights
+    #' @param full_out If `TRUE`, returns probability vector `omega` and dual problem solution `lambda` in addition to the EL loglikelihood.
     #' @param check_conv If `TRUE`, checks whether the desired `rel_tol` was reached within `max_iter` Newton-Raphson iterations.  If not, returns `-Inf.
     #'
-    #' @return The empirical loglikelihood evaluated at `G` (a scalar).
-    logel = function(G, weights, check_conv = TRUE) {
+    #' @return If `full_out == FALSE`, the empirical loglikelihood evaluated at `G` (a scalar).  Otherwise, a list with elements `logel`, `omega`, and `lambda`.
+    logel = function(G, weights, check_conv = TRUE, full_out = FALSE) {
       private$check_G(G)
-      if (missing(weights) || is.null(weights)) {
-        ans <- GenEL_logel(private$.gelptr, t(G), check_conv)
-      }
-      else {
-        ## n_obs <- GenEL_get_n_obs(private$.gelptr)
-        ## if (length(weights) != n_obs) {
-        ##   stop("Length of `weights` does not equal to the number of obserations.")
-        ## }
-        ## if (any(weights < 0)) {
-        ##   stop("`weights` should contain only non-negative values.")
-        ## }
-        private$check_weights(weights)
-        ans <- GenEL_weighted_logel(private$.gelptr, t(G), weights, check_conv)
+      if(!full_out) {
+        if (missing(weights) || is.null(weights)) {
+          ans <- GenEL_logel(private$.gelptr, t(G), check_conv)
+        }
+        else {
+          private$check_weights(weights)
+          ans <- GenEL_weighted_logel(private$.gelptr, t(G), weights, check_conv)
+        }
+      } else {
+        if (missing(weights) || is.null(weights)) {
+          weights <- rep(1, GenEL_get_n_obs(private$.gelptr))
+        } else {
+          private$check_weights(weights)
+        }
+        ans <- GenEL_logel_full(private$.gelptr, t(G), weights, check_conv)
       }
       ans
     },

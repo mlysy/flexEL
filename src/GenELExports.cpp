@@ -154,7 +154,7 @@ Eigen::VectorXd GenEL_lambda_nr(SEXP p_gel,
   Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
   // bool supp_adj = gel->get_supp_adj();
   // int n_obs = G.cols();
-  int n_eqs = G.rows();
+  int n_eqs = gel->get_n_eqs(); // should be equal to G.rows();
   Eigen::VectorXd lambda(n_eqs);
   // Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
   // Eigen::VectorXd norm_weights = weights/weights.sum();
@@ -185,7 +185,7 @@ Eigen::VectorXd GenEL_omega_hat(SEXP p_gel,
                                 Eigen::MatrixXd G,
                                 Eigen::VectorXd weights) {
   Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
-  int n_obs = gel->get_n_obs(); // G.cols() should be the same value, check in R side
+  int n_obs = gel->get_n_obs();
   bool supp_adj = gel->get_supp_adj();
   Eigen::VectorXd omega(n_obs + supp_adj);
   // Eigen::VectorXd norm_weights = Eigen::VectorXd::Constant(n_obs+supp_adj, 1.0/(n_obs+supp_adj));
@@ -218,7 +218,7 @@ double GenEL_logel(SEXP p_gel,
 /// Calculate the weighted log empirical likelihood base on the given G matrix and weights.
 /// 
 /// @param[in] p_gel    `externalptr` pointer to GenEL object. 
-/// @param[in] G        Moment matrix of size `n_eqs x (n_obs + supp_adj)`.
+/// @param[in] G         Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected.
 /// @param[in] weights  Weight vector of length `n_obs`.
 /// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns negative infinity.
 ///
@@ -237,6 +237,40 @@ double GenEL_weighted_logel(SEXP p_gel,
   }
   return log_el;
 }
+
+/// Calculate the weighted log empirical likelihood and return intermediate calculations.
+/// 
+/// @param[in] p_gel    `externalptr` pointer to GenEL object. 
+/// @param[in] G         Moment matrix of size `n_eqs x n_obs` or `n_eqs x (n_obs + supp_adj)`.  If `supp_adj = false`, the former is required.  If `supp_adj = true` and the former is provided, support adjustment is performed.  If `supp_adj = true` and `G.cols() == n_obs + 1`, assumes that support has already been corrected.
+/// @param[in] weights  Weight vector of length `n_obs`.
+/// @param[in] check_conv If `true`, checks whether the desired `rel_tol` was reached within the given maximum number of Newton-Raphson iterations.  If not, returns negative infinity for `logel` and `NaN` for `omega` and `lambda`.
+///
+/// @return List with elements `logel` for the empirical loglikelihood (scalar), `omega` for the probability vector (of size `n_obs + supp_adj`), and `lambda` for the solution vector (of size `n_eqs`) of the dual problem. 
+///
+// [[Rcpp::export]]
+Rcpp::List GenEL_logel_full(SEXP p_gel, 
+                            Eigen::MatrixXd G, 
+                            Eigen::VectorXd weights, 
+                            bool check_conv) {
+  Rcpp::XPtr<flexEL::GenEL<double> > gel(p_gel);
+  int n_obs = gel->get_n_obs();
+  int n_eqs = gel->get_n_eqs();
+  bool supp_adj = gel->get_supp_adj();
+  Eigen::VectorXd omega(n_obs + supp_adj);
+  Eigen::VectorXd lambda(n_eqs);
+  double log_el = gel->logel_full(omega, lambda, G, weights);
+  bool has_conv = check_conv ? gel->has_converged_nr() : true;
+  if(!has_conv) {
+    log_el = -std::numeric_limits<double>::infinity();
+    lambda.setConstant(std::numeric_limits<double>::quiet_NaN());
+    omega.setConstant(std::numeric_limits<double>::quiet_NaN());
+  }
+  return Rcpp::List::create(Rcpp::Named("logel") = log_el,
+                            Rcpp::Named("omega") = omega,
+			    Rcpp::Named("lambda") = lambda);
+}
+
+
 
 /// Calculate log EL and its gradient with respect to `G`.
 ///

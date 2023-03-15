@@ -201,7 +201,7 @@ A numeric vector of length \code{n_eqs}.
 \if{html}{\out{<a id="method-GenEL-omega_hat"></a>}}
 \if{latex}{\out{\hypertarget{method-GenEL-omega_hat}{}}}
 \subsection{Method \code{omega_hat()}}{
-Calculate the probability vector base on the given G matrix.
+Calculate the probability vector based on the given G matrix.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{GenEL$omega_hat(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
 }
@@ -243,7 +243,7 @@ A probability vector of length \code{n_obs + supp_adj}.
 \subsection{Method \code{logel()}}{
 Evaluate the empirical loglikelihood function.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, check_conv = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{GenEL$logel(G, weights, check_conv = TRUE, full_out = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -268,11 +268,13 @@ Evaluate the empirical loglikelihood function.
 \item{\code{weights}}{Non-negative weight of each observation.  A numeric vector of length \code{n_obs}.}
 
 \item{\code{check_conv}}{If \code{TRUE}, checks whether the desired \code{rel_tol} was reached within \code{max_iter} Newton-Raphson iterations.  If not, returns `-Inf.}
+
+\item{\code{full_out}}{If \code{TRUE}, returns probability vector \code{omega} and dual problem solution \code{lambda} in addition to the EL loglikelihood.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-The empirical loglikelihood evaluated at \code{G} (a scalar).
+If \code{full_out == FALSE}, the empirical loglikelihood evaluated at \code{G} (a scalar).  Otherwise, a list with elements \code{logel}, \code{omega}, and \code{lambda}.
 }
 }
 \if{html}{\out{<hr>}}

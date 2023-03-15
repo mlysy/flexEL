@@ -1,7 +1,7 @@
 #--- R version of C++ functions ------------------------------------------------
 
 # setup for GenEL tests
-GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv,
+GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv, full_out,
                         n_obs, n_eqs, max_iter) {
   # setup
   if(missing(n_obs)) n_obs <- sample(10:20, 1)
@@ -30,6 +30,9 @@ GenEL_setup <- function(set_opts, supp_adj, weighted, check_conv,
   gel$weight_adj <- weight_adj
   if(weighted) {
     el_args <- c(el_args, list(weights = weights))
+  }
+  if(!missing(full_out)) {
+    el_args <- c(el_args, list(full_out = full_out))
   }
   if(set_opts) {
     do.call(gel$set_opts, el_opts)
@@ -223,15 +226,18 @@ omega_hat_nr <- function(G, weights, max_iter, rel_tol, lambda0,
 }
 
 # weighted logel and its gradient
+# optionally returns lambda and omega as well
 logel_grad <- function(G, weights, max_iter, rel_tol, lambda0,
                       supp_adj, supp_adj_a, weight_adj,
-                      check_conv) {
+                      check_conv, full_out = FALSE) {
   lambda_out <- lambda_nr(G = G, weights = weights,
                           max_iter = max_iter, rel_tol = rel_tol,
                           lambda0 = lambda0,
                           supp_adj = supp_adj, supp_adj_a = supp_adj_a,
                           weight_adj = weight_adj, check_conv = check_conv)
   if(check_conv && !lambda_out$has_converged) {
+    lambda <- rep(NaN, ncol(G))
+    omega <- rep(NaN, nrow(G) + supp_adj)
     out <- list(logel = -Inf, grad = matrix(NaN, nrow(G), ncol(G)))
   } else {
     omega <- omega_hat_nr(G = G, weights = weights,
@@ -254,6 +260,7 @@ logel_grad <- function(G, weights, max_iter, rel_tol, lambda0,
     grad <- grad * sum(weights)
     out <- list(logel = logel, grad = grad)
   }
+  if(full_out) out <- c(out, list(omega = omega, lambda = lambda))
   out
 }
 
