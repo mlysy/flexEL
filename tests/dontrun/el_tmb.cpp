@@ -44,6 +44,9 @@ using MatrixX_t = Matrix<Type, Dynamic, Dynamic>;
 template <class Type>
 using VectorX_t = Matrix<Type, Dynamic, 1>;
 
+// Sumber of nondifferentiable inputs.  See `tx_to_G()`.
+const int N_NONDIFF = 5;
+
 /// Copy contiguous elements of a `CppAD::vector<Type>` to a `VectorX_t<Type>`.
 ///
 /// The intented usage is something like
@@ -75,37 +78,55 @@ const MatrixX_t<Type> copy_matrix(const CppAD::vector<Type>& x,
   return Map<const MatrixX_t<Type>,Unaligned>(x.data()+start, rows, cols);
 }
 
-
+/// Extract G matrix from contiguous inputs.
+///
+/// The contiguous input is assumed to start with the following scalars prior to the flattened `G`:
+///
+/// - `n_eqs`, `n_obs`: The number of rows and columns of `G`.
+/// - `supp_adj`: Whether or not to do support adjustment.
+/// - `max_iter`: Maximum number of NR iterations.
+/// - `rel_tol`: Relative tolerance for NR convergence.
+///
+/// @param[in] tx Vector of contiguous inputs.
+/// @return The matrix `G`.
 template <class Type>
 const MatrixX_t<Type> tx_to_G(const CppAD::vector<Type>& tx) {
-  int n_row = CppAD::Integer(tx[0]);
-  int n_col = CppAD::Integer(tx[1]);
-  return copy_matrix<Type>(tx, 2, n_row, n_col);
+  int n_eqs = CppAD::Integer(tx[0]);
+  int n_obs = CppAD::Integer(tx[1]);
+  return copy_matrix<Type>(tx, N_NONDIFF, n_eqs, n_obs);
 }
 
 /// Vectorized wrapper to `flexEL::GenEL<Type>.logel_full()`.
 ///
 /// @param[out] ty A vector containing the result, `omega`, and `lambda`.
-/// @param[in] tx A vector containing `G.rows()`, `G.cols()`, and the flattened `G`.
+/// @param[in] tx Vector of contiguous inputs.  See `tx_to_G()`.
 template <class Type>
 void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
-  // unpack from tx
+  // unpack inputs from tx
   int n_eqs = int(tx[0]);
   int n_obs = int(tx[1]);
-  const MatrixX_t<Type> G = copy_matrix(tx, 2, n_eqs, n_obs);
+  bool supp_adj = bool(tx[2]);
+  int n_obs2 = n_obs + supp_adj;
+  int max_iter = int(tx[3]);
+  Type rel_tol = Type(tx[4]);
+  MatrixX_t<Type> G = tx_to_G(tx); // Note: removed `const` from LHS
   // weights input needed for logel_full()
   VectorX_t<Type> weights = VectorX_t<Type>::Ones(n_obs);
   // outputs
   VectorX_t<Type> lambda(n_eqs);
-  VectorX_t<Type> omega(n_obs);
-  // calculations
+  VectorX_t<Type> omega(n_obs2);
+  // initialize GenEL object
   flexEL::GenEL<Type> gel(n_obs, n_eqs);
+  gel.set_max_iter(max_iter);
+  gel.set_rel_tol(rel_tol);
+  gel.set_supp_adj(supp_adj);
+  // calculations
   ty[0] = gel.logel_full(omega, lambda, G, weights);
   // pack into ty
   // NOTE: this makes a copy of the Eigen objects,
   // see <https://stackoverflow.com/questions/26094379/typecasting-eigenvectorxd-to-stdvector>
-  VectorX_t<Type>::Map(&ty[1], omega.size()) = omega;
-  VectorX_t<Type>::Map(&ty[1+omega.size()], lambda.size()) = lambda;
+  VectorX_t<Type>::Map(&ty[1], n_obs2) = omega;
+  VectorX_t<Type>::Map(&ty[1+n_obs2], n_eqs) = lambda;
   return;
 }
 
@@ -119,24 +140,36 @@ TMB_ATOMIC_VECTOR_FUNCTION(
 			   logel_vector<double>(ty, tx),
 			   // ATOMIC_REVERSE
 			   // unpack inputs from tx
+			   int n_eqs = CppAD::Integer(tx[0]);
+			   int n_obs = CppAD::Integer(tx[1]);
+			   bool supp_adj = bool(CppAD::Integer(tx[2]));
+			   int n_obs2 = n_obs + supp_adj;
+			   int max_iter = CppAD::Integer(tx[3]);
+			   Type rel_tol = Type(tx[4]);
 			   MatrixX_t<Type> G = tx_to_G(tx);
-			   int n_eqs = G.rows();
-			   int n_obs = G.cols();
+			   // int n_eqs = G.rows();
+			   // int n_obs = G.cols();
 			   // unpack inputs from ty
 			   int start = 1;
-			   const VectorX_t<Type> omega = copy_vector<Type>(ty, start, n_obs);
-			   start += n_obs;
-			   const VectorX_t<Type> lambda = copy_vector<Type>(ty, start, n_eqs);
+			   VectorX_t<Type> omega = copy_vector<Type>(ty, start, n_obs2);
+			   start += n_obs2;
+			   VectorX_t<Type> lambda = copy_vector<Type>(ty, start, n_eqs);
+			   // initialize GenEL object
+			   flexEL::GenEL<Type> gel(n_obs, n_eqs);
+			   gel.set_max_iter(max_iter);
+			   gel.set_rel_tol(rel_tol);
+			   gel.set_supp_adj(supp_adj);
 			   // calculate gradient
 			   MatrixX_t<Type> dldG(n_eqs, n_obs);
-			   flexEL::GenEL<Type> gel(n_obs, n_eqs);
-			   gel.logel_grad(dldG, omega, lambda, Type(n_obs));
+			   Type sum_weights = Type(n_obs2);
+			   gel.logel_grad(dldG, omega, lambda, sum_weights);
 			   // compute the reverse-mode rule
-			   px[0] = Type(0.);
-			   px[1] = Type(0.);
+			   for(int ii=0; ii<N_NONDIFF; ii++) {
+			     px[ii] = Type(0.);
+			   }
 			   for(int jj=0; jj<n_obs; jj++) {
 			     for(int ii=0; ii<n_eqs; ii++) {
-			       px[jj*n_eqs + ii + 2] = dldG(ii,jj) * py[0];
+			       px[jj*n_eqs + ii + N_NONDIFF] = dldG(ii,jj) * py[0];
 			       // px[jj*n_eqs + ii + 2] = Type(2) * py[0];
 			     }
 			   }
@@ -148,17 +181,27 @@ TMB_ATOMIC_VECTOR_FUNCTION(
 /// Wrapper to logel_atomic() for Eigen types.
 ///
 /// @param G Matrix of size `n_eqs x n_obs`.
+/// @param max_iter Maximum number of NR iterations.
+/// @param rel_tol Relative tolerance for NR convergence.
+/// @param supp_adj Whether or not to perform support adjustment.
+///
 /// @return The return value of `flexEL::GenEL<Type>.logel()`.
 template<class Type>
-Type logel(cRefMatrix_t<Type>& G) {
-  CppAD::vector<Type> tx(G.size() + 2);
-  int n_row = G.rows();
-  int n_col = G.cols();
-  tx[0] = Type(n_row);
-  tx[1] = Type(n_col);
-  for(int jj=0; jj<n_col; jj++) {
-    for(int ii=0; ii<n_row; ii++) {
-      tx[jj*n_row + ii + 2] = G(ii,jj);
+Type logel(cRefMatrix_t<Type>& G,
+	   int max_iter = 100,
+	   Type rel_tol = Type(1e-7),
+	   bool supp_adj = false) {
+  CppAD::vector<Type> tx(G.size() + N_NONDIFF);
+  int n_eqs = G.rows();
+  int n_obs = G.cols();
+  tx[0] = Type(n_eqs);
+  tx[1] = Type(n_obs);
+  tx[2] = Type(supp_adj);
+  tx[3] = Type(max_iter);
+  tx[4] = Type(rel_tol);
+  for(int jj=0; jj<n_obs; jj++) {
+    for(int ii=0; ii<n_eqs; ii++) {
+      tx[jj*n_eqs + ii + N_NONDIFF] = G(ii,jj);
     }
   }
   return logel_atomic(tx)[0];
@@ -167,7 +210,10 @@ Type logel(cRefMatrix_t<Type>& G) {
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
+  DATA_INTEGER(max_iter);
+  DATA_SCALAR(rel_tol);
+  DATA_INTEGER(supp_adj);
   PARAMETER_MATRIX(G);
-  Type f = logel<Type>(G);
+  Type f = logel<Type>(G, max_iter, rel_tol, supp_adj);
   return f;
 }
