@@ -12,8 +12,8 @@ dyn.load(dynlib(model))
 
 n_obs <- 10
 n_eqs <- 3
-max_iter <- 1
-rel_tol <- 1e-10
+max_iter <- 10
+rel_tol <- 1e-7
 supp_adj <- FALSE
 
 logel_adf <- MakeADFun(

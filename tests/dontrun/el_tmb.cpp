@@ -98,8 +98,13 @@ const MatrixX_t<Type> tx_to_G(const CppAD::vector<Type>& tx) {
 
 /// Vectorized wrapper to `flexEL::GenEL<Type>.logel_full()`.
 ///
-/// @param[out] ty A vector containing the result, `omega`, and `lambda`.
-/// @param[in] tx Vector of contiguous inputs.  See `tx_to_G()`.
+/// Both inputs and outputs are contiguous vectors.  For the former, see `tx_to_G()`.  For the latter, the contiguous elements are:
+/// - `log_el`: The EL loglikelihood itself (scalar).
+/// - `has_conv`: Whether or not the NR converged (scalar).
+/// - `omega`, `lambda`: Auxillary outputs of `GenEL::logel_full()`.
+///
+/// @param[out] ty Vector of continuous outputs.
+/// @param[in] tx Vector of contiguous inputs.
 template <class Type>
 void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
   // unpack inputs from tx
@@ -109,7 +114,7 @@ void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
   int n_obs2 = n_obs + supp_adj;
   int max_iter = int(tx[3]);
   Type rel_tol = Type(tx[4]);
-  MatrixX_t<Type> G = tx_to_G(tx); // Note: removed `const` from LHS
+  MatrixX_t<Type> G = tx_to_G(tx);
   // weights input needed for logel_full()
   VectorX_t<Type> weights = VectorX_t<Type>::Ones(n_obs);
   // outputs
@@ -121,12 +126,18 @@ void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
   gel.set_rel_tol(rel_tol);
   gel.set_supp_adj(supp_adj);
   // calculations
-  ty[0] = gel.logel_full(omega, lambda, G, weights);
-  // pack into ty
+  Type log_el = gel.logel_full(omega, lambda, G, weights);
+  bool has_conv = gel.has_converged_nr();
+  if(!has_conv) {
+    log_el = -std::numeric_limits<double>::infinity();
+  }
+  // pack outputs into ty
+  ty[0] = log_el;
+  ty[1] = Type(has_conv);
   // NOTE: this makes a copy of the Eigen objects,
   // see <https://stackoverflow.com/questions/26094379/typecasting-eigenvectorxd-to-stdvector>
-  VectorX_t<Type>::Map(&ty[1], n_obs2) = omega;
-  VectorX_t<Type>::Map(&ty[1+n_obs2], n_eqs) = lambda;
+  VectorX_t<Type>::Map(&ty[2], n_obs2) = omega;
+  VectorX_t<Type>::Map(&ty[2+n_obs2], n_eqs) = lambda;
   return;
 }
 
@@ -149,20 +160,26 @@ TMB_ATOMIC_VECTOR_FUNCTION(
 			   MatrixX_t<Type> G = tx_to_G(tx);
 			   // int n_eqs = G.rows();
 			   // int n_obs = G.cols();
-			   // unpack inputs from ty
-			   int start = 1;
-			   VectorX_t<Type> omega = copy_vector<Type>(ty, start, n_obs2);
-			   start += n_obs2;
-			   VectorX_t<Type> lambda = copy_vector<Type>(ty, start, n_eqs);
-			   // initialize GenEL object
-			   flexEL::GenEL<Type> gel(n_obs, n_eqs);
-			   gel.set_max_iter(max_iter);
-			   gel.set_rel_tol(rel_tol);
-			   gel.set_supp_adj(supp_adj);
-			   // calculate gradient
+			   // calculate gradient only if NR has converged
 			   MatrixX_t<Type> dldG(n_eqs, n_obs);
-			   Type sum_weights = Type(n_obs2);
-			   gel.logel_grad(dldG, omega, lambda, sum_weights);
+			   bool has_conv = bool(CppAD::Integer(ty[1]));
+			   if(!has_conv) {
+			     dldG.setConstant(std::numeric_limits<Type>::quiet_NaN());
+			   } else {
+			     // unpack auxillary outputs from ty
+			     int start = 2; // first two arguments are log_el and has_conv
+			     VectorX_t<Type> omega = copy_vector<Type>(ty, start, n_obs2);
+			     start += n_obs2;
+			     VectorX_t<Type> lambda = copy_vector<Type>(ty, start, n_eqs);
+			     // initialize GenEL object
+			     flexEL::GenEL<Type> gel(n_obs, n_eqs);
+			     gel.set_max_iter(max_iter);
+			     gel.set_rel_tol(rel_tol);
+			     gel.set_supp_adj(supp_adj);
+			     // calculate gradient
+			     Type sum_weights = Type(n_obs2);
+			     gel.logel_grad(dldG, omega, lambda, sum_weights);
+			   }
 			   // compute the reverse-mode rule
 			   for(int ii=0; ii<N_NONDIFF; ii++) {
 			     px[ii] = Type(0.);
@@ -170,12 +187,8 @@ TMB_ATOMIC_VECTOR_FUNCTION(
 			   for(int jj=0; jj<n_obs; jj++) {
 			     for(int ii=0; ii<n_eqs; ii++) {
 			       px[jj*n_eqs + ii + N_NONDIFF] = dldG(ii,jj) * py[0];
-			       // px[jj*n_eqs + ii + 2] = Type(2) * py[0];
 			     }
 			   }
-			   // for(int ii=2; ii<tx.size(); ii++) {
-			   //   px[ii] = py[0];
-			   // }
 )
 
 /// Wrapper to logel_atomic() for Eigen types.
