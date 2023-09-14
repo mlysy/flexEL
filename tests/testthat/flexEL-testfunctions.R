@@ -264,6 +264,25 @@ logel_grad <- function(G, weights, max_iter, rel_tol, lambda0,
   out
 }
 
+# create TMB logel function
+logel_tmb <- function(model, G, max_iter, rel_tol, supp_adj) {
+  n_eqs <- ncol(G)
+  n_obs <- nrow(G)
+  logel_adf <- TMB::MakeADFun(
+                      data = list(
+                        max_iter = max_iter,
+                        rel_tol = rel_tol,
+                        supp_adj = supp_adj
+                      ),
+                      parameters = list(G = matrix(0, n_eqs, n_obs)),
+                      silent = TRUE,
+                      DLL = model
+                    )
+  log_el <- logel_adf$f(t(G))
+  dldg <- t(matrix(logel_adf$g(t(G)), n_eqs, n_obs))
+  list(logel = log_el, grad = dldg)
+}
+
 # smoothed indicator function
 smooth_indicator <- function(eps1, eps2, s) {
   1/(1 + exp(s * (eps1 - eps2)))

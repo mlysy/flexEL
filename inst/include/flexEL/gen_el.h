@@ -343,7 +343,6 @@ namespace flexEL {
     // std::cout << "G:" << std::endl << G << std::endl;
     // std::cout << "norm_weights:" << std::endl << norm_weights.transpose() << std::endl;
     int n_obs2 = G.cols();
-    // lambda = lambda0_; // set to initial value
     // logstar constants
     // assume the weights are normalized to sum to one
     bstar_.head(n_obs2) = norm_weights.array().inverse();
@@ -364,8 +363,8 @@ namespace flexEL {
           log_star2<Type>(Glambda_(jj), norm_weights(jj), astar_(jj)) * GGt_;
       }
       // update lambda
-      rho_.array() *= norm_weights.array();
-      Q1_.noalias() = G * rho_;
+      rho_.head(n_obs2).array() *= norm_weights.array();
+      Q1_.noalias() = G * rho_.head(n_obs2);
       Q2llt_.compute(Q2_);
       Q2llt_.solveInPlace(Q1_);
       lambda_new_ = lambda - Q1_;

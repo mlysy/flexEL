@@ -30,11 +30,12 @@
 
 */
 
-#include "flexEL/gen_el.h"
 #include <TMB.hpp>
+#include "flexEL/tmb_el.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Core>
 using namespace Eigen;
+#include <iostream>
 
 // typedefs
 template <class Type>
@@ -115,6 +116,7 @@ void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
   int max_iter = int(tx[3]);
   Type rel_tol = Type(tx[4]);
   MatrixX_t<Type> G = tx_to_G(tx);
+  printf("logel_vector: unpacked tx\n");
   // weights input needed for logel_full()
   VectorX_t<Type> weights = VectorX_t<Type>::Ones(n_obs);
   // outputs
@@ -125,8 +127,17 @@ void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
   gel.set_max_iter(max_iter);
   gel.set_rel_tol(rel_tol);
   gel.set_supp_adj(supp_adj);
+  printf("supp_adj = %i\n", gel.get_supp_adj());
+  printf("max_iter = %i\n", gel.get_max_iter());
+  printf("rel_tol = %f\n", gel.get_rel_tol());
   // calculations
+  printf("Right before logel_full()\n");
+  std::cout << G << "\n" << std::endl;
+  std::cout << omega << "\n" << std::endl;
+  std::cout << lambda << "\n" << std::endl;  
+  std::cout << weights << "\n" << std::endl;
   Type log_el = gel.logel_full(omega, lambda, G, weights);
+  printf("Right after logel_full()\n");
   bool has_conv = gel.has_converged_nr();
   if(!has_conv) {
     log_el = -std::numeric_limits<double>::infinity();
@@ -138,6 +149,7 @@ void logel_vector(CppAD::vector<Type>& ty, const CppAD::vector<Type>& tx) {
   // see <https://stackoverflow.com/questions/26094379/typecasting-eigenvectorxd-to-stdvector>
   VectorX_t<Type>::Map(&ty[2], n_obs2) = omega;
   VectorX_t<Type>::Map(&ty[2+n_obs2], n_eqs) = lambda;
+  printf("Made it here 3\n");
   return;
 }
 
@@ -148,6 +160,7 @@ TMB_ATOMIC_VECTOR_FUNCTION(
 			   // OUTPUT_DIM
 			   CppAD::Integer(tx[0] * tx[1]),
 			   // ATOMIC_DOUBLE
+			   printf("Right before logel_vector()\n");
 			   logel_vector<double>(ty, tx),
 			   // ATOMIC_REVERSE
 			   // unpack inputs from tx
@@ -217,6 +230,7 @@ Type logel(cRefMatrix_t<Type>& G,
       tx[jj*n_eqs + ii + N_NONDIFF] = G(ii,jj);
     }
   }
+  printf("Right before logel_atomic()\n");
   return logel_atomic(tx)[0];
 }
 
@@ -227,6 +241,8 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(rel_tol);
   DATA_INTEGER(supp_adj);
   PARAMETER_MATRIX(G);
-  Type f = logel<Type>(G, max_iter, rel_tol, supp_adj);
+  // printf("Right before logel()\n");
+  Type f = flexEL::logel<Type>(G, max_iter, rel_tol, supp_adj);
+  // printf("Made it here final\n");
   return f;
 }
