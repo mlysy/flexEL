@@ -13,8 +13,8 @@ BugReports: https://github.com/mlysy/flexEL/issues
 License: GPL (>= 3)
 Imports: Rcpp (>= 0.12.13), R6
 LinkingTo: Rcpp, RcppEigen
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
-Suggests: testthat, MASS, optimCheck, knitr, rmarkdown, bookdown
+Suggests: testthat, MASS, optimCheck, knitr, rmarkdown, bookdown, TMB, withr, tools
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

@@ -5,6 +5,7 @@ date: "`r Sys.Date()`"
 output:
   bookdown::html_vignette2:
     toc: true
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{Empirical Likelihood Algorithms}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,14 +19,18 @@ bibliography: flexEL.bib
 <!-- }); -->
 <!-- </script> -->
 
+\newcommand{\bm}[1]{\boldsymbol{#1}}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator{\EL}{EL}
 \DeclareMathOperator{\CEL}{CEL}
+\DeclareMathOperator{\logel}{\log \EL}
+\DeclareMathOperator{\logcel}{\log \CEL}
+\DeclareMathOperator{\constr}{\bm{\mathcal{S}}}
 \newcommand{\SCEL}{\textrm{SCEL}}
-\newcommand{\bm}[1]{\boldsymbol{#1}}
 \newcommand{\bz}{{\bm{0}}}
 \newcommand{\bg}{{\bm{g}}}
+\newcommand{\bq}{{\bm{q}}}
 \newcommand{\bG}{{\bm{G}}}
 \newcommand{\XX}{{\bm{X}}}
 \newcommand{\xx}{{\bm{x}}}
@@ -63,32 +68,28 @@ $$
 E[\bg(\xx, \tth)] = \bz.
 $$
 The empirical likelihood (EL) function is defined as
-$$
-\log \EL(\tth) = \log \EL(\tth, \hat \oom) =  \sum_{i=1}^n \log \hat \omega_i,
-$$
-where $\hat \oom = \hat \oom(\tth)$ solves the optimization problem
 \begin{equation}
-\max_{\oom} \log \EL(\tth, \oom) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \oom \in \simplex^{n-1},
+\log \EL(\tth) = \logel(\hat \oom) =  \sum_{i=1}^n q_i \log \hat \omega_i,
+(\#eq:welfun)
+\end{equation}
+where $q_i \equiv 1$ (for now) and $\hat \oom = \hat \oom(\tth)$ solves the optimization problem
+\begin{equation}
+\hat \oom = \argmax_{\oom \in \constr(\bG_{\tth})} \logel(\oom),
 (\#eq:elopt)
 \end{equation}
-where $\bg_i = \bg(\xx_i, \tth) \in \mathbb R^m$ and 
+where $\bG_{\tth}$ is an $n \times m$ matrix with rows $\bg(\xx_1, \tth), \ldots, \bg(\xx_n, \tth)$, and 
 $$
-\simplex^{n-1} = \{\oom \in \mathbb R^n: \sum_{i=1}^n \omega_i = 1, \omega_i > 0\}
+\constr(\bG) = \left\{\oom \in \mathbb R^n: \oom'\bG = \bz, \omega_i > 0, \sum_{i=1}^n \omega_i = 1\right\}.
 $$ 
-is the $(n-1)$-dimensional probability simplex.  The estimator $\hat \tth = \argmax_{\tth} \log \EL(\tth)$ is called the EL estimator of $\tth$.
+The estimator $\hat \tth = \argmax_{\tth} \log \EL(\tth)$ is called the EL estimator of $\tth$.
 
 ## Computation
 
-For fixed $\tth$, we may solve the optimization problem \@ref(eq:elopt) as follows.  First, let us consider solving \@ref(eq:elopt) for a slighly generalized "weighted" EL function
-\begin{equation}
-\log \EL(\tth, \oom) = \sum_{i=1}^n q_i \log \omega_i,
-(\#eq:wel)
-\end{equation}
-where $q_i > 0$ are the weights.  Let $r_i = q_i / \sum_{i=1}^n q_i$, and consider the convex function
+For fixed $\tth$, we may solve the optimization problem \@ref(eq:elopt) for general $q_i > 0$ as follows.  Let $r_i = q_i / \sum_{i=1}^n q_i$, and consider the convex function
 $$
 Q(\bla) = \sum_{i=1}^n r_i \log^\star\left(1 - \bla'\bg_i; r_i\right),
 $$
-where
+where $\bg_i = \bg(\xx_i, \tth)$ and 
 $$
 \log^\star(x; r) = 
 \begin{cases} 
@@ -96,7 +97,7 @@ $$
 - \tfrac 1 2 (x/r)^2 + 2 (x/r) - \tfrac 3 2 + \log r & x < r.
 \end{cases}
 $$
-Then the solution to the weighted EL optimization problem \@ref(eq:elopt)-\@ref(eq:wel) is given by
+Then the solution to the weighted EL optimization problem \@ref(eq:elopt) is given by
 \begin{equation}
 \hat \omega_i = \frac{r_i}{1 - \hat \bla'\bg_i}, 
 (\#eq:omegahat)
@@ -178,7 +179,7 @@ E[\bg(\xx, \eps, \tth)] = \bz,
 $$
 the EL with right censoring is defined as
 \begin{equation}
-\log \CEL(\tth) = \log \CEL(\tth, \hat{\oom}) = \sum_{i=1}^n \left[\delta_i \log(\hat\w_i) + (1-\delta_i) \log\left(\sum_{j=1}^n \indsmooth(e_i - e_j; s) \cdot \hat\w_j \right)\right],
+\log \CEL(\tth) = \logcel(\hat \oom, \ee) = \sum_{i=1}^n \left[\delta_i \log(\hat\w_i) + (1-\delta_i) \log\left(\sum_{j=1}^n \indsmooth(e_i - e_j; s) \cdot \hat\w_j \right)\right],
 \end{equation}
 where $\indsmooth(\cdot; s)$ is the smoothed indicator function,
 $$
@@ -186,10 +187,10 @@ $$
 $$
 and $\hat{\oom} = \hat{\oom}(\tth)$ solves the optimization problem
 \begin{equation}
-\max_{\oom} \log \CEL(\tth, \oom) \qquad \Big\vert \qquad \sum_{i=1}^n \omega_i \cdot \bg_i = \bz, \quad \oom \in \simplex^{n-1},
+\argmax_{\oom \in \constr(\bG_\tth)} \logcel(\oom, \ee),
 (\#eq:celopt)
 \end{equation}
-where $\bg_i = \bg(\xx_i, e_i, \tth)$.
+where $\bG_\tth$ is the $n\times m$ matrix with rows $\bg(\xx_1, e_1, \tth), \ldots, \bg(\xx_n, e_n, \tth)$.
 
 ## EM Algorithm
 
@@ -209,10 +210,19 @@ For fixed $\tth$, the CEL optimization problem \@ref(eq:celopt) can be solved vi
 	
 - **M-Step**
 
-    Compute $\oom_{t+1}$ by solving the weighted EL problem \@ref(eq:elopt)-\@ref(eq:wel) with $q_i$ calculated as above.
+    Compute $\oom_{t+1}$ by solving the weighted EL problem \@ref(eq:elopt) with $q_i$ calculated as above.
 
+## Gradient
 
-# Appendix
+\begin{aligned}
+\dth \log \CEL(\tth) & = \frac{\partial}{\partial \oom} \logcel(\hat \oom, \ee) \cdot \dth \hat \oom(\tth) +  \frac{\partial}{\partial \ee} \logcel(\hat \oom, \ee) \cdot \dth \ee(\tth).
+\end{aligned}
+The partials of $\logcel(\oom, \ee)$ with respect to $\oom$ and $\ee$, as well as $\dth \ee(\tth)$ are straightforward to calculate.  In order to obtain $\dth \hat \oom(\tth)$, let
+$$
+\hat \omega(\bq, \bla, \bG) = \left(\frac{r_1}{1 - \bla' \bg_1}, \ldots, \frac{r_n}{1 - \bla' \bg_n} \right)
+$$
+
+# Appendix: Details of EM Algorithm {-}
 
 Suppose we have $\eps_i \iid \categorical(\oom)$ and suppose that we have additional variables
 $$
@@ -252,4 +262,4 @@ where $q_i = \delta_i + (1-\delta_i) \sum_{j=1}^n \tilde \omega_{ji}^{(t)}$ and
 $$
 \tilde \omega_{ij}^{(t)} = \frac{p_{ij} \cdot \omega_j^{(t)}}{\sum_{k=1}^n p_{ik} \cdot \omega_k^{(t)}}.
 $$
-The M-step of then consists of solving the weighted EL problem \@ref(eq:elopt)-\@ref(eq:wel) to obtain the new value of $\oom_{t+1}$ at step $t+1$.  Finally we recognize the specific case of the CEL optimization problem \@ref(eq:celopt) by setting $p_{ij} = \indsmooth(e_i - e_j; s)$.
+The M-step of then consists of solving the weighted EL problem \@ref(eq:elopt) to obtain the new value of $\oom_{t+1}$ at step $t+1$.  Finally we recognize the specific case of the CEL optimization problem \@ref(eq:celopt) by setting $p_{ij} = \indsmooth(e_i - e_j; s)$.

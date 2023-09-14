@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "gen_el.h"
 #include <limits> // for std::numeric_limits
-#include <iostream>
+// #include <iostream>
 // #include "sort_order.h"
 // #include "ind_smooth.h" 
 
@@ -300,7 +300,7 @@ namespace flexEL {
       if(has_converged_nr_ && !gel.has_converged_nr()) {
 	has_converged_nr_ = false;
       }
-      if(isnan(em_err_) || em_err_ < abs_tol_) break;
+      if(std::isnan(em_err_) || em_err_ < abs_tol_) break;
       logel_old = logel;
       gel.set_lambda0(lambda_); // update starting point
       // E-step
